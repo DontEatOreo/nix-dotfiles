@@ -1,0 +1,16 @@
+# ignore macOS and Linux files
+.DS_Store
+Thumbs.db
+*.DS_Store
+*.swp
+
+.direnv/
+
+# You'll need to generate your own hardware-configuration 
+hosts/nixos/users/nyx/hardware-configuration.nix
+
+# IDEs
+**/.idea/
+**/.vs/
+**/.vscode/
+**/packages/
