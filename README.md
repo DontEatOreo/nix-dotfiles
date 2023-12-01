@@ -2,7 +2,7 @@
 
 [![built with nix](https://img.shields.io/static/v1?logo=nixos&logoColor=white&label=&message=Built%20with%20Nix&color=41439a)](https://builtwithnix.org)
 
-This repository contains my personal configuration files for [nix-darwin](https://github.com/LnL7/nix-darwin) and [NixOS](https://nixos.org), which are operating systems based on the Nix package manager.
+This repository contains my personal configuration files for [nix-darwin](https://github.com/LnL7/nix-darwin) and [NixOS](https://nixos.org)
 
 ## Scope
 
