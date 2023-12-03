@@ -1,63 +1,76 @@
 {pkgs, ...}: let
+  # Python packages
   python-packages = ps:
     with ps; [
-      numba # Speed up Python
-      numpy # Math
-      pandas # Data Analysis
-      requests # HTTP Requests
-      matplotlib # Plotting
-      flask # Web Framework
-      django # Web Framework
-      beautifulsoup4 # Web Scraping
-      ansi2image # Convert ANSI to Image
-      pygments # Syntax Highlighting
-      tkinter # GUI Stuff
-      sympy # Symbolic Math
-      tqdm # Progress Bar
-      more-itertools # More Itertools
-      tiktoken # Fast Tokenizer from OpenAI
+      # Mathematical computations
+      numba # Speed up Python computations
+      numpy
+      sympy # Symbolic mathematics
 
-      # AI related
-      keras # Deep Learning for Theano and TensorFlow
-      torch # Tensors and Dynamic neural networks in Python with strong GPU acceleration
-      torchvision # Deep Learning
+      # Data analysis
+      pandas
+      matplotlib # Data visualization
+
+      # Web development
+      requests # HTTP requests
+      flask # Web framework
+      django # Web framework
+      beautifulsoup4 # Web scraping
+
+      # Text and image processing
+      ansi2image # Convert ANSI codes to images
+      pygments # Syntax highlighting
+      tiktoken # Fast tokenizer from OpenAI
+
+      # GUI development
+      tkinter
+
+      # Utilities
+      tqdm # Progress bars
+      more-itertools # Additional functions for working with iterables
+
+      # Machine learning
+      keras # Deep learning for Theano and TensorFlow
+      torch # Tensors and dynamic neural networks with strong GPU acceleration
+      torchvision # Datasets, models, and transforms for image and video data
     ];
+
+  # .NET SDKs
   dotnetSdks = with pkgs; [
-    dotnet-sdk # Last LTS Release (6.0)
-    dotnet-sdk_7
-    dotnet-sdk_8
+    dotnet-sdk # Latest LTS release (6.0)
+    dotnet-sdk_7 # .NET SDK version 7
+    dotnet-sdk_8 # .NET SDK version 8
   ];
 in {
   environment = {
     systemPackages = with pkgs; [
-      # Dev
-      # Git and GitHub Related
-      gh
-      git
-      gitty # Info about repos
-      gitui
-      gitflow
-      github-copilot-cli
+      # Git and GitHub related packages
+      gh # GitHub CLI
+      git # Git VCS
+      gitty # Information about Git repositories
+      gitui # Terminal UI for Git
+      gitflow # Git branching model
+      github-copilot-cli # GitHub Copilot CLI
 
-      # Terminal Related
-      colordiff
-      thefuck # Correct last command
-      bc # Calculator
+      # Terminal related packages
+      colordiff # Colorize diff output
+      thefuck # Correct previous command
+      bc # Command line calculator
 
-      # SDK & Misc
-      (python311.withPackages python-packages)
-      (dotnetCorePackages.combinePackages dotnetSdks)
-      nuget-to-nix # Convert a nuget packages directory to a lockfile for buildDotnetModule
-      omnisharp-roslyn # C# Lang Server
-      mono # .NET Framework for Linux & macOS
-      bun # Better JS Runtime
-      nodejs_21
-      nil # Nix Lang Server
+      # SDKs and miscellaneous packages
+      (python311.withPackages python-packages) # Python 3.11 with specified packages
+      (dotnetCorePackages.combinePackages dotnetSdks) # Combined .NET SDKs
+      nuget-to-nix # Convert a NuGet packages directory to a lockfile for buildDotnetModule
+      omnisharp-roslyn # C# language server
+      mono # .NET Framework for Linux and macOS
+      bun # Better JavaScript runtime
+      nodejs_21 # Node.js version 21
+      nil # Nix language server
       rnix-lsp # Nix LSP
     ];
     variables = {
-      DOTNET_CLI_TELEMETRY_OPTOUT = "true";
-      DOTNET_ROOT = "/run/current-system/sw/share/dotnet"; # .NET SDK Path
+      DOTNET_CLI_TELEMETRY_OPTOUT = "true"; # Opt out of .NET CLI telemetry
+      DOTNET_ROOT = "/run/current-system/sw/share/dotnet"; # .NET SDK path
     };
   };
 }
