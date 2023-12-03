@@ -59,4 +59,4 @@ darwin-rebuild switch --flake .
 ## Notes
 
 - TeX packages are disabled by default due to the file size
-- Special thanks to @ashuramaruzxc for bash & zsh aliases, PS1 and `commonAttrs`.
+- Special thanks to [@ashuramaruzxc](https://github.com/ashuramaruzxc) for bash & zsh aliases, PS1 and `commonAttrs`.
