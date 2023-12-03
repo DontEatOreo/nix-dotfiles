@@ -31,7 +31,7 @@ mv hardware-configuration.nix hosts/nixos/users/nyx
 rm configuration.nix
 
 # Apply the configuration
-sudo nixos-rebuild switch --flake . --extra-experimental-features "nix-command flakes" # As `nix3` commands are enabled in the new derivation this only one time off including the --extra flag
+sudo nixos-rebuild switch --flake .
 ```
 
 ### macOS
@@ -50,7 +50,7 @@ cd ~/.nixpkgs
 git clone https://github.com/DontEatOreo/dotfiles.git
 
 # Install Nix Darwin
-nix run nix-darwin -- switch --flake . --extra-experimental-features "nix-command flakes" # As `nix3` commands are enabled in the new derivation this only one time off including the --extra flag
+nix run nix-darwin -- switch --flake .
 
 # For future apply the configuration
 darwin-rebuild switch --flake .
