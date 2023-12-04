@@ -1,10 +1,20 @@
-{pkgs, ...}: {
+{pkgs, ...}: let
+  ffmpeg-h264-patched = pkgs.ffmpeg.override {
+    x264 = pkgs.x264.overrideAttrs (old: {
+      postPatch =
+        old.postPatch
+        + pkgs.lib.optionalString (pkgs.stdenv.isDarwin) ''
+          substituteInPlace Makefile --replace '$(if $(STRIP), $(STRIP) -x $@)' '$(if $(STRIP), $(STRIP) -S $@)'
+        '';
+    });
+  };
+in {
   environment = {
     systemPackages = with pkgs; [
       # CLI Tools
       # Video Related
-      ffmpeg_6-full
-      yt-dlp # Video Downloader
+      ffmpeg-h264-patched
+      (yt-dlp.override {ffmpeg = ffmpeg-h264-patched;}) # Video Downloader
 
       # Images Related
       gallery-dl # Image Downloader
