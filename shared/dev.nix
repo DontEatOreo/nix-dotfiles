@@ -44,11 +44,6 @@
 
       # Static typing
       mypy # Static type checker
-
-      # Machine learning
-      keras # Deep learning for Theano and TensorFlow
-      torch # Tensors and dynamic neural networks with strong GPU acceleration
-      torchvision # Datasets, models, and transforms for image and video data
     ];
 
   # .NET SDKs
