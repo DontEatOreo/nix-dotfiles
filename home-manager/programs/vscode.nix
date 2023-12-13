@@ -27,8 +27,9 @@ in {
       bbenoist.nix # Nix language support
       jnoortheen.nix-ide # Nix IDE features
 
-      ## C#
-      ms-dotnettools.csharp # C# language support
+      # C#
+      ms-dotnettools.vscode-dotnet-runtime
+      ms-dotnettools.csharp
 
       ## Java
       redhat.java # Java language support
@@ -50,7 +51,6 @@ in {
       james-yu.latex-workshop # LaTeX support
       redhat.vscode-xml # XML language support
       aykutsarac.jsoncrack-vscode # JSONCrack support
-      streetsidesoftware.code-spell-checker # Spell checking
 
       # Utilities
       kamadorueda.alejandra # Alejandra, a Nix IDE
@@ -63,7 +63,7 @@ in {
       edwinsulaiman.jetbrains-rider-dark-theme # JetBrains Rider Dark Theme
       github.github-vscode-theme # GitHub's VS Code theme
     ];
-    mutableExtensionsDir = true;
+    mutableExtensionsDir = false;
     userSettings = {
       # Bash
       "bashIde.explainshellEndpoint" = "http://localhost:5000";
@@ -109,6 +109,9 @@ in {
         "lock" = false;
         "tape" = false;
       };
+
+      # Other
+      "redhat.telemetry.enabled" = false;
 
       # LaTeX
       "latex-workshop.latex.outDir" = "./output";
