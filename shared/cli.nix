@@ -31,6 +31,7 @@ in {
       alejandra # Format Nix Files
       direnv
       gnupg
+      (vhs.override { ffmpeg = ffmpeg-h264-patched; })
       coreutils # GNU CoreUtils
       progress # Show progress of CoreUtils
     ];
