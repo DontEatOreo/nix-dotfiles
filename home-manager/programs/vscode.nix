@@ -1,9 +1,9 @@
 {
   inputs,
-  system,
+  pkgs,
   ...
 }: let
-  inherit (inputs.nix-vscode-extensions.extensions.${system}) vscode-marketplace;
+  inherit (inputs.nix-vscode-extensions.extensions.${pkgs.system}.forVSCodeVersion pkgs.vscode.version) vscode-marketplace;
 in {
   programs.vscode = {
     enable = true;
@@ -11,62 +11,71 @@ in {
     enableExtensionUpdateCheck = false;
     extensions = with vscode-marketplace; [
       # Core Extensions
-      # Enables VS Code to be used as a UI when connected to a remote server
-      ms-vscode-remote.vscode-remote-extensionpack
+      eamodio.gitlens # Supercharge Git capabilities built into Visual Studio Code
+      editorconfig.editorconfig # Consistent coding styles between developers
+      exodiusstudios.comment-anchors # Navigate through your code via comment anchors
       github.copilot # AI-powered coding assistant
-      github.copilot-chat # Chat with GitHub Copilot
-      vscode-icons-team.vscode-icons # Icons for Visual Studio Code
+      # Temporarily disabled
+      # github.copilot-chat # Chat with GitHub Copilot
       ms-vsliveshare.vsliveshare # Real-time collaborative development
+      ms-vscode-remote.vscode-remote-extensionpack # Enables VS Code to be used as a UI when connected to a remote server
       visualstudioexptteam.vscodeintellicode
+      vscode-icons-team.vscode-icons # Icons for Visual Studio Code
 
       # Language Specific Extensions
       ## Bash
       mads-hartmann.bash-ide-vscode # Bash language support
 
-      ## Nix
-      bbenoist.nix # Nix language support
-      jnoortheen.nix-ide # Nix IDE features
-
-      # C#
-      ms-dotnettools.vscode-dotnet-runtime
+      ## C#
       ms-dotnettools.csharp
+      ms-dotnettools.vscode-dotnet-runtime
 
       ## Java
       redhat.java # Java language support
       vscjava.vscode-java-pack # Java Extension Pack
+
+      ## JS & TS
+      dbaeumer.vscode-eslint # ESLint support
+      gregorbiswanger.json2ts # Convert JSON objects to TypeScript interfaces
+      mgmcdermott.vscode-language-babel # Babel language support
+      ms-vscode.vscode-typescript-next # TypeScript language support
+      steoates.autoimport # Auto import for JavaScript and TypeScript
+
+      ## Nix
+      bbenoist.nix # Nix language support
+      jnoortheen.nix-ide # Nix IDE features
 
       ## Python
       ms-python.python # Python language support
       ms-python.vscode-pylance # Python language server
       ms-toolsai.jupyter # Jupyter notebook support
 
-      ## JS & TS
-      ms-vscode.vscode-typescript-next # TypeScript language support
-      mgmcdermott.vscode-language-babel # Babel language support
-      steoates.autoimport # Auto import for JavaScript and TypeScript
-      dbaeumer.vscode-eslint # ESLint support
+      ## VIM
+      xadillax.viml
 
       # Text Editing and Documentation
+      aykutsarac.jsoncrack-vscode # JSONCrack support
       davidanson.vscode-markdownlint # Linting for Markdown files
       james-yu.latex-workshop # LaTeX support
       redhat.vscode-xml # XML language support
-      aykutsarac.jsoncrack-vscode # JSONCrack support
+
+      # Themes
+      github.github-vscode-theme # GitHub's VS Code theme
 
       # Utilities
+      esbenp.prettier-vscode # Code formatting with Prettier
       kamadorueda.alejandra # Alejandra, a Nix IDE
       mkhl.direnv # Direnv support
       oderwat.indent-rainbow # Colorful indentation
-      esbenp.prettier-vscode # Code formatting with Prettier
       ryu1kn.partial-diff # Compare (diff) text selections within a file
-
-      # Themes
-      edwinsulaiman.jetbrains-rider-dark-theme # JetBrains Rider Dark Theme
-      github.github-vscode-theme # GitHub's VS Code theme
     ];
     mutableExtensionsDir = false;
     userSettings = {
+      # Git
+      "git.enableCommitSigning" = true; # Make sure to set up GPG and GIT first...
+
       # Bash
-      "bashIde.explainshellEndpoint" = "http://localhost:5000";
+      "bashIde.explainshellEndpoint" = "http://localhost:5134";
 
       # Nix
       "nix.enableLanguageServer" = true;
@@ -77,9 +86,9 @@ in {
 
       # Theme
       "workbench.iconTheme" = "vscode-icons";
-      "workbench.preferredLightColorTheme" = "JetBrains Rider Dark Theme";
-      "workbench.preferredDarkColorTheme" = "JetBrains Rider Dark Theme";
-      "workbench.colorTheme" = "JetBrains Rider Dark Theme";
+      "workbench.colorTheme" = "Github Dark";
+      "workbench.preferredLightColorTheme" = "GitHub Light";
+      "workbench.preferredDarkColorTheme" = "GitHub Dark";
       "window.autoDetectColorScheme" = true;
       "window.zoomLevel" = 1.5;
 
