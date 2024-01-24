@@ -1,20 +1,10 @@
-{pkgs, ...}: let
-  ffmpeg-h264-patched = pkgs.ffmpeg.override {
-    x264 = pkgs.x264.overrideAttrs (old: {
-      postPatch =
-        old.postPatch
-        + pkgs.lib.optionalString (pkgs.stdenv.isDarwin) ''
-          substituteInPlace Makefile --replace '$(if $(STRIP), $(STRIP) -x $@)' '$(if $(STRIP), $(STRIP) -S $@)'
-        '';
-    });
-  };
-in {
+{pkgs, ...}: {
   environment = {
     systemPackages = with pkgs; [
       # CLI Tools
       # Video Related
-      ffmpeg-h264-patched
-      (yt-dlp.override {ffmpeg = ffmpeg-h264-patched;}) # Video Downloader
+      ffmpeg_6-full
+      yt-dlp # Video Downloader
 
       # Images Related
       gallery-dl # Image Downloader
@@ -31,7 +21,7 @@ in {
       alejandra # Format Nix Files
       direnv
       gnupg
-      (vhs.override { ffmpeg = ffmpeg-h264-patched; })
+      vhs
       coreutils # GNU CoreUtils
       progress # Show progress of CoreUtils
     ];
