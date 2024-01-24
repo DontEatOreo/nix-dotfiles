@@ -2,7 +2,7 @@
   description = "My NixOS & Darwin System Flake";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     flake-utils.url = "github:numtide/flake-utils";
