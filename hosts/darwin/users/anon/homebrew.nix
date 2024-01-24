@@ -21,6 +21,7 @@
       "microsoft-edge"
       "brave-browser"
       "firefox"
+      "mullvad-browser"
 
       # Messengers
       "discord"
@@ -29,7 +30,6 @@
       # Quality of Life
       "hiddenbar" # Hide status bar items
       "stats" # System Stats
-      "soundsource" # Proper Sound Mixer
       "alt-tab" # Proper Alt Tab
       "rectangle" # Snap Windows
       "itsycal" # Better Calendar
