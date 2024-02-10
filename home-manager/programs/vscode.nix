@@ -11,12 +11,10 @@ in {
     enableExtensionUpdateCheck = false;
     extensions = with vscode-marketplace; [
       # Core Extensions
-      eamodio.gitlens # Supercharge Git capabilities built into Visual Studio Code
       editorconfig.editorconfig # Consistent coding styles between developers
       exodiusstudios.comment-anchors # Navigate through your code via comment anchors
       github.copilot # AI-powered coding assistant
-      # Temporarily disabled
-      # github.copilot-chat # Chat with GitHub Copilot
+      github.copilot-chat # Chat with GitHub Copilot
       ms-vsliveshare.vsliveshare # Real-time collaborative development
       ms-vscode-remote.vscode-remote-extensionpack # Enables VS Code to be used as a UI when connected to a remote server
       visualstudioexptteam.vscodeintellicode
@@ -28,7 +26,7 @@ in {
 
       ## C#
       ms-dotnettools.csharp
-      ms-dotnettools.vscode-dotnet-runtime
+      (ms-dotnettools.csdevkit.overrideAttrs (_: {sourceRoot = "extension";}))
 
       ## Java
       redhat.java # Java language support
@@ -86,9 +84,9 @@ in {
 
       # Theme
       "workbench.iconTheme" = "vscode-icons";
-      "workbench.colorTheme" = "Github Dark";
+      "workbench.colorTheme" = "GitHub Dark Dimmed";
       "workbench.preferredLightColorTheme" = "GitHub Light";
-      "workbench.preferredDarkColorTheme" = "GitHub Dark";
+      "workbench.preferredDarkColorTheme" = "GitHub Dark Dimmed";
       "window.autoDetectColorScheme" = true;
       "window.zoomLevel" = 1.5;
 
