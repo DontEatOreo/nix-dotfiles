@@ -49,35 +49,12 @@ in {
       alias rebuild="darwin-rebuild switch --use-remote-sudo --flake ~/.nixpkgs/"
 
       # Video
-      function m4a() {
-        ${yt-dlp-script} m4a "$1"
-      }
-      alias m4a=m4a
-
-      function m4a-cut() {
-        ${yt-dlp-script} m4a-cut "$1" "$2"
-      }
-      alias m4a-cut=m4a-cut
-
-      function mp3() {
-        ${yt-dlp-script} mp3 "$1"
-      }
-      alias mp3=mp3
-
-      function mp3-cut() {
-        ${yt-dlp-script} mp3-cut "$1" "$2"
-      }
-      alias mp3-cut=mp3-cut
-
-      function mp4() {
-        ${yt-dlp-script} mp4 "$1"
-      }
-      alias mp4=mp4
-
-      function mp4-cut() {
-        ${yt-dlp-script} mp4-cut "$1" "$2"
-      }
-      alias mp4-cut=mp4-cut
+      alias m4a="${yt-dlp-script} m4a "$1""
+      alias m4a-cut="${yt-dlp-script} m4a-cut "$1" "$2""
+      alias mp3="${yt-dlp-script} mp3 "$1""
+      alias mp3-cut="${yt-dlp-script} mp3 "$1""
+      alias mp4="${yt-dlp-script} mp4 "$1""
+      alias mp4-cut="${yt-dlp-script} mp4-cut "$1" "$2""
 
       # Directory Navigation
       alias ".."="../"
