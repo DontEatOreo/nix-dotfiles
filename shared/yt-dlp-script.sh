@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Define constants
 declare -a COMMON_ARGS=(--progress --console-title)
@@ -33,8 +33,9 @@ parse_arguments() {
     url=$argument
 
   # If the argument is a time range, assign it to timeRange variable
-  elif [[ $argument =~ ^[0-9]+(\.[0-9]+)?-[0-9]+(\.[0-9]+)?$ ]]; then
-    timeRange=$argument
+  elif [[ $argument =~ ^\**[0-9]+(\.[0-9]+)?\**-\**[0-9]+(\.[0-9]+)?\**$ ]]; then
+    # Remove all '*' characters
+    timeRange=${argument//'*'/}
 
   # If the argument is a cut option, set cutOption to true and set the format
   elif [[ $argument == *"-cut"* ]]; then
@@ -45,10 +46,9 @@ parse_arguments() {
   elif [[ -n ${FORMAT_ARGS[$argument]} ]]; then
     format=$argument
 
-  # If the argument doesn't match any of the above options, display an error message and exit the script
+  # If the argument doesn't match any of the above options, add it to final_args
   else
-    echo "Error: Unexpected argument $argument"
-    exit 1
+    final_args+=" $argument"
   fi
 }
 
@@ -69,16 +69,19 @@ check_arguments() {
 
 # Function to construct and execute the yt-dlp command using the provided arguments
 execute_yt_dlp() {
-  local cutArgs=(--force-keyframes-at-cuts)
   local formatArgs=(${FORMAT_ARGS[$format]})
   
   # If cut option is true, add cut arguments and time range to the format arguments
   if [[ $cutOption == true ]]; then
-    formatArgs+=("${cutArgs[@]}" "${timeRange}")
+    local cutArgs=("--force-keyframes-at-cuts")
+    formatArgs+=("*${timeRange}" "${cutArgs[@]}")
   fi
 
+  # Split final_args into an array of arguments
+  IFS=' ' read -r -a final_args_array <<< "$final_args"
+
   # Execute the yt-dlp command with the constructed argument set
-  yt-dlp "${url}" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args}"
+  yt-dlp "${url}" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args_array[@]}"
 }
 
 # Loop through all provided arguments and parse them
