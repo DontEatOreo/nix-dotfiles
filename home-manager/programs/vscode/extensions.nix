@@ -42,7 +42,7 @@ in
       ## Python
       ms-python.python # Python language support
       ms-python.vscode-pylance # Python language server
-      ms-toolsai.jupyter # Jupyter notebook support
+      ms-python.black-formatter # Format Python Code
 
       ## VIM
       xadillax.viml

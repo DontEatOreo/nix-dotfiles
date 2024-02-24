@@ -5,16 +5,12 @@
   # Bash
   "bashIde.explainshellEndpoint" = "http://localhost:5134";
 
-  # Nix
-  "nix.enableLanguageServer" = true;
-  "nix.serverPath" = "nil";
-
   # Diff Editor
   "diffEditor.ignoreTrimWhitespace" = false;
 
   # Theme
   "workbench.iconTheme" = "vscode-icons";
-  "workbench.colorTheme" = "GitHub Dark Dimmed";
+  "workbench.colorTheme" = "Quiet Light";
   "workbench.preferredLightColorTheme" = "GitHub Light";
   "workbench.preferredDarkColorTheme" = "GitHub Dark Dimmed";
   "window.autoDetectColorScheme" = true;
@@ -27,14 +23,58 @@
   "security.workspace.trust.enabled" = false;
   "editor.accessibilitySupport" = "off";
 
-  # Nix Editor
+  # Nix
+  "nix.enableLanguageServer" = true;
+  "nix.serverPath" = "nil";
+
+  # Formaters
+  ## Nix formatter
+  "alejandra.program" = "alejandra";
   "[nix]" = {
     "editor.defaultFormatter" = "kamadorueda.alejandra";
     "editor.formatOnPaste" = true;
     "editor.formatOnSave" = true;
     "editor.formatOnType" = false;
   };
-  "alejandra.program" = "alejandra";
+
+  ## Python formatter
+  "[python]" = {
+    "editor.defaultFormatter" = "ms-python.black-formatter";
+    "editor.formatOnPaste" = true;
+    "editor.formatOnSave" = true;
+    "editor.formatOnType" = false;
+  };
+  ## JavaScript formatter
+  "[javascript]" = {
+    "editor.defaultFormatter" = "esbenp.prettier-vscode";
+    "editor.formatOnPaste" = true;
+    "editor.formatOnSave" = true;
+    "editor.formatOnType" = false;
+  };
+
+  # TypeScript formatter
+  "[typescript]" = {
+    "editor.defaultFormatter" = "esbenp.prettier-vscode";
+    "editor.formatOnPaste" = true;
+    "editor.formatOnSave" = true;
+    "editor.formatOnType" = false;
+  };
+
+  ## Java formatter
+  "[java]" = {
+    "editor.defaultFormatter" = "redhat.java";
+    "editor.formatOnPaste" = true;
+    "editor.formatOnSave" = true;
+    "editor.formatOnType" = false;
+  };
+
+  ## C# formatter
+  "[csharp]" = {
+    "editor.defaultFormatter" = "ms-dotnettools.csharp";
+    "editor.formatOnPaste" = true;
+    "editor.formatOnSave" = true;
+    "editor.formatOnType" = false;
+  };
 
   # GitHub Copilot
   "github.copilot.enable" = {
