@@ -35,16 +35,16 @@
       "itsycal" # Better Calendar
 
       # Other
-      "warp" # Modern Terminal
-      "postman" # Create HTTP requests
       "obsidian" # Note taking
       "iina" # Best video player
       "transmission" # Torrent client
       "thunderbird" # Email client
-      "font-monaspace" # Github Fonts
 
       # Dev
       "rider-eap"
+      "warp" # Modern Terminal
+      "postman" # Create HTTP requests
+      "font-monaspace" # Github Fonts
     ];
   };
 }
