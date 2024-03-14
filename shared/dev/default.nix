@@ -26,7 +26,6 @@ in {
       bun # Better JavaScript runtime
       nodejs_21 # Node.js version 21
       nil # Nix language server
-      rnix-lsp # Nix LSP
     ];
     variables = {
       DOTNET_CLI_TELEMETRY_OPTOUT = "true"; # Opt out of .NET CLI telemetry
