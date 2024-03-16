@@ -58,6 +58,6 @@ darwin-rebuild switch --flake .
 
 ## Notes
 
-- If you end up getting an error of the srot of `error: cached failure of attribute` make sure to pass the option `--option eval-cache false` to `nix run`
+- If you end up getting an error of the sort of `error: cached failure of attribute` make sure to pass the option `--option eval-cache false` to `nix run`
 - TeX packages are disabled by default due to the file size
 - Special thanks to [@ashuramaruzxc](https://github.com/ashuramaruzxc) for bash & zsh aliases, PS1 and `commonAttrs`.
