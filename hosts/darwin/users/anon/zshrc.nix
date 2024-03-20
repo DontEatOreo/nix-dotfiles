@@ -67,7 +67,7 @@ in {
       alias ports="ss -tulanp"
       alias xdg-data-dirs="echo -e $XDG_DATA_DIRS | tr ':' '\n' | nl | sort"
       # Fix for my headphones
-      alias micfix="sudo launchctl stop com.apple.audio.coreaudiod && sudo launchctl start com.apple.audio.coreaudiod"
+      alias micfix="sudo killall coreaudiod"
     '';
   };
 }
