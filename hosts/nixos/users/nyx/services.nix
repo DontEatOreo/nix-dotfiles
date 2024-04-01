@@ -1,8 +1,10 @@
 _: {
   services = {
     xserver = {
+      xkb = {
+        layout = "us";
+      };
       enable = true;
-      layout = "us";
       libinput.enable = true; # Enable Touchpad support
       # KDE
       desktopManager.plasma5.enable = true;
