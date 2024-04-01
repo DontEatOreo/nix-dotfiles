@@ -1,5 +1,6 @@
 _: {
   services = {
+    desktopManager.plasma6.enable = true;
     xserver = {
       xkb = {
         layout = "us";
@@ -7,8 +8,10 @@ _: {
       enable = true;
       libinput.enable = true; # Enable Touchpad support
       # KDE
-      desktopManager.plasma5.enable = true;
-      displayManager.sddm.enable = true;
+      displayManager.sddm = {
+        enable = true;
+        wayland.enable = true;
+      };
     };
     openssh = {
       enable = true;
