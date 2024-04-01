@@ -7,7 +7,6 @@ Thumbs.db
 .direnv/
 
 # You'll need to generate your own hardware-configuration 
-hosts/nixos/users/nyx/hardware-configuration.nix
 
 # IDEs
 **/.idea/
