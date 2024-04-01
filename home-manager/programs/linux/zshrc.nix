@@ -1,5 +1,5 @@
 {pkgs, ...}: let
-  yt-dlp-script = import ../../shared/yt-dlp-script.nix {inherit pkgs;};
+  yt-dlp-script = import ../../../shared/yt-dlp-script.nix {inherit pkgs;};
 in {
   programs.zsh = {
     enable = true;
