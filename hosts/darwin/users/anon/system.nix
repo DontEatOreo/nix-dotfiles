@@ -25,7 +25,7 @@
       menuExtraClock = {
         Show24Hour = true; # Use 24 hour clock
         ShowSeconds = true; # Show Seconds
-        ShowDate = 1; # Don't show date (Use Itsycal)
+        ShowDate = 2; # Don't show date (Use Itsycal)
       };
       finder = {
         AppleShowAllFiles = false; # Show all files
