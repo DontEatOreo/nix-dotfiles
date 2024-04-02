@@ -31,6 +31,7 @@
         AppleShowAllFiles = false; # Show all files
         AppleShowAllExtensions = true; # Show all file extensions
         FXEnableExtensionChangeWarning = false; # Disable Warning for changing extension
+        FXPreferredViewStyle = "icnv"; # Change the default finder view. “icnv” = Icon view
         QuitMenuItem = true; # Allow qutting Finder
         ShowPathbar = true; # Show full path at bottom
       };
