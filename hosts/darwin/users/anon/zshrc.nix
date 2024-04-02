@@ -46,7 +46,7 @@ in {
       # Nix
       alias update="nix flake update ~/.nixpkgs/"
       alias check="nix flake check"
-      alias rebuild="darwin-rebuild switch --use-remote-sudo --flake ~/.nixpkgs/"
+      alias rebuild="darwin-rebuild switch --flake ~/.nixpkgs/#$(hostname | sed 's/.local$//')"
 
       # Video
       alias m4a="${yt-dlp-script} m4a "$1""
