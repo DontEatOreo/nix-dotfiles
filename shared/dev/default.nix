@@ -1,7 +1,9 @@
-{pkgs, ...}: let
-  python-packages = import ./pythonPackages.nix;
-  dotnetSdks = import ./dotnetSdks.nix {inherit pkgs;};
-in {
+{pkgs, ...}: {
+  imports = [
+    ./pythonPackages.nix
+    ./dotnetSdks.nix
+  ];
+
   environment = {
     systemPackages = with pkgs; [
       # Git and GitHub related packages
@@ -11,6 +13,7 @@ in {
       gitui # Terminal UI for Git
       gitflow # Git branching model
       github-copilot-cli # GitHub Copilot CLI
+      jq
 
       # Terminal related packages
       colordiff # Colorize diff output
@@ -18,8 +21,6 @@ in {
       bc # Command line calculator
 
       # SDKs and miscellaneous packages
-      (python311.withPackages python-packages) # Python 3.11 with specified packages
-      (dotnetCorePackages.combinePackages dotnetSdks) # Combined .NET SDKs
       nuget-to-nix # Convert a NuGet packages directory to a lockfile for buildDotnetModule
       omnisharp-roslyn # C# language server
       mono # .NET Framework for Linux and macOS

@@ -1,17 +1,13 @@
-{
-  inputs,
-  pkgs,
-  ...
-}: let
-  vscodeExtensions = import ./extensions.nix {inherit inputs pkgs;};
-  userSettings = import ./settings.nix;
-in {
+_: {
+  imports = [
+    ./extensions.nix
+    ./settings.nix
+  ];
+
   programs.vscode = {
     enable = true;
     enableUpdateCheck = false;
     enableExtensionUpdateCheck = false;
-    extensions = vscodeExtensions;
     mutableExtensionsDir = false;
-    userSettings = userSettings;
   };
 }
