@@ -8,7 +8,7 @@ in {
   programs.vscode = {
     extensions = with vscode-marketplace; [
       # Bash
-      mads-hartmann.bash-ide-vscode # Bash language support
+      mads-hartmann.bash-ide-vscode
 
       # C#
       ms-dotnettools.csharp
@@ -17,25 +17,25 @@ in {
       ms-dotnettools.vscodeintellicode-csharp
 
       # Java
-      redhat.java # Java language support
-      vscjava.vscode-java-pack # Java Extension Pack
+      redhat.java
+      vscjava.vscode-java-pack
 
       # JS & TS
-      dbaeumer.vscode-eslint # ESLint support
+      dbaeumer.vscode-eslint
       gregorbiswanger.json2ts # Convert JSON objects to TypeScript interfaces
-      mgmcdermott.vscode-language-babel # Babel language support
-      ms-vscode.vscode-typescript-next # TypeScript language support
-      steoates.autoimport # Auto import for JavaScript and TypeScript
+      mgmcdermott.vscode-language-babel
+      ms-vscode.vscode-typescript-next
+      steoates.autoimport
 
       # Nix
-      bbenoist.nix # Nix language support
-      jnoortheen.nix-ide # Nix IDE features
+      bbenoist.nix
+      jnoortheen.nix-ide
       kamadorueda.alejandra # Opinionated Nix Formatter
 
       # Python
-      ms-python.python # Python language support
+      ms-python.Python
       ms-python.vscode-pylance # Python language server
-      ms-python.black-formatter # Format Python Code
+      ms-python.black-formatter
 
       # VIM
       xadillax.viml
