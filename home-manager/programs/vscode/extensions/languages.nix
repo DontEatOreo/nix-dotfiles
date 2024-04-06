@@ -7,38 +7,37 @@
 in {
   programs.vscode = {
     extensions = with vscode-marketplace; [
-      # Language Specific Extensions
-      ## Bash
+      # Bash
       mads-hartmann.bash-ide-vscode # Bash language support
 
-      ## C#
+      # C#
       ms-dotnettools.csharp
       ms-dotnettools.csdevkit
       ms-dotnettools.vscode-dotnet-runtime
       ms-dotnettools.vscodeintellicode-csharp
 
-      ## Java
+      # Java
       redhat.java # Java language support
       vscjava.vscode-java-pack # Java Extension Pack
 
-      ## JS & TS
+      # JS & TS
       dbaeumer.vscode-eslint # ESLint support
       gregorbiswanger.json2ts # Convert JSON objects to TypeScript interfaces
       mgmcdermott.vscode-language-babel # Babel language support
       ms-vscode.vscode-typescript-next # TypeScript language support
       steoates.autoimport # Auto import for JavaScript and TypeScript
 
-      ## Nix
+      # Nix
       bbenoist.nix # Nix language support
       jnoortheen.nix-ide # Nix IDE features
       kamadorueda.alejandra # Opinionated Nix Formatter
 
-      ## Python
+      # Python
       ms-python.python # Python language support
       ms-python.vscode-pylance # Python language server
       ms-python.black-formatter # Format Python Code
 
-      ## VIM
+      # VIM
       xadillax.viml
     ];
   };
