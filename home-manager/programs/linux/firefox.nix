@@ -3,14 +3,17 @@
     enable = true;
     profiles.main = {
       isDefault = true;
-      extensions = with pkgs.nur.repos.rycee.firefox-addons; [
-        ublock-origin
-        tree-style-tab
-        sponsorblock
-        dearrow
-        return-youtube-dislikes
-        violentmonkey
-      ];
+      extensions = builtins.attrValues {
+        inherit
+          (pkgs.nur.repos.rycee.firefox-addons)
+          ublock-origin # Ad Blocker
+          tree-style-tab
+          sponsorblock # YouTube Sponsor Skipper
+          dearrow # YouTube Clickbait Remover
+          return-youtube-dislikes
+          violentmonkey # Browser Scripts
+          ;
+      };
     };
     policies = {
       DisableTelemetry = true;

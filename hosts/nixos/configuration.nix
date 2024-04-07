@@ -58,27 +58,27 @@
         emoji = ["Twitter Color Emoji"];
       };
     };
-    packages = with pkgs; [
-      noto-fonts
-      noto-fonts-cjk
-      noto-fonts-emoji
+    packages = builtins.attrValues {
+      mplus-outline-fonts = pkgs.mplus-outline-fonts.githubRelease;
+      inherit
+        (pkgs)
+        noto-fonts
+        noto-fonts-cjk
+        noto-fonts-emoji
+        liberation_ttf
+        fira-code
+        fira-code-symbols
+        dina-font
+        proggyfonts
+        meslo-lgs-nf
+        victor-mono
+        monaspace
+        twemoji-color-font
+        sarasa-gothic
+        ;
 
-      liberation_ttf
-      fira-code
-      fira-code-symbols
-
-      mplus-outline-fonts.githubRelease
-      dina-font
-      proggyfonts
-      meslo-lgs-nf
-      victor-mono
-      monaspace
-
-      twemoji-color-font
-      sarasa-gothic
-
-      (nerdfonts.override {fonts = ["FiraCode" "DroidSansMono"];})
-    ];
+      nerfonts = pkgs.nerdfonts.override {fonts = ["FiraCode" "DroidSansMono"];};
+    };
   };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion

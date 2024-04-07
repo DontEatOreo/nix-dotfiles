@@ -2,7 +2,7 @@
   programs.chromium = {
     enable = true;
     package = pkgs.brave;
-    dictionaries = with pkgs; [hunspellDictsChromium.en_US];
+    dictionaries = [pkgs.hunspellDictsChromium.en_US];
     extensions = [
       {id = "cjpalhdlnbpafiamejdnhcphjbkeiagm";} # Ublock Origin
       {id = "mnjggcdmjocbbbhaepdhchncahnbgone";} # Sponsor Block

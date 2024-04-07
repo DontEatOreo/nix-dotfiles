@@ -6,39 +6,42 @@
   inherit (inputs.nix-vscode-extensions.extensions.${pkgs.system}.forVSCodeVersion pkgs.vscode.version) vscode-marketplace;
 in {
   programs.vscode = {
-    extensions = with vscode-marketplace; [
+    extensions = builtins.attrValues {
       # Bash
-      mads-hartmann.bash-ide-vscode
+      bash-ide-vscode = vscode-marketplace.mads-hartmann.bash-ide-vscode;
 
       # C#
-      ms-dotnettools.csharp
-      ms-dotnettools.csdevkit
-      ms-dotnettools.vscode-dotnet-runtime
-      ms-dotnettools.vscodeintellicode-csharp
+      csharp = vscode-marketplace.ms-dotnettools.csharp;
+      csdevkit = vscode-marketplace.ms-dotnettools.csdevkit;
+      vscode-dotnet-runtime = vscode-marketplace.ms-dotnettools.vscode-dotnet-runtime;
+      vscodeintellicode-csharp = vscode-marketplace.ms-dotnettools.vscodeintellicode-csharp;
 
       # Java
-      redhat.java
-      vscjava.vscode-java-pack
+      java = vscode-marketplace.redhat.java;
+      vscode-java-pack = vscode-marketplace.vscjava.vscode-java-pack;
 
       # JS & TS
-      dbaeumer.vscode-eslint
-      gregorbiswanger.json2ts # Convert JSON objects to TypeScript interfaces
-      mgmcdermott.vscode-language-babel
-      ms-vscode.vscode-typescript-next
-      steoates.autoimport
+      vscode-eslint = vscode-marketplace.dbaeumer.vscode-eslint;
+      ## Convert JSON objects to TypeScript interfaces
+      json2ts = vscode-marketplace.gregorbiswanger.json2ts;
+      vscode-language-babel = vscode-marketplace.mgmcdermott.vscode-language-babel;
+      vscode-typescript-next = vscode-marketplace.ms-vscode.vscode-typescript-next;
+      autoimport = vscode-marketplace.steoates.autoimport;
 
       # Nix
-      bbenoist.nix
-      jnoortheen.nix-ide
-      kamadorueda.alejandra # Opinionated Nix Formatter
+      nix = vscode-marketplace.bbenoist.nix;
+      nix-ide = vscode-marketplace.jnoortheen.nix-ide;
+      ## Opinionated Nix Formatter
+      alejandra = vscode-marketplace.kamadorueda.alejandra;
 
       # Python
-      ms-python.Python
-      ms-python.vscode-pylance # Python language server
-      ms-python.black-formatter
+      python = vscode-marketplace.ms-python.python;
+      ## Python language server
+      vscode-pylance = vscode-marketplace.ms-python.vscode-pylance;
+      black-formatter = vscode-marketplace.ms-python.black-formatter;
 
       # VIM
-      xadillax.viml
-    ];
+      viml = vscode-marketplace.xadillax.viml;
+    };
   };
 }

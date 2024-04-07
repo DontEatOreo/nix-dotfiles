@@ -1,9 +1,8 @@
 {pkgs, ...}: {
   environment = {
-    systemPackages = with pkgs; [
-      # LaTeX Related
-      texlive.combined.scheme-full
-      pandoc # Convert Documents
-    ];
+    systemPackages = builtins.attrValues {
+      text-live-full = pkgs.texlive.combined.scheme-full;
+      inherit (pkgs) pandoc;
+    };
   };
 }

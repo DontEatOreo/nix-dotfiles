@@ -12,26 +12,34 @@ in {
   ];
 
   programs.vscode = {
-    extensions = with vscode-marketplace;
-      [
-        # Text Editing and Documentation
-        aykutsarac.jsoncrack-vscode # JSONCrack support
-        davidanson.vscode-markdownlint # Linting for Markdown files
-        james-yu.latex-workshop # LaTeX support
-        redhat.vscode-xml # XML language support
+    extensions = builtins.attrValues {
+      # Text Editing and Documentation
+      ## JSONCrack support
+      jsoncrack-vscode = vscode-marketplace.aykutsarac.jsoncrack-vscode;
+      ## Linting for Markdown files
+      vscode-markdownlint = vscode-marketplace.davidanson.vscode-markdownlint;
+      ## LaTeX support
+      latex-workshop = vscode-marketplace.james-yu.latex-workshop;
+      ## XML language support
+      vscode-xml = vscode-marketplace.redhat.vscode-xml;
 
-        # Themes
-        github.github-vscode-theme # GitHub's VS Code theme
+      # Themes
+      ## GitHub's VS Code theme
+      github-vscode-theme = vscode-marketplace.github.github-vscode-theme;
 
-        # Utilities
-        esbenp.prettier-vscode # Code formatting with Prettier
-        mkhl.direnv # Direnv support
-        oderwat.indent-rainbow # Colorful indentation
-        ryu1kn.partial-diff # Compare (diff) text selections within a file
-      ]
-      ++ (with vscode-marketplace-release; [
-        github.copilot # AI-powered coding assistant
-        github.copilot-chat # Chat with GitHub Copilot
-      ]);
+      # Utilities
+      ## Code formatting with Prettier
+      prettier-vscode = vscode-marketplace.esbenp.prettier-vscode;
+      ## Direnv support
+      direnv = vscode-marketplace.mkhl.direnv;
+      ## Colorful indentation
+      indent-rainbow = vscode-marketplace.oderwat.indent-rainbow;
+      ## Compare (diff) text selections within a file
+      partial-diff = vscode-marketplace.ryu1kn.partial-diff;
+
+      # Release
+      copilot = vscode-marketplace-release.github.copilot;
+      copilot-chat = vscode-marketplace-release.github.copilot-chat;
+    };
   };
 }
