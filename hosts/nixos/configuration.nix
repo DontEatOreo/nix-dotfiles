@@ -4,10 +4,20 @@
   config,
   ...
 }: {
-  imports =
-    []
-    ++ (import ./users/nyx)
-    ++ (import ../../shared);
+  imports = [
+    ./users/nyx/nix.nix
+    ./users/nyx/nixpkgs.nix
+    ./users/nyx/programs.nix
+    ./users/nyx/services.nix
+    ./users/nyx/users.nix
+    ./users/nyx/hardware-configuration.nix
+
+    ../../shared/cli.nix
+    ../../shared/dev
+    #../../shared/latex.nix # Disabled by default due to file size
+    ../../shared/tui.nix
+    ../../shared/programs.nix
+  ];
 
   # Add inputs to legacy (nix2) channels, making legacy nix commands consistent
   environment.etc =

@@ -1,8 +1,12 @@
 {pkgs, ...}: {
-  imports =
-    []
-    ++ (import ../programs)
-    ++ (import ../programs/linux);
+  imports = [
+    ../programs/neovim.nix
+    ../programs/bashrc.nix
+    ../programs/chromium.nix
+    ../programs/firefox.nix
+    ../programs/zshrc.nix
+    ../programs/vscode
+  ];
   home = {
     stateVersion = "24.05";
     packages = builtins.attrValues {
