@@ -5,6 +5,7 @@ _: {
     ./users/anon/nixpkgs.nix
     ./users/anon/system.nix
     ./users/anon/zshrc.nix
+    ./users/anon/fonts.nix
 
     ../../shared/cli.nix
     ../../shared/dev
