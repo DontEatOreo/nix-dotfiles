@@ -3,6 +3,9 @@ _: {
     # Git
     "git.enableCommitSigning" = true; # Make sure to set up GPG and GIT first...
 
+    # Enable Word Wrap
+    "editor.wordWrap" = "on";
+
     # Bash
     "bashIde.explainshellEndpoint" = "http://localhost:5134";
 
