@@ -14,7 +14,7 @@ _: {
 
     # Theme
     "workbench.iconTheme" = "vscode-icons";
-    "workbench.colorTheme" = "Quiet Light";
+    "workbench.colorTheme" = "GitHub Light";
     "workbench.preferredLightColorTheme" = "GitHub Light";
     "workbench.preferredDarkColorTheme" = "GitHub Dark Dimmed";
     "window.autoDetectColorScheme" = true;
