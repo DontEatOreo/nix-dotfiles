@@ -1,6 +1,5 @@
 _: {
   services = {
-    desktopManager.plasma6.enable = true;
     xserver = {
       videoDrivers = ["nvidia"];
       xkb = {
@@ -11,8 +10,9 @@ _: {
       # KDE
       displayManager.sddm = {
         enable = true;
-        wayland.enable = true;
+        settings.General.DisplayServer = "x11-user";
       };
+      desktopManager.plasma5.enable = true;
     };
     openssh = {
       enable = true;
