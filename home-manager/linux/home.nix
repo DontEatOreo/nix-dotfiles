@@ -1,11 +1,14 @@
 {pkgs, ...}: {
   imports = [
-    ../programs/neovim.nix
-    ../programs/bashrc.nix
-    ../programs/chromium.nix
-    ../programs/firefox.nix
-    ../programs/zshrc.nix
+    ../programs/linux/chromium.nix
+    ../programs/linux/firefox.nix
+    ../programs/linux/zshrc.nix
+
     ../programs/vscode
+
+    ../programs/bashrc.nix
+    ../programs/git.nix
+    ../programs/neovim.nix
   ];
   home = {
     stateVersion = "24.05";
