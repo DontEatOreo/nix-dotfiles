@@ -2,6 +2,7 @@ _: {
   services = {
     desktopManager.plasma6.enable = true;
     xserver = {
+      videoDrivers = ["nvidia"];
       xkb = {
         layout = "us";
       };
