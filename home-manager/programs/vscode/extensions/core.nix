@@ -14,7 +14,8 @@ in {
       # Real-time collaborative development
       vsliveshare = vscode-marketplace.ms-vsliveshare.vsliveshare;
       # Enables VS Code to be used as a UI when connected to a remote server
-      vscode-remote-extensionpack = vscode-marketplace.ms-vscode-remote.vscode-remote-extensionpack;
+      remote-ssh = vscode-marketplace.ms-vscode-remote.remote-ssh;
+      remote-explorer = vscode-marketplace.ms-vscode.remote-explorer;
       vscodeintellicode = vscode-marketplace.visualstudioexptteam.vscodeintellicode;
       # Icons for Visual Studio Code
       vscode-icons = vscode-marketplace.vscode-icons-team.vscode-icons;
