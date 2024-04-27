@@ -14,6 +14,9 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    dis.url = "github:DontEatOreo/dis";
+    dis.inputs.nixpkgs.follows = "nixpkgs";
+
     # Firefox Extensions
     nur.url = "github:nix-community/NUR";
 
@@ -30,6 +33,7 @@
     pre-commit-hooks,
     nix-darwin,
     home-manager,
+    dis,
     nur,
     vscode-server,
     nix-vscode-extensions,
@@ -38,6 +42,7 @@
     commonAttrs = {
       inherit (nixpkgs) lib;
       inherit (self) outputs;
+      inherit (dis) dis;
       inherit nixos-hardware;
       inherit inputs self;
       inherit nixpkgs nix-darwin;
