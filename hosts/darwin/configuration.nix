@@ -9,7 +9,7 @@ _: {
 
     ../../shared/cli.nix
     ../../shared/dev.nix
-    #../../latex.nix # Disabled by default due to file size
+    # ../../shared/latex.nix # Disabled by default due to file size
     ../../shared/tui.nix
     ../../shared/programs.nix
   ];
