@@ -22,7 +22,7 @@
 
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     vscode-server.inputs.nixpkgs.follows = "nixpkgs";
-    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
+    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions/f7f2e0b543335f469753b7ee0900ffe7eb9eb81f";
     nix-vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
   };
 
