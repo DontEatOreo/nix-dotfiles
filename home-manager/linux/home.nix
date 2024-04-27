@@ -7,6 +7,7 @@
     ../programs/vscode
 
     ../programs/bashrc.nix
+    ../programs/direnv.nix
     ../programs/git.nix
     ../programs/neovim.nix
   ];

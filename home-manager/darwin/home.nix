@@ -3,6 +3,7 @@ _: {
     ../programs/vscode
 
     ../programs/bashrc.nix
+    ../programs/direnv.nix
     ../programs/neovim.nix
     ../programs/git.nix
   ];
