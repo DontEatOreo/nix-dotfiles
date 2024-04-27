@@ -14,7 +14,7 @@
     ./users/nyx/hardware-configuration.nix
 
     ../../shared/cli.nix
-    ../../shared/dev
+    ../../shared/dev.nix
     #../../shared/latex.nix # Disabled by default due to file size
     ../../shared/tui.nix
     ../../shared/programs.nix

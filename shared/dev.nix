@@ -1,9 +1,4 @@
 {pkgs, ...}: {
-  imports = [
-    ./pythonPackages.nix
-    ./dotnetSdks.nix
-  ];
-
   environment = {
     systemPackages = builtins.attrValues {
       inherit
@@ -22,20 +17,8 @@
         colordiff # Colorize diff output
         thefuck # Correct previous command
         bc # Command line calculator
-        
-        # SDKs and miscellaneous packages
-        
-        nuget-to-nix # Convert a NuGet packages directory to a lockfile for buildDotnetModule
-        omnisharp-roslyn # C# language server
-        mono # .NET Framework for Linux and macOS
-        bun # Better JavaScript runtime
-        nodejs_21 # Node.js version 21
         nil # Nix language server
         ;
-    };
-    variables = {
-      DOTNET_CLI_TELEMETRY_OPTOUT = "true"; # Opt out of .NET CLI telemetry
-      DOTNET_ROOT = "/run/current-system/sw/share/dotnet"; # .NET SDK path
     };
   };
 }
