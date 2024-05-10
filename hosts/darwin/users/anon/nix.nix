@@ -1,6 +1,15 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  inputs,
+  lib,
+  ...
+}: {
   nix = {
     package = pkgs.nix;
+
+    # Add each flake input as a registery, to make nix3 commands consistent with flake.nix
+    registry = (lib.mapAttrs (_: flake: {inherit flake;})) ((lib.filterAttrs (_: lib.isType "flake")) inputs);
+
     # Garbage Collection
     gc = {
       automatic = true;
