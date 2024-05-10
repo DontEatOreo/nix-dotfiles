@@ -24,6 +24,7 @@
       # Messengers
       "discord"
       "telegram"
+      "element"
 
       # Quality of Life
       "hiddenbar" # Hide status bar items
