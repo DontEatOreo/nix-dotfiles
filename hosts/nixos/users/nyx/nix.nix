@@ -15,6 +15,11 @@
       experimental-features = "nix-command flakes";
       # Deduplicate and optimize nix store
       auto-optimise-store = true;
+      trusted-users = [
+        "root"
+        "nyx"
+        "anon"
+      ];
       # Trust Devenv Shell
       trusted-substituters = [
         "https://devenv.cachix.org"
