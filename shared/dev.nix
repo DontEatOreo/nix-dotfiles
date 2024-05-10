@@ -8,10 +8,10 @@
         gh # GitHub CLI
         git # Git VCS
         gitty # Information about Git repositories
-        gitui # Terminal UI for Git
         gitflow # Git branching model
         github-copilot-cli # GitHub Copilot CLI
         jq
+        devenv # Manage development environment on Nix
         # Terminal related packages
         
         colordiff # Colorize diff output
