@@ -1,12 +1,10 @@
-{ inputs, ... }: {
+{inputs, ...}: {
   imports = [
     ../programs/vscode
 
     ../programs/bashrc.nix
-    ../programs/direnv.nix
     ../programs/neovim.nix
-    ../programs/git.nix
-    ../programs/gitui.nix
+    ../programs/programs.nix
     inputs.catppuccin.homeManagerModules.catppuccin
   ];
 
