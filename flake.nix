@@ -2,56 +2,59 @@
   description = "My NixOS & Darwin System Flake";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-
-    pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
-    pre-commit-hooks.inputs.nixpkgs.follows = "nixpkgs";
-
-    nix-darwin.url = "github:LnL7/nix-darwin";
-    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
-
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    catppuccin.url = "github:catppuccin/nix";
 
     dis.url = "github:DontEatOreo/dis";
     dis.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Firefox Extensions
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    nix-darwin.url = "github:LnL7/nix-darwin";
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+
+    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions/";
+    nix-vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
+
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
     nur.url = "github:nix-community/NUR";
 
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     vscode-server.inputs.nixpkgs.follows = "nixpkgs";
-    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions/f7f2e0b543335f469753b7ee0900ffe7eb9eb81f";
-    nix-vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
     self,
-    nixpkgs,
-    nixos-hardware,
-    pre-commit-hooks,
-    nix-darwin,
-    home-manager,
+    catppuccin,
     dis,
+    home-manager,
+    nix-darwin,
+    nix-vscode-extensions,
+    nixos-hardware,
+    nixpkgs,
     nur,
     vscode-server,
-    nix-vscode-extensions,
     ...
   } @ inputs: let
     commonAttrs = {
+      inherit (dis) dis;
       inherit (nixpkgs) lib;
       inherit (self) outputs;
-      inherit (dis) dis;
-      inherit nixos-hardware;
-      inherit inputs self;
-      inherit nixpkgs nix-darwin;
+      inherit catppuccin;
       inherit home-manager;
+      inherit inputs;
+      inherit nix-darwin;
+      inherit nixos-hardware;
+      inherit nixpkgs;
       inherit nur;
+      inherit self;
       inherit vscode-server;
     };
   in {
-    nixosConfigurations = import ./hosts/nixos commonAttrs;
     darwinConfigurations = import ./hosts/darwin commonAttrs;
+    nixosConfigurations = import ./hosts/nixos commonAttrs;
   };
 }
