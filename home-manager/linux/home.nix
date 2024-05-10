@@ -23,7 +23,7 @@
         alacritty # GPU Terminal
         xclip # Clipboard for NVIM
         
-        discord
+        vesktop
         telegram-desktop
         _1password-gui
         ;
