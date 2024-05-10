@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  inputs,
+  ...
+}: {
   imports = [
     ../programs/linux/chromium.nix
     ../programs/linux/firefox.nix
@@ -10,6 +14,7 @@
     ../programs/direnv.nix
     ../programs/git.nix
     ../programs/neovim.nix
+    inputs.catppuccin.homeManagerModules.catppuccin
   ];
   home = {
     stateVersion = "24.05";

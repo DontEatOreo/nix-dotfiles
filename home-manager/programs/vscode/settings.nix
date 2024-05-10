@@ -13,10 +13,10 @@ _: {
     "diffEditor.ignoreTrimWhitespace" = false;
 
     # Theme
-    "workbench.iconTheme" = "vscode-icons";
-    "workbench.colorTheme" = "GitHub Light";
-    "workbench.preferredLightColorTheme" = "GitHub Light";
-    "workbench.preferredDarkColorTheme" = "GitHub Dark Dimmed";
+    "workbench.iconTheme" = "catppuccin-mocha";
+    "workbench.colorTheme" = "Catppuccin Mocha";
+    "workbench.preferredLightColorTheme" = "Catppuccin Latte";
+    "workbench.preferredDarkColorTheme" = "Catppuccin Mocha";
     "window.autoDetectColorScheme" = true;
     "window.zoomLevel" = 1.5;
 
