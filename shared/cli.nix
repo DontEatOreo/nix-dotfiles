@@ -1,4 +1,8 @@
-{pkgs, inputs, ...}: {
+{
+  pkgs,
+  inputs,
+  ...
+}: {
   environment = {
     systemPackages = builtins.attrValues {
       inherit
@@ -29,7 +33,7 @@
         coreutils # GNU CoreUtils
         progress # Show progress of CoreUtils
         ;
-        dis = inputs.dis.packages.${pkgs.system}.default;
+      dis = inputs.dis.packages.${pkgs.system}.default;
     };
     variables = {
       EDITOR = "nvim";
