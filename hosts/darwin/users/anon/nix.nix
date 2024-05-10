@@ -23,6 +23,7 @@
       build-use-substitutes = true
     '';
     settings = {
+      sandbox = true;
       trusted-users = [
         "root"
         "nyx"
