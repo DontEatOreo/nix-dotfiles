@@ -16,10 +16,6 @@ in {
       vscode-dotnet-runtime = vscode-marketplace.ms-dotnettools.vscode-dotnet-runtime;
       vscodeintellicode-csharp = vscode-marketplace.ms-dotnettools.vscodeintellicode-csharp;
 
-      # Java
-      java = vscode-marketplace.redhat.java;
-      vscode-java-pack = vscode-marketplace.vscjava.vscode-java-pack;
-
       # JS & TS
       vscode-eslint = vscode-marketplace.dbaeumer.vscode-eslint;
       ## Convert JSON objects to TypeScript interfaces
@@ -33,12 +29,6 @@ in {
       nix-ide = vscode-marketplace.jnoortheen.nix-ide;
       ## Opinionated Nix Formatter
       alejandra = vscode-marketplace.kamadorueda.alejandra;
-
-      # Python
-      python = vscode-marketplace.ms-python.python;
-      ## Python language server
-      vscode-pylance = vscode-marketplace.ms-python.vscode-pylance;
-      black-formatter = vscode-marketplace.ms-python.black-formatter;
 
       # VIM
       viml = vscode-marketplace.xadillax.viml;
