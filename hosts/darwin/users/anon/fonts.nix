@@ -5,7 +5,6 @@
     fonts = builtins.attrValues {
       inherit (pkgs)
         # I guess gotta have em'
-
         crimson
         crimson-pro
         ibm-plex
@@ -15,26 +14,26 @@
         roboto
         source-sans
         source-sans-pro
-        # Obviously NOTO DUHH!!!
 
+        # Obviously NOTO DUHH!!!
         noto-fonts
         noto-fonts-cjk
         noto-fonts-emoji
-        # Collection of "Comic" fonts
 
+        # Collection of "Comic" fonts
         comic-mono
         comic-neue
         comic-relief
-        # JP fonts
 
+        # JP fonts
         plemoljp
         plemoljp-hs
         plemoljp-nf
         source-han-sans
         source-han-sans-vf-otf
         source-han-sans-vf-ttf
-        # Dev
 
+        # Dev
         monaspace
         ;
       nerdfonts = pkgs.nerdfonts.override {
