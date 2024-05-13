@@ -1,4 +1,4 @@
-{
+_: {
   nixpkgs = {
     # No overlays yet
     # overlays = [ ];
