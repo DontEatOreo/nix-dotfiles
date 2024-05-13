@@ -7,7 +7,11 @@ in
     enable = true;
     autosuggestion.enable = true;
     enableCompletion = true;
-    syntaxHighlighting.enable = true;
+    syntaxHighlighting = {
+      enable = true;
+      highlighters = [ "brackets" ];
+      catppuccin.enable = true;
+    };
     enableVteIntegration = true;
     autocd = true;
     initExtraFirst = ''
