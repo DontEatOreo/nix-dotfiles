@@ -33,7 +33,7 @@ _: {
 
     # Formaters
     ## Nix formatter
-    "alejandra.program" = "alejandra";
+    "alejandra.program" = "nixfmt";
     "[nix]" = {
       "editor.defaultFormatter" = "kamadorueda.alejandra";
       "editor.formatOnPaste" = true;
