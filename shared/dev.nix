@@ -10,6 +10,7 @@
         gitflow # Git branching model
         github-copilot-cli # GitHub Copilot CLI
         jq
+        cachix # Nix Binary Cache
         devenv # Manage development environment on Nix
         nixfmt-rfc-style # Upcomming new nix format, RFC 0160
 
