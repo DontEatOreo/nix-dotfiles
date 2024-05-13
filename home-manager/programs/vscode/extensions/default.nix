@@ -1,11 +1,15 @@
+{ inputs, pkgs, ... }:
+let
+  inherit
+    (inputs.nix-vscode-extensions.extensions.${pkgs.system}.forVSCodeVersion pkgs.vscode.version)
+    vscode-marketplace
+    ;
+  inherit
+    (inputs.nix-vscode-extensions.extensions.${pkgs.system}.forVSCodeVersion pkgs.vscode.version)
+    vscode-marketplace-release
+    ;
+in
 {
-  inputs,
-  pkgs,
-  ...
-}: let
-  inherit (inputs.nix-vscode-extensions.extensions.${pkgs.system}.forVSCodeVersion pkgs.vscode.version) vscode-marketplace;
-  inherit (inputs.nix-vscode-extensions.extensions.${pkgs.system}.forVSCodeVersion pkgs.vscode.version) vscode-marketplace-release;
-in {
   imports = [
     ./core.nix
     ./languages.nix

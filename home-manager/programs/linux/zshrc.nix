@@ -1,6 +1,8 @@
-{pkgs, ...}: let
-  yt-dlp-script = import ../../../shared/yt-dlp-script.nix {inherit pkgs;};
-in {
+{ pkgs, ... }:
+let
+  yt-dlp-script = import ../../../shared/yt-dlp-script.nix { inherit pkgs; };
+in
+{
   programs.zsh = {
     enable = true;
     autosuggestion.enable = true;
@@ -30,7 +32,12 @@ in {
     ];
     oh-my-zsh = {
       enable = true;
-      plugins = ["git" "thefuck" "direnv" "sudo"];
+      plugins = [
+        "git"
+        "thefuck"
+        "direnv"
+        "sudo"
+      ];
     };
     shellAliases = {
       # File Operations

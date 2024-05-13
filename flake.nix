@@ -26,35 +26,38 @@
     vscode-server.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = {
-    self,
-    catppuccin,
-    dis,
-    home-manager,
-    nix-darwin,
-    nix-vscode-extensions,
-    nixos-hardware,
-    nixpkgs,
-    nur,
-    vscode-server,
-    ...
-  } @ inputs: let
-    commonAttrs = {
-      inherit (dis) dis;
-      inherit (nixpkgs) lib;
-      inherit (self) outputs;
-      inherit catppuccin;
-      inherit home-manager;
-      inherit inputs;
-      inherit nix-darwin;
-      inherit nixos-hardware;
-      inherit nixpkgs;
-      inherit nur;
-      inherit self;
-      inherit vscode-server;
+  outputs =
+    {
+      self,
+      catppuccin,
+      dis,
+      home-manager,
+      nix-darwin,
+      nix-vscode-extensions,
+      nixos-hardware,
+      nixpkgs,
+      nur,
+      vscode-server,
+      ...
+    }@inputs:
+    let
+      commonAttrs = {
+        inherit (dis) dis;
+        inherit (nixpkgs) lib;
+        inherit (self) outputs;
+        inherit catppuccin;
+        inherit home-manager;
+        inherit inputs;
+        inherit nix-darwin;
+        inherit nixos-hardware;
+        inherit nixpkgs;
+        inherit nur;
+        inherit self;
+        inherit vscode-server;
+      };
+    in
+    {
+      darwinConfigurations = import ./hosts/darwin commonAttrs;
+      nixosConfigurations = import ./hosts/nixos commonAttrs;
     };
-  in {
-    darwinConfigurations = import ./hosts/darwin commonAttrs;
-    nixosConfigurations = import ./hosts/nixos commonAttrs;
-  };
 }

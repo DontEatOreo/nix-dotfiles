@@ -1,10 +1,12 @@
-{pkgs, ...}: let
-  yt-dlp-script = import ../../shared/yt-dlp-script.nix {inherit pkgs;};
-in {
+{ pkgs, ... }:
+let
+  yt-dlp-script = import ../../shared/yt-dlp-script.nix { inherit pkgs; };
+in
+{
   programs.bash = {
     enable = true;
     enableCompletion = true;
-    sessionVariables = {};
+    sessionVariables = { };
     initExtra = ''
       shopt -s autocd
       set -o vi

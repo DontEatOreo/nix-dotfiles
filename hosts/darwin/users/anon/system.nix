@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   system = {
     # Global macOS System Settings
     defaults = {

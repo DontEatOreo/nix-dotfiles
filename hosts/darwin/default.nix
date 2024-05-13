@@ -3,7 +3,8 @@
   outputs,
   home-manager,
   ...
-}: let
+}:
+let
   system = "aarch64-darwin";
   modules = [
     ./configuration.nix
@@ -18,12 +19,17 @@
         useGlobalPkgs = true;
         useUserPackages = true;
         users.anon = import ../../home-manager/darwin/home.nix;
-        extraSpecialArgs = {inherit inputs outputs system;};
+        extraSpecialArgs = {
+          inherit inputs outputs system;
+        };
       };
     }
   ];
-  specialArgs = {inherit inputs;};
-in {
+  specialArgs = {
+    inherit inputs;
+  };
+in
+{
   "anons-Mac-mini" = inputs.nix-darwin.lib.darwinSystem {
     inherit system;
     inherit modules;

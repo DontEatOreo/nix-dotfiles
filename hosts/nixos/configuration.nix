@@ -3,7 +3,8 @@
   pkgs,
   config,
   ...
-}: {
+}:
+{
   imports = [
     ./users/nyx/hardware.nix
     ./users/nyx/nix.nix
@@ -21,13 +22,10 @@
   ];
 
   # Add inputs to legacy (nix2) channels, making legacy nix commands consistent
-  environment.etc =
-    lib.mapAttrs'
-    (name: value: {
-      name = "nix/path/${name}";
-      value.source = value.flake;
-    })
-    config.nix.registry;
+  environment.etc = lib.mapAttrs' (name: value: {
+    name = "nix/path/${name}";
+    value.source = value.flake;
+  }) config.nix.registry;
 
   networking = {
     hostName = "nyx";
@@ -63,16 +61,15 @@
     fontconfig = {
       enable = true;
       defaultFonts = {
-        monospace = ["Liga SFMono Nerd Font"];
-        sansSerif = ["SF Pro Text"];
-        serif = ["New York Medium"];
-        emoji = ["Twitter Color Emoji"];
+        monospace = [ "Liga SFMono Nerd Font" ];
+        sansSerif = [ "SF Pro Text" ];
+        serif = [ "New York Medium" ];
+        emoji = [ "Twitter Color Emoji" ];
       };
     };
     packages = builtins.attrValues {
       mplus-outline-fonts = pkgs.mplus-outline-fonts.githubRelease;
-      inherit
-        (pkgs)
+      inherit (pkgs)
         noto-fonts
         noto-fonts-cjk
         noto-fonts-emoji
@@ -88,7 +85,12 @@
         sarasa-gothic
         ;
 
-      nerfonts = pkgs.nerdfonts.override {fonts = ["FiraCode" "DroidSansMono"];};
+      nerfonts = pkgs.nerdfonts.override {
+        fonts = [
+          "FiraCode"
+          "DroidSansMono"
+        ];
+      };
     };
   };
 

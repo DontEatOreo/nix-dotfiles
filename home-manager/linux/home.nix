@@ -1,8 +1,5 @@
+{ pkgs, inputs, ... }:
 {
-  pkgs,
-  inputs,
-  ...
-}: {
   imports = [
     ../programs/linux/chromium.nix
     ../programs/linux/firefox.nix
@@ -18,11 +15,10 @@
   home = {
     stateVersion = "24.05";
     packages = builtins.attrValues {
-      inherit
-        (pkgs)
+      inherit (pkgs)
         alacritty # GPU Terminal
         xclip # Clipboard for NVIM
-        
+
         vesktop
         telegram-desktop
         _1password-gui

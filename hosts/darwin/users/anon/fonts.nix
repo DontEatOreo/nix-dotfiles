@@ -1,11 +1,11 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   fonts = {
     fontDir.enable = true;
     fonts = builtins.attrValues {
-      inherit
-        (pkgs)
+      inherit (pkgs)
         # I guess gotta have em'
-        
+
         crimson
         crimson-pro
         ibm-plex
@@ -16,17 +16,17 @@
         source-sans
         source-sans-pro
         # Obviously NOTO DUHH!!!
-        
+
         noto-fonts
         noto-fonts-cjk
         noto-fonts-emoji
         # Collection of "Comic" fonts
-        
+
         comic-mono
         comic-neue
         comic-relief
         # JP fonts
-        
+
         plemoljp
         plemoljp-hs
         plemoljp-nf
@@ -34,10 +34,15 @@
         source-han-sans-vf-otf
         source-han-sans-vf-ttf
         # Dev
-        
+
         monaspace
         ;
-      nerdfonts = pkgs.nerdfonts.override {fonts = ["DroidSansMono" "FiraCode"];};
+      nerdfonts = pkgs.nerdfonts.override {
+        fonts = [
+          "DroidSansMono"
+          "FiraCode"
+        ];
+      };
     };
   };
 }

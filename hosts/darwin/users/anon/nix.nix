@@ -3,12 +3,15 @@
   inputs,
   lib,
   ...
-}: {
+}:
+{
   nix = {
     package = pkgs.nix;
 
     # Add each flake input as a registery, to make nix3 commands consistent with flake.nix
-    registry = (lib.mapAttrs (_: flake: {inherit flake;})) ((lib.filterAttrs (_: lib.isType "flake")) inputs);
+    registry = (lib.mapAttrs (_: flake: { inherit flake; })) (
+      (lib.filterAttrs (_: lib.isType "flake")) inputs
+    );
 
     # Garbage Collection
     gc = {
@@ -30,12 +33,8 @@
         "anon"
       ];
       # Trust Devenv Shell
-      trusted-substituters = [
-        "https://devenv.cachix.org"
-      ];
-      trusted-public-keys = [
-        "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
-      ];
+      trusted-substituters = [ "https://devenv.cachix.org" ];
+      trusted-public-keys = [ "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=" ];
     };
 
     distributedBuilds = true;
@@ -48,7 +47,12 @@
         sshKey = "/Users/anon/.ssh/id_rsa";
         maxJobs = 1;
         speedFactor = 2;
-        supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
+        supportedFeatures = [
+          "nixos-test"
+          "benchmark"
+          "big-parallel"
+          "kvm"
+        ];
       }
       {
         hostName = "192.168.0.102";
@@ -58,7 +62,12 @@
         sshKey = "/Users/anon/.ssh/id_rsa";
         maxJobs = 1;
         speedFactor = 2;
-        supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
+        supportedFeatures = [
+          "nixos-test"
+          "benchmark"
+          "big-parallel"
+          "kvm"
+        ];
       }
     ];
   };

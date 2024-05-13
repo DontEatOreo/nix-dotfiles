@@ -1,7 +1,7 @@
 _: {
   services = {
     xserver = {
-      videoDrivers = ["nvidia"];
+      videoDrivers = [ "nvidia" ];
       xkb = {
         layout = "us";
       };

@@ -1,11 +1,11 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   programs.firefox = {
     enable = true;
     profiles.main = {
       isDefault = true;
       extensions = builtins.attrValues {
-        inherit
-          (pkgs.nur.repos.rycee.firefox-addons)
+        inherit (pkgs.nur.repos.rycee.firefox-addons)
           ublock-origin # Ad Blocker
           tree-style-tab
           sponsorblock # YouTube Sponsor Skipper

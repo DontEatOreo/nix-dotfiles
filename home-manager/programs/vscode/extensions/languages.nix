@@ -1,10 +1,11 @@
+{ inputs, pkgs, ... }:
+let
+  inherit
+    (inputs.nix-vscode-extensions.extensions.${pkgs.system}.forVSCodeVersion pkgs.vscode.version)
+    vscode-marketplace
+    ;
+in
 {
-  inputs,
-  pkgs,
-  ...
-}: let
-  inherit (inputs.nix-vscode-extensions.extensions.${pkgs.system}.forVSCodeVersion pkgs.vscode.version) vscode-marketplace;
-in {
   programs.vscode = {
     extensions = builtins.attrValues {
       # Bash
