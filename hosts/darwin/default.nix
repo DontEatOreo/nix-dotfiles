@@ -6,19 +6,20 @@
 }:
 let
   system = "aarch64-darwin";
+  username = "anon";
   modules = [
     ./configuration.nix
 
     home-manager.darwinModules.home-manager
     {
-      users.users.anon = {
-        name = "anon";
-        home = "/Users/anon";
+      users.users.${username} = {
+        name = username;
+        home = "/Users/${username}";
       };
       home-manager = {
         useGlobalPkgs = true;
         useUserPackages = true;
-        users.anon = import ../../home-manager/darwin/home.nix;
+        users.${username} = import ../../home-manager/home.nix;
         extraSpecialArgs = {
           inherit inputs outputs system;
         };
