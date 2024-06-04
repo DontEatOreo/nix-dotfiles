@@ -38,37 +38,6 @@
     };
 
     distributedBuilds = true;
-    buildMachines = [
-      {
-        hostName = "192.168.88.248";
-        system = "x86_64-linux";
-        protocol = "ssh";
-        sshUser = "nyx";
-        sshKey = "/Users/anon/.ssh/id_rsa";
-        maxJobs = 1;
-        speedFactor = 2;
-        supportedFeatures = [
-          "nixos-test"
-          "benchmark"
-          "big-parallel"
-          "kvm"
-        ];
-      }
-      {
-        hostName = "192.168.0.102";
-        system = "x86_64-linux";
-        protocol = "ssh";
-        sshUser = "nyx";
-        sshKey = "/Users/anon/.ssh/id_rsa";
-        maxJobs = 1;
-        speedFactor = 2;
-        supportedFeatures = [
-          "nixos-test"
-          "benchmark"
-          "big-parallel"
-          "kvm"
-        ];
-      }
-    ];
+    buildMachines = [ ];
   };
 }
