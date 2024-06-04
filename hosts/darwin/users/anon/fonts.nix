@@ -38,6 +38,8 @@
         ;
       nerdfonts = pkgs.nerdfonts.override {
         fonts = [
+          "Noto"
+          "Monaspace"
           "DroidSansMono"
           "FiraCode"
         ];
