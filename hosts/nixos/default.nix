@@ -6,7 +6,6 @@
   nixos-hardware,
   nur,
   home-manager,
-  catppuccin,
   ...
 }:
 let
@@ -36,7 +35,6 @@ let
 
     # Home Manger
     home-manager.nixosModules.home-manager
-    catppuccin.nixosModules.catppuccin
     {
       home-manager = {
         useGlobalPkgs = true;

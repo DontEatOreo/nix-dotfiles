@@ -1,16 +1,10 @@
-{
-  inputs,
-  pkgs,
-  system,
-  ...
-}:
+{ pkgs, system, ... }:
 let
   crossPlatformImports = [
     ./programs/vscode
     ./programs/bashrc.nix
     ./programs/neovim.nix
     ./programs/programs.nix
-    inputs.catppuccin.homeManagerModules.catppuccin
   ];
 
   linuxImports = [
@@ -51,8 +45,4 @@ in
     else
       crossPlatformImports;
   home = if isLinux then linuxHome else darwinHome;
-  catppuccin = {
-    enable = true;
-    flavor = "latte";
-  };
 }

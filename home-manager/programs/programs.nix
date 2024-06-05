@@ -21,11 +21,4 @@ _: {
       key = "0DB5361BEEE530AB";
     };
   };
-  programs.gitui = {
-    enable = true;
-    catppuccin = {
-      enable = true;
-      flavor = "latte";
-    };
-  };
 }

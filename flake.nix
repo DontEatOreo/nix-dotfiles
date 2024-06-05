@@ -2,8 +2,6 @@
   description = "My NixOS & Darwin System Flake";
 
   inputs = {
-    catppuccin.url = "github:catppuccin/nix";
-
     dis.url = "github:DontEatOreo/dis";
     dis.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -29,7 +27,6 @@
   outputs =
     {
       self,
-      catppuccin,
       dis,
       home-manager,
       nix-darwin,
@@ -45,7 +42,6 @@
         inherit (dis) dis;
         inherit (nixpkgs) lib;
         inherit (self) outputs;
-        inherit catppuccin;
         inherit home-manager;
         inherit inputs;
         inherit nix-darwin;

@@ -33,21 +33,6 @@
         "type": "github"
       }
     },
-    "catppuccin": {
-      "locked": {
-        "lastModified": 1717502698,
-        "narHash": "sha256-EXMMaSJ143ojJVb+xU7tCxbMAlIk0lbKhnOEh8XN7XU=",
-        "owner": "catppuccin",
-        "repo": "nix",
-        "rev": "7518e00f232e7b61f514f24dd4fa34b98c8089df",
-        "type": "github"
-      },
-      "original": {
-        "owner": "catppuccin",
-        "repo": "nix",
-        "type": "github"
-      }
-    },
     "devenv": {
       "inputs": {
         "cachix": "cachix",
@@ -595,7 +580,6 @@
     },
     "root": {
       "inputs": {
-        "catppuccin": "catppuccin",
         "dis": "dis",
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
