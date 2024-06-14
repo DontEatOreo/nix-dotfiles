@@ -26,7 +26,8 @@
       build-use-substitutes = true
     '';
     settings = {
-      sandbox = true;
+      # NOTE: Disabled until 4119 is fixed...
+      # sandbox = true;
       trusted-users = [
         "root"
         "nyx"

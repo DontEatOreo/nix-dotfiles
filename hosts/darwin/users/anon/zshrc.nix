@@ -52,7 +52,7 @@ in
       # Nix
       alias update="nix flake update ~/.nixpkgs/"
       alias check="nix flake check"
-      alias rebuild="darwin-rebuild switch --flake ~/.nixpkgs/#$(hostname | sed 's/.local$//')"
+      alias rebuild="darwin-rebuild switch --flake ~/.nixpkgs/#$(hostname | sed 's/.local$//') --option sandbox false"
 
       # Video
       alias m4a="${yt-dlp-script} m4a "$1""
