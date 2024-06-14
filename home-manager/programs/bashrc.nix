@@ -44,6 +44,10 @@ in
       nowtime = "now";
       nowdate = "date +'%d-%m-%Y'";
 
+      # Editors
+      vi = "nvim";
+      vim = "nvim";
+
       # Nix
       update = "nix flake update /etc/nixos#nyx";
       check = "nix flake check";

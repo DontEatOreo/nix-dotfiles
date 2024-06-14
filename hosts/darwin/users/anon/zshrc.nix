@@ -1,6 +1,8 @@
-{pkgs, ...}: let
-  yt-dlp-script = import ../../../../shared/yt-dlp-script.nix {inherit pkgs;};
-in {
+{ pkgs, ... }:
+let
+  yt-dlp-script = import ../../../../shared/yt-dlp-script.nix { inherit pkgs; };
+in
+{
   programs.zsh = {
     enable = true;
     enableCompletion = true;
@@ -42,6 +44,10 @@ in {
       alias now="date +'%T'"
       alias nowtime="now"
       alias nowdate="date +'%d-%m-%Y'"
+
+      # Editors
+      alias vi="nvim";
+      alias vim="nvim";
 
       # Nix
       alias update="nix flake update ~/.nixpkgs/"

@@ -1,9 +1,13 @@
-{ pkgs, system, ... }:
+{
+  inputs,
+  pkgs,
+  system,
+  ...
+}:
 let
   crossPlatformImports = [
     ./programs/vscode
     ./programs/bashrc.nix
-    ./programs/neovim.nix
     ./programs/programs.nix
   ];
 
@@ -16,6 +20,9 @@ let
   linuxHome = {
     stateVersion = "24.05";
     packages = builtins.attrValues {
+      nvim = inputs.nixvim.packages.${pkgs.system}.default.nixvimExtend {
+        config.theme = pkgs.lib.mkForce "decay";
+      };
       inherit (pkgs)
         alacritty # GPU Terminal
         xclip # Clipboard for NVIM
@@ -28,6 +35,16 @@ let
 
   darwinHome = {
     stateVersion = "24.05";
+    packages = builtins.attrValues {
+      nvim = inputs.nixvim.packages.${pkgs.system}.default.nixvimExtend {
+        config.theme = pkgs.lib.mkForce "decay";
+        config.extraConfigLua = ''
+          require('btw').setup({
+            text = "I use Neovim (and macOS, BTW)",
+          })
+        '';
+      };
+    };
   };
 
   isLinux = builtins.elem system [
