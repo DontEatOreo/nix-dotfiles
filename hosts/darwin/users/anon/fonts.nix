@@ -1,8 +1,7 @@
 { pkgs, ... }:
 {
   fonts = {
-    fontDir.enable = true;
-    fonts = builtins.attrValues {
+    packages = builtins.attrValues {
       inherit (pkgs)
         # I guess gotta have em'
         crimson
