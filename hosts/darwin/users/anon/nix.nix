@@ -13,11 +13,6 @@
       (lib.filterAttrs (_: lib.isType "flake")) inputs
     );
 
-    linux-builder = {
-      enable = true;
-      maxJobs = 8;
-    };
-
     # Garbage Collection
     gc = {
       automatic = true;
