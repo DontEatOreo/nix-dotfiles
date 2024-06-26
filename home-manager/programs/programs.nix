@@ -21,4 +21,5 @@ _: {
       key = "0DB5361BEEE530AB";
     };
   };
+  programs.gh.enable = true;
 }
