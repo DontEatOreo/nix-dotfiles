@@ -41,6 +41,7 @@ let
         useGlobalPkgs = true;
         useUserPackages = true;
         users.nyx = import ../../home-manager/home.nix;
+        backupFileExtension = "backup";
         extraSpecialArgs = {
           inherit inputs outputs system;
         };
