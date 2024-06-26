@@ -1,11 +1,7 @@
 { config, ... }:
 {
   hardware = {
-    opengl = {
-      enable = true;
-      driSupport = true;
-      driSupport32Bit = true;
-    };
+    opengl.enable = true;
     nvidia = {
       package = config.boot.kernelPackages.nvidiaPackages.production;
 
