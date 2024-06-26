@@ -5,15 +5,15 @@ _: {
     };
     displayManager.sddm = {
       enable = true;
+      wayland.enable = true;
     };
+    desktopManager.plasma6.enable = true;
     xserver = {
       videoDrivers = [ "nvidia" ];
       xkb = {
         layout = "us";
       };
       enable = true;
-      # KDE
-      desktopManager.plasma5.enable = true;
     };
     openssh = {
       enable = true;
@@ -27,21 +27,28 @@ _: {
       };
       pulse.enable = true;
     };
-    xremap.config.keymap = [
-      {
-        name = "Ctrl+Arrows for Start/End of Line";
-        remap = {
-          "Ctrl-Left" = "Home";
-          "Ctrl-Right" = "End";
-        };
-      }
-      {
-        name = "Alt+Arrows for Jumping Between Words";
-        remap = {
-          "Alt-Left" = "Ctrl-Left";
-          "Alt-Right" = "Ctrl-Right";
-        };
-      }
-    ];
+    xremap = {
+      withKDE = true;
+      serviceMode = "user";
+      userName = "nyx";
+      config = {
+        keymap = [
+          {
+            name = "Ctrl+Arrows for Start/End of Line";
+            remap = {
+              "Ctrl-Left" = "Home";
+              "Ctrl-Right" = "End";
+            };
+          }
+          {
+            name = "Alt+Arrows for Jumping Between Words";
+            remap = {
+              "Alt-Left" = "Ctrl-Left";
+              "Alt-Right" = "Ctrl-Right";
+            };
+          }
+        ];
+      };
+    };
   };
 }
