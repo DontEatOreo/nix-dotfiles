@@ -48,8 +48,6 @@
     };
   };
 
-  sound.enable = true;
-  hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
 
   boot.loader.systemd-boot.enable = true;
