@@ -1,6 +1,10 @@
 { config, ... }:
 {
   hardware = {
+    bluetooth = {
+      enable = true;
+      powerOnBoot = true;
+    };
     graphics.enable = true;
     nvidia = {
       package = config.boot.kernelPackages.nvidiaPackages.production;
