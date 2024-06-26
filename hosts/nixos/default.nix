@@ -6,6 +6,7 @@
   nixos-hardware,
   nur,
   home-manager,
+  xremap-flake,
   ...
 }:
 let
@@ -54,6 +55,8 @@ let
         services.vscode-server.enable = true;
       }
     )
+
+    xremap-flake.nixosModules.default
   ];
 in
 {

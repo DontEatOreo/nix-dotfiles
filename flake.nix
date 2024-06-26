@@ -24,6 +24,9 @@
 
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     vscode-server.inputs.nixpkgs.follows = "nixpkgs";
+
+    xremap-flake.url = "github:xremap/nix-flake";
+    xremap-flake.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -37,6 +40,7 @@
       nixpkgs,
       nur,
       vscode-server,
+      xremap-flake,
       ...
     }@inputs:
     let
@@ -52,6 +56,7 @@
         inherit nur;
         inherit self;
         inherit vscode-server;
+        inherit xremap-flake;
       };
     in
     {
