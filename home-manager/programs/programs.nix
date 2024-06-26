@@ -22,4 +22,5 @@ _: {
     };
   };
   programs.gh.enable = true;
+  progrmas.gitui.enable = true;
 }
