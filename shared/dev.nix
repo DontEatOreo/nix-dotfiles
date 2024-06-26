@@ -4,8 +4,8 @@
     systemPackages = builtins.attrValues {
       inherit (pkgs)
         # Git and GitHub related packages
-        gh # GitHub CLI
-        git # Git VCS
+        # gh # GitHub CLI
+        # git # Git VCS
         gitui
         gitty # Information about Git repositories
         gitflow # Git branching model
