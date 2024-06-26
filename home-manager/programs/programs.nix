@@ -23,4 +23,9 @@ _: {
   };
   programs.gh.enable = true;
   progrmas.gitui.enable = true;
+  programs.thefuck = {
+    enable = true;
+    enableBashIntegration = true;
+    enableZshIntegration = true;
+  };
 }
