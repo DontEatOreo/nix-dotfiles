@@ -10,7 +10,6 @@ in
     syntaxHighlighting = {
       enable = true;
       highlighters = [ "brackets" ];
-      catppuccin.enable = true;
     };
     enableVteIntegration = true;
     autocd = true;
