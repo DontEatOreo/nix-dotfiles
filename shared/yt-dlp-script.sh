@@ -65,6 +65,22 @@ check_arguments() {
     echo "Error: Missing time range for -cut option"
     exit 1
   fi
+
+  # Check if start time is higher than end time and ensure start time is not negative
+  if [[ $cutOption == true ]]; then
+    local startTime=$(echo $timeRange | cut -d'-' -f1)
+    local endTime=$(echo $timeRange | cut -d'-' -f2)
+
+    if (( $(echo "$startTime > $endTime" | bc -l) )); then
+      echo "Error: Start time is greater than end time in time range"
+      exit 1
+    fi
+
+    if (( $(echo "$startTime < 0" | bc -l) )); then
+      echo "Error: Start time cannot be negative"
+      exit 1
+    fi
+  fi
 }
 
 # Function to construct and execute the yt-dlp command using the provided arguments
