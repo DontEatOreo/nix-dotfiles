@@ -21,7 +21,7 @@ let
     stateVersion = "24.05";
     packages = builtins.attrValues {
       nvim = inputs.nixvim.packages.${pkgs.system}.default.nixvimExtend {
-        config.theme = pkgs.lib.mkForce "decay";
+        config.theme = pkgs.lib.mkForce "gruvbox";
       };
       inherit (pkgs)
         alacritty # GPU Terminal
@@ -37,7 +37,7 @@ let
     stateVersion = "24.05";
     packages = builtins.attrValues {
       nvim = inputs.nixvim.packages.${pkgs.system}.default.nixvimExtend {
-        config.theme = pkgs.lib.mkForce "decay";
+        config.theme = pkgs.lib.mkForce "gruvbox";
         config.extraConfigLua = ''
           require('btw').setup({
             text = "I use Neovim (and macOS, BTW)",
