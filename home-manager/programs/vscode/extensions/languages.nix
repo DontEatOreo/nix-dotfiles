@@ -11,12 +11,6 @@ in
       # Bash
       bash-ide-vscode = vscode-marketplace.mads-hartmann.bash-ide-vscode;
 
-      # C#
-      csharp = vscode-marketplace.ms-dotnettools.csharp;
-      csdevkit = vscode-marketplace.ms-dotnettools.csdevkit;
-      vscode-dotnet-runtime = vscode-marketplace.ms-dotnettools.vscode-dotnet-runtime;
-      vscodeintellicode-csharp = vscode-marketplace.ms-dotnettools.vscodeintellicode-csharp;
-
       # JS & TS
       vscode-eslint = vscode-marketplace.dbaeumer.vscode-eslint;
       ## Convert JSON objects to TypeScript interfaces
