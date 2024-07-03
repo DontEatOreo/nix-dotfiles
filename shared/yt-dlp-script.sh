@@ -1,112 +1,75 @@
 #!/usr/bin/env bash
 
-# Define constants
+# Constants
 declare -a COMMON_ARGS=(--progress --console-title)
 declare -a AUDIO_ARGS=(--embed-thumbnail --extract-audio --audio-quality 0)
-declare -a VIDEO_ARGS=(-S vcodec:h264,ext:mp4:m4a)
+declare -a VIDEO_ARGS=(-S "vcodec:h264,ext:mp4:m4a")
 declare -a OUTPUT_ARGS=(-o "%(display_id)s.%(ext)s")
 
-# Define variables
+# Variables
 url=""
 timeRange=""
 cutOption=false
 format=""
-
-# Any additional arguments to be passed to the yt-dlp command
 final_args="--ignore-config"
 
-# Define format to arguments mapping
-declare -A FORMAT_ARGS
-FORMAT_ARGS["m4a"]="${AUDIO_ARGS[@]} --audio-format m4a --embed-metadata"
-FORMAT_ARGS["mp3"]="${AUDIO_ARGS[@]} --audio-format mp3 --embed-metadata"
-FORMAT_ARGS["mp4"]="${VIDEO_ARGS[@]} --embed-metadata"
-FORMAT_ARGS["m4a-cut"]="${AUDIO_ARGS[@]} --audio-format m4a --download-sections"
-FORMAT_ARGS["mp3-cut"]="${AUDIO_ARGS[@]} --audio-format mp3 --download-sections"
-FORMAT_ARGS["mp4-cut"]="${VIDEO_ARGS[@]} --download-sections"
+# Format to arguments mapping
+declare -A FORMAT_ARGS=(
+  ["m4a"]="${AUDIO_ARGS[*]} --audio-format m4a --embed-metadata"
+  ["mp3"]="${AUDIO_ARGS[*]} --audio-format mp3 --embed-metadata"
+  ["mp4"]="${VIDEO_ARGS[*]} --embed-metadata"
+  ["m4a-cut"]="${AUDIO_ARGS[*]} --audio-format m4a --download-sections"
+  ["mp3-cut"]="${AUDIO_ARGS[*]} --audio-format mp3 --download-sections"
+  ["mp4-cut"]="${VIDEO_ARGS[*]} --download-sections"
+)
 
-# Function to parse arguments and assign them to the correct variable
+# Parse arguments
 parse_arguments() {
   local argument="$1"
-
-  # If the argument is a URL, assign it to url variable
-  if [[ $argument =~ ^http ]]; then
-    url=$argument
-
-  # If the argument is a time range, assign it to timeRange variable
-  elif [[ $argument =~ ^\**[0-9]+(\.[0-9]+)?\**-\**[0-9]+(\.[0-9]+)?\**$ ]]; then
-    # Remove all '*' characters
-    timeRange=${argument//'*'/}
-
-  # If the argument is a cut option, set cutOption to true and set the format
-  elif [[ $argument == *"-cut"* ]]; then
-    cutOption=true
-    format=$argument
-
-  # If the argument is a valid format, assign it to format variable
-  elif [[ -n ${FORMAT_ARGS[$argument]} ]]; then
-    format=$argument
-
-  # If the argument doesn't match any of the above options, add it to final_args
-  else
-    final_args+=" $argument"
-  fi
+  case "$argument" in
+    http*) url="$argument" ;;
+    *-*.*) timeRange="${argument//'*'/}" ;;
+    *-cut*) cutOption=true; format="$argument" ;;
+    *)
+      if [[ -n "${FORMAT_ARGS[$argument]}" ]]; then
+        format="$argument"
+      else
+        final_args+=" $argument"
+      fi
+      ;;
+  esac
 }
 
-# Function to check if all required arguments are provided
+# Validate required arguments
 check_arguments() {
-  # If URL is not provided, display an error message and exit the script
-  if [[ -z $url ]]; then
-    echo "Error: Missing URL"
-    exit 1
-  fi
-  
-  # If cut option is true but time range is not provided, display an error message and exit the script
-  if [[ $cutOption == true && -z $timeRange ]]; then
-    echo "Error: Missing time range for -cut option"
-    exit 1
-  fi
+  [[ -z "$url" ]] && { echo "Error: Missing URL"; exit 1; }
 
-  # Check if start time is higher than end time and ensure start time is not negative
-  if [[ $cutOption == true ]]; then
-    local startTime=$(echo $timeRange | cut -d'-' -f1)
-    local endTime=$(echo $timeRange | cut -d'-' -f2)
+  if [[ "$cutOption" == true ]]; then
+    [[ -z "$timeRange" ]] && { echo "Error: Missing time range for -cut option"; exit 1; }
 
-    if (( $(echo "$startTime > $endTime" | bc -l) )); then
-      echo "Error: Start time is greater than end time in time range"
-      exit 1
-    fi
+    local startTime endTime
+    startTime=$(echo "$timeRange" | cut -d'-' -f1)
+    endTime=$(echo "$timeRange" | cut -d'-' -f2)
 
-    if (( $(echo "$startTime < 0" | bc -l) )); then
-      echo "Error: Start time cannot be negative"
-      exit 1
-    fi
+    (( $(echo "$startTime > $endTime" | bc -l) )) && { echo "Error: Start time is greater than end time in time range"; exit 1; }
+    (( $(echo "$startTime < 0" | bc -l) )) && { echo "Error: Start time cannot be negative"; exit 1; }
   fi
 }
 
-# Function to construct and execute the yt-dlp command using the provided arguments
+# Execute yt-dlp with the constructed argument set
 execute_yt_dlp() {
-  local formatArgs=(${FORMAT_ARGS[$format]})
-  
-  # If cut option is true, add cut arguments and time range to the format arguments
-  if [[ $cutOption == true ]]; then
-    local cutArgs=("--force-keyframes-at-cuts")
-    formatArgs+=("*${timeRange}" "${cutArgs[@]}")
-  fi
-
-  # Split final_args into an array of arguments
+  local formatArgs
+  IFS=' ' read -r -a formatArgs <<< "${FORMAT_ARGS[$format]}"
+  [[ "$cutOption" == true ]] && formatArgs+=("*${timeRange}" "--force-keyframes-at-cuts")
   IFS=' ' read -r -a final_args_array <<< "$final_args"
 
-  # Execute the yt-dlp command with the constructed argument set
-  yt-dlp "${url}" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args_array[@]}"
+  yt-dlp "$url" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args_array[@]}"
 }
 
-# Loop through all provided arguments and parse them
+# Main
 for arg in "$@"; do
   parse_arguments "$arg"
 done
 
-# Check if all required arguments are provided
 check_arguments
-
-# Execute the yt-dlp command
 execute_yt_dlp
