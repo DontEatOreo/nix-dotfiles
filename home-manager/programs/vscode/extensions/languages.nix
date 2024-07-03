@@ -10,6 +10,7 @@ in
     extensions = builtins.attrValues {
       # Bash
       bash-ide-vscode = vscode-marketplace.mads-hartmann.bash-ide-vscode;
+      shellcheck = vscode-marketplace.timonwong.shellcheck;
 
       # JS & TS
       vscode-eslint = vscode-marketplace.dbaeumer.vscode-eslint;
