@@ -38,6 +38,7 @@ _: {
       "iina" # Best video player
       "transmission" # Torrent client
       "thunderbird" # Email client
+      "mullvadvpn" # VPN
 
       # Dev
       "rider"
