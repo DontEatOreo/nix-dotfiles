@@ -14,10 +14,7 @@ in
       comment-anchors = vscode-marketplace.exodiusstudios.comment-anchors;
       # Real-time collaborative development
       vsliveshare = vscode-marketplace.ms-vsliveshare.vsliveshare;
-      remote-explorer = vscode-marketplace.ms-vscode.remote-explorer;
       vscodeintellicode = vscode-marketplace.visualstudioexptteam.vscodeintellicode;
-      # Icons for Visual Studio Code
-      vscode-icons = vscode-marketplace.vscode-icons-team.vscode-icons;
     };
   };
 }
