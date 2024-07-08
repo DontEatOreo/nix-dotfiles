@@ -23,6 +23,14 @@ declare -A FORMAT_ARGS=(
   ["mp4-cut"]="${VIDEO_ARGS[*]} --download-sections"
 )
 
+# Check if required tools are installed
+check_dependencies() {
+  command -v ffmpeg >/dev/null 2>&1 || { echo "Error: ffmpeg is not installed."; exit 1; }
+  command -v yt-dlp >/dev/null 2>&1 || { echo "Error: yt-dlp is not installed."; exit 1; }
+  command -v jq >/dev/null 2>&1 || { echo "Error: jq is not installed."; exit 1; }
+  command -v bc >/dev/null 2>&1 || { echo "Error: bc is not installed."; exit 1; }
+}
+
 # Parse arguments
 parse_arguments() {
   local argument="$1"
@@ -71,5 +79,6 @@ for arg in "$@"; do
   parse_arguments "$arg"
 done
 
+check_dependencies
 check_arguments
 execute_yt_dlp
