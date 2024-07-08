@@ -9,6 +9,7 @@ _: {
     };
     git = {
       enable = true;
+      delta.enable = true;
       ignores = [
         ".DS_Store"
         "Thumbs.db"
