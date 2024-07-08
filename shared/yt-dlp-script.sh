@@ -34,18 +34,23 @@ check_dependencies() {
 # Parse arguments
 parse_arguments() {
   local argument="$1"
-  case "$argument" in
-    http*) url="$argument" ;;
-    *-*.*) timeRange="${argument//'*'/}" ;;
-    *-cut*) cutOption=true; format="$argument" ;;
-    *)
-      if [[ -n "${FORMAT_ARGS[$argument]}" ]]; then
-        format="$argument"
-      else
-        final_args+=" $argument"
-      fi
-      ;;
-  esac
+  local urlRegex="^(http|https)://"
+  local timeRangeRegex="^([0-9]+(\.[0-9]+)?)-([0-9]+(\.[0-9]+)?)$"
+
+  if [[ $argument =~ $urlRegex ]]; then
+    url="$argument"
+  elif [[ $argument =~ $timeRangeRegex ]]; then
+    timeRange="${argument}"
+  elif [[ $argument == *"-cut"* ]]; then
+    cutOption=true
+    format="${argument}"
+  else
+    if [[ -n "${FORMAT_ARGS[$argument]}" ]]; then
+      format="$argument"
+    else
+      final_args+=" $argument"
+    fi
+  fi
 }
 
 # Validate required arguments
