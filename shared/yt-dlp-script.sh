@@ -66,6 +66,10 @@ check_arguments() {
 
     (( $(echo "$startTime > $endTime" | bc -l) )) && { echo "Error: Start time is greater than end time in time range"; exit 1; }
     (( $(echo "$startTime < 0" | bc -l) )) && { echo "Error: Start time cannot be negative"; exit 1; }
+
+    # Check if the end time is valid
+    duration=$(yt-dlp "$url" -j | jq '.duration')
+    (( $(echo "$endTime > $duration" | bc -l) )) && { echo "Error: End time exceeds video duration"; exit 1; }
   fi
 }
 
