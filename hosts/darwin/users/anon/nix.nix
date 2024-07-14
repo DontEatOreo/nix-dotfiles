@@ -28,13 +28,14 @@
     settings = {
       # NOTE: Disabled until 4119 is fixed...
       # sandbox = true;
+      trusted-substituters = [
+        "https://devenv.cachix.org"
+        "https://nix-community.cachix.org"
       ];
-      # Trust Devenv Shell
-      trusted-substituters = [ "https://devenv.cachix.org" ];
-      trusted-public-keys = [ "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=" ];
+      trusted-public-keys = [
+        "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      ];
     };
-
-    distributedBuilds = true;
-    buildMachines = [ ];
   };
 }
