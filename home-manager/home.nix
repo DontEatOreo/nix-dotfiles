@@ -20,7 +20,7 @@ let
   linuxHome = {
     stateVersion = "24.05";
     packages = builtins.attrValues {
-      nvim = inputs.nixvim.packages.${pkgs.system}.default.nixvimExtend {
+      nvim = inputs.nixvim.packages.${pkgs.system}.default.extend {
         config.theme = pkgs.lib.mkForce "gruvbox";
       };
       inherit (pkgs)
@@ -36,7 +36,7 @@ let
   darwinHome = {
     stateVersion = "24.05";
     packages = builtins.attrValues {
-      nvim = inputs.nixvim.packages.${pkgs.system}.default.nixvimExtend {
+      nvim = inputs.nixvim.packages.${pkgs.system}.default.extend {
         config.theme = pkgs.lib.mkForce "gruvbox";
         config.extraConfigLua = ''
           require('btw').setup({
