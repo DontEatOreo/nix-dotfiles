@@ -28,10 +28,6 @@
     settings = {
       # NOTE: Disabled until 4119 is fixed...
       # sandbox = true;
-      trusted-users = [
-        "root"
-        "nyx"
-        "anon"
       ];
       # Trust Devenv Shell
       trusted-substituters = [ "https://devenv.cachix.org" ];
