@@ -5,6 +5,7 @@ declare -a COMMON_ARGS=(--progress --console-title)
 declare -a AUDIO_ARGS=(--embed-thumbnail --extract-audio --audio-quality 0)
 declare -a VIDEO_ARGS=(-S "vcodec:h264,ext:mp4:m4a")
 declare -a OUTPUT_ARGS=(-o "%(display_id)s.%(ext)s")
+declare -a DEPENDENCIES=("ffmpeg" "yt-dlp" "jq" "bc")
 
 # Variables
 url=""
@@ -25,22 +26,12 @@ declare -A FORMAT_ARGS=(
 
 # Check if required tools are installed
 check_dependencies() {
-	command -v ffmpeg >/dev/null 2>&1 || {
-		echo "Error: ffmpeg is not installed."
-		exit 1
-	}
-	command -v yt-dlp >/dev/null 2>&1 || {
-		echo "Error: yt-dlp is not installed."
-		exit 1
-	}
-	command -v jq >/dev/null 2>&1 || {
-		echo "Error: jq is not installed."
-		exit 1
-	}
-	command -v bc >/dev/null 2>&1 || {
-		echo "Error: bc is not installed."
-		exit 1
-	}
+	for dependency in "${DEPENDENCIES[@]}"; do
+		if ! command -v "$dependency" &>/dev/null; then
+			echo "Error: $dependency is not installed. Please install it and try again."
+			exit 1
+		fi
+	done
 }
 
 # Parse arguments
