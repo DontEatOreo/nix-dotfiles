@@ -1,5 +1,8 @@
 _: {
   programs.vscode.userSettings = {
+    "editor.fontFamily" = "'FiraCode Nerd Font', 'Droid Sans Mono', 'monospace', 'Droid Sans Fallback'";
+    "workbench.editor.showIcons" = true;
+
     # Git
     "git.enableCommitSigning" = true; # Make sure to set up GPG and GIT first...
 
