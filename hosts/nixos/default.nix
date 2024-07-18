@@ -25,7 +25,7 @@ let
     (
       { pkgs, ... }:
       let
-        nur-no-pkgs = import nur { nurpkgs = import nixpkgs { system = "x86_64-linux"; }; };
+        nur-no-pkgs = import nur { nurpkgs = import nixpkgs { system = system; }; };
       in
       {
         imports = [ nur-no-pkgs.repos.iopq.modules.xraya ];
