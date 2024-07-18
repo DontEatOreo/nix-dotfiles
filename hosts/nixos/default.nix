@@ -2,7 +2,6 @@
   inputs,
   outputs,
   nixpkgs,
-  vscode-server,
   nixos-hardware,
   nur,
   home-manager,
@@ -47,15 +46,6 @@ let
         };
       };
     }
-
-    # Remote VSCode Server
-    vscode-server.nixosModules.default
-    (
-      { config, pkgs, ... }:
-      {
-        services.vscode-server.enable = true;
-      }
-    )
 
     xremap-flake.nixosModules.default
   ];
