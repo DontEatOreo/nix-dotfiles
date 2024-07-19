@@ -11,6 +11,7 @@
     ./users/nyx/nixpkgs.nix
     ./users/nyx/programs.nix
     ./users/nyx/services.nix
+    ./users/nyx/systemd.nix
     ./users/nyx/users.nix
     ./users/nyx/hardware-configuration.nix
 
