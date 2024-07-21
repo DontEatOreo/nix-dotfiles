@@ -5,7 +5,6 @@ declare -a COMMON_ARGS=(--progress --console-title)
 declare -a AUDIO_ARGS=(--embed-thumbnail --extract-audio --audio-quality 0)
 declare -a VIDEO_ARGS=(-S "vcodec:h264,ext:mp4:m4a")
 declare -a OUTPUT_ARGS=(-o "%(display_id)s.%(ext)s")
-declare -a DEPENDENCIES=("ffmpeg" "yt-dlp" "jq" "bc")
 
 # Variables
 url=""
@@ -23,16 +22,6 @@ declare -A FORMAT_ARGS=(
 	["mp3-cut"]="${AUDIO_ARGS[*]} --audio-format mp3 --download-sections"
 	["mp4-cut"]="${VIDEO_ARGS[*]} --download-sections"
 )
-
-# Check if required tools are installed
-check_dependencies() {
-	for dependency in "${DEPENDENCIES[@]}"; do
-		if ! command -v "$dependency" &>/dev/null; then
-			echo "Error: $dependency is not installed. Please install it and try again."
-			exit 1
-		fi
-	done
-}
 
 # Parse arguments
 parse_arguments() {
@@ -106,6 +95,5 @@ for arg in "$@"; do
 	parse_arguments "$arg"
 done
 
-check_dependencies
 check_arguments
 execute_yt_dlp
