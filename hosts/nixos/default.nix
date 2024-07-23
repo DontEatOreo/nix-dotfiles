@@ -1,7 +1,6 @@
 {
   inputs,
   outputs,
-  nixpkgs,
   nixos-hardware,
   nur,
   home-manager,
@@ -22,16 +21,6 @@ let
     nixos-hardware.nixosModules.lenovo-legion-15arh05h
 
     { nixpkgs.overlays = [ nur.overlay ]; }
-    (
-      { pkgs, ... }:
-      let
-        nur-no-pkgs = import nur { nurpkgs = import nixpkgs { system = system; }; };
-      in
-      {
-        imports = [ nur-no-pkgs.repos.iopq.modules.xraya ];
-        services.xraya.enable = true;
-      }
-    )
 
     # Home Manger
     home-manager.nixosModules.home-manager
