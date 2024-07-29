@@ -6,6 +6,7 @@
 }:
 {
   imports = [
+    ./users/nyx/gnome.nix
     ./users/nyx/hardware.nix
     ./users/nyx/nix.nix
     ./users/nyx/nixpkgs.nix

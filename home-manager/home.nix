@@ -13,6 +13,7 @@ let
 
   linuxImports = [
     ./programs/linux/chromium.nix
+    ./programs/linux/dconf.nix
     ./programs/linux/firefox.nix
     ./programs/linux/zshrc.nix
   ];
@@ -61,5 +62,6 @@ in
       ]
     else
       crossPlatformImports;
+
   home = if isLinux then linuxHome else darwinHome;
 }
