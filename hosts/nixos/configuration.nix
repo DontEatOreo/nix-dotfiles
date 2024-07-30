@@ -10,6 +10,7 @@
     ./users/nyx/hardware.nix
     ./users/nyx/nix.nix
     ./users/nyx/nixpkgs.nix
+    ./users/nyx/packages.nix
     ./users/nyx/programs.nix
     ./users/nyx/services.nix
     ./users/nyx/systemd.nix

@@ -24,12 +24,6 @@ let
       nvim = inputs.nixvim.packages.${pkgs.system}.default.extend {
         config.theme = pkgs.lib.mkForce "gruvbox";
       };
-      inherit (pkgs)
-        alacritty # GPU Terminal
-        xclip # Clipboard for NVIM
-        telegram-desktop
-        _1password-gui
-        ;
       # This is how Discordia was meant to be used, a TRUE Discordian setup...
       vesktop = pkgs.vesktop.override {
         withSystemVencord = true;
