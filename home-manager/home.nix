@@ -27,10 +27,15 @@ let
       inherit (pkgs)
         alacritty # GPU Terminal
         xclip # Clipboard for NVIM
-        vesktop # A modded Discordian Client (Not having a modded client is like being below middle class...)
         telegram-desktop
         _1password-gui
         ;
+      # This is how Discordia was meant to be used, a TRUE Discordian setup...
+      vesktop = pkgs.vesktop.override {
+        withSystemVencord = true;
+        withMiddleClickScroll = true;
+        withTTS = false;
+      };
     };
   };
 
