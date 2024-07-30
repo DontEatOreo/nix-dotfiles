@@ -42,6 +42,13 @@ _: {
               "Alt-Right" = "Ctrl-Right";
             };
           }
+          {
+            name = "Ctrl+Up/Down for Start/End of Page";
+            remap = {
+              "Ctrl-Up" = "Ctrl-Home";
+              "Ctrl-Down" = "Ctrl-End";
+            };
+          }
         ];
       };
     };
