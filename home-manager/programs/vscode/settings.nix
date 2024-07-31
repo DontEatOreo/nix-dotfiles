@@ -44,13 +44,6 @@ _: {
       "editor.formatOnType" = false;
     };
 
-    ## Python formatter
-    "[python]" = {
-      "editor.defaultFormatter" = "ms-python.black-formatter";
-      "editor.formatOnPaste" = true;
-      "editor.formatOnSave" = true;
-      "editor.formatOnType" = false;
-    };
     ## JavaScript formatter
     "[javascript]" = {
       "editor.defaultFormatter" = "esbenp.prettier-vscode";
@@ -62,22 +55,6 @@ _: {
     # TypeScript formatter
     "[typescript]" = {
       "editor.defaultFormatter" = "esbenp.prettier-vscode";
-      "editor.formatOnPaste" = true;
-      "editor.formatOnSave" = true;
-      "editor.formatOnType" = false;
-    };
-
-    ## Java formatter
-    "[java]" = {
-      "editor.defaultFormatter" = "redhat.java";
-      "editor.formatOnPaste" = true;
-      "editor.formatOnSave" = true;
-      "editor.formatOnType" = false;
-    };
-
-    ## C# formatter
-    "[csharp]" = {
-      "editor.defaultFormatter" = "ms-dotnettools.csharp";
       "editor.formatOnPaste" = true;
       "editor.formatOnSave" = true;
       "editor.formatOnType" = false;
