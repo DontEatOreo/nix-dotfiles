@@ -4,6 +4,7 @@ _: {
     # overlays = [ ];
     config = {
       allowUnfree = true;
+      cudaSupport = true;
     };
   };
 }
