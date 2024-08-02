@@ -13,7 +13,7 @@
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-    nixvim.url = "github:elythh/nixvim/4447842513a08bed7d8f5e3e9eef63cde5c46e99";
+    nixvim.url = "github:elythh/nixvim";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
 
     nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions/";
