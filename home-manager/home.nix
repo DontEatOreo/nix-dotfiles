@@ -9,6 +9,8 @@ let
     ./programs/vscode
     ./programs/bashrc.nix
     ./programs/programs.nix
+    ./programs/nixcord.nix
+    inputs.nixcord.homeManagerModules.nixcord
   ];
 
   linuxImports = [
@@ -23,12 +25,6 @@ let
     packages = builtins.attrValues {
       nvim = inputs.nixvim.packages.${pkgs.system}.default.extend {
         config.theme = pkgs.lib.mkForce "gruvbox";
-      };
-      # This is how Discordia was meant to be used, a TRUE Discordian setup...
-      vesktop = pkgs.vesktop.override {
-        withSystemVencord = true;
-        withMiddleClickScroll = true;
-        withTTS = false;
       };
     };
   };

@@ -11,6 +11,8 @@
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 
+    nixcord.url = "github:kaylorben/nixcord";
+
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     nixvim.url = "github:elythh/nixvim";
@@ -34,6 +36,7 @@
       home-manager,
       nix-darwin,
       nix-vscode-extensions,
+      nixcord,
       nixos-hardware,
       nixpkgs,
       nur,
@@ -48,6 +51,7 @@
         inherit home-manager;
         inherit inputs;
         inherit nix-darwin;
+        inherit nixcord;
         inherit nixos-hardware;
         inherit nixpkgs;
         inherit nur;
