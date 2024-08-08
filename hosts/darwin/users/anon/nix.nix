@@ -28,7 +28,7 @@
     settings = {
       # NOTE: Disabled until 4119 is fixed...
       # sandbox = true;
-      trusted-substituters = [
+      substituters = [
         "https://devenv.cachix.org"
         "https://nix-community.cachix.org"
       ];

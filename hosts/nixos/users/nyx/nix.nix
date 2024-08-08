@@ -15,7 +15,7 @@
       nix-path = config.nix.nixPath;
 
       auto-optimise-store = true;
-      trusted-substituters = [
+      substituters = [
         "https://devenv.cachix.org"
         "https://nix-community.cachix.org"
         "https://cuda-maintainers.cachix.org"
