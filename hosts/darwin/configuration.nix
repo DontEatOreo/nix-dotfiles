@@ -1,11 +1,11 @@
 _: {
   imports = [
-    ./users/anon/homebrew.nix
-    ./users/anon/nix.nix
-    ./users/anon/nixpkgs.nix
-    ./users/anon/system.nix
-    ./users/anon/zshrc.nix
-    ./users/anon/fonts.nix
+    ./homebrew.nix
+    ./nix.nix
+    ./nixpkgs.nix
+    ./system.nix
+    ./zshrc.nix
+    ./fonts.nix
 
     ../../shared/cli.nix
     ../../shared/dev.nix
