@@ -1,6 +1,8 @@
 { pkgs, ... }:
 let
-  yt-dlp-script = import ../../../../shared/yt-dlp-script.nix { inherit pkgs; };
+  yt-dlp-script = pkgs.lib.getExe (
+    pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../../../../shared/scripts/yt-dlp-script.sh)
+  );
 in
 {
   programs.zsh = {

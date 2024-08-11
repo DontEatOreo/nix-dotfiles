@@ -1,4 +1,6 @@
-#!/usr/bin/env bash
+#! /usr/bin/env nix-shell
+# shellcheck shell=bash
+#! nix-shell -i bash -p jq wl-clipboard delta
 
 # We time out "notify-send" because it can hang for pretty long time if there is no notification server running
 
