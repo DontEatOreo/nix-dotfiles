@@ -6,16 +6,16 @@
 }:
 {
   imports = [
-    ./users/nyx/gnome.nix
-    ./users/nyx/hardware.nix
-    ./users/nyx/nix.nix
-    ./users/nyx/nixpkgs.nix
-    ./users/nyx/packages.nix
-    ./users/nyx/programs.nix
-    ./users/nyx/services.nix
-    ./users/nyx/systemd.nix
-    ./users/nyx/users.nix
-    ./users/nyx/hardware-configuration.nix
+    ./gnome.nix
+    ./hardware.nix
+    ./nix.nix
+    ./nixpkgs.nix
+    ./packages.nix
+    ./programs.nix
+    ./services.nix
+    ./systemd.nix
+    ./users.nix
+    ./hardware-configuration.nix
 
     ../../shared/cli.nix
     ../../shared/dev.nix
