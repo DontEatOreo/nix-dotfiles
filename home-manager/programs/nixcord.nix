@@ -110,7 +110,6 @@
         voiceMessages.enable = true;
         volumeBooster.enable = true;
         watchTogetherAdblock.enable = true;
-        whoReacted.enable = true;
       };
     };
   };
