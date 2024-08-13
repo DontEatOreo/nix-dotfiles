@@ -11,34 +11,6 @@
 
 
 
-/* ----- REMOVE SETTINGS ANIMATION ----- */
-
-#app-mount .baseLayer__8fda3 {
-  opacity: 1 !important;
-  transform: scale(1) !important;
-}
-.baseLayer__8fda3[aria-hidden="true"] {
-  pointer-events: none;
-}
-.standardSidebarView__1129a {
-  opacity: 1 !important;
-}
-.layer__2efaa + .layer__2efaa {
-  opacity: 1 !important;
-  transform: unset !important;
-}
-.layer__2efaa[aria-hidden="false"] + .layer__2efaa[aria-hidden="false"] {
-  display: none;
-}
-.baseLayer__8fda3[aria-hidden="true"] {
-  pointer-events: none;
-}
-.layers__1c917 > .layer__2efaa.animating__27211 {
-  will-change: unset !important;
-}
-
-
-
 /* ----- HIDE PROFILE EFFECTS ----- */
 
 [class^="profileEffects"] {
