@@ -49,7 +49,12 @@
         memberCount.enable = true;
         messageLatency.enable = true;
         messageLinkEmbeds.enable = true;
-        messageLogger.enable = true;
+        messageLogger = {
+          enable = true;
+          collapseDeleted = true;
+          ignoreSelf = true;
+          ignoreBots = true;
+        };
         messageTags.enable = true;
         moreUserTags.enable = true;
         mutualGroupDMs.enable = true;
