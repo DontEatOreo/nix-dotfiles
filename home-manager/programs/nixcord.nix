@@ -117,6 +117,7 @@
         voiceDownload.enable = true;
         voiceMessages.enable = true;
         volumeBooster.enable = true;
+        webScreenShareFixes.enable = true;
         youtubeAdblock.enable = true;
       };
     };
