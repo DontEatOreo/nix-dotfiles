@@ -7,8 +7,8 @@
     vesktop.enable = if pkgs.stdenv.isLinux then true else false;
     quickCss = builtins.readFile ./config/quickCSS.css;
     config = {
-      useQuickCss = true; # use out quickCSS
-      frameless = true; # set some Vencord options
+      useQuickCss = true;
+      frameless = true;
       plugins = {
         automodContext.enable = true;
         betterGifPicker.enable = true;
