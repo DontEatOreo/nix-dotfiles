@@ -24,6 +24,8 @@
         };
         clearURLs.enable = true;
         colorSighted.enable = true;
+        consoleJanitor.enable = true;
+        consoleJanitor.disableNoisyLoggers = true;
         crashHandler.enable = true;
         dearrow.enable = true;
         disableCallIdle.enable = true;
