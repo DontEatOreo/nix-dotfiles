@@ -28,6 +28,7 @@
         consoleJanitor.disableNoisyLoggers = true;
         crashHandler.enable = true;
         dearrow.enable = true;
+        dontRoundMyTimestamps.enable = true;
         disableCallIdle.enable = true;
         favoriteEmojiFirst.enable = true;
         fixCodeblockGap.enable = true;
