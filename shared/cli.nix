@@ -4,7 +4,7 @@
     systemPackages = builtins.attrValues {
       inherit (pkgs)
         # Video Related
-        ffmpeg_6-full
+        ffmpeg_7-full
         yt-dlp # Video Downloader
 
         # Images Related
