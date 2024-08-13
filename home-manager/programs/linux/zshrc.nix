@@ -3,6 +3,7 @@ let
   yt-dlp-script = pkgs.lib.getExe (
     pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../../../shared/scripts/yt-dlp-script.sh)
   );
+  nixConfigPath = "/etc/nixos";
 in
 {
   programs.zsh = {
@@ -79,10 +80,10 @@ in
       vim = "nvim";
 
       # Nix
-      update = "nix flake update /etc/nixos#nyx";
-      check = "nix flake check";
-      rebuild = "nixos-rebuild switch --use-remote-sudo --flake /etc/nixos#nyx";
-      test = "nixos-rebuild test --flake /etc/nixos#nyx";
+      update = "nix flake update  ${nixConfigPath}";
+      check = "nix flake check  ${nixConfigPath}";
+      rebuild = "nixos-rebuild switch --use-remote-sudo --flake  ${nixConfigPath}";
+      test = "nixos-rebuild test --flake  ${nixConfigPath}";
 
       # Video
       m4a = "${yt-dlp-script} m4a";

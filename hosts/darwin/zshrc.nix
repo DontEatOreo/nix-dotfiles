@@ -3,6 +3,7 @@ let
   yt-dlp-script = pkgs.lib.getExe (
     pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../../shared/scripts/yt-dlp-script.sh)
   );
+  nixConfigPath = "~/.nixpkgs";
 in
 {
   programs.zsh = {
@@ -52,9 +53,9 @@ in
       alias vim="nvim";
 
       # Nix
-      alias update="nix flake update ~/.nixpkgs/"
-      alias check="nix flake check"
-      alias rebuild="darwin-rebuild switch --flake ~/.nixpkgs/#$(hostname | sed 's/.local$//') --option sandbox false"
+      alias update="nix flake update ${nixConfigPath}"
+      alias check="nix flake check ${nixConfigPath}"
+      alias rebuild="darwin-rebuild switch --flake ${nixConfigPath}"
 
       # Video
       alias m4a="${yt-dlp-script} m4a "$1""

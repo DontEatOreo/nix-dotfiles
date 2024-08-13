@@ -11,6 +11,9 @@ _: {
       # "dahlia/jetbrains-eap" # https://github.com/dahlia/homebrew-jetbrains-eap
       "homebrew/cask-fonts"
     ];
+    masApps = {
+      Xcode = 497799835;
+    };
     brews = [
       "smartmontools" # Check System Health
     ];
