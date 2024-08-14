@@ -27,8 +27,8 @@ git clone "https://github.com/DontEatOreo/nix-dotfiles.git"
 
 # Generate hardware-configuration.nix with `nixos-generate-config`
 nixos-generate-config
-# Then move hardware-configuration.nix to hosts/nixos/users/nyx
-mv "hardware-configuration.nix" "hosts/nixos/users/nyx"
+# Then move hardware-configuration.nix to hosts/nixos/nyx
+mv "hardware-configuration.nix" "hosts/nixos/nyx"
 # Delete configuration.nix
 rm "configuration.nix"
 
