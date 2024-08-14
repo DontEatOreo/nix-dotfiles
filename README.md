@@ -19,47 +19,63 @@ To use this configuration, follow the steps below:
 ### NixOS
 
 ```bash
-# Navigate to /etc/nix/nixos
-cd "/etc/nix/nixos"
+# Backup the existing NixOS dotfiles
+if [ -d "/etc/nix/nixos" ]; then
+  sudo mkdir -p "/etc/nixos-backup"
+  sudo mv "/etc/nix/nixos" "/etc/nixos-backup/"
+fi
+
+if [ ! -d "/etc/nixos" ]; then 
+    sudo mkdir -p "/etc/nixos" 
+fi
+sudo chown -R "$USER" "/etc/nixos/"
 
 # Clone the repo
-git clone "https://github.com/DontEatOreo/nix-dotfiles.git"
+git clone "https://github.com/DontEatOreo/nix-dotfiles.git" "/tmp/nix-dotfiles"
 
-# Generate hardware-configuration.nix with `nixos-generate-config`
-nixos-generate-config
-# Then move hardware-configuration.nix to hosts/nixos/nyx
-mv "hardware-configuration.nix" "hosts/nixos/nyx"
-# Delete configuration.nix
-rm "configuration.nix"
+# Move files over
+sudo mv "/tmp/nix-dotfiles" "/etc/nixos"
 
-# Apply the configuration
-sudo nixos-rebuild switch --flake "/etc/nix/nixos"
+cd "/etc/nixos/"
 
-# Alternatively, you can also use the `rebuild` alias...
+# Generate the hardware configuration
+if [ ! -f "hosts/nixos/hardware-configuration.nix" ]; then
+  nixos-generate-config
+  mv "hardware-configuration.nix" "hosts/nixos/nyx"
+  rm "configuration.nix"
+fi
+
+nixos-rebuild switch --use-remote-sudo --flake "/etc/nixos"
+
+# Or you can also use `rebuild` alias after the initial build
 ```
 
 ### macOS
 
 ```bash
-# Installed Nix & Homebrew first
-# Nix
-sh <(curl -L https://nixos.org/nix/install)
-# Homebrew
+if [ -d "$HOME/.nixpkgs" ]; then
+  sudo mkdir -p "$HOME/.nixpkgs-backup/"
+  sudo mv "$HOME/.nixpkgs" "$HOME/.nixpkgs-backup/"
+fi
+
+# Clone the repo
+git clone "https://github.com/DontEatOreo/nix-dotfiles.git" "$HOME"
+
+if [! -d "$HOME/.nixpkgs" ]; then 
+    mkdir -p "$HOME/.nixpkgs"
+if
+mv "$HOME/nix-dotfiles" "$HOME/.nixpkgs"
+
+# Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Navigate to the ~/.nixpkgs directory
-cd "$HOME/.nixpkgs"
-
-# Clone the repository
-git clone "https://github.com/DontEatOreo/nix-dotfiles.git"
 
 # Since the config is flake-based, we will need to temporarily do it the verbose way
 nix --experimental-features 'nix-command flakes' run nix-darwin -- switch --flake "$HOME/.nixpkgs"
 
-# After the first building we can return back to using the normal command
+# After the first build, we can return to using the normal command
 darwin-rebuild switch --flake "$HOME/.nixpkgs"
 
-# Alternatively, you can also use the `rebuild` alias...
+# Or you can also use `rebuild` alias after the initial build
 ```
 
 ## Notes
