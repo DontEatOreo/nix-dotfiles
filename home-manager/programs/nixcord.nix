@@ -101,7 +101,6 @@ _: {
         showMeYourName.enable = true;
         showMeYourName.mode = "nick-user";
         silentTyping.enable = true;
-        spotifyShareCommands.enable = true;
         startupTimings.enable = true;
         streamerModeOnStream.enable = true;
         summaries.enable = true;
