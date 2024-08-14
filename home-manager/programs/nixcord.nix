@@ -113,6 +113,7 @@ _: {
         unindent.enable = true;
         unlockedAvatarZoom.enable = true;
         userVoiceShow.enable = true;
+        validReply.enable = true;
         validUser.enable = true;
         vencordToolbox.enable = true;
         viewIcons.enable = true;
