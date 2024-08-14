@@ -118,6 +118,7 @@ _: {
         vencordToolbox.enable = true;
         viewIcons.enable = true;
         viewRaw.enable = true;
+        voiceChatDoubleClick.enable = true;
         voiceDownload.enable = true;
         voiceMessages.enable = true;
         volumeBooster.enable = true;
