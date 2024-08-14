@@ -5,6 +5,10 @@ _: {
     discord.enable = true;
     vesktop.enable = true;
     quickCss = builtins.readFile ./config/quickCSS.css;
+    vesktopConfig.plugins = {
+      youtubeAdblock = true;
+      webScreenShareFixes.enable = true;
+    };
     config = {
       useQuickCss = true;
       frameless = true;
@@ -116,8 +120,7 @@ _: {
         voiceDownload.enable = true;
         voiceMessages.enable = true;
         volumeBooster.enable = true;
-        webScreenShareFixes.enable = true;
-        youtubeAdblock.enable = true;
+        watchTogetherAdblock.enable = true;
       };
     };
   };
