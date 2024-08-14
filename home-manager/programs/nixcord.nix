@@ -97,6 +97,7 @@ _: {
         shikiCodeblocks.enable = true;
         showConnections.enable = true;
         showHiddenThings.enable = true;
+        showTimeoutDuration.enable = true;
         showMeYourName.enable = true;
         showMeYourName.mode = "nick-user";
         silentTyping.enable = true;
