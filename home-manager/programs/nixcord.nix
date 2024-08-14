@@ -1,10 +1,9 @@
-{ pkgs, ... }:
-{
+_: {
   programs.nixcord = {
     enable = true;
     openASAR.enable = false;
-    discord.enable = if pkgs.stdenv.isLinux then false else true;
-    vesktop.enable = if pkgs.stdenv.isLinux then true else false;
+    discord.enable = true;
+    vesktop.enable = true;
     quickCss = builtins.readFile ./config/quickCSS.css;
     config = {
       useQuickCss = true;
