@@ -1,14 +1,16 @@
-# My dotfiles
+# My Nix dotfiles
 
 [![built with nix](https://img.shields.io/static/v1?logo=nixos&logoColor=white&label=&message=Built%20with%20Nix&color=41439a)](https://builtwithnix.org)
 
-This repository contains my personal configuration files for [nix-darwin](https://github.com/LnL7/nix-darwin) and [NixOS](https://nixos.org)
+This repo contains my main dotfiles for [nix-darwin](https://github.com/LnL7/nix-darwin) and [NixOS](https://nixos.org)
 
 ## Scope
 
-To start with, all CLI tools are located in [/shared](/shared/) and are *shared* between macOS and NixOS. For macOS, GUI programs are mainly managed by homebrew, except for vscode, which is managed by `home-manager` and is shared between macOS and NixOS. For NixOS, all GUI programs are managed by home-manager.
+[/shared/](/shared/) folder mainly contains CLI tools shared between macOS and NixOS
 
-All macOS system settings are managed by [system.nix](/hosts/darwin/users/anon/system.nix)
+[/home-manager/](/home-manager/) is shared between macOS and NixOS with the exception of the Linux folder
+
+[/hosts/](/hosts/) contains all the system configurations for macOS and NixOS
 
 ## How to Use
 
@@ -18,20 +20,22 @@ To use this configuration, follow the steps below:
 
 ```bash
 # Navigate to /etc/nix/nixos
-cd /etc/nix/nixos
+cd "/etc/nix/nixos"
 
-# Clone the repository
-git clone https://github.com/DontEatOreo/dotfiles.git
+# Clone the repo
+git clone "https://github.com/DontEatOreo/nix-dotfiles.git"
 
 # Generate hardware-configuration.nix with `nixos-generate-config`
 nixos-generate-config
 # Then move hardware-configuration.nix to hosts/nixos/users/nyx
-mv hardware-configuration.nix hosts/nixos/users/nyx
+mv "hardware-configuration.nix" "hosts/nixos/users/nyx"
 # Delete configuration.nix
-rm configuration.nix
+rm "configuration.nix"
 
 # Apply the configuration
-sudo nixos-rebuild switch --flake .
+sudo nixos-rebuild switch --flake "/etc/nix/nixos"
+
+# Alternatively, you can also use the `rebuild` alias...
 ```
 
 ### macOS
@@ -44,16 +48,18 @@ sh <(curl -L https://nixos.org/nix/install)
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # Navigate to the ~/.nixpkgs directory
-cd ~/.nixpkgs
+cd "$HOME/.nixpkgs"
 
 # Clone the repository
-git clone https://github.com/DontEatOreo/dotfiles.git
+git clone "https://github.com/DontEatOreo/nix-dotfiles.git"
 
-# Install Nix Darwin
-nix run nix-darwin -- switch --flake .
+# Since the config is flake-based, we will need to temporarily do it the verbose way
+nix --experimental-features 'nix-command flakes' run nix-darwin -- switch --flake "$HOME/.nixpkgs"
 
-# For future apply the configuration
-darwin-rebuild switch --flake .
+# After the first building we can return back to using the normal command
+darwin-rebuild switch --flake "$HOME/.nixpkgs"
+
+# Alternatively, you can also use the `rebuild` alias...
 ```
 
 ## Notes
