@@ -57,12 +57,12 @@ in
       alias rebuild="darwin-rebuild switch --flake ${nixConfigPath}"
 
       # Video
-      alias m4a="${yt-dlp-script} m4a "$1""
-      alias m4a-cut="${yt-dlp-script} m4a-cut "$1" "$2""
-      alias mp3="${yt-dlp-script} mp3 "$1""
-      alias mp3-cut="${yt-dlp-script} mp3 "$1""
-      alias mp4="${yt-dlp-script} mp4 "$1""
-      alias mp4-cut="${yt-dlp-script} mp4-cut "$1" "$2""
+      alias m4a="${yt-dlp-script} m4a"
+      alias m4a-cut="${yt-dlp-script} m4a-cut"
+      alias mp3="${yt-dlp-script} mp3"
+      alias mp3-cut="${yt-dlp-script} mp3"
+      alias mp4="${yt-dlp-script} mp4"
+      alias mp4-cut="${yt-dlp-script} mp4-cut"
 
       # Directory Navigation
       alias ".."="../"
