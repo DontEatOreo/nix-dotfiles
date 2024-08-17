@@ -3,6 +3,7 @@
   system = {
     # Global macOS System Settings
     defaults = {
+      LaunchServices.LSQuarantine = false; # Disable Quarantine for Downloaded Applications
       SoftwareUpdate.AutomaticallyInstallMacOSUpdates = false;
       NSGlobalDomain = {
         # Apple menu > System Preferences > Keyboard
