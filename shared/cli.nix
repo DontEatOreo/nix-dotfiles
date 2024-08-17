@@ -17,12 +17,8 @@
         tldr # Most Common used commands for CLI tool
         tree
         neofetch # Show System Info
-        nixpkgs-fmt # Format Nix Files
         wget
         alejandra # Format Nix Files
-        direnv
-        gnupg
-        vhs
         coreutils # GNU CoreUtils
         progress # Show progress of CoreUtils
         ;
