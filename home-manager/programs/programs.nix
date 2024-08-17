@@ -1,4 +1,3 @@
-# Any program.something that isn't too long goes here!
 _: {
   programs = {
     direnv = {
@@ -7,6 +6,12 @@ _: {
       enableZshIntegration = true;
       nix-direnv.enable = true;
     };
+    fzf = {
+      enable = true;
+      enableBashIntegration = true;
+      enableZshIntegration = true;
+    };
+    gh.enable = true;
     git = {
       enable = true;
       delta.enable = true;
@@ -23,14 +28,8 @@ _: {
         key = "0DB5361BEEE530AB";
       };
     };
-    gh.enable = true;
     gitui.enable = true;
     thefuck = {
-      enable = true;
-      enableBashIntegration = true;
-      enableZshIntegration = true;
-    };
-    fzf = {
       enable = true;
       enableBashIntegration = true;
       enableZshIntegration = true;
