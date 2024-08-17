@@ -59,7 +59,7 @@ in
 
       # Text Processing
       grep = "grep --color=auto";
-      diff = "colordiff";
+      diff = "delta";
 
       # Job Control
       j = "jobs -l";

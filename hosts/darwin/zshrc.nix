@@ -32,7 +32,7 @@ in
 
       # Text Processing
       alias grep="grep --color=auto"
-      alias diff="colordiff"
+      alias diff="delta"
 
       # Job Control
       alias j="jobs -l"

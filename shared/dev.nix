@@ -16,7 +16,7 @@
         shellcheck # Warning hints for shell scripts
 
         # Terminal related packages
-        colordiff # Colorize diff output
+        delta # Better Diff
         thefuck # Correct previous command
         bc # Command line calculator
         nil # Nix language server
