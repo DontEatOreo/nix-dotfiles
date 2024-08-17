@@ -17,7 +17,6 @@ in
     loginShellInit = ''
       # EVAL
       eval "$(github-copilot-cli alias -- "$0")"
-      eval "$(direnv hook zsh)"
 
       # File Operations
       alias ls="eza --oneline"
