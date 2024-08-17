@@ -48,15 +48,9 @@
         inherit (dis) dis;
         inherit (nixpkgs) lib;
         inherit (self) outputs;
-        inherit home-manager;
         inherit inputs;
-        inherit nix-darwin;
-        inherit nixcord;
-        inherit nixos-hardware;
         inherit nixpkgs;
-        inherit nur;
         inherit self;
-        inherit xremap-flake;
       };
     in
     {
