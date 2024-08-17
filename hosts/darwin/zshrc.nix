@@ -20,7 +20,7 @@ in
 
       # File Operations
       alias ls="eza --oneline"
-      alias lt="eza --oneline --reverse --sort=size --size"
+      alias lt="eza --oneline --reverse --sort=size"
       alias ll="eza --long"
       alias ld="ls -d .*"
       alias mv="mv -iv"
