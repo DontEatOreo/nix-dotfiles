@@ -1,4 +1,4 @@
-{ inputs, outputs, ... }:
+{ inputs, ... }:
 let
   system = "aarch64-darwin";
   username = "anon";
@@ -22,7 +22,7 @@ in
           useUserPackages = true;
           users.${username} = import ../../home-manager/home.nix;
           extraSpecialArgs = {
-            inherit inputs outputs system;
+            inherit inputs system;
           };
         };
       }

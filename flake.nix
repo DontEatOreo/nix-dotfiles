@@ -31,7 +31,6 @@
 
   outputs =
     {
-      self,
       dis,
       home-manager,
       nix-darwin,
@@ -47,10 +46,8 @@
       commonAttrs = {
         inherit (dis) dis;
         inherit (nixpkgs) lib;
-        inherit (self) outputs;
         inherit inputs;
         inherit nixpkgs;
-        inherit self;
       };
     in
     {

@@ -1,4 +1,4 @@
-{ inputs, outputs, ... }:
+{ inputs, ... }:
 let
   system = "x86_64-linux";
 in
@@ -26,7 +26,7 @@ in
           users.nyx = import ../../home-manager/home.nix;
           backupFileExtension = "backup";
           extraSpecialArgs = {
-            inherit inputs outputs system;
+            inherit inputs system;
           };
         };
       }
