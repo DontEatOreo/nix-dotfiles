@@ -35,7 +35,7 @@ _: {
       };
     };
     xremap = {
-      withKDE = true;
+      withGnome = true;
       serviceMode = "user";
       userName = "nyx";
       config = {
