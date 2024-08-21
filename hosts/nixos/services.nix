@@ -41,6 +41,13 @@ _: {
       config = {
         keymap = [
           {
+            name = "Swap CapsLock and Escape Keys";
+            remap = {
+              "CapsLock" = "Esc";
+              "Esc" = "CapsLock";
+            };
+          }
+          {
             name = "Ctrl+Arrows for Start/End of Line";
             remap = {
               "Ctrl-Left" = "Home";
