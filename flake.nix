@@ -13,7 +13,7 @@
 
     nixcord.url = "github:kaylorben/nixcord";
 
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
 
     nixvim.url = "github:elythh/nixvim";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
