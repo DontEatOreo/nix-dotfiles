@@ -18,10 +18,10 @@
     nixvim.url = "github:elythh/nixvim";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
 
-    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions/";
+    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions/03d3171c94c36f43c10c46df6fbab127af314da6";
     nix-vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
 
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
     nur.url = "github:nix-community/NUR";
 
