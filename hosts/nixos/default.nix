@@ -23,7 +23,9 @@ in
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;
-          users.nyx = import ../../home-manager/home.nix;
+          users.nyx = {
+            imports = [ ../../home-manager/home.nix ];
+          };
           backupFileExtension = "backup";
           extraSpecialArgs = {
             inherit inputs system;
