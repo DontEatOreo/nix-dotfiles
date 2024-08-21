@@ -42,16 +42,8 @@
       xremap-flake,
       ...
     }@inputs:
-    let
-      commonAttrs = {
-        inherit (dis) dis;
-        inherit (nixpkgs) lib;
-        inherit inputs;
-        inherit nixpkgs;
-      };
-    in
     {
-      darwinConfigurations = import ./hosts/darwin commonAttrs;
-      nixosConfigurations = import ./hosts/nixos commonAttrs;
+      darwinConfigurations = import ./hosts/darwin { inherit inputs; };
+      nixosConfigurations = import ./hosts/nixos { inherit inputs; };
     };
 }
