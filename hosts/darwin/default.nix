@@ -7,25 +7,17 @@ in
   "anons-Mac-mini" = inputs.nix-darwin.lib.darwinSystem {
     inherit system;
     specialArgs = {
-      inherit inputs;
+      inherit inputs system username;
     };
     modules = [
       ./configuration.nix
+      ../../modules/common
       inputs.home-manager.darwinModules.home-manager
+      ./home.nix
       {
         users.users.${username} = {
           name = username;
           home = "/Users/${username}";
-        };
-        home-manager = {
-          useGlobalPkgs = true;
-          useUserPackages = true;
-          users.${username} = {
-            imports = [ ../../home-manager/home.nix ];
-          };
-          extraSpecialArgs = {
-            inherit inputs system;
-          };
         };
       }
     ];

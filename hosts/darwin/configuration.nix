@@ -1,8 +1,6 @@
 _: {
   imports = [
     ./homebrew.nix
-    ./nix.nix
-    ./nixpkgs.nix
     ./system.nix
     ./zshrc.nix
     ./fonts.nix
@@ -14,6 +12,11 @@ _: {
     ../../shared/tui.nix
     ../../shared/programs.nix
   ];
+
+  shared = {
+    nix.enable = true;
+    nixpkgs.enable = true;
+  };
 
   services.nix-daemon.enable = true;
 }

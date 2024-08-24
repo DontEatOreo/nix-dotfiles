@@ -6,10 +6,7 @@
 }:
 {
   imports = [
-    ./gnome.nix
     ./hardware.nix
-    ./nix.nix
-    ./nixpkgs.nix
     ./packages.nix
     ./programs.nix
     ./services.nix
@@ -24,6 +21,15 @@
     ../../shared/tui.nix
     ../../shared/programs.nix
   ];
+
+  nixOS = {
+    gnome.enable = true;
+  };
+
+  shared = {
+    nix.enable = true;
+    nixpkgs.enable = true;
+  };
 
   environment = {
     sessionVariables = {

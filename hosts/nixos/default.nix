@@ -1,37 +1,25 @@
 { inputs, ... }:
 let
   system = "x86_64-linux";
+  username = "nyx";
 in
 {
-  nyx = inputs.nixpkgs.lib.nixosSystem {
+  ${username} = inputs.nixpkgs.lib.nixosSystem {
+    inherit system;
     specialArgs = {
-      inherit inputs;
+      inherit inputs system username;
     };
     modules = [
-      # > Our main NixOS configuration file <
       ./configuration.nix
+      ../../modules/common
+      ../../modules/de
 
       inputs.nur.nixosModules.nur
-
       inputs.nixos-hardware.nixosModules.lenovo-legion-15arh05h
-
-      { nixpkgs.overlays = [ inputs.nur.overlay ]; }
 
       # Home Manger
       inputs.home-manager.nixosModules.home-manager
-      {
-        home-manager = {
-          useGlobalPkgs = true;
-          useUserPackages = true;
-          users.nyx = {
-            imports = [ ../../home-manager/home.nix ];
-          };
-          backupFileExtension = "backup";
-          extraSpecialArgs = {
-            inherit inputs system;
-          };
-        };
-      }
+      ./home.nix
 
       inputs.xremap-flake.nixosModules.default
     ];
