@@ -29,6 +29,7 @@
             git.enable = true;
             nixcord.enable = true;
             vscode.enable = true;
+            yazi.enable = true;
             zsh.enable = true;
           };
 

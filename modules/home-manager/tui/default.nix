@@ -1,1 +1,6 @@
-_: { imports = [ ./fzf.nix ]; }
+_: {
+  imports = [
+    ./fzf.nix
+    ./yazi
+  ];
+}
