@@ -1,11 +1,8 @@
 { lib, config, ... }:
-let
-  inherit (lib) mkEnableOption mkIf;
-in
 {
-  options.hm.nixcord.enable = mkEnableOption "Enable NixCord";
+  options.hm.nixcord.enable = lib.mkEnableOption "Enable NixCord";
 
-  config = mkIf config.hm.nixcord.enable {
+  config = lib.mkIf config.hm.nixcord.enable {
     programs.nixcord = {
       enable = true;
       openASAR.enable = true;

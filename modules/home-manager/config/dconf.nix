@@ -6,7 +6,6 @@
   ...
 }:
 let
-  inherit (lib) mkEnableOption mkIf;
   generateKeybindings =
     prefix: super: modifiers: range:
     builtins.listToAttrs (
@@ -25,9 +24,9 @@ let
   isLinux = builtins.match ".*linux.*" system != null;
 in
 {
-  options.hm.dconf.enable = mkEnableOption "Enable Dconf";
+  options.hm.dconf.enable = lib.mkEnableOption "Enable Dconf";
 
-  config = mkIf config.hm.dconf.enable {
+  config = lib.mkIf config.hm.dconf.enable {
     assertions = [
       {
         assertion = isLinux;

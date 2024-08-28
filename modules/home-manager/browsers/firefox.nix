@@ -6,13 +6,12 @@
   ...
 }:
 let
-  inherit (lib) mkEnableOption mkIf;
   isLinux = builtins.match ".*linux.*" system != null;
 in
 {
-  options.hm.firefox.enable = mkEnableOption "Enable Declerative Firefox";
+  options.hm.firefox.enable = lib.mkEnableOption "Enable Declerative Firefox";
 
-  config = mkIf config.hm.firefox.enable {
+  config = lib.mkIf config.hm.firefox.enable {
     assertions = [
       {
         assertion = isLinux;

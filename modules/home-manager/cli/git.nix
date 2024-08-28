@@ -1,11 +1,8 @@
 { lib, config, ... }:
-let
-  inherit (lib) mkEnableOption mkIf;
-in
 {
-  options.hm.git.enable = mkEnableOption "Enable Git";
+  options.hm.git.enable = lib.mkEnableOption "Enable Git";
 
-  config = mkIf config.hm.git.enable {
+  config = lib.mkIf config.hm.git.enable {
     programs = {
       gitui.enable = true;
       gh.enable = true;

@@ -10,13 +10,12 @@ let
     pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../../../shared/scripts/yt-dlp-script.sh)
   );
   nixConfigPath = "/etc/nixos";
-  inherit (lib) mkEnableOption mkIf;
   isLinux = builtins.match ".*linux.*" system != null;
 in
 {
-  options.hm.zsh.enable = mkEnableOption "Enable Declerative Zsh";
+  options.hm.zsh.enable = lib.mkEnableOption "Enable Declerative Zsh";
 
-  config = mkIf config.hm.zsh.enable {
+  config = lib.mkIf config.hm.zsh.enable {
     assertions = [
       {
         assertion = isLinux;

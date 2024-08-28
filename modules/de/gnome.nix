@@ -6,13 +6,12 @@
   ...
 }:
 let
-  inherit (lib) mkEnableOption mkIf;
   isLinux = builtins.match ".*linux.*" system != null;
 in
 {
-  options.nixOS.gnome.enable = mkEnableOption "Enable GNOME";
+  options.nixOS.gnome.enable = lib.mkEnableOption "Enable GNOME";
 
-  config = mkIf config.nixOS.gnome.enable {
+  config = lib.mkIf config.nixOS.gnome.enable {
     assertions = [
       {
         assertion = isLinux;

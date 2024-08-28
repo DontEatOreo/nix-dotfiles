@@ -6,14 +6,13 @@
   ...
 }:
 let
-  inherit (lib) mkEnableOption mkIf;
-  enableOnSystem = x: y: (mkIf (system == x) y);
+  enableOnSystem = x: y: (lib.mkIf (system == x) y);
   isLinux = builtins.match ".*linux.*" system != null;
 in
 {
-  options.shared.nix.enable = mkEnableOption "Enable Nix";
+  options.shared.nix.enable = lib.mkEnableOption "Enable Nix";
 
-  config = mkIf config.shared.nix.enable {
+  config = lib.mkIf config.shared.nix.enable {
     nix = {
       settings = {
         # Enable flakes and new 'nix3' command

@@ -1,11 +1,8 @@
 { lib, config, ... }:
-let
-  inherit (lib) mkEnableOption mkIf;
-in
 {
-  options.hm.fzf.enable = mkEnableOption "Enable FZF";
+  options.hm.fzf.enable = lib.mkEnableOption "Enable FZF";
 
-  config = mkIf config.hm.fzf.enable {
+  config = lib.mkIf config.hm.fzf.enable {
     programs.fzf = {
       enable = true;
       enableBashIntegration = true;

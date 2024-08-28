@@ -9,12 +9,11 @@ let
     pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../../../shared/scripts/yt-dlp-script.sh)
   );
   nixConfigPath = if pkgs.stdenvNoCC.isLinux then "/etc/nixos" else "~/.nixpkgs";
-  inherit (lib) mkEnableOption mkIf;
 in
 {
-  options.hm.bash.enable = mkEnableOption "Enable Bash";
+  options.hm.bash.enable = lib.mkEnableOption "Enable Bash";
 
-  config = mkIf config.hm.bash.enable {
+  config = lib.mkIf config.hm.bash.enable {
     programs.bash = {
       enable = true;
       enableCompletion = true;

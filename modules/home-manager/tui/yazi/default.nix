@@ -4,17 +4,14 @@
   config,
   ...
 }:
-let
-  inherit (lib) mkEnableOption mkIf;
-in
 {
   imports = [
     ./keybindings.nix
     ./settings.nix
   ];
-  options.hm.yazi.enable = mkEnableOption "Enable Yazi";
+  options.hm.yazi.enable = lib.mkEnableOption "Enable Yazi";
 
-  config = mkIf config.hm.yazi.enable {
+  config = lib.mkIf config.hm.yazi.enable {
     xdg.configFile = {
       "yazi/plugins/smart-paste.yazi/init.lua".text = builtins.readFile ./plugins/smart-paste.lua;
       "yazi/plugins/smart-enter.yazi/init.lua".text = builtins.readFile ./plugins/smart-enter.lua;
