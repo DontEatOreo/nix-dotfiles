@@ -22,7 +22,6 @@ in
         # Workaround for https://github.com/NixOS/nix/issues/9574
         nix-path = enableOnSystem isLinux config.nix.nixPath;
 
-        auto-optimise-store = true;
         substituters = [
           "https://devenv.cachix.org"
           "https://nix-community.cachix.org"
