@@ -13,7 +13,6 @@
         useQuickCss = true;
         frameless = true;
         plugins = {
-          automodContext.enable = true;
           betterGifPicker.enable = true;
           betterNotesBox.enable = true;
           betterSessions.enable = true;
