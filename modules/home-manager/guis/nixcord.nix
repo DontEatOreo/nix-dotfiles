@@ -122,7 +122,6 @@
           voiceDownload.enable = true;
           voiceMessages.enable = true;
           volumeBooster.enable = true;
-          watchTogetherAdblock.enable = true;
           webScreenShareFixes.enable = true;
           youtubeAdblock.enable = true;
         };
