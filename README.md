@@ -8,9 +8,19 @@ This repo contains my main dotfiles for [nix-darwin](https://github.com/LnL7/nix
 
 [/shared/](/shared/) folder mainly contains CLI tools shared between macOS and NixOS
 
-[/home-manager/](/home-manager/) is shared between macOS and NixOS with the exception of the Linux folder
+---
+
+[/modules/](/modules/) is the module folder that contains modules for both macOS and NixOS.
+
+The `common` folder contains modules that are at the `nix/darwin` system level and share very similar or the same settings (e.g., `nix` and `nixpkgs`).
+
+The `de` folder contains `Desktop Environments` modules only meant for NixOS. The `home-manager` folder contains all the Home Manager modules, which are shared between macOS and NixOS.
+
+---
 
 [/hosts/](/hosts/) contains all the system configurations for macOS and NixOS
+
+---
 
 ## How to Use
 
