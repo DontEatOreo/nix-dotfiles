@@ -15,7 +15,7 @@ in
     nixpkgs = {
       config = {
         allowUnfree = true;
-        cudaSupport = lib.mkIf isLinux true;
+        # cudaSupport = lib.mkIf isLinux true;
       };
       hostPlatform = system;
       overlays =
