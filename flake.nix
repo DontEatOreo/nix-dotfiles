@@ -29,21 +29,8 @@
     xremap-flake.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs =
-    {
-      dis,
-      home-manager,
-      nix-darwin,
-      nix-vscode-extensions,
-      nixcord,
-      nixos-hardware,
-      nixpkgs,
-      nur,
-      xremap-flake,
-      ...
-    }@inputs:
-    {
-      darwinConfigurations = import ./hosts/darwin { inherit inputs; };
-      nixosConfigurations = import ./hosts/nixos { inherit inputs; };
-    };
+  outputs = inputs: {
+    darwinConfigurations = import ./hosts/darwin { inherit inputs; };
+    nixosConfigurations = import ./hosts/nixos { inherit inputs; };
+  };
 }
