@@ -34,6 +34,7 @@ in
       initExtraFirst = ''
         eval "$(github-copilot-cli alias -- "$0")"
       '';
+      historySubstringSearch.enable = true;
       plugins = [
         {
           name = "fast-syntax-highlighting";
