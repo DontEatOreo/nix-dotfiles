@@ -61,15 +61,15 @@ in
       oh-my-zsh = {
         enable = true;
         plugins = [
-          "gitfast"
-          "direnv"
-          "sudo"
           "colorize"
+          "direnv"
           "docker"
           "dotnet"
           "fzf"
+          "gitfast"
           "podman"
           "ssh"
+          "sudo"
           "vscode"
         ];
       };
