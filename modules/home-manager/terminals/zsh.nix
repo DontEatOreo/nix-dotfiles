@@ -34,7 +34,6 @@ in
       autocd = true;
       initExtraFirst = ''
         eval "$(github-copilot-cli alias -- "$0")"
-        eval "$(direnv hook zsh)"
       '';
       plugins = [
         {
