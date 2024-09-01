@@ -61,7 +61,7 @@ in
       oh-my-zsh = {
         enable = true;
         plugins = [
-          "git"
+          "gitfast"
           "direnv"
           "sudo"
           "colorize"
