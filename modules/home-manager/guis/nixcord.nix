@@ -67,6 +67,7 @@
           noBlockedMessages.enable = true;
           noDevtoolsWarning.enable = true;
           noF1.enable = true;
+          noMaskedUrlPaste.enable = true;
           noMosaic.enable = true;
           noPendingCount.enable = true;
           noProfileThemes.enable = true;
