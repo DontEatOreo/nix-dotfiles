@@ -15,8 +15,10 @@ in
     enableFzfHistory = true;
     enableSyntaxHighlighting = true;
     loginShellInit = ''
-      source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+      source ${pkgs.oh-my-zsh}/share/oh-my-zsh/oh-my-zsh.sh
+
       source ${../../modules/home-manager/config/p10k.zsh}
+      source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
 
       eval "$(github-copilot-cli alias -- "$0")"
 
