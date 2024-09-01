@@ -49,6 +49,14 @@ in
           src = ../config;
           file = "p10k.zsh";
         }
+        {
+          name = "fzf-tab";
+          src = pkgs.zsh-fzf-tab;
+        }
+        {
+          name = "nix-shell";
+          src = pkgs.zsh-nix-shell;
+        }
       ];
       oh-my-zsh = {
         enable = true;
