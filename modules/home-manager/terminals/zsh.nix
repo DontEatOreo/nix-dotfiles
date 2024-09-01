@@ -64,6 +64,13 @@ in
           "git"
           "direnv"
           "sudo"
+          "colorize"
+          "docker"
+          "dotnet"
+          "fzf"
+          "podman"
+          "ssh"
+          "vscode"
         ];
       };
       shellAliases = {
