@@ -56,7 +56,6 @@ in
         enable = true;
         plugins = [
           "git"
-          "thefuck"
           "direnv"
           "sudo"
         ];
