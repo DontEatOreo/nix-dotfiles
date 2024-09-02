@@ -1,5 +1,12 @@
-{ lib, config, ... }:
 {
+  inputs,
+  lib,
+  config,
+  ...
+}:
+{
+  imports = [ inputs.nixcord.homeManagerModules.nixcord ];
+
   options.hm.nixcord.enable = lib.mkEnableOption "Enable NixCord";
 
   config = lib.mkIf config.hm.nixcord.enable {

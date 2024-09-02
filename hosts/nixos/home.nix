@@ -16,7 +16,6 @@
         ../../modules/home-manager/guis
         ../../modules/home-manager/terminals
         ../../modules/home-manager/tui
-        inputs.nixcord.homeManagerModules.nixcord
 
         {
           hm = {
