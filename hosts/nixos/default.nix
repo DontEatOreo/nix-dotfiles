@@ -16,6 +16,7 @@ in
 
       inputs.nur.nixosModules.nur
       inputs.nixos-hardware.nixosModules.lenovo-legion-15arh05h
+      inputs.lix-module.nixosModules.default
 
       # Home Manger
       inputs.home-manager.nixosModules.home-manager

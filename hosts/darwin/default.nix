@@ -13,6 +13,7 @@ in
       ./configuration.nix
       ../../modules/common
       inputs.home-manager.darwinModules.home-manager
+      inputs.lix-module.nixosModules.default
       ./home.nix
       {
         users.users.${username} = {
