@@ -4,7 +4,9 @@ Thumbs.db
 *.DS_Store
 *.swp
 
+.devenv/
 .direnv/
+result
 
 # You'll need to generate your own hardware-configuration 
 
