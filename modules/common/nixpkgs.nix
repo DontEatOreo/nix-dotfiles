@@ -15,7 +15,7 @@ in
     nixpkgs = {
       config = {
         allowUnfree = true;
-        # cudaSupport = lib.mkIf isLinux true;
+        cudaSupport = lib.mkIf isLinux true;
       };
       hostPlatform = system;
       overlays =
@@ -55,9 +55,13 @@ in
                   EOF
                 '';
           };
+          opencvOverlay = self: super: {
+            opencv = inputs.nixpkgs-opencv.legacyPackages.x86_64-linux.opencv;
+          };
         in
         (lib.optional isLinux inputs.nur.overlay)
         ++ (lib.optional (!isLinux) darwinZshCompletionsOverlay)
+        ++ (lib.optional (isLinux) opencvOverlay)
         ++ [ ];
     };
   };

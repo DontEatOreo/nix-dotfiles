@@ -25,6 +25,7 @@
     nix-vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
+    nixpkgs-opencv.url = "github:NixOS/nixpkgs/pull/339619/head";
 
     nur.url = "github:nix-community/NUR";
 
