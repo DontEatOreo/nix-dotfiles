@@ -70,7 +70,6 @@ in
           "gitfast"
           "podman"
           "ssh"
-          "sudo"
           "vscode"
         ];
       };
