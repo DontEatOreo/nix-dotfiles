@@ -9,6 +9,13 @@
 
 /* ----- CSS ----- */
 
+/* ----- DON'T SHOW ME ACTIVITY ----- */
+
+[class^='membersGroup']:has([role=button]),
+[class^='member'] [class^='container']:has([class*='badges']) {
+  display: none;
+}
+
 
 
 /* ----- HIDE PROFILE EFFECTS ----- */
