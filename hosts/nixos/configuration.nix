@@ -2,6 +2,7 @@
   lib,
   pkgs,
   config,
+  hostname,
   ...
 }:
 {
@@ -44,7 +45,7 @@
   };
 
   networking = {
-    hostName = "nyx";
+    hostName = hostname;
     networkmanager.enable = true;
   };
 

@@ -1,4 +1,5 @@
-_: {
+{ username, ... }:
+{
   services = {
     libinput = {
       enable = true;
@@ -37,7 +38,7 @@ _: {
     xremap = {
       withGnome = true;
       serviceMode = "user";
-      userName = "nyx";
+      userName = username;
       config = {
         keymap = [
           {

@@ -2,12 +2,18 @@
 let
   system = "x86_64-linux";
   username = "nyx";
+  hostname = "nyx";
 in
 {
   ${username} = inputs.nixpkgs.lib.nixosSystem {
     inherit system;
     specialArgs = {
-      inherit inputs system username;
+      inherit
+        inputs
+        system
+        username
+        hostname
+        ;
     };
     modules = [
       ./configuration.nix

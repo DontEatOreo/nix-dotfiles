@@ -1,7 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, username, ... }:
 {
   users.users = {
-    nyx = {
+    ${username} = {
       isNormalUser = true;
       extraGroups = [
         "wheel"
