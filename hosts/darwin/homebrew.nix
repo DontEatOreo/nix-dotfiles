@@ -9,6 +9,11 @@ _: {
     };
     taps = [
       # "dahlia/jetbrains-eap" # https://github.com/dahlia/homebrew-jetbrains-eap
+      {
+        name = "zen-browser/browser";
+        clone_target = "https://github.com/zen-browser/desktop.git";
+        force_auto_update = true;
+      }
       "homebrew/cask-fonts"
     ];
     masApps = {
@@ -21,7 +26,7 @@ _: {
       # Browsers
       "microsoft-edge"
       "brave-browser"
-      "firefox"
+      "zen-browser"
       "mullvad-browser"
 
       # Messengers
