@@ -12,8 +12,6 @@
   config = lib.mkIf config.hm.nixcord.enable {
     programs.nixcord = {
       enable = true;
-      openASAR.enable = true;
-      discord.enable = true;
       vesktop.enable = true;
       quickCss = builtins.readFile ../config/quickCSS.css;
       config = {
