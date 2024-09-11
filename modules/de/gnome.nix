@@ -29,16 +29,17 @@ in
         inherit (pkgs) wl-clipboard;
         inherit (pkgs.gnomeExtensions) appindicator clipboard-indicator;
       };
-      gnome.excludePackages =
-        builtins.attrValues {
-          inherit (pkgs)
-            gnome-tour
-            epiphany # Browser
-            geary # Email
-            evince # Docs
-            ;
-        }
-        ++ builtins.attrValues { inherit (pkgs.gnome) gnome-maps gnome-weather gnome-music; };
+      gnome.excludePackages = builtins.attrValues {
+        inherit (pkgs)
+          gnome-maps
+          gnome-music
+          gnome-tour
+          gnome-weather
+          epiphany # Browser
+          geary # Email
+          evince # Docs
+          ;
+      };
     };
   };
 }
