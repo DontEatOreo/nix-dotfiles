@@ -18,6 +18,7 @@
         useQuickCss = true;
         frameless = true;
         plugins = {
+          alwaysExpandRoles.enable = true;
           betterGifPicker.enable = true;
           betterNotesBox.enable = true;
           betterSessions.enable = true;
