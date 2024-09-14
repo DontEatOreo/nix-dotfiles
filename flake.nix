@@ -29,6 +29,9 @@
 
     nur.url = "github:nix-community/NUR";
 
+    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+
     xremap-flake.url = "github:xremap/nix-flake";
     xremap-flake.inputs.nixpkgs.follows = "nixpkgs";
   };

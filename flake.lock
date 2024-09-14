@@ -1097,6 +1097,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-stable_3": {
+      "locked": {
+        "lastModified": 1725762081,
+        "narHash": "sha256-vNv+aJUW5/YurRy1ocfvs4q/48yVESwlC/yHzjkZSP8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "dc454045f5b5d814e5862a6d057e7bb5c29edc05",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "release-24.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1725946965,
@@ -1360,7 +1376,29 @@
         "nixpkgs-opencv": "nixpkgs-opencv",
         "nixvim": "nixvim",
         "nur": "nur",
+        "sops-nix": "sops-nix",
         "xremap-flake": "xremap-flake"
+      }
+    },
+    "sops-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nixpkgs-stable": "nixpkgs-stable_3"
+      },
+      "locked": {
+        "lastModified": 1726218807,
+        "narHash": "sha256-z7CoWbSOtsOz8TmRKDnobURkKfv6nPZCo3ayolNuQGc=",
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "rev": "f30b1bac192e2dc252107ac8a59a03ad25e1b96e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "type": "github"
       }
     },
     "systems": {

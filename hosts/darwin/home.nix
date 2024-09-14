@@ -14,6 +14,7 @@
         ../../modules/home-manager/guis
         ../../modules/home-manager/terminals/bash.nix
         ../../modules/home-manager/tui
+        inputs.sops-nix.homeManagerModules.sops
 
         {
           hm = {
@@ -22,8 +23,15 @@
             fzf.enable = true;
             git.enable = true;
             nixcord.enable = true;
+            ssh.enable = true;
             vscode.enable = true;
             yazi.enable = true;
+          };
+
+          sops = {
+            age.keyFile = "/Users/${username}/Library/Application Support/sops/age/keys.txt";
+            defaultSopsFile = ../../secrets/secrets.yaml;
+            secrets.github_ssh = { };
           };
 
           home = {

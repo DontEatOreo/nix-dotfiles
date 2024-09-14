@@ -27,6 +27,7 @@
             fzf.enable = true;
             git.enable = true;
             nixcord.enable = true;
+            ssh.enable = true;
             vscode.enable = true;
             yazi.enable = true;
             zsh.enable = true;

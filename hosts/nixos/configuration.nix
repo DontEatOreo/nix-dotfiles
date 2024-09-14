@@ -2,7 +2,6 @@
   lib,
   pkgs,
   config,
-  hostname,
   ...
 }:
 {
@@ -13,6 +12,7 @@
     ./services.nix
     ./systemd.nix
     ./users.nix
+    ./networking.nix
     ./hardware-configuration.nix
 
     ../../shared/cli.nix
@@ -42,11 +42,6 @@
       name = "nix/path/${name}";
       value.source = value.flake;
     }) config.nix.registry;
-  };
-
-  networking = {
-    hostName = hostname;
-    networkmanager.enable = true;
   };
 
   # Keyboard layout
