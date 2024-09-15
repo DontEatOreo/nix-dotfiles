@@ -16,6 +16,7 @@
         ../../modules/home-manager/guis
         ../../modules/home-manager/terminals
         ../../modules/home-manager/tui
+        inputs.sops-nix.homeManagerModules.sops
 
         {
           hm = {
@@ -31,6 +32,12 @@
             vscode.enable = true;
             yazi.enable = true;
             zsh.enable = true;
+          };
+
+          sops = {
+            age.keyFile = "/home/${username}/.config/sops/age/keys.txt";
+            defaultSopsFile = ../../secrets/secrets.yaml;
+            secrets.github_ssh = { };
           };
 
           home = {

@@ -6,6 +6,7 @@
     programs = {
       gitui.enable = true;
       gh.enable = true;
+      gh.settings.git_protocol = "ssh";
       git = {
         enable = true;
         delta.enable = true;
