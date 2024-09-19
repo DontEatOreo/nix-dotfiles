@@ -18,7 +18,18 @@ in
     modules = [
       ./configuration.nix
       ../../modules/common
+      {
+        shared = {
+          nix.enable = true;
+          nixpkgs.enable = true;
+        };
+      }
       ../../modules/de
+      {
+        nixOS = {
+          gnome.enable = true;
+        };
+      }
 
       inputs.nur.nixosModules.nur
       inputs.nixos-hardware.nixosModules.lenovo-legion-15arh05h

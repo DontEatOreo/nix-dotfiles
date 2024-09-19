@@ -23,15 +23,6 @@
     ../../shared/programs.nix
   ];
 
-  nixOS = {
-    gnome.enable = true;
-  };
-
-  shared = {
-    nix.enable = true;
-    nixpkgs.enable = true;
-  };
-
   environment = {
     sessionVariables = {
       NIXOS_OZONE_WL = "1";
