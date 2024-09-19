@@ -30,7 +30,6 @@ _: {
       "mullvad-browser"
 
       # Messengers
-      "discord"
       "telegram"
       "element"
 
