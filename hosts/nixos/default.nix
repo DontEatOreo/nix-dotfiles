@@ -31,8 +31,6 @@ in
         };
       }
 
-      # Home Manger
-      inputs.home-manager.nixosModules.home-manager
       ./home.nix
 
       inputs.xremap-flake.nixosModules.default
