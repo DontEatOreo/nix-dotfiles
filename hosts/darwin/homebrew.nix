@@ -51,7 +51,6 @@ _: {
       "rider"
       "warp" # Modern Terminal
       "postman" # Create HTTP requests
-      "font-monaspace" # Github Fonts
     ];
   };
 }
