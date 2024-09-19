@@ -10,7 +10,6 @@ in
       inherit inputs system username;
     };
     modules = [
-      inputs.home-manager.darwinModules.home-manager
       inputs.lix-module.nixosModules.default
 
       ./fonts.nix
