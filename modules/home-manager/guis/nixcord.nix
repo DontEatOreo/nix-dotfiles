@@ -16,7 +16,6 @@
       quickCss = builtins.readFile ../config/quickCSS.css;
       config = {
         useQuickCss = true;
-        frameless = true;
         plugins = {
           alwaysExpandRoles.enable = true;
           betterGifPicker.enable = true;
