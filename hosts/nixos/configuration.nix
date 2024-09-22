@@ -10,6 +10,7 @@
     ./packages.nix
     ./programs.nix
     ./services.nix
+    ./sound.nix
     ./systemd.nix
     ./users.nix
     ./networking.nix
@@ -50,8 +51,6 @@
       LC_TIME = "en_US.UTF-8";
     };
   };
-
-  security.rtkit.enable = true;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

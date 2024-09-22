@@ -14,27 +14,6 @@
     openssh = {
       enable = true;
     };
-    pipewire = {
-      enable = true;
-      audio.enable = true;
-      alsa = {
-        enable = true;
-        support32Bit = true;
-      };
-      pulse.enable = true;
-      # Patch to fix usb-camera bug
-      # https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/2669
-      # https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/4115
-      wireplumber.extraConfig = {
-        "10-disable-camera" = {
-          "wireplumber.profiles" = {
-            main = {
-              "monitor.libcamera" = "disabled";
-            };
-          };
-        };
-      };
-    };
     xremap = {
       withGnome = true;
       serviceMode = "user";
