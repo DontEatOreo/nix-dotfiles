@@ -19,7 +19,6 @@
         neofetch # Show System Info
         wget
         alejandra # Format Nix Files
-        coreutils # GNU CoreUtils
         progress # Show progress of CoreUtils
         ;
       dis = inputs.dis.packages.${pkgs.system}.default;
