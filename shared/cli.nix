@@ -18,7 +18,6 @@
         tree
         neofetch # Show System Info
         wget
-        alejandra # Format Nix Files
         ;
       dis = inputs.dis.packages.${pkgs.system}.default;
     };
