@@ -1017,22 +1017,6 @@
         "url": "https://github.com/NixOS/nixpkgs/archive/5daf0514482af3f97abaefc78a6606365c9108e2.tar.gz"
       }
     },
-    "nixpkgs-opencv": {
-      "locked": {
-        "lastModified": 1725485709,
-        "narHash": "sha256-zYHRYa1wTU9Lv9GXy9jU1NEaK6MVJmCUC848tvwnqrE=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "1da478e04bc80343840278eaf12c78393c2cafb8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "pull/339619/head",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs-regression": {
       "locked": {
         "lastModified": 1643052045,
@@ -1373,7 +1357,6 @@
         "nixcord": "nixcord",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_2",
-        "nixpkgs-opencv": "nixpkgs-opencv",
         "nixvim": "nixvim",
         "nur": "nur",
         "sops-nix": "sops-nix",
