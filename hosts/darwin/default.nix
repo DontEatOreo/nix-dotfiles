@@ -16,7 +16,7 @@ in
       ./home.nix
       ./homebrew.nix
       ./system.nix
-      ./zshrc.nix
+      ./zsh.nix
 
       ../../shared/cli.nix
       ../../shared/dev.nix
