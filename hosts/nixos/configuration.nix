@@ -6,21 +6,21 @@
 }:
 {
   imports = [
+    ./hardware-configuration.nix
     ./hardware.nix
+    ./networking.nix
     ./packages.nix
     ./programs.nix
     ./services.nix
     ./sound.nix
     ./systemd.nix
     ./users.nix
-    ./networking.nix
-    ./hardware-configuration.nix
 
     ../../shared/cli.nix
     ../../shared/dev.nix
     ../../shared/gnuimp.nix
-    ../../shared/tui.nix
     ../../shared/programs.nix
+    ../../shared/tui.nix
   ];
 
   environment = {
