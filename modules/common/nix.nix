@@ -10,6 +10,8 @@ let
   isLinux = builtins.match ".*linux.*" system != null;
 in
 {
+  imports = [ inputs.lix-module.nixosModules.default ];
+
   options.shared.nix.enable = lib.mkEnableOption "Enable Nix";
 
   config = lib.mkIf config.shared.nix.enable {

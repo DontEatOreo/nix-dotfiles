@@ -33,7 +33,6 @@ in
 
       inputs.nur.nixosModules.nur
       inputs.nixos-hardware.nixosModules.lenovo-legion-15arh05h
-      inputs.lix-module.nixosModules.default
       inputs.sops-nix.nixosModules.sops
       {
         sops = {

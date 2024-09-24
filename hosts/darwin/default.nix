@@ -10,8 +10,6 @@ in
       inherit inputs system username;
     };
     modules = [
-      inputs.lix-module.nixosModules.default
-
       ./fonts.nix
       ./home.nix
       ./homebrew.nix
