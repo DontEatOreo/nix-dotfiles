@@ -41,8 +41,6 @@ in
         };
       }
 
-      ./home.nix
-
       inputs.xremap-flake.nixosModules.default
     ];
   };
