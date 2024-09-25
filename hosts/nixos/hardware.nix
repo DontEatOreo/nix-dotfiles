@@ -26,7 +26,7 @@
       extraPackages32 = lib.attrValues { inherit (pkgs.driversi686Linux) mesa; };
     };
     nvidia = {
-      package = config.boot.kernelPackages.nvidiaPackages.production;
+      package = config.boot.kernelPackages.nvidiaPackages.stable;
       # Modesetting is required.
       modesetting.enable = true;
     };
