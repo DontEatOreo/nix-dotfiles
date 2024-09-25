@@ -46,8 +46,8 @@ in
       partial-diff = vscode-marketplace.ryu1kn.partial-diff;
 
       # Release
-      copilot = vscode-marketplace-release.github.copilot;
-      copilot-chat = vscode-marketplace-release.github.copilot-chat;
+      copilot = pkgs.vscode-extensions.github.copilot;
+      copilot-chat = pkgs.vscode-extensions.github.copilot-chat;
     };
   };
 }
