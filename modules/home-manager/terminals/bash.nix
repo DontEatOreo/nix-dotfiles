@@ -8,7 +8,7 @@ let
   yt-dlp-script = pkgs.lib.getExe (
     pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../../../shared/scripts/yt-dlp-script.sh)
   );
-  nixConfigPath = if pkgs.stdenvNoCC.isLinux then "/etc/nixos" else "~/.nixpkgs";
+  nixConfigPath = if pkgs.stdenvNoCC.hostPlatform.isLinux then "/etc/nixos" else "~/.nixpkgs";
 in
 {
   options.hm.bash.enable = lib.mkEnableOption "Enable Bash";
@@ -62,10 +62,10 @@ in
         update = "nix flake update ${nixConfigPath}";
         check = "nix flake check ${nixConfigPath}";
         rebuild = "${
-          if pkgs.stdenvNoCC.isLinux then "nixos-rebuild" else "darwin-rebuild"
-        } switch ${pkgs.lib.optionalString pkgs.stdenvNoCC.isLinux "--use-remote-sudo"} --flake ${nixConfigPath}";
+          if pkgs.stdenvNoCC.hostPlatform.isLinux then "nixos-rebuild" else "darwin-rebuild"
+        } switch ${pkgs.lib.optionalString pkgs.stdenvNoCC.hostPlatform.isLinux "--use-remote-sudo"} --flake ${nixConfigPath}";
         test = "${
-          if pkgs.stdenvNoCC.isLinux then "nixos-rebuild" else "darwin-rebuild"
+          if pkgs.stdenvNoCC.hostPlatform.isLinux then "nixos-rebuild" else "darwin-rebuild"
         } test --flake ${nixConfigPath}";
 
         # Video
