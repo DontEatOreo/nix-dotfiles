@@ -6,48 +6,33 @@
 
 # ---------- VARIABLES ----------
 
-readonly MODEL_NAME="phi3:14b"
+readonly MODEL_NAME="llama3.2:3b-instruct-fp16"
 readonly NOTIFY_TIMEOUT="3s"
 readonly NOTIFY_TITLE="AI Grammar Fix"
 
 read -r -d '' system_json <<'EOF'
-Please correct the user's grammar and spelling while retaining their writing style and flow. Here are some examples of issues to look out for:
+Act as a spelling corrector and improver. 
 
-1. Incorrect verb tense
-2. Subject-verb agreement
-3. Spelling mistakes
-4. Punctuation errors
-5. Misplaced modifiers
+Here are the rules you must follow:
+- Fix spelling, grammar and punctuation
+- Retain the exact formatting of the input
+- Retain original names of stuff in backticks
+- Improve clarity and conciseness
+- Reduce repetition
+- Prefer active voice
+- Prefer simple words
+- Keep the meaning same
+- Keep the tone of voice same
+- Return in the same language as the input
 
-Input/Output Examples:
-
-Input: I has went to the store and buyed some apple's, it was a good day.
-Output: I went to the store and bought some apples. It was a good day.
-
-Input: She dont like going too the park becuz it always rain there.
-Output: She doesn't like going to the park because it always rains there.
-
-Input: Their going too see a movie, but they dont know what time its start.
-Output: They're going to see a movie, but they don't know what time it starts.
-
-Input: The cats is playing with there toys and it's very cute to watch.
-Output: The cats are playing with their toys, and it's very cute to watch.
-
-Input:
+ONLY reply with the correct text verbatim. Do not add any additional information.
 EOF
 read -r -d '' template_json <<'EOF'
-{{ if .System }}<|system|>
-<|system|>
-{{ .System }}<|end|>
-{{ end }}{{ if .Prompt }}<|user|>
-<|user|>
-{{ .Prompt }}<|end|>
-{{ end }}<|assistant|>
-{{ .Response }}<|end|>
+
 EOF
 
 read -r -d '' stops_json <<'EOF'
-"<|start_header_id|>", "<|user|>", "<|assistant|>"
+"<|start_header_id|>", "<|end_header_id|>", "<|eot_id|>"
 EOF
 
 TEMP_FILES=()
