@@ -33,10 +33,14 @@
         {
           diff = "${pluginsRepo}/diff.yazi";
           full-border = "${pluginsRepo}/full-border.yazi";
+          git = "${pluginsRepo}/git.yazi";
           hide-preview = "${pluginsRepo}/hide-preview.yazi";
           max-preview = "${pluginsRepo}/max-preview.yazi";
         };
-      initLua = "require('full-border'):setup()";
+      initLua = ''
+        require('full-border'):setup()
+        require("git"):setup()
+      '';
     };
   };
 }
