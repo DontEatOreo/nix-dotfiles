@@ -51,7 +51,6 @@
         ];
       };
     };
-    # Temporarily disable until https://github.com/NixOS/nixpkgs/pull/331780 reaches unstable
-    # ollama.enable = true;
+    ollama.enable = true;
   };
 }
