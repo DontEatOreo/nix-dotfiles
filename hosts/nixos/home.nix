@@ -43,11 +43,7 @@
 
           home = {
             stateVersion = "24.05";
-            packages = builtins.attrValues {
-              nvim = inputs.nixvim.packages.${system}.default.extend {
-                config.theme = inputs.nixpkgs.lib.mkForce "gruvbox";
-              };
-            };
+            packages = [ inputs.nixvim.packages.${system}.default ];
           };
         }
       ];
