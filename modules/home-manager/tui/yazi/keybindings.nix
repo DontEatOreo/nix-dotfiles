@@ -1,11 +1,7 @@
 { pkgs, ... }:
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
-  genKeyBind = desc: key: command: {
-    inherit desc;
-    on = key;
-    run = command;
-  };
+  genKeyBind = desc: on: run: { inherit desc on run; };
 
   keymap = [
     (genKeyBind "Open help" [ "~" ] "help")
