@@ -1,6 +1,6 @@
 #! /usr/bin/env nix-shell
-# shellcheck shell=bash
 #! nix-shell -i bash -p jq yt-dlp ffmpeg_7-full bc
+# shellcheck shell=bash
 
 # Constants
 declare -a COMMON_ARGS=(--progress --console-title)
