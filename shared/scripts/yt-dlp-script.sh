@@ -6,7 +6,7 @@
 declare -a COMMON_ARGS=(--progress --console-title)
 declare -a AUDIO_ARGS=(--embed-thumbnail --extract-audio --audio-quality 0)
 declare -a VIDEO_ARGS=(-S "vcodec:h264,ext:mp4:m4a")
-declare -a OUTPUT_ARGS=(-o "%(display_id)s.%(ext)s")
+declare -a OUTPUT_ARGS=(-o "%(display_id)s%(time_range)s.%(ext)s")
 
 # Variables
 url=""
@@ -82,11 +82,41 @@ check_arguments() {
 	fi
 }
 
+# Format time range for output file name
+format_time_range() {
+	local startTime endTime
+	startTime=$(echo "$timeRange" | cut -d'-' -f1)
+	endTime=$(echo "$timeRange" | cut -d'-' -f2)
+
+	# Format time for the output file name
+	local formattedStartTime formattedEndTime
+	if [[ $startTime == *.* ]]; then
+		formattedStartTime=$(printf "%02d_%02d" "${startTime%.*}" "${startTime#*.}")
+	else
+		formattedStartTime=$(printf "%02d" "$startTime")
+	fi
+
+	if [[ $endTime == *.* ]]; then
+		formattedEndTime=$(printf "%02d_%02d" "${endTime%.*}" "${endTime#*.}")
+	else
+		formattedEndTime=$(printf "%02d" "$endTime")
+	fi
+
+	echo "-${formattedStartTime}-${formattedEndTime}"
+}
+
 # Execute yt-dlp with the constructed argument set
 execute_yt_dlp() {
 	local formatArgs
 	IFS=' ' read -r -a formatArgs <<<"${FORMAT_ARGS[$format]}"
 	[[ "$cutOption" == true ]] && formatArgs+=("*${timeRange}" "--force-keyframes-at-cuts")
+
+	# Add time range to OUTPUT_ARGS if cutOption is true
+	if [[ "$cutOption" == true ]]; then
+		time_range=$(format_time_range)
+		OUTPUT_ARGS=(-o "%(display_id)s${time_range}.%(ext)s")
+	fi
+
 	IFS=' ' read -r -a final_args_array <<<"$final_args"
 
 	yt-dlp "$url" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args_array[@]}"
