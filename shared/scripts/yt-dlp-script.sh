@@ -1,5 +1,5 @@
 #! /usr/bin/env nix-shell
-#! nix-shell -i bash -p jq yt-dlp ffmpeg_7-full bc
+#! nix-shell -i bash -p jq yt-dlp ffmpeg_7-full bc coreutils
 # shellcheck shell=bash
 
 # Constants
@@ -14,6 +14,7 @@ timeRange=""
 cutOption=false
 format=""
 final_args="--ignore-config"
+json_metadata=""
 
 # Format to arguments mapping
 declare -A FORMAT_ARGS=(
@@ -74,7 +75,7 @@ check_arguments() {
 		}
 
 		# Check if the end time is valid
-		duration=$(yt-dlp "$url" -j | jq '.duration')
+		duration=$(echo "$json_metadata" | jq '.duration')
 		(($(echo "$endTime > $duration" | bc -l))) && {
 			echo "Error: End time exceeds video duration"
 			exit 1
@@ -124,10 +125,33 @@ execute_yt_dlp() {
 	yt-dlp "$url" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args_array[@]}"
 }
 
+# Change file creation date to uploader date
+change_file_date() {
+    local upload_date display_id
+    upload_date=$(echo "$json_metadata" | jq -r '.upload_date')
+    display_id=$(echo "$json_metadata" | jq -r '.display_id')
+
+    if [[ -n "$upload_date" ]]; then
+        local formatted_date
+        formatted_date=$(date -d "$upload_date" +"%Y%m%d%H%M.%S")
+
+        for file in "${display_id}"*; do
+            touch -t "$formatted_date" "$file"
+        done
+    fi
+}
+
 # Main
 for arg in "$@"; do
 	parse_arguments "$arg"
 done
 
+# Fetch JSON metadata once
+json_metadata=$(yt-dlp "$url" -j) || {
+    echo "Error: Failed to fetch JSON metadata"
+    exit 1
+}
+
 check_arguments
 execute_yt_dlp
+change_file_date
