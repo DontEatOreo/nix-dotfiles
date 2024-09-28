@@ -2,6 +2,23 @@
 #! nix-shell -i bash -p jq yt-dlp ffmpeg_7-full bc coreutils
 # shellcheck shell=bash
 
+# Help menu
+show_help() {
+printf "Usage: URL [TIME_RANGE] [ADDITIONAL_ARGS]
+Arguments:
+	URL                 The URL of the video to download.
+	TIME_RANGE          Optional. The time range to cut (e.g., '30-60').
+						Required if using a '-cut' format.
+	ADDITIONAL_ARGS     Optional. Any additional arguments to pass to yt-dlp.
+
+Examples:
+https://example.com/video
+https://example.com/video 30-60
+https://example.com/video 30-60 --no-playlist
+https://example.com/video --no-playlist
+"
+}
+
 # Constants
 declare -a COMMON_ARGS=(--progress --console-title --embed-metadata)
 declare -a AUDIO_ARGS=(--embed-thumbnail --extract-audio --audio-quality 0)
@@ -36,15 +53,13 @@ parse_arguments() {
 		url="$argument"
 	elif [[ $argument =~ $timeRangeRegex ]]; then
 		timeRange="${argument}"
-	elif [[ $argument == *"-cut"* ]]; then
-		cutOption=true
+	elif [[ $argument == *"-cut"* ]] || [[ ${FORMAT_ARGS[$argument]+_} ]]; then
 		format="${argument}"
+	elif [[ $argument == "--help" || $argument == "-h" ]]; then
+		show_help
+		exit 0
 	else
-		if [[ -n "${FORMAT_ARGS[$argument]}" ]]; then
-			format="$argument"
-		else
-			final_args+=" $argument"
-		fi
+		final_args+=" $argument"
 	fi
 }
 
@@ -52,12 +67,14 @@ parse_arguments() {
 check_arguments() {
 	[[ -z "$url" ]] && {
 		echo "Error: Missing URL"
+		show_help
 		exit 1
 	}
 
 	if [[ "$cutOption" == true ]]; then
 		[[ -z "$timeRange" ]] && {
 			echo "Error: Missing time range for -cut option"
+			show_help
 			exit 1
 		}
 
@@ -145,6 +162,13 @@ change_file_date() {
 for arg in "$@"; do
 	parse_arguments "$arg"
 done
+
+# Check if URL is provided before fetching metadata
+if [[ -z "$url" ]]; then
+    echo "Error: Missing URL"
+    show_help
+    exit 1
+fi
 
 # Fetch JSON metadata once
 json_metadata=$(yt-dlp "$url" -j) || {
