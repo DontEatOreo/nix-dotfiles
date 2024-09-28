@@ -109,7 +109,9 @@ format_time_range() {
 execute_yt_dlp() {
 	local formatArgs
 	IFS=' ' read -r -a formatArgs <<<"${FORMAT_ARGS[$format]}"
-	[[ "$cutOption" == true ]] && formatArgs+=("*${timeRange}" "--force-keyframes-at-cuts")
+	# NOTE: On some players, keeping the embedded chapters for trimmed
+	# or cut videos can cause an inaccurate video duration report
+	[[ "$cutOption" == true ]] && formatArgs+=("*${timeRange}" "--force-keyframes-at-cuts" "--no-embed-chapters")
 
 	# Add time range to OUTPUT_ARGS if cutOption is true
 	if [[ "$cutOption" == true ]]; then
