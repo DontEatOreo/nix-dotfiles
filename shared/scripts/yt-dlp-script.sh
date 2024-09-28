@@ -3,7 +3,7 @@
 # shellcheck shell=bash
 
 # Constants
-declare -a COMMON_ARGS=(--progress --console-title)
+declare -a COMMON_ARGS=(--progress --console-title --embed-metadata)
 declare -a AUDIO_ARGS=(--embed-thumbnail --extract-audio --audio-quality 0)
 declare -a VIDEO_ARGS=(-S "vcodec:h264,ext:mp4:m4a")
 declare -a OUTPUT_ARGS=(-o "%(display_id)s%(time_range)s.%(ext)s")
@@ -17,9 +17,9 @@ final_args="--ignore-config"
 
 # Format to arguments mapping
 declare -A FORMAT_ARGS=(
-	["m4a"]="${AUDIO_ARGS[*]} --audio-format m4a --embed-metadata"
-	["mp3"]="${AUDIO_ARGS[*]} --audio-format mp3 --embed-metadata"
-	["mp4"]="${VIDEO_ARGS[*]} --embed-metadata"
+	["m4a"]="${AUDIO_ARGS[*]} --audio-format m4a"
+	["mp3"]="${AUDIO_ARGS[*]} --audio-format mp3"
+	["mp4"]="${VIDEO_ARGS[*]}"
 	["m4a-cut"]="${AUDIO_ARGS[*]} --audio-format m4a --download-sections"
 	["mp3-cut"]="${AUDIO_ARGS[*]} --audio-format mp3 --download-sections"
 	["mp4-cut"]="${VIDEO_ARGS[*]} --download-sections"
