@@ -11,11 +11,17 @@ Arguments:
 						Required if using a '-cut' format.
 	ADDITIONAL_ARGS     Optional. Any additional arguments to pass to yt-dlp.
 
+Options:
+	--compress          Download and compress the video.
+	--crf VALUE         Specify the CRF value for compression (default: 26).
+
 Examples:
 https://example.com/video
 https://example.com/video 30-60
 https://example.com/video 30-60 --no-playlist
 https://example.com/video --no-playlist
+https://example.com/video --compress
+https://example.com/video --compress --crf 22
 "
 }
 
@@ -29,6 +35,8 @@ declare -a OUTPUT_ARGS=(-o "%(display_id)s%(time_range)s.%(ext)s")
 url=""
 timeRange=""
 cutOption=false
+compressOption=false
+crf=26
 format=""
 final_args="--ignore-config"
 json_metadata=""
@@ -53,9 +61,15 @@ parse_arguments() {
 		url="$argument"
 	elif [[ $argument =~ $timeRangeRegex ]]; then
 		timeRange="${argument}"
-	elif [[ $argument == *"-cut"* ]] || [[ ${FORMAT_ARGS[$argument]+_} ]]; then
+	elif [[ ${FORMAT_ARGS[$argument]+_} ]]; then
 		format="${argument}"
-		cutOption=true # Set cutOption to true if a -cut format is detected
+		# Set cutOption to true only if the format includes '-cut'
+		[[ $format == *"-cut" ]] && cutOption=true
+	elif [[ $argument == "--compress" ]]; then
+		compressOption=true
+	elif [[ $argument == "--crf" ]]; then
+		crf="$2"
+		shift
 	elif [[ $argument == "--help" || $argument == "-h" ]]; then
 		show_help
 		exit 0
@@ -145,7 +159,65 @@ execute_yt_dlp() {
 
 	IFS=' ' read -r -a final_args_array <<<"$final_args"
 
-	yt-dlp "$url" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args_array[@]}"
+	if [[ "$compressOption" == true ]]; then
+		temp_dir=$(mktemp -d)
+		OUTPUT_ARGS=(-o "$temp_dir/%(display_id)s.%(ext)s")
+	fi
+
+	yt-dlp "$url" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args_array[@]}" \
+		--postprocessor-args "ffmpeg:-hide_banner"
+
+	if [[ "$compressOption" == true ]]; then
+		compress_video "$temp_dir"
+		rm -rf "$temp_dir"
+	fi
+}
+
+compress_video() {
+	local temp_dir="$1"
+	local input_file output_file
+	input_file=$(find "$temp_dir" -type f)
+
+	# Extract the base name without extension
+	local base_name
+	base_name=$(basename "$input_file" | sed 's/\.[^.]*$//')
+
+	# Add the time range if it exists
+	local time_range_suffix=""
+	if [[ -n "$timeRange" ]]; then
+		time_range_suffix=$(format_time_range)
+	fi
+
+	output_file="${PWD}/${base_name}${time_range_suffix}.mp4"
+
+	local valid_tunes=("film" "animation" "grain" "stillimage" "none")
+	local tune
+
+	while true; do
+		echo "Choose a tune for compression (film, animation, grain, stillimage, none):"
+		read -r tune
+
+		# Default to "none" if the input is empty
+		if [[ -z "$tune" ]]; then
+			tune="none"
+		fi
+
+		if [[ " ${valid_tunes[*]} " == *" $tune "* ]]; then
+			break
+		else
+			echo "Invalid option. Please choose from: film, animation, grain, stillimage, none."
+		fi
+	done
+
+	local ffmpeg_cmd=("ffmpeg" "-hide_banner" "-i" "$input_file" "-c:v" "libx264" "-profile:v" "high" "-preset" "veryslow" "-crf" "$crf" "-c:a" "copy" "$output_file")
+
+	# Add the -tune option only if it's not "none"
+	if [[ "$tune" != "none" ]]; then
+		ffmpeg_cmd+=("-tune" "$tune")
+	fi
+
+	# Execute the ffmpeg command
+	"${ffmpeg_cmd[@]}"
 }
 
 # Change file creation date to uploader date
