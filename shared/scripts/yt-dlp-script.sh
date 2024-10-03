@@ -4,7 +4,7 @@
 
 # Help menu
 show_help() {
-printf "Usage: URL [TIME_RANGE] [ADDITIONAL_ARGS]
+	printf "Usage: URL [TIME_RANGE] [ADDITIONAL_ARGS]
 Arguments:
 	URL                 The URL of the video to download.
 	TIME_RANGE          Optional. The time range to cut (e.g., '30-60').
@@ -55,7 +55,7 @@ parse_arguments() {
 		timeRange="${argument}"
 	elif [[ $argument == *"-cut"* ]] || [[ ${FORMAT_ARGS[$argument]+_} ]]; then
 		format="${argument}"
-		cutOption=true  # Set cutOption to true if a -cut format is detected
+		cutOption=true # Set cutOption to true if a -cut format is detected
 	elif [[ $argument == "--help" || $argument == "-h" ]]; then
 		show_help
 		exit 0
@@ -125,43 +125,43 @@ format_time_range() {
 }
 
 execute_yt_dlp() {
-    local formatArgs
-    IFS=' ' read -r -a formatArgs <<<"${FORMAT_ARGS[$format]}"
+	local formatArgs
+	IFS=' ' read -r -a formatArgs <<<"${FORMAT_ARGS[$format]}"
 
-    # Check if the video has chapters and append --no-embed-chapters if it does
-    local has_chapters
-    has_chapters=$(echo "$json_metadata" | jq '(.chapters // []) | length > 0')
-    if [[ "$has_chapters" == "true" ]]; then
-        formatArgs+=("--no-embed-chapters")
-    fi
+	# Check if the video has chapters and append --no-embed-chapters if it does
+	local has_chapters
+	has_chapters=$(echo "$json_metadata" | jq '(.chapters // []) | length > 0')
+	if [[ "$has_chapters" == "true" ]]; then
+		formatArgs+=("--no-embed-chapters")
+	fi
 
-    # Append the time range to --download-sections if cutOption is true
-    if [[ "$cutOption" == true ]]; then
-        formatArgs+=("--download-sections=*${timeRange}")
-        formatArgs+=("--force-keyframes-at-cuts")
-        time_range=$(format_time_range)
-        OUTPUT_ARGS=(-o "%(display_id)s${time_range}.%(ext)s")
-    fi
+	# Append the time range to --download-sections if cutOption is true
+	if [[ "$cutOption" == true ]]; then
+		formatArgs+=("--download-sections=*${timeRange}")
+		formatArgs+=("--force-keyframes-at-cuts")
+		time_range=$(format_time_range)
+		OUTPUT_ARGS=(-o "%(display_id)s${time_range}.%(ext)s")
+	fi
 
-    IFS=' ' read -r -a final_args_array <<<"$final_args"
+	IFS=' ' read -r -a final_args_array <<<"$final_args"
 
-    yt-dlp "$url" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args_array[@]}"
+	yt-dlp "$url" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args_array[@]}"
 }
 
 # Change file creation date to uploader date
 change_file_date() {
-    local upload_date display_id
-    upload_date=$(echo "$json_metadata" | jq -r '.upload_date')
-    display_id=$(echo "$json_metadata" | jq -r '.display_id')
+	local upload_date display_id
+	upload_date=$(echo "$json_metadata" | jq -r '.upload_date')
+	display_id=$(echo "$json_metadata" | jq -r '.display_id')
 
-    if [[ -n "$upload_date" ]]; then
-        local formatted_date
-        formatted_date=$(date -d "$upload_date" +"%Y%m%d%H%M.%S")
+	if [[ -n "$upload_date" ]]; then
+		local formatted_date
+		formatted_date=$(date -d "$upload_date" +"%Y%m%d%H%M.%S")
 
-        for file in "${display_id}"*; do
-            touch -t "$formatted_date" "$file"
-        done
-    fi
+		for file in "${display_id}"*; do
+			touch -t "$formatted_date" "$file"
+		done
+	fi
 }
 
 # Main
@@ -171,15 +171,15 @@ done
 
 # Check if URL is provided before fetching metadata
 if [[ -z "$url" ]]; then
-    echo "Error: Missing URL"
-    show_help
-    exit 1
+	echo "Error: Missing URL"
+	show_help
+	exit 1
 fi
 
 # Fetch JSON metadata once
 json_metadata=$(yt-dlp "$url" -j) || {
-    echo "Error: Failed to fetch JSON metadata"
-    exit 1
+	echo "Error: Failed to fetch JSON metadata"
+	exit 1
 }
 
 check_arguments
