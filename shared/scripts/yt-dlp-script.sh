@@ -38,9 +38,9 @@ declare -A FORMAT_ARGS=(
 	["m4a"]="${AUDIO_ARGS[*]} --audio-format m4a"
 	["mp3"]="${AUDIO_ARGS[*]} --audio-format mp3"
 	["mp4"]="${VIDEO_ARGS[*]}"
-	["m4a-cut"]="${AUDIO_ARGS[*]} --audio-format m4a --download-sections"
-	["mp3-cut"]="${AUDIO_ARGS[*]} --audio-format mp3 --download-sections"
-	["mp4-cut"]="${VIDEO_ARGS[*]} --download-sections"
+	["m4a-cut"]="${AUDIO_ARGS[*]} --audio-format m4a"
+	["mp3-cut"]="${AUDIO_ARGS[*]} --audio-format mp3"
+	["mp4-cut"]="${VIDEO_ARGS[*]}"
 )
 
 # Parse arguments
@@ -55,6 +55,7 @@ parse_arguments() {
 		timeRange="${argument}"
 	elif [[ $argument == *"-cut"* ]] || [[ ${FORMAT_ARGS[$argument]+_} ]]; then
 		format="${argument}"
+		cutOption=true  # Set cutOption to true if a -cut format is detected
 	elif [[ $argument == "--help" || $argument == "-h" ]]; then
 		show_help
 		exit 0
@@ -123,23 +124,28 @@ format_time_range() {
 	echo "-${formattedStartTime}-${formattedEndTime}"
 }
 
-# Execute yt-dlp with the constructed argument set
 execute_yt_dlp() {
-	local formatArgs
-	IFS=' ' read -r -a formatArgs <<<"${FORMAT_ARGS[$format]}"
-	# NOTE: On some players, keeping the embedded chapters for trimmed
-	# or cut videos can cause an inaccurate video duration report
-	[[ "$cutOption" == true ]] && formatArgs+=("*${timeRange}" "--force-keyframes-at-cuts" "--no-embed-chapters")
+    local formatArgs
+    IFS=' ' read -r -a formatArgs <<<"${FORMAT_ARGS[$format]}"
 
-	# Add time range to OUTPUT_ARGS if cutOption is true
-	if [[ "$cutOption" == true ]]; then
-		time_range=$(format_time_range)
-		OUTPUT_ARGS=(-o "%(display_id)s${time_range}.%(ext)s")
-	fi
+    # Check if the video has chapters and append --no-embed-chapters if it does
+    local has_chapters
+    has_chapters=$(echo "$json_metadata" | jq '(.chapters // []) | length > 0')
+    if [[ "$has_chapters" == "true" ]]; then
+        formatArgs+=("--no-embed-chapters")
+    fi
 
-	IFS=' ' read -r -a final_args_array <<<"$final_args"
+    # Append the time range to --download-sections if cutOption is true
+    if [[ "$cutOption" == true ]]; then
+        formatArgs+=("--download-sections=*${timeRange}")
+        formatArgs+=("--force-keyframes-at-cuts")
+        time_range=$(format_time_range)
+        OUTPUT_ARGS=(-o "%(display_id)s${time_range}.%(ext)s")
+    fi
 
-	yt-dlp "$url" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args_array[@]}"
+    IFS=' ' read -r -a final_args_array <<<"$final_args"
+
+    yt-dlp "$url" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args_array[@]}"
 }
 
 # Change file creation date to uploader date
