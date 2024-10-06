@@ -19,6 +19,7 @@ in
 
       source ${../../modules/home-manager/config/p10k.zsh}
       source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+      source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
       eval "$(github-copilot-cli alias -- "$0")"
 
