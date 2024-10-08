@@ -1,5 +1,10 @@
 /* ----- IMPORTS ----- */
 
+/* ----- CATPPUCCIN THEME ----- */
+
+@import url("https://catppuccin.github.io/discord/dist/catppuccin-mocha.theme.css")
+@import url("https://catppuccin.github.io/discord/dist/catppuccin-latte.theme.css")
+
 
 
 /* ----- INLINE CUSTOM STATUS ----- */
