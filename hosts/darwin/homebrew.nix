@@ -16,9 +16,6 @@ _: {
       }
       "homebrew/cask-fonts"
     ];
-    masApps = {
-      Xcode = 497799835;
-    };
     brews = [
       "smartmontools" # Check System Health
     ];
