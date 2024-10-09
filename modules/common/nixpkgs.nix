@@ -56,13 +56,7 @@ in
                 '';
           };
         in
-        (lib.optional isLinux inputs.nur.overlay)
-        ++ (lib.optional (!isLinux) darwinZshCompletionsOverlay)
-        ++ (lib.optional (isLinux) (
-          self: super: {
-            cudaPackages = super.cudaPackages_12_3;
-          }
-        ));
+        (lib.optional isLinux inputs.nur.overlay) ++ (lib.optional (!isLinux) darwinZshCompletionsOverlay);
     };
   };
 }
