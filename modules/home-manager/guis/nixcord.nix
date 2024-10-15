@@ -108,7 +108,6 @@
           silentTyping.enable = true;
           startupTimings.enable = true;
           streamerModeOnStream.enable = true;
-          summaries.enable = true;
           superReactionTweaks.enable = true;
           textReplace.enable = true;
           themeAttributes.enable = true;
