@@ -155,6 +155,8 @@ execute_yt_dlp() {
 		formatArgs+=("--force-keyframes-at-cuts")
 		time_range=$(format_time_range)
 		OUTPUT_ARGS=(-o "%(display_id)s${time_range}.%(ext)s")
+	else
+		OUTPUT_ARGS=(-o "%(display_id)s.%(ext)s") # When no time range is provided
 	fi
 
 	IFS=' ' read -r -a final_args_array <<<"$final_args"
