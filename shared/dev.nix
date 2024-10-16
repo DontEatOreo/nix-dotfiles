@@ -6,6 +6,7 @@
         github-copilot-cli # GitHub Copilot CLI
         jq
         nixfmt-rfc-style # Upcomming new nix format, RFC 0160
+        nixpkgs-review
         shellcheck # Warning hints for shell scripts
 
         # Terminal related packages
