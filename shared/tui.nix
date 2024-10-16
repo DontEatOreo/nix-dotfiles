@@ -4,7 +4,7 @@
     systemPackages = builtins.attrValues {
       inherit (pkgs)
         htop-vim
-        # ncdu 
+        ncdu
         nix-tree
         ;
     };
