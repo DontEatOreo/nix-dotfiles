@@ -9,14 +9,14 @@
 
         # Images Related
         gallery-dl # Image Downloader
-        imagemagick # Image Manipulation
         ghostscript # Interpreter for PostScript and PDF (Convert PDF to Image)
+        imagemagick # Image Manipulation
 
         # Other
         eza # Bettter LS
+        neofetch # Show System Info
         tldr # Most Common used commands for CLI tool
         tree
-        neofetch # Show System Info
         wget
         ;
       dis = inputs.dis.packages.${pkgs.system}.default;
