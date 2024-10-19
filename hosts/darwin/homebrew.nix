@@ -34,7 +34,7 @@ _: {
       "hiddenbar" # Hide status bar items
       "stats" # System Stats
       "alt-tab" # Proper Alt Tab
-      "rectangle" # Snap Windows
+      "lasso" # Window Manager
       "itsycal" # Better Calendar
 
       # Other
