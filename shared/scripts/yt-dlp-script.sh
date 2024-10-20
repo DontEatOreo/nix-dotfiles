@@ -192,23 +192,40 @@ compress_video() {
 
 	output_file="${PWD}/${base_name}${time_range_suffix}.mp4"
 
-	local valid_tunes=("film" "animation" "grain" "stillimage" "none")
 	local tune
+	local tune_options=("1) film" "2) animation" "3) grain" "4) stillimage" "5) none")
 
 	while true; do
-		echo "Choose a tune for compression (film, animation, grain, stillimage, none):"
-		read -r tune
+		echo "Choose a tune for compression:"
+		for option in "${tune_options[@]}"; do
+			echo "$option"
+		done
 
-		# Default to "none" if the input is empty
-		if [[ -z "$tune" ]]; then
-			tune="none"
-		fi
+		read -r tune_choice
 
-		if [[ " ${valid_tunes[*]} " == *" $tune "* ]]; then
+		case "$tune_choice" in
+		1)
+			tune="film"
 			break
-		else
-			echo "Invalid option. Please choose from: film, animation, grain, stillimage, none."
-		fi
+			;;
+		2)
+			tune="animation"
+			break
+			;;
+		3)
+			tune="grain"
+			break
+			;;
+		4)
+			tune="stillimage"
+			break
+			;;
+		5)
+			tune="none"
+			break
+			;;
+		*) echo "Invalid option. Please choose a number between 1 and 5." ;;
+		esac
 	done
 
 	local ffmpeg_cmd=("ffmpeg" "-hide_banner" "-i" "$input_file" "-c:v" "libx264" "-profile:v" "high" "-preset" "veryslow" "-crf" "$crf" "-c:a" "copy" "$output_file")
