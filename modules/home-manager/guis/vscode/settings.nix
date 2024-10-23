@@ -1,6 +1,6 @@
 _: {
   programs.vscode.userSettings = {
-    "editor.fontFamily" = "'FiraCode Nerd Font', 'Droid Sans Mono', 'monospace', 'Droid Sans Fallback'";
+    "editor.fontFamily" = "'MonaspiceKr Nerd Font Mono', 'Droid Sans Mono', 'monospace', 'Droid Sans Fallback'";
     "workbench.editor.showIcons" = true;
 
     # Git
