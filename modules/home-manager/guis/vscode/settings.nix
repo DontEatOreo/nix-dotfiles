@@ -16,11 +16,8 @@ _: {
     "diffEditor.ignoreTrimWhitespace" = false;
 
     # Theme
-    "workbench.iconTheme" = "catppuccin-mocha";
-    "workbench.colorTheme" = "Catppuccin Mocha";
-    "workbench.preferredLightColorTheme" = "Catppuccin Latte";
-    "workbench.preferredDarkColorTheme" = "Catppuccin Mocha";
-    "window.autoDetectColorScheme" = true;
+    "workbench.iconTheme" = "catppuccin-frappe";
+    "workbench.colorTheme" = "Catppuccin Frappé";
     "window.zoomLevel" = 1.5;
 
     # Editor
