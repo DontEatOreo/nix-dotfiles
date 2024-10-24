@@ -90,5 +90,4 @@ darwin-rebuild switch --flake "$HOME/.nixpkgs"
 
 ## Notes
 
-- If you end up getting an error of the sort of `error: cached failure of attribute` make sure to pass the option `--option eval-cache false` to `nix run`
 - Special thanks to [@ashuramaruzxc](https://github.com/ashuramaruzxc) for bash & zsh aliases, PS1 and `commonAttrs`.
