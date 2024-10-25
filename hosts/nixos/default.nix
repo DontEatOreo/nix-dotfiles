@@ -21,7 +21,10 @@ in
       {
         shared = {
           nix.enable = true;
-          nixpkgs.enable = true;
+          nixpkgs = {
+            enable = true;
+            cudaSupport = true;
+          };
         };
       }
       ../../modules/de
