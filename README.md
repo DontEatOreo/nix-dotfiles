@@ -35,8 +35,8 @@ if [ -d "/etc/nix/nixos" ]; then
   sudo mv "/etc/nix/nixos" "/etc/nixos-backup/"
 fi
 
-if [ ! -d "/etc/nixos" ]; then 
-    sudo mkdir -p "/etc/nixos" 
+if [ ! -d "/etc/nixos" ]; then
+    sudo mkdir -p "/etc/nixos"
 fi
 sudo chown -R "$USER" "/etc/nixos/"
 
@@ -71,7 +71,7 @@ fi
 # Clone the repo
 git clone "https://github.com/DontEatOreo/nix-dotfiles.git" "$HOME"
 
-if [! -d "$HOME/.nixpkgs" ]; then 
+if [! -d "$HOME/.nixpkgs" ]; then
     mkdir -p "$HOME/.nixpkgs"
 if
 mv "$HOME/nix-dotfiles" "$HOME/.nixpkgs"
