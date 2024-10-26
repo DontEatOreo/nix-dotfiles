@@ -2,6 +2,8 @@
   description = "My NixOS & Darwin System Flake";
 
   inputs = {
+    catppuccin.url = "github:catppuccin/nix";
+
     dis.url = "github:DontEatOreo/dis";
     dis.inputs.nixpkgs.follows = "nixpkgs";
 

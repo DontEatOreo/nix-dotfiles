@@ -18,6 +18,11 @@
         ../../modules/home-manager/terminals
         ../../modules/home-manager/tui
         inputs.sops-nix.homeManagerModules.sops
+        inputs.catppuccin.homeManagerModules.catppuccin
+        {
+          catppuccin.enable = true;
+          catppuccin.flavor = "frappe";
+        }
 
         {
           hm = {

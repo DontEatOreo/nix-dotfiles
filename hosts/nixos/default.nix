@@ -34,6 +34,11 @@ in
         };
       }
 
+      inputs.catppuccin.nixosModules.catppuccin
+      {
+        catppuccin.enable = true;
+        catppuccin.flavor = "frappe";
+      }
       inputs.nur.nixosModules.nur
       inputs.nixos-hardware.nixosModules.lenovo-legion-15arh05h
       inputs.sops-nix.nixosModules.sops
