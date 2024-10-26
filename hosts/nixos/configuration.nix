@@ -71,7 +71,7 @@
       mplus-outline-fonts = pkgs.mplus-outline-fonts.githubRelease;
       inherit (pkgs)
         noto-fonts
-        noto-fonts-cjk
+        noto-fonts-cjk-sans
         noto-fonts-emoji
         liberation_ttf
         fira-code

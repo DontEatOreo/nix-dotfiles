@@ -16,7 +16,7 @@
 
         # Obviously NOTO DUHH!!!
         noto-fonts
-        noto-fonts-cjk
+        noto-fonts-cjk-sans
         noto-fonts-emoji
 
         # Collection of "Comic" fonts
