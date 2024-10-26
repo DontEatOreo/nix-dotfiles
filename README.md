@@ -90,4 +90,4 @@ darwin-rebuild switch --flake "$HOME/.nixpkgs"
 
 ## Notes
 
-- Special thanks to [@ashuramaruzxc](https://github.com/ashuramaruzxc) for bash & zsh aliases, PS1 and `commonAttrs`.
+- Special thanks to [@ashuramaruzxc](https://github.com/ashuramaruzxc) for the bash & zsh aliases and for the bash PS1
