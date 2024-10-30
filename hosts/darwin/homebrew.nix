@@ -26,7 +26,7 @@ _: {
       "element"
 
       # Quality of Life
-      "hiddenbar" # Hide status bar items
+      "jordanbaird-ice" # Hide status bar items
       "stats" # System Stats
       "alt-tab" # Proper Alt Tab
       "lasso" # Window Manager
