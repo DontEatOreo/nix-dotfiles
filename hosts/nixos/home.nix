@@ -33,6 +33,7 @@
             firefox.enable = true;
             fzf.enable = true;
             git.enable = true;
+            mpv.enable = true;
             nixcord.enable = true;
             ssh.enable = true;
             vscode.enable = true;
