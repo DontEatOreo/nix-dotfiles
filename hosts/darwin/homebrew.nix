@@ -9,7 +9,6 @@ _: {
     };
     taps = [
       # "dahlia/jetbrains-eap" # https://github.com/dahlia/homebrew-jetbrains-eap
-      "homebrew/cask-fonts"
     ];
     brews = [
       "smartmontools" # Check System Health

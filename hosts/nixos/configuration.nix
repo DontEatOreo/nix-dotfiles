@@ -1,5 +1,7 @@
 {
   lib,
+  inputs,
+  system,
   pkgs,
   config,
   ...
@@ -59,36 +61,35 @@
 
   fonts = {
     fontconfig = {
-      enable = true;
       defaultFonts = {
-        monospace = [ "Liga SFMono Nerd Font" ];
-        sansSerif = [ "SF Pro Text" ];
-        serif = [ "New York Medium" ];
+        monospace = [ "SFMono Nerd Font" ];
+        sansSerif = [ "SFProText Nerd Font" ];
+        serif = [ "SFProDisplay Nerd Font" ];
         emoji = [ "Twitter Color Emoji" ];
       };
     };
     packages = builtins.attrValues {
-      mplus-outline-fonts = pkgs.mplus-outline-fonts.githubRelease;
       inherit (pkgs)
+        fira-code
+        fira-code-symbols
+        monaspace
         noto-fonts
         noto-fonts-cjk-sans
         noto-fonts-emoji
-        liberation_ttf
-        fira-code
-        fira-code-symbols
-        dina-font
-        proggyfonts
-        meslo-lgs-nf
-        victor-mono
-        monaspace
         twemoji-color-font
-        sarasa-gothic
+        ;
+      inherit (inputs.apple-fonts.packages.${system})
+        sf-compact-nerd
+        sf-mono-nerd
+        sf-pro-nerd
         ;
 
       nerfonts = pkgs.nerdfonts.override {
         fonts = [
-          "FiraCode"
           "DroidSansMono"
+          "FiraCode"
+          "Monaspace"
+          "Noto"
         ];
       };
     };

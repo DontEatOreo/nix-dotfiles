@@ -2,6 +2,9 @@
   description = "My NixOS & Darwin System Flake";
 
   inputs = {
+    apple-fonts.url = "github:Lyndeno/apple-fonts.nix";
+    apple-fonts.inputs.nixpkgs.follows = "nixpkgs";
+
     catppuccin.url = "github:catppuccin/nix";
 
     dis.url = "github:DontEatOreo/dis";
