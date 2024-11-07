@@ -2,9 +2,9 @@
 
 /* ----- CATPPUCCIN THEME ----- */
 
-@import url("https://catppuccin.github.io/discord/dist/catppuccin-frappe.theme.css")
+@import url("https://catppuccin.github.io/discord/dist/catppuccin-frappe-blue.theme.css")
 (prefers-color-scheme: dark);
-@import url("https://catppuccin.github.io/discord/dist/catppuccin-latte.theme.css")
+@import url("https://catppuccin.github.io/discord/dist/catppuccin-latte-blue.theme.css")
 (prefers-color-scheme: light);
 
 
