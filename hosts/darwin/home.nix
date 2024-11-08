@@ -19,8 +19,11 @@
         inputs.sops-nix.homeManagerModules.sops
         inputs.catppuccin.homeManagerModules.catppuccin
         {
-          catppuccin.enable = true;
-          catppuccin.flavor = "frappe";
+          catppuccin = {
+            enable = true;
+            flavor = "frappe";
+            accent = "blue";
+          };
         }
 
         {

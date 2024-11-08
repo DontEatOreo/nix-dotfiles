@@ -36,8 +36,11 @@ in
 
       inputs.catppuccin.nixosModules.catppuccin
       {
-        catppuccin.enable = true;
-        catppuccin.flavor = "frappe";
+        catppuccin = {
+          enable = true;
+          flavor = "frappe";
+          accent = "blue";
+        };
       }
       inputs.nur.nixosModules.nur
       inputs.nixos-hardware.nixosModules.lenovo-legion-15arh05h
