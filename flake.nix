@@ -6,6 +6,8 @@
     apple-fonts.inputs.nixpkgs.follows = "nixpkgs";
 
     catppuccin.url = "github:catppuccin/nix";
+    catppuccin-vsc.url = "github:catppuccin/vscode";
+    catppuccin-vsc.inputs.nixpkgs.follows = "nixpkgs";
 
     dis.url = "github:DontEatOreo/dis";
     dis.inputs.nixpkgs.follows = "nixpkgs";

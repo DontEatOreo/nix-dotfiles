@@ -9,6 +9,11 @@ _: {
     # Enable Word Wrap
     "editor.wordWrap" = "on";
 
+    # Catppuccin
+    "editor.semanticHighlighting.enabled" = true;
+    "terminal.integrated.minimumContrastRatio" = 1;
+    "window.titleBarStyle" = "custom";
+
     # Bash
     "bashIde.explainshellEndpoint" = "http://localhost:5134";
 

@@ -21,7 +21,7 @@ in
         cudaSupport = config.shared.nixpkgs.cudaSupport;
       };
       hostPlatform = system;
-      overlays = (lib.optional isLinux inputs.nur.overlay);
+      overlays = [ inputs.catppuccin-vsc.overlays.default ] ++ (lib.optional isLinux inputs.nur.overlay);
     };
   };
 }

@@ -32,7 +32,7 @@ in
       github-vscode-theme = vscode-marketplace.github.github-vscode-theme;
 
       ## Catppuccin
-      catppuccin-vsc = vscode-marketplace.catppuccin.catppuccin-vsc;
+      catppuccin-vsc = pkgs.catppuccin-vsc.override { accent = "blue"; };
       catppuccin-vsc-icons = vscode-marketplace.catppuccin.catppuccin-vsc-icons;
 
       # Utilities
