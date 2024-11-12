@@ -18,7 +18,7 @@
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 
-    nixcord.url = "github:DontEatOreo/nixcord/temporary-hash-fix";
+    nixcord.url = "github:KaylorBen/nixcord";
     nixcord.inputs.nixpkgs.follows = "nixpkgs";
     nixcord.inputs.flake-compat.follows = "";
 
