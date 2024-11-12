@@ -11,9 +11,6 @@ in
     enableCompletion = true;
     enableBashCompletion = true;
     enableFastSyntaxHighlighting = true;
-    enableFzfCompletion = true;
-    enableFzfGit = true;
-    enableFzfHistory = true;
     loginShellInit = ''
       source ${pkgs.oh-my-zsh}/share/oh-my-zsh/oh-my-zsh.sh
 
