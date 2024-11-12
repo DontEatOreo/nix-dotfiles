@@ -28,7 +28,7 @@ _: {
       "jordanbaird-ice" # Hide status bar items
       "stats" # System Stats
       "alt-tab" # Proper Alt Tab
-      "lasso" # Window Manager
+      "rectangle" # Window Manager
       "itsycal" # Better Calendar
 
       # Other
