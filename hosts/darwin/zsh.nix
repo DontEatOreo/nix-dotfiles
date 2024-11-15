@@ -10,7 +10,7 @@ in
     enable = true;
     enableCompletion = true;
     enableBashCompletion = true;
-    enableFastSyntaxHighlighting = true;
+    enableSyntaxHighlighting = true;
     loginShellInit = ''
       source ${pkgs.oh-my-zsh}/share/oh-my-zsh/oh-my-zsh.sh
 
