@@ -60,13 +60,17 @@ in
 
         # Nix
         update = "nix flake update ${nixConfigPath}";
-        check = "nix flake check ${nixConfigPath}";
-        rebuild = "${
-          if pkgs.stdenvNoCC.hostPlatform.isLinux then "nixos-rebuild" else "darwin-rebuild"
-        } switch ${lib.optionalString pkgs.stdenvNoCC.hostPlatform.isLinux "--use-remote-sudo"} --flake ${nixConfigPath}";
-        test = "${
-          if pkgs.stdenvNoCC.hostPlatform.isLinux then "nixos-rebuild" else "darwin-rebuild"
-        } test --flake ${nixConfigPath}";
+        check =
+          if pkgs.stdenvNoCC.hostPlatform.isDarwin then
+            "darwin-rebuild check --flake ${nixConfigPath}"
+          else
+            "nix flake check ${nixConfigPath}";
+        rebuild =
+          if pkgs.stdenvNoCC.hostPlatform.isLinux then
+            "nixos-rebuild switch --use-remote-sudo --flake ${nixConfigPath}"
+          else
+            "darwin-rebuild switch --flake ${nixConfigPath}";
+        test = lib.mkIf pkgs.stdenvNoCC.hostPlatform.isLinux "nixos-rebuild test --flake ${nixConfigPath}";
 
         # Video
         m4a = "${yt-dlp-script} m4a";
