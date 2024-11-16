@@ -1,5 +1,4 @@
 {
-  pkgs,
   lib,
   config,
   system,
@@ -58,10 +57,10 @@ in
           let
             otherKeybindings = { };
             switchKeybindings = (
-              pkgs.lib.genAttrs (map (n: "switch-to-application-${toString n}") (pkgs.lib.range 1 9)) (_: [ ])
+              lib.genAttrs (map (n: "switch-to-application-${toString n}") (lib.range 1 9)) (_: [ ])
             );
           in
-          pkgs.lib.mkMerge [
+          lib.mkMerge [
             otherKeybindings
             switchKeybindings
           ];
@@ -82,7 +81,7 @@ in
             switchKeybindings = generateKeybindings "switch-to-workspace" "<Super>" [ ] 9;
             moveKeybindings = generateKeybindings "move-to-workspace" "<Super>" [ "<Shift>" ] 9;
           in
-          pkgs.lib.mkMerge [
+          lib.mkMerge [
             otherKeybindings
             switchKeybindings
             moveKeybindings

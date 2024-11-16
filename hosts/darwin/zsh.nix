@@ -1,6 +1,6 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
-  yt-dlp-script = pkgs.lib.getExe (
+  yt-dlp-script = lib.getExe (
     pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../../shared/scripts/yt-dlp-script.sh)
   );
   nixConfigPath = "~/.nixpkgs";
