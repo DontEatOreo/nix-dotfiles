@@ -2,7 +2,7 @@
 {
   environment.systemPackages = builtins.attrValues {
     inherit (pkgs)
-      htop-vim
+      btop
       ncdu
       nix-tree
       ;

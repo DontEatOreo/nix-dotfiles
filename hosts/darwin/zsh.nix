@@ -20,6 +20,9 @@ in
 
       eval "$(github-copilot-cli alias -- "$0")"
 
+      # Program aliases
+      alias htop="btop"
+
       # File Operations
       alias ls="eza --oneline"
       alias lt="eza --oneline --reverse --sort=size"

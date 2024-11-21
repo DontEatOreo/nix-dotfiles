@@ -74,6 +74,9 @@ in
         ];
       };
       shellAliases = {
+        # Program aliases
+        htop = "btop";
+
         # File Operations
         ls = "eza --oneline";
         lt = "eza --oneline --reverse --sort=size --size";
