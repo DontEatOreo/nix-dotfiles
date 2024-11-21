@@ -21,13 +21,14 @@
     nixcord.url = "github:KaylorBen/nixcord";
     nixcord.inputs.nixpkgs.follows = "nixpkgs";
     nixcord.inputs.flake-compat.follows = "";
+    nixcord.inputs.treefmt-nix.follows = "";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
     nixvim.url = "github:elythh/nixvim";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
 
-    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions/0d53b7836079cda476fab76bf9becfdd475a5d1d";
+    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
     nix-vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
     nix-vscode-extensions.inputs.flake-compat.follows = "";
 
@@ -37,7 +38,6 @@
 
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
-    sops-nix.inputs.nixpkgs-stable.follows = "nixpkgs";
 
     xremap-flake.url = "github:xremap/nix-flake";
     xremap-flake.inputs.nixpkgs.follows = "nixpkgs";
