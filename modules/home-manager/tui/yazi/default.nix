@@ -19,8 +19,6 @@
     home.packages = builtins.attrValues { inherit (pkgs) mediainfo exiftool; };
     programs.yazi = {
       enable = true;
-      enableBashIntegration = true;
-      enableZshIntegration = true;
       plugins =
         let
           pluginsRepo = pkgs.fetchFromGitHub {
