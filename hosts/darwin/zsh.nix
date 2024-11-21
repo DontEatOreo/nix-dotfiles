@@ -22,6 +22,7 @@ in
 
       # Program aliases
       alias htop="btop"
+      alias neofetch="fastfetch"
 
       # File Operations
       alias ls="eza --oneline"

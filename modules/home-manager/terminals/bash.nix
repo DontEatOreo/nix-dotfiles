@@ -27,6 +27,7 @@ in
       shellAliases = {
         # Program aliases
         htop = "btop";
+        neofetch = "fastfetch";
 
         # File Operations
         ls = "eza --oneline";

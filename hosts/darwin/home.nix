@@ -30,6 +30,7 @@
           hm = {
             bash.enable = true;
             direnv.enable = true;
+            fastfetch.enable = true;
             fzf.enable = true;
             git.enable = true;
             nixcord.enable = true;
