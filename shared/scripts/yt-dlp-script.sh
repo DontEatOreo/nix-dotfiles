@@ -175,10 +175,44 @@ execute_yt_dlp() {
 	fi
 }
 
+get_file_size() {
+	local file="$1"
+	if [[ "$(uname)" == "Darwin" ]]; then
+		# macOS - use wc -c as more reliable alternative
+		wc -c <"$file" 2>/dev/null || echo "0"
+	else
+		stat --printf="%s" "$file" 2>/dev/null || echo "0"
+	fi
+}
+
+format_size() {
+	local size="$1"
+	local power=0
+	local units=("B" "KB" "MB" "GB")
+
+	while [ "$(echo "$size > 1024" | bc -l)" -eq 1 ]; do
+		size=$(echo "scale=2; $size/1024" | bc)
+		power=$((power + 1))
+	done
+
+	printf "%.2f %s" "$size" "${units[$power]}"
+}
+
 compress_video() {
 	local temp_dir="$1"
 	local input_file output_file
 	input_file=$(find "$temp_dir" -type f)
+
+	# Check if input file exists
+	if [[ ! -f "$input_file" ]]; then
+		echo "Error: Input file not found"
+		return 1
+	fi
+
+	# Get original file size
+	local original_size
+	original_size=$(get_file_size "$input_file")
+	echo "Original file size: $(format_size "$original_size")"
 
 	# Extract the base name without extension
 	local base_name
@@ -228,15 +262,60 @@ compress_video() {
 		esac
 	done
 
-	local ffmpeg_cmd=("ffmpeg" "-hide_banner" "-i" "$input_file" "-c:v" "libx264" "-profile:v" "high" "-preset" "veryslow" "-crf" "$crf" "-c:a" "copy" "$output_file")
+	local ffmpeg_cmd=("ffmpeg" "-hide_banner" "-i" "$input_file" "-c:v" "libx264" "-profile:v" "high" "-preset" "veryslow" "-crf" "$crf" "-c:a" "copy")
 
 	# Add the -tune option only if it's not "none"
 	if [[ "$tune" != "none" ]]; then
 		ffmpeg_cmd+=("-tune" "$tune")
 	fi
 
+	# Add output file
+	ffmpeg_cmd+=("$output_file")
+
 	# Execute the ffmpeg command
-	"${ffmpeg_cmd[@]}"
+	if ! "${ffmpeg_cmd[@]}"; then
+		echo "Error: Compression failed"
+		return 1
+	fi
+
+	# Check if output file exists
+	if [[ ! -f "$output_file" ]]; then
+		echo "Error: Compressed file was not created"
+		return 1
+	fi
+
+	# Get compressed file size and calculate savings
+	local compressed_size
+	compressed_size=$(get_file_size "$output_file")
+	echo "Compressed file size: $(format_size "$compressed_size")"
+
+	local size_saved
+	size_saved=$(echo "scale=2; ($original_size - $compressed_size) * 100 / $original_size" | bc)
+
+	if (($(echo "$size_saved > 0" | bc -l))); then
+		echo "Space saved: ${size_saved}%"
+	else
+		echo "Space saved: ${size_saved}%"
+	fi
+
+	# Check if savings are less than 25%
+	if (($(echo "$size_saved < 25" | bc -l))); then
+		echo "Warning: Compression only saved ${size_saved}% of space"
+		echo "Would you like to delete the compressed file and download without compression? (y/n)"
+		read -r response
+		if [[ "$response" =~ ^[Yy]$ ]]; then
+			echo "Removing compressed file..."
+			rm "$output_file"
+			echo "Re-downloading without compression..."
+			# Set compressOption to false for re-download
+			compressOption=false
+			# Re-download without compression
+			OUTPUT_ARGS=(-o "%(display_id)s${time_range_suffix}.%(ext)s")
+			execute_yt_dlp
+		fi
+	else
+		echo "Successfully compressed file. Saved ${size_saved}% of space"
+	fi
 }
 
 # Change file creation date to uploader date
