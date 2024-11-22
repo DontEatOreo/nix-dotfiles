@@ -403,9 +403,20 @@ change_file_date() {
 
 	if [[ -n "$upload_date" ]]; then
 		local formatted_date
-		formatted_date=$(date -d "$upload_date" +"%Y%m%d%H%M.%S")
 
-		for file in "${display_id}"*; do
+		if [[ "$OSTYPE" == "darwin"* ]]; then
+			# macOS format: use string manipulation
+			year=${upload_date:0:4}
+			month=${upload_date:4:2}
+			day=${upload_date:6:2}
+			formatted_date="${year}${month}${day}0000.00"
+		else
+			# Linux format: use GNU date
+			formatted_date=$(date -d "${upload_date:0:4}-${upload_date:4:2}-${upload_date:6:2}" +"%Y%m%d%H%M.%S")
+		fi
+
+		# Use find to handle filenames with special characters
+		find . -maxdepth 1 -name "${display_id}*" -print0 | while IFS= read -r -d '' file; do
 			touch -t "$formatted_date" "$file"
 		done
 	fi
