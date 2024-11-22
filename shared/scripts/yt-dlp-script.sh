@@ -25,6 +25,30 @@ https://example.com/video --compress --crf 22
 "
 }
 
+log_error() {
+	echo "[error] $1"
+}
+
+log_info() {
+	echo "[info] $1"
+}
+
+log_compress() {
+	echo "[compress] $1"
+}
+
+log_warning() {
+	echo "[warning] $1"
+}
+
+log_question() {
+	echo "[?] $1"
+}
+
+log_success() {
+	echo "[success] $1"
+}
+
 # Constants
 declare -a COMMON_ARGS=(--progress --console-title --embed-metadata)
 declare -a AUDIO_ARGS=(--embed-thumbnail --extract-audio --audio-quality 0)
@@ -81,14 +105,14 @@ parse_arguments() {
 # Validate required arguments
 check_arguments() {
 	[[ -z "$url" ]] && {
-		echo "Error: Missing URL"
+		log_error "Missing URL"
 		show_help
 		exit 1
 	}
 
 	if [[ "$cutOption" == true ]]; then
 		[[ -z "$timeRange" ]] && {
-			echo "Error: Missing time range for -cut option"
+			log_error "Missing time range for -cut option"
 			show_help
 			exit 1
 		}
@@ -98,18 +122,18 @@ check_arguments() {
 		endTime=$(echo "$timeRange" | cut -d'-' -f2)
 
 		(($(echo "$startTime > $endTime" | bc -l))) && {
-			echo "Error: Start time is greater than end time in time range"
+			log_error "Start time is greater than end time in time range"
 			exit 1
 		}
 		(($(echo "$startTime < 0" | bc -l))) && {
-			echo "Error: Start time cannot be negative"
+			log_error "Start time cannot be negative"
 			exit 1
 		}
 
 		# Check if the end time is valid
 		duration=$(echo "$json_metadata" | jq '.duration')
 		(($(echo "$endTime > $duration" | bc -l))) && {
-			echo "Error: End time exceeds video duration"
+			log_error "End time exceeds video duration"
 			exit 1
 		}
 	fi
@@ -154,7 +178,7 @@ execute_yt_dlp() {
 		formatArgs+=("--download-sections=*${timeRange}")
 		formatArgs+=("--force-keyframes-at-cuts")
 		time_range=$(format_time_range)
-		OUTPUT_ARGS=(-o "%(display_id)s${time_range}.%(ext)s")
+		OUTPUT_ARGS=(-oF "%(display_id)s${time_range}.%(ext)s")
 	else
 		OUTPUT_ARGS=(-o "%(display_id)s.%(ext)s") # When no time range is provided
 	fi
@@ -205,14 +229,14 @@ compress_video() {
 
 	# Check if input file exists
 	if [[ ! -f "$input_file" ]]; then
-		echo "Error: Input file not found"
+		log_error "Input file not found"
 		return 1
 	fi
 
 	# Get original file size
 	local original_size
 	original_size=$(get_file_size "$input_file")
-	echo "Original file size: $(format_size "$original_size")"
+	log_info "Original file size: $(format_size "$original_size")"
 
 	# Extract the base name without extension
 	local base_name
@@ -230,7 +254,7 @@ compress_video() {
 	local tune_options=("1) film" "2) animation" "3) grain" "4) stillimage" "5) none")
 
 	while true; do
-		echo "Choose a tune for compression:"
+		log_question "Choose a tune for compression:"
 		for option in "${tune_options[@]}"; do
 			echo "$option"
 		done
@@ -258,7 +282,7 @@ compress_video() {
 			tune="none"
 			break
 			;;
-		*) echo "Invalid option. Please choose a number between 1 and 5." ;;
+		*) log_error "Invalid option. Please choose a number between 1 and 5." ;;
 		esac
 	done
 
@@ -274,39 +298,39 @@ compress_video() {
 
 	# Execute the ffmpeg command
 	if ! "${ffmpeg_cmd[@]}"; then
-		echo "Error: Compression failed"
+		log_error "Compression failed"
 		return 1
 	fi
 
 	# Check if output file exists
 	if [[ ! -f "$output_file" ]]; then
-		echo "Error: Compressed file was not created"
+		log_error "Compressed file was not created"
 		return 1
 	fi
 
 	# Get compressed file size and calculate savings
 	local compressed_size
 	compressed_size=$(get_file_size "$output_file")
-	echo "Compressed file size: $(format_size "$compressed_size")"
+	log_compress "Compressed file size: $(format_size "$compressed_size")"
 
 	local size_saved
 	size_saved=$(echo "scale=2; ($original_size - $compressed_size) * 100 / $original_size" | bc)
 
 	if (($(echo "$size_saved > 0" | bc -l))); then
-		echo "Space saved: ${size_saved}%"
+		log_compress "Space saved: ${size_saved}%"
 	else
-		echo "Space saved: ${size_saved}%"
+		log_compress "Space saved: ${size_saved}%"
 	fi
 
 	# Check if savings are less than 25%
 	if (($(echo "$size_saved < 25" | bc -l))); then
-		echo "Warning: Compression only saved ${size_saved}% of space"
-		echo "Would you like to delete the compressed file and download without compression? (y/n)"
+		log_warning "Compression only saved ${size_saved}% of space"
+		log_question "Would you like to delete the compressed file and download without compression? (y/n)"
 		read -r response
 		if [[ "$response" =~ ^[Yy]$ ]]; then
-			echo "Removing compressed file..."
+			log_info "Removing compressed file..."
 			rm "$output_file"
-			echo "Re-downloading without compression..."
+			log_info "Re-downloading without compression..."
 			# Set compressOption to false for re-download
 			compressOption=false
 			# Re-download without compression
@@ -314,7 +338,7 @@ compress_video() {
 			execute_yt_dlp
 		fi
 	else
-		echo "Successfully compressed file. Saved ${size_saved}% of space"
+		log_success "Successfully compressed file. Saved ${size_saved}% of space"
 	fi
 }
 
@@ -341,14 +365,14 @@ done
 
 # Check if URL is provided before fetching metadata
 if [[ -z "$url" ]]; then
-	echo "Error: Missing URL"
+	log_error "Missing URL"
 	show_help
 	exit 1
 fi
 
 # Fetch JSON metadata once
 json_metadata=$(yt-dlp "$url" -j) || {
-	echo "Error: Failed to fetch JSON metadata"
+	log_error "Failed to fetch JSON metadata"
 	exit 1
 }
 
