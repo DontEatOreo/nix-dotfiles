@@ -222,6 +222,66 @@ format_size() {
 	printf "%.2f %s" "$size" "${units[$power]}"
 }
 
+create_stats_box() {
+	local original_size=$1
+	local compressed_size=$2
+	local size_saved=$3
+
+	# Use tput for better color support
+	local GREEN
+	local RED
+	local WHITE
+	local NC
+	GREEN=$(tput setaf 2)
+	RED=$(tput setaf 1)
+	WHITE=$(tput bold)$(tput setaf 7)
+	NC=$(tput sgr0)
+
+	# Check if terminal supports colors
+	if [[ ! -t 1 ]]; then
+		GREEN="" RED="" WHITE="" NC=""
+	fi
+
+	# Convert sizes to human readable format
+	local original_hr
+	original_hr=$(format_size "$original_size")
+	local compressed_hr
+	compressed_hr=$(format_size "$compressed_size")
+
+	# Create the content strings first
+	local title=" COMPRESSION STATISTICS"
+	local original_line=" Original Size:    $original_hr"
+	local compressed_line=" Compressed Size:  $compressed_hr"
+	local saved_line=" Space Saved:      $size_saved%"
+
+	# Calculate required width based on longest line
+	local min_width=40 # Minimum width for aesthetics
+	local max_len=0
+	for line in "$title" "$original_line" "$compressed_line" "$saved_line"; do
+		local len=${#line}
+		((len > max_len)) && max_len=$len
+	done
+
+	# Add padding for box characters and spacing
+	local width=$((max_len + 4))
+	((width < min_width)) && width=$min_width
+
+	local horizontal_line
+	horizontal_line=$(printf '─%.0s' $(seq 1 $((width - 2))))
+	local middle_line
+	middle_line=$(printf '─%.0s' $(seq 1 $((width - 2))))
+
+	printf '\n'
+	printf "${WHITE}╭%s╮${NC}\n" "$horizontal_line"
+	printf "${WHITE}│${NC}%-*s${WHITE}│${NC}\n" "$((width - 2))" "$title"
+	printf "${WHITE}│${NC}%s${WHITE}│${NC}\n" "$middle_line"
+	printf "${WHITE}│${NC}${RED}%-*s${NC}${WHITE}│${NC}\n" "$((width - 2))" "$original_line"
+	printf "${WHITE}│${NC}${GREEN}%-*s${NC}${WHITE}│${NC}\n" "$((width - 2))" "$compressed_line"
+	printf "${WHITE}│${NC}${GREEN}%-*s${NC}${WHITE}│${NC}\n" "$((width - 2))" "$saved_line"
+	printf "${WHITE}╰%s╯${NC}\n" "$horizontal_line"
+	printf '\n'
+}
+
 compress_video() {
 	local temp_dir="$1"
 	local input_file output_file
@@ -311,16 +371,11 @@ compress_video() {
 	# Get compressed file size and calculate savings
 	local compressed_size
 	compressed_size=$(get_file_size "$output_file")
-	log_compress "Compressed file size: $(format_size "$compressed_size")"
 
 	local size_saved
 	size_saved=$(echo "scale=2; ($original_size - $compressed_size) * 100 / $original_size" | bc)
 
-	if (($(echo "$size_saved > 0" | bc -l))); then
-		log_compress "Space saved: ${size_saved}%"
-	else
-		log_compress "Space saved: ${size_saved}%"
-	fi
+	create_stats_box "$original_size" "$compressed_size" "$size_saved"
 
 	# Check if savings are less than 25%
 	if (($(echo "$size_saved < 25" | bc -l))); then
@@ -337,8 +392,6 @@ compress_video() {
 			OUTPUT_ARGS=(-o "%(display_id)s${time_range_suffix}.%(ext)s")
 			execute_yt_dlp
 		fi
-	else
-		log_success "Successfully compressed file. Saved ${size_saved}% of space"
 	fi
 }
 
