@@ -25,12 +25,12 @@
             catppuccin = {
               enable = true;
               flavor = "frappe";
-              accent = "blue";
+              accent = "teal";
             };
           }
           {
             home.file.".warp/themes".source =
-              (pkgs.callPackage ../../modules/home-manager/terminals/warp-terminal-catppuccin.nix {
+              (pkgs.callPackage ../../modules/home-manager/custom/warp-terminal-catppuccin.nix {
                 inherit (config.catppuccin) accent;
               }).outPath
               + "/share/warp/themes";
