@@ -62,7 +62,7 @@ cutOption=false
 compressOption=false
 crf=26
 format=""
-final_args="--ignore-config"
+declare -a final_args=("--ignore-config")
 json_metadata=""
 
 # Format to arguments mapping
@@ -98,7 +98,7 @@ parse_arguments() {
 		show_help
 		exit 0
 	else
-		final_args+=" $argument"
+		final_args+=("$argument")
 	fi
 }
 
@@ -183,14 +183,12 @@ execute_yt_dlp() {
 		OUTPUT_ARGS=(-o "%(display_id)s.%(ext)s") # When no time range is provided
 	fi
 
-	IFS=' ' read -r -a final_args_array <<<"$final_args"
-
 	if [[ "$compressOption" == true ]]; then
 		temp_dir=$(mktemp -d)
 		OUTPUT_ARGS=(-o "$temp_dir/%(display_id)s.%(ext)s")
 	fi
 
-	yt-dlp "$url" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args_array[@]}" \
+	yt-dlp "$url" "${formatArgs[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args[@]}" \
 		--postprocessor-args "ffmpeg:-hide_banner"
 
 	if [[ "$compressOption" == true ]]; then
