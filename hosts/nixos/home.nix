@@ -1,4 +1,5 @@
 {
+  pkgs,
   inputs,
   system,
   username,
@@ -28,7 +29,6 @@
               accent = "blue";
             };
           }
-
           {
             hm = {
               bash.enable = true;

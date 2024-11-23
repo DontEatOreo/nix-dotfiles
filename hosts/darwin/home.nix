@@ -34,6 +34,11 @@
                 inherit (config.catppuccin) accent;
               }).outPath
               + "/share/warp/themes";
+            home.file."Documents/catppuccin-userstyles.json".source =
+              (pkgs.callPackage ../../modules/home-manager/custom/catppuccin.nix {
+                inherit (config.catppuccin) accent flavor;
+              }).outPath
+              + "/dist/import.json";
           }
 
           {
