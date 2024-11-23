@@ -1,4 +1,5 @@
 {
+  pkgs,
   inputs,
   username,
   system,
@@ -10,7 +11,7 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    users.${username} = {
+    users.${username} = { config, ... }: {
       imports = [
         ../../modules/home-manager/cli
         ../../modules/home-manager/guis
@@ -24,6 +25,13 @@
             flavor = "frappe";
             accent = "blue";
           };
+        }
+        {
+          home.file.".warp/themes".source =
+            (pkgs.callPackage ../../modules/home-manager/terminals/warp-terminal-catppuccin.nix {
+              inherit (config.catppuccin) accent;
+            }).outPath
+            + "/share/warp/themes";
         }
 
         {
