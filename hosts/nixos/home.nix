@@ -9,7 +9,7 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    users.${username} = {
+    users.${username} = { config, ...}: {
       imports = [
         ../../modules/home-manager/browsers
         ../../modules/home-manager/cli
@@ -37,7 +37,18 @@
             fzf.enable = true;
             git.enable = true;
             mpv.enable = true;
-            nixcord.enable = true;
+            nixcord = {
+              enable = true;
+              theme = {
+                dark = {
+                  inherit (config.catppuccin) flavor accent;
+                };
+                light = {
+                  flavor = "latte";
+                  inherit (config.catppuccin) accent;
+                };
+              };
+            };
             ssh.enable = true;
             vscode.enable = true;
             yazi.enable = true;

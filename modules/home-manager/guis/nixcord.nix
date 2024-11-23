@@ -7,13 +7,49 @@
 {
   imports = [ inputs.nixcord.homeManagerModules.nixcord ];
 
-  options.hm.nixcord.enable = lib.mkEnableOption "Enable NixCord";
+  options.hm.nixcord = {
+    enable = lib.mkEnableOption "Enable NixCord";
+    theme = {
+      dark = {
+        flavor = lib.mkOption {
+          type = lib.types.str;
+          default = config.catppuccin.flavor;
+          description = "Catppuccin flavor for dark mode";
+        };
+        accent = lib.mkOption {
+          type = lib.types.str;
+          default = config.catppuccin.accent;
+          description = "Accent color for dark mode";
+        };
+      };
+      light = {
+        flavor = lib.mkOption {
+          type = lib.types.str;
+          default = "latte";
+          description = "Catppuccin flavor for light mode";
+        };
+        accent = lib.mkOption {
+          type = lib.types.str;
+          default = config.catppuccin.accent;
+          description = "Accent color for light mode";
+        };
+      };
+    };
+  };
 
   config = lib.mkIf config.hm.nixcord.enable {
     programs.nixcord = {
       enable = true;
       vesktop.enable = true;
-      quickCss = builtins.readFile ../config/quickCSS.css;
+      quickCss =
+        ''
+          /* ----- CATPPUCCIN THEME ----- */
+          @import url("https://catppuccin.github.io/discord/dist/catppuccin-${config.hm.nixcord.theme.dark.flavor}-${config.hm.nixcord.theme.dark.accent}.theme.css")
+          (prefers-color-scheme: dark);
+          @import url("https://catppuccin.github.io/discord/dist/catppuccin-${config.hm.nixcord.theme.light.flavor}-${config.hm.nixcord.theme.light.accent}.theme.css")
+          (prefers-color-scheme: light);
+        ''
+        + builtins.readFile ../config/quickCSS.css;
       config = {
         useQuickCss = true;
         plugins = {

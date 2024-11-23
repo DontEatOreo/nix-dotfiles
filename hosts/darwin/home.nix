@@ -41,7 +41,19 @@
             fastfetch.enable = true;
             fzf.enable = true;
             git.enable = true;
-            nixcord.enable = true;
+            nixcord = {
+              enable = true;
+              theme = {
+                dark = {
+                  flavor = config.catppuccin.flavor;
+                  accent = config.catppuccin.accent;
+                };
+                light = {
+                  flavor = "latte";
+                  accent = config.catppuccin.accent;
+                };
+              };
+            };
             ssh.enable = true;
             vscode.enable = true;
             yazi.enable = true;
