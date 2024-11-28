@@ -26,7 +26,7 @@
             catppuccin = {
               enable = true;
               flavor = "frappe";
-              accent = "blue";
+              accent = "teal";
             };
           }
           {
