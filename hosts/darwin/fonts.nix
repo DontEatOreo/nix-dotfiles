@@ -2,23 +2,10 @@
 {
   fonts = {
     packages = builtins.attrValues {
-      inherit (pkgs)
-        # Dev
-        fira-code
-        fira-code-symbols
-        monaspace
-        noto-fonts
-        noto-fonts-cjk-sans
-        noto-fonts-emoji
-        ;
-      nerdfonts = pkgs.nerdfonts.override {
-        fonts = [
-          "DroidSansMono"
-          "FiraCode"
-          "Monaspace"
-          "Noto"
-        ];
-      };
+      UbuntuMono = pkgs.nerd-fonts.ubuntu-mono;
+      FiraCode = pkgs.nerd-fonts.fira-code;
+      Monaspace = pkgs.nerd-fonts.monaspace;
+      Noto = pkgs.nerd-fonts.noto;
     };
   };
 }

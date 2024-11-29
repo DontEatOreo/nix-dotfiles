@@ -38,9 +38,9 @@ in
       github-vscode-theme = vscode-marketplace.github.github-vscode-theme;
 
       ## Catppuccin
-      catppuccin-vsc = inputs.catppuccin-vsc.packages.${system}.catppuccin-vsc.override {
-        inherit (config.catppuccin) accent;
-      };
+      # catppuccin-vsc = inputs.catppuccin-vsc.packages.${system}.catppuccin-vsc.override {
+      #   inherit (config.catppuccin) accent;
+      # };
       catppuccin-vsc-icons = vscode-marketplace.catppuccin.catppuccin-vsc-icons;
 
       # Utilities

@@ -69,11 +69,14 @@
       };
     };
     packages = builtins.attrValues {
+      Ubuntu = pkgs.nerd-fonts.ubuntu;
+      UbuntuMono = pkgs.nerd-fonts.ubuntu-mono;
+      UbuntuSans = pkgs.nerd-fonts.ubuntu-sans;
+      FiraCode = pkgs.nerd-fonts.fira-code;
+      Monaspace = pkgs.nerd-fonts.monaspace;
+      Noto = pkgs.nerd-fonts.noto;
+
       inherit (pkgs)
-        fira-code
-        fira-code-symbols
-        monaspace
-        noto-fonts
         noto-fonts-cjk-sans
         noto-fonts-emoji
         twemoji-color-font
@@ -83,15 +86,6 @@
         sf-mono-nerd
         sf-pro-nerd
         ;
-
-      nerfonts = pkgs.nerdfonts.override {
-        fonts = [
-          "DroidSansMono"
-          "FiraCode"
-          "Monaspace"
-          "Noto"
-        ];
-      };
     };
   };
 
