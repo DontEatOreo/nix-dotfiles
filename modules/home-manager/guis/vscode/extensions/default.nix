@@ -1,4 +1,10 @@
-{ inputs, pkgs, ... }:
+{
+  inputs,
+  pkgs,
+  config,
+  system,
+  ...
+}:
 let
   inherit
     (inputs.nix-vscode-extensions.extensions.${pkgs.system}.forVSCodeVersion pkgs.vscode.version)
@@ -32,7 +38,9 @@ in
       github-vscode-theme = vscode-marketplace.github.github-vscode-theme;
 
       ## Catppuccin
-      catppuccin-vsc = pkgs.catppuccin-vsc.override { accent = "blue"; };
+      catppuccin-vsc = inputs.catppuccin-vsc.packages.${system}.catppuccin-vsc.override {
+        inherit (config.catppuccin) accent;
+      };
       catppuccin-vsc-icons = vscode-marketplace.catppuccin.catppuccin-vsc-icons;
 
       # Utilities
