@@ -53,6 +53,9 @@ pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
   buildPhase = ''
     runHook preBuild
 
+    rm -rf ./styles/shinigami-eyes/
+    rm -rf ./styles/gmail/
+
     deno run --allow-read --allow-write --allow-net ./scripts/stylus-import/main.ts
     sed -i \
       -e 's/"default":"mocha"/"default":"'"${flavor}"'"/g' \
