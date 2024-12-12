@@ -35,7 +35,7 @@ let
     (genKeyBind "Move to the top" [ (if isDarwin then "<D-Up>" else "<C-Home>") ] "arrow -100%")
     (genKeyBind "Move to the bottom" [ (if isDarwin then "<D-Down>" else "<C-End>") ] "arrow 100%")
 
-    (genKeyBind "Enter directory" [ "<Right>" ] "plugin --sync smart-enter")
+    (genKeyBind "Enter directory" [ "<Right>" ] "plugin smart-enter")
     (genKeyBind "Exit directory" [ "<Left>" ] "leave")
 
     (genKeyBind "Go to a directory interactively" [

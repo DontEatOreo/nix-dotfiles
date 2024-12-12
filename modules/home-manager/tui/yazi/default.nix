@@ -14,7 +14,6 @@
   config = lib.mkIf config.hm.yazi.enable {
     xdg.configFile = {
       "yazi/plugins/smart-paste.yazi/init.lua".text = builtins.readFile ./plugins/smart-paste.lua;
-      "yazi/plugins/smart-enter.yazi/init.lua".text = builtins.readFile ./plugins/smart-enter.lua;
     };
     home.packages = builtins.attrValues { inherit (pkgs) mediainfo exiftool; };
     programs.yazi = {
@@ -34,6 +33,7 @@
           git = "${pluginsRepo}/git.yazi";
           hide-preview = "${pluginsRepo}/hide-preview.yazi";
           max-preview = "${pluginsRepo}/max-preview.yazi";
+          smart-enter = "${pluginsRepo}/smart-enter.yazi";
         };
       initLua = ''
         require('full-border'):setup()
