@@ -40,6 +40,7 @@
   config = lib.mkIf config.hm.nixcord.enable {
     programs.nixcord = {
       enable = true;
+      discord.vencord.unstable = true;
       vesktop.enable = true;
       quickCss =
         ''
