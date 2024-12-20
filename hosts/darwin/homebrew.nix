@@ -15,7 +15,6 @@ _: {
     ];
     casks = [
       # Browsers
-      "microsoft-edge"
       "brave-browser"
       "zen-browser"
       "mullvad-browser"
