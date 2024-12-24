@@ -23,7 +23,10 @@ in
       hostPlatform = system;
       overlays = [
         inputs.catppuccin-vsc.overlays.default
-      ] ++ (lib.optional isLinux inputs.nur.overlays.default);
+        (final: prev: {
+          neovim = inputs.nixvim.packages.${system}.default;
+        })
+      ] ++ (lib.optional isLinux inputs.nur.overlay);
     };
   };
 }

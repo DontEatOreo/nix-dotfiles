@@ -6,6 +6,7 @@
       delta # Better Diff
       github-copilot-cli # GitHub Copilot CLI
       jq
+      neovim
       nil # Nix language server
       nixfmt-rfc-style
       nixpkgs-review
