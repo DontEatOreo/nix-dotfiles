@@ -1,6 +1,6 @@
 { lib, config, ... }:
 {
-  options.hm.mpv.enable = lib.mkEnableOption "NixCord";
+  options.hm.mpv.enable = lib.mkEnableOption "MPV";
 
   config = lib.mkIf config.hm.mpv.enable {
     programs.mpv = {
