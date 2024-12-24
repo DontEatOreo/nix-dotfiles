@@ -26,14 +26,6 @@
 
 
 
-/* ----- FIX NEW POPUP BG ----- */
-
-[class*="userPopoutOverlayBackground"] {
-  max-height: 60vh;
-}
-
-
-
 /* ----- MUTE CHANNEL LIST EMOJIS ----- */
 
 [class*="modeMuted_"]:has([class^="icon_"]) [class^="name_"] {
