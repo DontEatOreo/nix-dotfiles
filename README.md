@@ -76,9 +76,6 @@ if [! -d "$HOME/.nixpkgs" ]; then
 if
 mv "$HOME/nix-dotfiles" "$HOME/.nixpkgs"
 
-# Install Homebrew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
 # Since the config is flake-based, we will need to temporarily do it the verbose way
 nix --experimental-features 'nix-command flakes' run nix-darwin -- switch --flake "$HOME/.nixpkgs"
 
