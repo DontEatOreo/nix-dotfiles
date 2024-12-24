@@ -34,6 +34,7 @@ in
         shared = {
           nix.enable = true;
           nixpkgs.enable = true;
+          nixpkgs.allowUnfree = true;
         };
       }
     ];

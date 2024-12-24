@@ -11,15 +11,13 @@ in
 {
   options.shared.nixpkgs = {
     enable = lib.mkEnableOption "Nixpkgs";
+    allowUnfree = lib.mkEnableOption "Unfree Packages";
     cudaSupport = lib.mkEnableOption "Cuda";
   };
 
   config = lib.mkIf config.shared.nixpkgs.enable {
     nixpkgs = {
-      config = {
-        allowUnfree = true;
-        cudaSupport = config.shared.nixpkgs.cudaSupport;
-      };
+      config = { inherit (config.shared.nixpkgs) allowUnfree cudaSupport; };
       hostPlatform = system;
       overlays = [
         inputs.catppuccin-vsc.overlays.default
