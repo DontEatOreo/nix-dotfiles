@@ -43,65 +43,6 @@
 
 
 
-/* ----- ANIMATED VOICE CHANNEL ICON ----- */
-
-/* Change the first path definition of the volume icon SVG to be the moving part of my new animated SVG */
-.containerDefault_f6f816:has([class*="voiceUser_"])
-  .iconContainer_d8bfb3
-  svg.icon_d8bfb3
-  path[d^="M15.16"] {
-  d: path(
-    "M15.1 20.75c-.58.14-1.1-.33-1.1-.92v-.03c0-.5.37-.92.85-1.05a7 7 0 0 0 0-13.5A1.11 1.11 0 0 1 14 4.2v-.03c0-.6.52-1.06 1.1-.92a9 9 0 0 1 0 17.5Z"
-  );
-  animation-name: volume-icon-anim;
-  animation-duration: 1.25s;
-  animation-iteration-count: infinite;
-}
-/* Change the second path definition of the volume icon SVG to be the static part of my new animated SVG */
-.containerDefault_f6f816:has([class*="voiceUser_"])
-  .iconContainer_d8bfb3
-  svg.icon_d8bfb3
-  path[d^="M12"] {
-  d: path(
-    "M12 3a1 1 0 0 0-1-1h-.06a1 1 0 0 0-.74.32L5.92 7H3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h2.92l4.28 4.68a1 1 0 0 0 .74.32H11a1 1 0 0 0 1-1V3ZM15.16 16.51c-.57.28-1.16-.2-1.16-.83v-.14c0-.43.28-.8.63-1.02a3 3 0 0 0 0-5.04c-.35-.23-.63-.6-.63-1.02v-.14c0-.63.59-1.1 1.16-.83a5 5 0 0 1 0 9.02Z"
-  );
-}
-/* change color of animation to match Discord's "Live" icon when someone is live-streaming */
-.containerDefault_f6f816:has([class*="live_"], [class*="baseShapeRound_"])
-  .iconContainer_d8bfb3
-  svg.icon_d8bfb3
-  path[d^="M15.16"] {
-  animation-name: volume-icon-anim-live;
-}
-.containerDefault_f6f816:has([class*="live_"], [class*="baseShapeRound_"])
-  .iconContainer_d8bfb3
-  svg.icon_d8bfb3
-  path[d^="M12"] {
-  color: var(--red-400);
-}
-/* Animation when there is someone in a voice channel */
-@keyframes volume-icon-anim {
-  0%,
-  100% {
-    color: transparent;
-  }
-  50% {
-    color: var(--currentColor);
-  }
-}
-/* Animation when there is someone live-streaming in a voice channel */
-@keyframes volume-icon-anim-live {
-  0%,
-  100% {
-    color: transparent;
-  }
-  50% {
-    color: var(--red-400);
-  }
-}
-
-
-
 /* ----- REMOVE APP LAUNCHER ----- */
 [class*="channelAppLauncher_"] {
   display: none;
