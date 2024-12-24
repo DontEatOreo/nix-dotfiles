@@ -12,7 +12,6 @@ in
     modules = [
       ./fonts.nix
       ./home.nix
-      ./homebrew.nix
       ./system.nix
       ./zsh.nix
 
