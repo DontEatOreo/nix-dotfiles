@@ -10,7 +10,7 @@ let
   isLinux = builtins.match ".*linux.*" system != null;
 in
 {
-  options.shared.nix.enable = lib.mkEnableOption "Enable Nix";
+  options.shared.nix.enable = lib.mkEnableOption "Nix";
 
   config = lib.mkIf config.shared.nix.enable {
     nix = {

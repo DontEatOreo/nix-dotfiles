@@ -9,7 +9,7 @@
     ./keybindings.nix
     ./settings.nix
   ];
-  options.hm.yazi.enable = lib.mkEnableOption "Enable Yazi";
+  options.hm.yazi.enable = lib.mkEnableOption "Yazi";
 
   config = lib.mkIf config.hm.yazi.enable {
     xdg.configFile = {

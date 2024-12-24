@@ -14,7 +14,7 @@ let
       ".1password/agent.sock";
 in
 {
-  options.hm.ssh.enable = lib.mkEnableOption "Enable SSH";
+  options.hm.ssh.enable = lib.mkEnableOption "SSH";
 
   config = lib.mkIf config.hm.git.enable {
     home.sessionVariables = {

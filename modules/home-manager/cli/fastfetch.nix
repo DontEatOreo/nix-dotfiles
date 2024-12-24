@@ -1,6 +1,6 @@
 { lib, config, ... }:
 {
-  options.hm.fastfetch.enable = lib.mkEnableOption "Enable Fastfetch";
+  options.hm.fastfetch.enable = lib.mkEnableOption "Fastfetch";
 
   config = lib.mkIf config.hm.fastfetch.enable {
     programs.fastfetch.enable = true;

@@ -23,7 +23,7 @@ let
   isLinux = builtins.match ".*linux.*" system != null;
 in
 {
-  options.hm.dconf.enable = lib.mkEnableOption "Enable Dconf";
+  options.hm.dconf.enable = lib.mkEnableOption "Dconf";
 
   config = lib.mkIf config.hm.dconf.enable {
     assertions = [

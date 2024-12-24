@@ -13,7 +13,7 @@ let
   isLinux = builtins.match ".*linux.*" system != null;
 in
 {
-  options.hm.zsh.enable = lib.mkEnableOption "Enable Declerative Zsh";
+  options.hm.zsh.enable = lib.mkEnableOption "Declerative Zsh";
 
   config = lib.mkIf config.hm.zsh.enable {
     assertions = [

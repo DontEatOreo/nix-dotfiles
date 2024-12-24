@@ -8,7 +8,7 @@
   imports = [ inputs.nixcord.homeManagerModules.nixcord ];
 
   options.hm.nixcord = {
-    enable = lib.mkEnableOption "Enable NixCord";
+    enable = lib.mkEnableOption "NixCord";
     theme = {
       dark = {
         flavor = lib.mkOption {

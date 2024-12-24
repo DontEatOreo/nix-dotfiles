@@ -9,7 +9,7 @@ let
   isLinux = builtins.match ".*linux.*" system != null;
 in
 {
-  options.nixOS.gnome.enable = lib.mkEnableOption "Enable GNOME";
+  options.nixOS.gnome.enable = lib.mkEnableOption "GNOME";
 
   config = lib.mkIf config.nixOS.gnome.enable {
     assertions = [

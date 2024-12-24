@@ -10,8 +10,8 @@ let
 in
 {
   options.shared.nixpkgs = {
-    enable = lib.mkEnableOption "Enable Nixpkgs";
-    cudaSupport = lib.mkEnableOption "Enable Cuda";
+    enable = lib.mkEnableOption "Nixpkgs";
+    cudaSupport = lib.mkEnableOption "Cuda";
   };
 
   config = lib.mkIf config.shared.nixpkgs.enable {

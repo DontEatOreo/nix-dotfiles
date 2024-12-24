@@ -11,7 +11,7 @@ let
   nixConfigPath = if pkgs.stdenvNoCC.hostPlatform.isLinux then "/etc/nixos" else "~/.nixpkgs";
 in
 {
-  options.hm.bash.enable = lib.mkEnableOption "Enable Bash";
+  options.hm.bash.enable = lib.mkEnableOption "Bash";
 
   config = lib.mkIf config.hm.bash.enable {
     programs.bash = {

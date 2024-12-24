@@ -1,6 +1,6 @@
 { lib, config, ... }:
 {
-  options.hm.git.enable = lib.mkEnableOption "Enable Git";
+  options.hm.git.enable = lib.mkEnableOption "Git";
 
   config = lib.mkIf config.hm.git.enable {
     programs = {

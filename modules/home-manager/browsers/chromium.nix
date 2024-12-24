@@ -9,7 +9,7 @@ let
   isLinux = builtins.match ".*linux.*" system != null;
 in
 {
-  options.hm.chromium.enable = lib.mkEnableOption "Enable Chromium";
+  options.hm.chromium.enable = lib.mkEnableOption "Chromium";
 
   config = lib.mkIf config.hm.chromium.enable {
     assertions = [
