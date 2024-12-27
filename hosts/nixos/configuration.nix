@@ -81,11 +81,6 @@
         noto-fonts-emoji
         twemoji-color-font
         ;
-      inherit (inputs.apple-fonts.packages.${system})
-        sf-compact-nerd
-        sf-mono-nerd
-        sf-pro-nerd
-        ;
     };
   };
 
