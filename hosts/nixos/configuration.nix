@@ -62,9 +62,9 @@
   fonts = {
     fontconfig = {
       defaultFonts = {
-        monospace = [ "SFMono Nerd Font" ];
-        sansSerif = [ "SFProText Nerd Font" ];
-        serif = [ "SFProDisplay Nerd Font" ];
+        monospace = [ "Monaspice Kr Nerd Font" ];
+        sansSerif = [ "Noto Nerd Font" ];
+        serif = [ "Noto Nerd Font" ];
         emoji = [ "Twitter Color Emoji" ];
       };
     };
