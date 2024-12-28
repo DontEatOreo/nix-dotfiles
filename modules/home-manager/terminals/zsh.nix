@@ -112,7 +112,7 @@ in
         vim = "nvim";
 
         # Nix
-        update = "nix flake update  ${nixConfigPath}";
+        update = "nix flake update --flake ${nixConfigPath}";
         check = "nix flake check  ${nixConfigPath}";
         rebuild = "nixos-rebuild switch --use-remote-sudo --flake  ${nixConfigPath}";
         test = "nixos-rebuild test --flake  ${nixConfigPath}";

@@ -63,7 +63,7 @@ in
         vim = "nvim";
 
         # Nix
-        update = "nix flake update ${nixConfigPath}";
+        update = "nix flake update --flake ${nixConfigPath}";
         check =
           if pkgs.stdenvNoCC.hostPlatform.isDarwin then
             "darwin-rebuild check --flake ${nixConfigPath}"

@@ -58,7 +58,7 @@ in
       alias vim="nvim";
 
       # Nix
-      alias update="nix flake update ${nixConfigPath}"
+      alias update="nix flake update --flake ${nixConfigPath}"
       alias check="nix flake check ${nixConfigPath}"
       alias rebuild="darwin-rebuild switch --flake ${nixConfigPath}"
 
