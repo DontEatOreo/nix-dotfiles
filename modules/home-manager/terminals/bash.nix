@@ -8,7 +8,11 @@ let
   yt-dlp-script = lib.getExe (
     pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../../../shared/scripts/yt-dlp-script.sh)
   );
-  nixConfigPath = if pkgs.stdenvNoCC.hostPlatform.isLinux then "/etc/nixos" else "~/.nixpkgs";
+  nixConfigPath =
+    if pkgs.stdenvNoCC.hostPlatform.isLinux then
+      "/etc/nixos"
+    else
+      "${config.home.homeDirectory}/.nixpkgs";
 in
 {
   options.hm.bash.enable = lib.mkEnableOption "Bash";

@@ -1,9 +1,15 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  username,
+  ...
+}:
 let
   yt-dlp-script = lib.getExe (
     pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../../shared/scripts/yt-dlp-script.sh)
   );
-  nixConfigPath = "~/.nixpkgs";
+  nixConfigPath = "${config.users.users.${username}.home}/.nixpkgs";
 in
 {
   programs.zsh = {
