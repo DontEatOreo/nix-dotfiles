@@ -10,6 +10,88 @@ let
     pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../../shared/scripts/yt-dlp-script.sh)
   );
   nixConfigPath = "${config.users.users.${username}.home}/.nixpkgs";
+
+  mkAlias = name: value: "alias ${name}=\"${value}\"";
+
+  programAliases = {
+    htop = "btop";
+    neofetch = "fastfetch";
+  };
+
+  fileOpAliases = {
+    ls = "eza --oneline";
+    lt = "eza --oneline --reverse --sort=size";
+    ll = "eza --long";
+    ld = "ls -d .*";
+    mv = "mv -iv";
+    cp = "cp -iv";
+    rm = "rm -v";
+    mkdir = "mkdir -pv";
+    untar = "tar -zxvf";
+  };
+
+  textProcAliases = {
+    grep = "grep --color=auto";
+    diff = "delta";
+  };
+
+  systemAliases = {
+    j = "jobs -l";
+    path = "echo -e $PATH | tr ':' '\n' | nl | sort";
+    myip = "curl ipinfo.io/ip && printf '%s\n'";
+    ports = "ss -tulanp";
+    "xdg-data-dirs" = "echo -e $XDG_DATA_DIRS | tr ':' '\n' | nl | sort";
+    micfix = "sudo killall coreaudiod";
+  };
+
+  timeAliases = {
+    now = "date +'%T'";
+    nowtime = "now";
+    nowdate = "date +'%d-%m-%Y'";
+  };
+
+  editorAliases = {
+    vi = "nvim";
+    vim = "nvim";
+  };
+
+  nixAliases = {
+    update = "nix flake update --flake ${nixConfigPath}";
+    check = "nix flake check ${nixConfigPath}";
+    rebuild = "darwin-rebuild switch --flake ${nixConfigPath}";
+  };
+
+  videoAliases = {
+    m4a = "${yt-dlp-script} m4a";
+    "m4a-cut" = "${yt-dlp-script} m4a-cut";
+    mp3 = "${yt-dlp-script} mp3";
+    "mp3-cut" = "${yt-dlp-script} mp3";
+    mp4 = "${yt-dlp-script} mp4";
+    "mp4-cut" = "${yt-dlp-script} mp4-cut";
+  };
+
+  dirNavAliases = {
+    ".." = "../";
+    ".3" = "../../";
+    ".4" = "../../..";
+    ".5" = "../../../../";
+  };
+
+  mkAliases = aliases: lib.concatStringsSep "\n" (lib.mapAttrsToList mkAlias aliases);
+
+  allAliases = lib.concatStringsSep "\n" (
+    map mkAliases [
+      programAliases
+      fileOpAliases
+      textProcAliases
+      systemAliases
+      timeAliases
+      editorAliases
+      nixAliases
+      videoAliases
+      dirNavAliases
+    ]
+  );
 in
 {
   programs.zsh = {
@@ -24,68 +106,8 @@ in
 
       eval "$(github-copilot-cli alias -- "$0")"
 
-      # Program aliases
-      alias htop="btop"
-      alias neofetch="fastfetch"
-
-      # File Operations
-      alias ls="eza --oneline"
-      alias lt="eza --oneline --reverse --sort=size"
-      alias ll="eza --long"
-      alias ld="ls -d .*"
-      alias mv="mv -iv"
-      alias cp="cp -iv"
-      alias rm="rm -v"
-      alias mkdir="mkdir -pv"
-      alias untar="tar -zxvf"
-
-      # Text Processing
-      alias grep="grep --color=auto"
-      alias diff="delta"
-
-      # Job Control
-      alias j="jobs -l"
-
-      # Math Operations
-      alias bc="bc -l"
-
-      # System Information
-      alias path="echo -e $PATH | tr ':' '\n' | nl | sort"
-
-      # Date and Time
-      alias now="date +'%T'"
-      alias nowtime="now"
-      alias nowdate="date +'%d-%m-%Y'"
-
-      # Editors
-      alias vi="nvim";
-      alias vim="nvim";
-
-      # Nix
-      alias update="nix flake update --flake ${nixConfigPath}"
-      alias check="nix flake check ${nixConfigPath}"
-      alias rebuild="darwin-rebuild switch --flake ${nixConfigPath}"
-
-      # Video
-      alias m4a="${yt-dlp-script} m4a"
-      alias m4a-cut="${yt-dlp-script} m4a-cut"
-      alias mp3="${yt-dlp-script} mp3"
-      alias mp3-cut="${yt-dlp-script} mp3"
-      alias mp4="${yt-dlp-script} mp4"
-      alias mp4-cut="${yt-dlp-script} mp4-cut"
-
-      # Directory Navigation
-      alias ".."="../"
-      alias ".3"="../../"
-      alias ".4"="../../.."
-      alias ".5"="../../../../"
-
-      # Misc
-      alias myip="curl ipinfo.io/ip && printf '%s\n'"
-      alias ports="ss -tulanp"
-      alias xdg-data-dirs="echo -e $XDG_DATA_DIRS | tr ':' '\n' | nl | sort"
-      # Fix for my headphones
-      alias micfix="sudo killall coreaudiod"
+      # Aliases
+      ${allAliases}
     '';
     variables = {
       SHELL = lib.getExe pkgs.zsh;
