@@ -14,11 +14,12 @@ in
 {
   programs.zsh = {
     enableSyntaxHighlighting = true;
-    loginShellInit = ''
-      source ${pkgs.oh-my-zsh}/share/oh-my-zsh/oh-my-zsh.sh
-
+    promptInit = ''
       source ${../../modules/home-manager/config/p10k.zsh}
       source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+    '';
+    interactiveShellInit = ''
+      source ${pkgs.oh-my-zsh}/share/oh-my-zsh/oh-my-zsh.sh
       source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
       eval "$(github-copilot-cli alias -- "$0")"
