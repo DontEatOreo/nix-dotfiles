@@ -86,5 +86,9 @@ in
       # Fix for my headphones
       alias micfix="sudo killall coreaudiod"
     '';
+    variables = {
+      SHELL = lib.getExe pkgs.zsh;
+      ZDOTDIR = config.users.users.${username}.home;
+    };
   };
 }
