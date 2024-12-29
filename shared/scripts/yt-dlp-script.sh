@@ -18,8 +18,7 @@ Options:
 Examples:
 https://example.com/video
 https://example.com/video 30-60
-https://example.com/video 30-60 --no-playlist
-https://example.com/video --no-playlist
+https://example.com/video 30-60 --compress
 https://example.com/video --compress
 https://example.com/video --compress --crf 22
 "
