@@ -13,9 +13,6 @@ let
 in
 {
   programs.zsh = {
-    enable = true;
-    enableCompletion = true;
-    enableBashCompletion = true;
     enableSyntaxHighlighting = true;
     loginShellInit = ''
       source ${pkgs.oh-my-zsh}/share/oh-my-zsh/oh-my-zsh.sh
