@@ -1,5 +1,5 @@
 #! /usr/bin/env nix-shell
-#! nix-shell -i bash -p jq yt-dlp ffmpeg_7-full bc coreutils
+#! nix-shell --pure -i bash -p jq yt-dlp ffmpeg_7-full bc coreutils
 # shellcheck shell=bash
 
 # Help menu
