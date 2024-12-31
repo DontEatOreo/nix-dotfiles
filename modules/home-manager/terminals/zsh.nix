@@ -6,11 +6,8 @@
   ...
 }:
 let
-  yt-dlp-script = lib.getExe (
-    pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../../../shared/scripts/yt-dlp-script.sh)
-  );
-  nixConfigPath = "/etc/nixos";
   isLinux = builtins.match ".*linux.*" system != null;
+  nixConfigPath = "/etc/nixos/";
 in
 {
   options.hm.zsh.enable = lib.mkEnableOption "Declerative Zsh";
@@ -73,68 +70,10 @@ in
           "vscode"
         ];
       };
-      shellAliases = {
-        # Program aliases
-        htop = "btop";
-        neofetch = "fastfetch";
-
-        # File Operations
-        ls = "eza --oneline";
-        lt = "eza --oneline --reverse --sort=size --size";
-        ll = "eza --long";
-        ld = "ls -d .*";
-        mv = "mv -iv";
-        cp = "cp -iv";
-        rm = "rm -v";
-        mkdir = "mkdir -pv";
-        untar = "tar -zxvf";
-
-        # Text Processing
-        grep = "grep --color=auto";
-        diff = "delta";
-
-        # Job Control
-        j = "jobs -l";
-
-        # Math Operations
-        bc = "bc -l";
-
-        # System Information
-        path = "echo -e $PATH | tr ':' '\n' | nl | sort";
-
-        # Date and Time
-        now = "date +'%T'";
-        nowtime = "now";
-        nowdate = "date +'%d-%m-%Y'";
-
-        # Editors
-        vi = "nvim";
-        vim = "nvim";
-
-        # Nix
-        update = "nix flake update --flake ${nixConfigPath}";
-        check = "nix flake check  ${nixConfigPath}";
-        rebuild = "nixos-rebuild switch --use-remote-sudo --flake  ${nixConfigPath}";
-        test = "nixos-rebuild test --flake  ${nixConfigPath}";
-
-        # Video
-        m4a = "${yt-dlp-script} m4a";
-        m4a-cut = "${yt-dlp-script} m4a-cut";
-        mp3 = "${yt-dlp-script} mp3";
-        mp3-cut = "${yt-dlp-script} mp3-cut";
-        mp4 = "${yt-dlp-script} mp4";
-        mp4-cut = "${yt-dlp-script} mp4-cut";
-
-        # Directory Navigation
-        ".." = "../";
-        ".3" = "../../";
-        ".4" = "../../..";
-        ".5" = "../../../../";
-
-        # Misc
-        myip = "curl ipinfo.io/ip && printf '%s\n'";
-        ports = "ss -tulanp";
-        xdg-data-dirs = "echo -e $XDG_DATA_DIRS | tr ':' '\n' | nl | sort";
+      shellAliases = import ../../../shared/aliases.nix {
+        inherit (pkgs) writeScriptBin;
+        inherit (lib) getExe;
+        inherit system nixConfigPath;
       };
     };
   };
