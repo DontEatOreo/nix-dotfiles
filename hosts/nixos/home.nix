@@ -55,6 +55,7 @@
               vscode.enable = true;
               yazi.enable = true;
               zsh.enable = true;
+              zoxide.enable = true;
             };
 
             sops = {

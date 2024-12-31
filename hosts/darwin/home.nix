@@ -64,6 +64,7 @@
               ssh.enable = true;
               vscode.enable = true;
               yazi.enable = true;
+              zoxide.enable = true;
             };
 
             sops = {

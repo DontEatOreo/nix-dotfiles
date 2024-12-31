@@ -34,6 +34,7 @@ in
       source ${pkgs.oh-my-zsh}/share/oh-my-zsh/oh-my-zsh.sh
       source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
+      eval "$(zoxide init zsh)"
       eval "$(github-copilot-cli alias -- "$0")"
 
       # Aliases
