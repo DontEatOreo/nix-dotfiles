@@ -15,7 +15,7 @@
     xdg.configFile = {
       "yazi/plugins/smart-paste.yazi/init.lua".text = builtins.readFile ./plugins/smart-paste.lua;
     };
-    home.packages = builtins.attrValues { inherit (pkgs) mediainfo exiftool; };
+    home.packages = builtins.attrValues { inherit (pkgs) mediainfo exiftool clipboard-jh; };
     programs.yazi = {
       enable = true;
       plugins =
@@ -39,6 +39,12 @@
             repo = "starship.yazi";
             rev = "9c37d37099455a44343f4b491d56debf97435a0e";
             hash = "sha256-wESy7lFWan/jTYgtKGQ3lfK69SnDZ+kDx4K1NfY4xf4=";
+          };
+          system-clipboard = pkgs.fetchFromGitHub {
+            owner = "orhnk";
+            repo = "system-clipboard.yazi";
+            rev = "7775a80e8d3391e0b3da19ba143196960a4efc48";
+            hash = "sha256-tfR9XHvRqm7yPbTu/joBDpu908oceaUoBiIImehMobk=";
           };
         };
       initLua = ''

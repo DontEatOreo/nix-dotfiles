@@ -97,7 +97,7 @@ let
     (genKeyBind "Go to the next found" [ "n" ] "find_arrow")
     (genKeyBind "Go to the previous found" [ "N" ] "find_arrow --previous")
 
-    (genKeyBind "Yank a file (copy)" [ "y" ] [ "yank" ])
+    (genKeyBind "Yank a file (copy)" [ "y" ] [ "plugin system-clipboard" ])
     (genKeyBind "Yank a file (cut)" [ "Y" ] "yank --cut")
     (genKeyBind "Cancel the yank status" [ (if isDarwin then "<D-y>" else "<C-y>") ] "unyank")
     (genKeyBind "Copy path to a file" [
