@@ -34,10 +34,17 @@
           hide-preview = "${pluginsRepo}/hide-preview.yazi";
           max-preview = "${pluginsRepo}/max-preview.yazi";
           smart-enter = "${pluginsRepo}/smart-enter.yazi";
+          starship = pkgs.fetchFromGitHub {
+            owner = "Rolv-Apneseth";
+            repo = "starship.yazi";
+            rev = "9c37d37099455a44343f4b491d56debf97435a0e";
+            hash = "sha256-wESy7lFWan/jTYgtKGQ3lfK69SnDZ+kDx4K1NfY4xf4=";
+          };
         };
       initLua = ''
         require('full-border'):setup()
         require("git"):setup()
+        require("starship"):setup()
       '';
     };
   };
