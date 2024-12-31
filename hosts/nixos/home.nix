@@ -20,6 +20,7 @@
           ../../modules/home-manager/guis
           ../../modules/home-manager/terminals
           ../../modules/home-manager/tui
+          ../../modules/home-manager/config/starship.nix
           inputs.sops-nix.homeManagerModules.sops
           inputs.catppuccin.homeManagerModules.catppuccin
           {
@@ -52,6 +53,7 @@
                 };
               };
               ssh.enable = true;
+              starship.enable = true;
               vscode.enable = true;
               yazi.enable = true;
               zsh.enable = true;
