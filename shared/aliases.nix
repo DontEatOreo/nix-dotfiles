@@ -62,6 +62,8 @@ let
     rm = "rm -v";
     mkdir = "mkdir -pv";
     untar = "tar -zxvf";
+    du = "dust";
+    find = "fd";
   };
 
   programs = {
@@ -70,8 +72,10 @@ let
   };
 
   text = {
-    grep = "grep --color=auto";
+    grep = "rg";
     diff = "delta";
+    cat = "bat";
+    sed = "sd";
   };
 
   video = {
