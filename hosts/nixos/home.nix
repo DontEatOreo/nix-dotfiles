@@ -42,6 +42,7 @@
               chromium.enable = true;
               dconf.enable = true;
               direnv.enable = true;
+              fastfetch.enable = true;
               firefox.enable = true;
               fzf.enable = true;
               git.enable = true;
