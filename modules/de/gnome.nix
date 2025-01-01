@@ -23,7 +23,7 @@ in
       displayManager.gdm.enable = true;
       desktopManager.gnome.enable = true;
     };
-    hardware.pulseaudio.enable = false;
+    services.pulseaudio.enable = false;
     environment = {
       systemPackages = builtins.attrValues {
         inherit (pkgs) wl-clipboard;
