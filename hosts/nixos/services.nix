@@ -51,6 +51,5 @@
         ];
       };
     };
-    ollama.enable = true;
   };
 }
