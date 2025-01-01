@@ -29,6 +29,12 @@
               flavor = "frappe";
               accent = "teal";
             };
+            home.shellAliases = import ../../shared/aliases.nix {
+              inherit (pkgs) writeScriptBin;
+              inherit (pkgs.lib) getExe;
+              inherit system;
+              nixConfigPath = "/etc/nixos";
+            };
           }
           {
             hm = {

@@ -7,7 +7,6 @@
 }:
 let
   isLinux = builtins.match ".*linux.*" system != null;
-  nixConfigPath = "/etc/nixos/";
 in
 {
   options.hm.zsh.enable = lib.mkEnableOption "Declerative Zsh";
@@ -59,11 +58,6 @@ in
           "ssh"
           "vscode"
         ];
-      };
-      shellAliases = import ../../../shared/aliases.nix {
-        inherit (pkgs) writeScriptBin;
-        inherit (lib) getExe;
-        inherit system nixConfigPath;
       };
     };
   };

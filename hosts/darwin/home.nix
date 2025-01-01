@@ -30,16 +30,25 @@
             };
           }
           {
-            home.file.".warp/themes".source =
-              (pkgs.callPackage ../../modules/home-manager/custom/warp-terminal-catppuccin.nix {
-                inherit (config.catppuccin) accent;
-              }).outPath
-              + "/share/warp/themes";
-            home.file."Documents/catppuccin-userstyles.json".source =
-              (pkgs.callPackage ../../modules/home-manager/custom/catppuccin-userstyles.nix {
-                inherit (config.catppuccin) accent flavor;
-              }).outPath
-              + "/dist/import.json";
+            home = {
+              file.".warp/themes".source =
+                (pkgs.callPackage ../../modules/home-manager/custom/warp-terminal-catppuccin.nix {
+                  inherit (config.catppuccin) accent;
+                }).outPath
+                + "/share/warp/themes";
+              file."Documents/catppuccin-userstyles.json".source =
+                (pkgs.callPackage ../../modules/home-manager/custom/catppuccin-userstyles.nix {
+                  inherit (config.catppuccin) accent flavor;
+                }).outPath
+                + "/dist/import.json";
+
+              shellAliases = import ../../shared/aliases.nix {
+                inherit (pkgs) writeScriptBin;
+                inherit (pkgs.lib) getExe;
+                inherit system;
+                nixConfigPath = "${config.home.homeDirectory}/.nixpkgs/";
+              };
+            };
           }
 
           {
