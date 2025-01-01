@@ -26,7 +26,7 @@ in
             config.theme = lib.mkForce "decay";
           };
         })
-      ] ++ (lib.optional isLinux inputs.nur.overlay);
+      ] ++ (lib.optional isLinux inputs.nur.overlays.default);
     };
   };
 }
