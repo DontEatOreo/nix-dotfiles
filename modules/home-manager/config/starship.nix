@@ -23,12 +23,12 @@
         "$time"
         "$battery"
         "$line_break"
+        "$sudo"
         "\${custom.yazi}"
         "$character"
         "$command_timeout"
         "$git_commit"
         "$package"
-        "$sudo"
       ];
 
       os = {
