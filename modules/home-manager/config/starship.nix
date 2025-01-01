@@ -23,6 +23,7 @@
         "$time"
         "$battery"
         "$line_break"
+        "\${custom.yazi}"
         "$character"
         "$command_timeout"
         "$git_commit"
@@ -78,6 +79,14 @@
         full_symbol = " ";
         charging_symbol = "󰂄 ";
         empty_symbol = " ";
+      };
+
+      custom.yazi = {
+        when = ''test -n "$YAZI_LEVEL"'';
+        description = "Indicate when the shell was launched by `yazi`";
+        symbol = "󰇥 Yazi ";
+        style = "bold yellow";
+        format = "in [$symbol]($style)";
       };
     };
   };
