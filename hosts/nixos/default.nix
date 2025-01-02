@@ -52,8 +52,6 @@ in
           defaultSopsFile = ../../secrets/secrets.yaml;
         };
       }
-
-      inputs.xremap-flake.nixosModules.default
     ];
   };
 }
