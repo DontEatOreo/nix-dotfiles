@@ -224,17 +224,31 @@ create_stats_box() {
 	local compressed_size=$2
 	local size_saved=$3
 
-	# Use tput for better color support
-	local GREEN
-	local RED
-	local WHITE
-	local NC
-	GREEN=$(tput setaf 2)
-	RED=$(tput setaf 1)
-	WHITE=$(tput bold)$(tput setaf 7)
-	NC=$(tput sgr0)
+	# Default to ANSI color codes as fallback
+	local GREEN RED WHITE NC
+	GREEN='\033[0;32m'
+	RED='\033[0;31m'
+	WHITE='\033[1;37m'
+	NC='\033[0m'
 
-	# Check if terminal supports colors
+	if command -v tput >/dev/null 2>&1; then
+		if ! GREEN=$(tput setaf 2 2>/dev/null); then
+			echo "[warning] tput setaf 2 failed, using fallback colors" >&2
+		fi
+		if ! RED=$(tput setaf 1 2>/dev/null); then
+			echo "[warning] tput setaf 1 failed, using fallback colors" >&2
+		fi
+		if ! WHITE=$(tput bold 2>/dev/null && tput setaf 7 2>/dev/null); then
+			echo "[warning] tput bold/setaf 7 failed, using fallback colors" >&2
+		fi
+		if ! NC=$(tput sgr0 2>/dev/null); then
+			echo "[warning] tput sgr0 failed, using fallback colors" >&2
+		fi
+	else
+		echo "[warning] tput not found, using fallback colors" >&2
+	fi
+
+	# Disable colors if not in a terminal
 	if [[ ! -t 1 ]]; then
 		GREEN="" RED="" WHITE="" NC=""
 	fi
