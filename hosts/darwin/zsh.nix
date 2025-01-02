@@ -38,6 +38,9 @@ in
 
       # Aliases
       ${aliasesToString shellAliases}
+
+      # macOS Specific Aliases
+      alias "micfix"="sudo killall coreaudiod"
     '';
     variables = {
       SHELL = lib.getExe pkgs.zsh;
