@@ -13,6 +13,7 @@
         secToMin 10;
 
       format = lib.concatStrings [
+        "$shell"
         "$os"
         "$directory"
         "$git_branch"
@@ -21,6 +22,7 @@
         "$cmd_duration"
         "$status"
         "$time"
+        "$nix_shell"
         "$battery"
         "$line_break"
         "$sudo"
@@ -28,22 +30,35 @@
         "$character"
         "$command_timeout"
         "$git_commit"
-        "$package"
       ];
+
+      shell = {
+        disabled = false;
+        style = "cyan bold";
+        fish_indicator = "λ";
+        powershell_indicator = ">_";
+        bash_indicator = "$";
+        zsh_indicator = "%";
+        format = "\\[[$indicator]($style)\\] ";
+      };
 
       os = {
         disabled = false;
-        symbols.Macos = " ";
-        symbols.NixOS = " ";
+        style = "bold blue";
+        format = "on [$symbol]($style) ";
+        symbols.Macos = "󰀵";
+        symbols.NixOS = "󱄅";
       };
 
       directory = {
         truncate_to_repo = false;
         fish_style_pwd_dir_length = 1;
-        truncation_length = 17;
         truncation_symbol = "../";
         read_only = "";
+        format = "in [$path]($style)[$read_only]($read_only_style) ";
       };
+
+      git_branch.symbol = "󰊢 ";
 
       git_status = {
         ahead = " \${count} ";
@@ -71,7 +86,7 @@
       time = {
         disabled = false;
         time_format = "%X";
-        format = "at [$time]($style)";
+        format = "at [$time]($style) ";
         style = "bold blue";
       };
 
@@ -79,14 +94,24 @@
         full_symbol = " ";
         charging_symbol = "󰂄 ";
         empty_symbol = " ";
+        threshold = 50;
+      };
+
+      nix_shell = {
+        disabled = false;
+        impure_msg = "[impure shell](bold red)";
+        pure_msg = "[pure shell](bold green)";
+        unknown_msg = "[unknown shell](bold yellow)";
+        style = "bold blue";
+        format = "inside  with $state ";
       };
 
       custom.yazi = {
         when = ''test -n "$YAZI_LEVEL"'';
         description = "Indicate when the shell was launched by `yazi`";
-        symbol = "󰇥 Yazi ";
+        symbol = "󰇥 Yazi";
         style = "bold yellow";
-        format = "in [$symbol]($style)";
+        format = "in [$symbol]($style) ";
       };
     };
   };
