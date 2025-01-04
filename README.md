@@ -84,7 +84,3 @@ darwin-rebuild switch --flake "$HOME/.nixpkgs"
 
 # Or you can also use `rebuild` alias after the initial build
 ```
-
-## Notes
-
-- Special thanks to [@ashuramaruzxc](https://github.com/ashuramaruzxc) for the bash & zsh aliases and for the bash PS1
