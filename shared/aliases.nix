@@ -11,7 +11,15 @@ let
     writeScriptBin "yt-dlp-script" (builtins.readFile ../shared/scripts/yt-dlp-script.sh)
   );
 
-  mergeAttrs = attrsList: builtins.foldl' (acc: set: acc // set) { } attrsList;
+  mergeAttrs =
+    attrsList:
+    builtins.foldl' (
+      acc: set:
+      acc
+      // builtins.mapAttrs (
+        k: v: if builtins.isString v && builtins.match ".*[^ ]$" v != null then "${v} " else v
+      ) set
+    ) { } attrsList;
 
   date = {
     now = "date +'%T'";
