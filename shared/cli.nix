@@ -27,7 +27,7 @@
           dust # du
           eza # ls
           fd # find
-          ripgrep-all # grep
+          ripgrep # grep
           sd # sed
           zoxide # cd
           ;
