@@ -37,7 +37,7 @@
         style = "cyan bold";
         fish_indicator = "λ";
         powershell_indicator = ">_";
-        bash_indicator = "$";
+        bash_indicator = "\\$";
         zsh_indicator = "%";
         format = "\\[[$indicator]($style)\\] ";
       };
