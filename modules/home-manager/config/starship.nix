@@ -94,7 +94,6 @@
         full_symbol = " ";
         charging_symbol = "󰂄 ";
         empty_symbol = " ";
-        threshold = 50;
       };
 
       nix_shell = {
