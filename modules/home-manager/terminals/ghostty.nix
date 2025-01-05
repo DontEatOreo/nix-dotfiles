@@ -89,6 +89,7 @@ let
     misc = [
       (mkSuper "a" "select_all")
       (mkSuperShift "," "reload_config")
+      (mkSuperShift "backspace" "close_window")
     ];
 
     tabs = map (n: mkSuper (toString n) "goto_tab:${toString n}") (lib.range 1 9);
