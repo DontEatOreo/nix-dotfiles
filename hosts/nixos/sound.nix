@@ -20,6 +20,10 @@ _: {
           };
         };
       };
+      # Fixes the "Corsair HS80 Wireless" Volume desync between Headset & System
+      "volume-sync" = {
+        "bluez5.enable-absolute-volume" = true;
+      };
     };
   };
 }
