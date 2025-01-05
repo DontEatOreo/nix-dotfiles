@@ -78,7 +78,7 @@ let
       "${superKey}+shift+equal=increase_font_size:1"
 
       (mkSuper "minus" "decrease_font_size:1")
-      "${superKey}+shift+-minus=decrease_font_size:1"
+      "${superKey}+shift+minus=decrease_font_size:1"
     ];
 
     clipboard = [
