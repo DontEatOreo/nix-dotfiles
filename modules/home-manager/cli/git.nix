@@ -9,9 +9,6 @@
       gh.settings.git_protocol = "ssh";
       git = {
         enable = true;
-        difftastic.enable = true;
-        difftastic.display = "inline";
-        difftastic.background = "dark";
         ignores = [
           ".DS_Store"
           "Thumbs.db"
