@@ -1,7 +1,7 @@
 { username, ... }:
 {
   programs = {
-    steam.enable = true;
+    steam.enable = false;
     zsh.enable = true;
     _1password.enable = true;
     _1password-gui = {
