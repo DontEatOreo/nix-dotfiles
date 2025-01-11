@@ -102,7 +102,7 @@
         pure_msg = "[pure shell](bold green)";
         unknown_msg = "[unknown shell](bold yellow)";
         style = "bold blue";
-        format = "inside  with $state ";
+        format = "inside ( $state) ";
       };
 
       custom.yazi = {
