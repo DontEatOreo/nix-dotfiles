@@ -47,7 +47,8 @@
         style = "bold blue";
         format = "on [$symbol]($style) ";
         symbols.Macos = "󰀵";
-        symbols.NixOS = "󱄅";
+        symbols.NixOS = "";
+        symbols.Linux = "";
       };
 
       directory = {
