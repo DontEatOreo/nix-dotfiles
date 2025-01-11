@@ -14,11 +14,7 @@ in
 
       # JS & TS
       vscode-eslint = vscode-marketplace.dbaeumer.vscode-eslint;
-      ## Convert JSON objects to TypeScript interfaces
-      json2ts = vscode-marketplace.gregorbiswanger.json2ts;
       vscode-language-babel = vscode-marketplace.mgmcdermott.vscode-language-babel;
-      vscode-typescript-next = vscode-marketplace.ms-vscode.vscode-typescript-next;
-      autoimport = vscode-marketplace.steoates.autoimport;
 
       # Nix
       nix = vscode-marketplace.bbenoist.nix;
