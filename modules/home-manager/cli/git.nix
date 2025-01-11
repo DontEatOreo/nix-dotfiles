@@ -22,6 +22,8 @@
           key = "0DB5361BEEE530AB";
         };
       };
+      vscode.userSettings."git.enableCommitSigning" =
+        if config.programs.git.signing.signByDefault then true else false;
     };
   };
 }
