@@ -45,10 +45,9 @@
       os = {
         disabled = false;
         style = "bold blue";
-        format = "on [$symbol]($style) ";
-        symbols.Macos = "󰀵";
-        symbols.NixOS = "";
-        symbols.Linux = "";
+        symbols.Macos = "󰀵 ";
+        symbols.NixOS = " ";
+        symbols.Linux = " ";
       };
 
       directory = {
