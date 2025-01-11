@@ -1,7 +1,7 @@
 { lib, config, ... }:
 {
   imports = [
-    ./extensions
+    ./extensions.nix
     ./settings.nix
   ];
 
