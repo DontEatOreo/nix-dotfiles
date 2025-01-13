@@ -65,6 +65,7 @@
                 };
               };
               ssh.enable = true;
+              nushell.enable = true;
               starship.enable = true;
               vscode.enable = true;
               yazi.enable = true;

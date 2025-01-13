@@ -26,7 +26,6 @@
         "$battery"
         "$line_break"
         "$sudo"
-        "\${custom.yazi}"
         "$character"
         "$command_timeout"
         "$git_commit"
@@ -39,6 +38,7 @@
         powershell_indicator = ">_";
         bash_indicator = "\\$";
         zsh_indicator = "%";
+        nu_indicator = ">";
         format = "\\[[$indicator]($style)\\] ";
       };
 
@@ -103,14 +103,6 @@
         unknown_msg = "[unknown shell](bold yellow)";
         style = "bold blue";
         format = "inside ( $state) ";
-      };
-
-      custom.yazi = {
-        when = ''test -n "$YAZI_LEVEL"'';
-        description = "Indicate when the shell was launched by `yazi`";
-        symbol = "󰇥 Yazi";
-        style = "bold yellow";
-        format = "in [$symbol]($style) ";
       };
     };
   };

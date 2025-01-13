@@ -18,6 +18,7 @@
           ../../modules/home-manager/cli
           ../../modules/home-manager/guis
           ../../modules/home-manager/terminals/bash.nix
+          ../../modules/home-manager/terminals/nushell.nix
           ../../modules/home-manager/tui
           ../../modules/home-manager/config/starship.nix
           inputs.sops-nix.homeManagerModules.sops
@@ -71,6 +72,7 @@
                   };
                 };
               };
+              nushell.enable = true;
               ssh.enable = true;
               starship.enable = true;
               vscode.enable = true;
