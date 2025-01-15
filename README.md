@@ -74,7 +74,8 @@ git clone "https://github.com/DontEatOreo/nix-dotfiles.git" "$HOME"
 if [! -d "$HOME/.nixpkgs" ]; then
     mkdir -p "$HOME/.nixpkgs"
 if
-mv "$HOME/nix-dotfiles" "$HOME/.nixpkgs"
+mv "$HOME/nix-dotfiles/"* "$HOME/.nixpkgs/"
+rm -rf "$HOME/nix-dotfiles"
 
 # Since the config is flake-based, we will need to temporarily do it the verbose way
 nix --experimental-features 'nix-command flakes' run nix-darwin -- switch --flake "$HOME/.nixpkgs"
