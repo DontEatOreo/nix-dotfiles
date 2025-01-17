@@ -40,6 +40,7 @@ let
     v = "nvim";
     vi = "nvim";
     vim = "nvim";
+    h = "hx";
   };
 
   misc = {

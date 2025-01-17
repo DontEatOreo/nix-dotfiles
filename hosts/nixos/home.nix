@@ -51,6 +51,7 @@
                 theme.flavor = config.catppuccin.flavor;
               };
               git.enable = true;
+              helix.enable = true;
               mpv.enable = true;
               nixcord = {
                 enable = true;

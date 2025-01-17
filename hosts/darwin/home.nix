@@ -59,6 +59,7 @@
               fastfetch.enable = true;
               fzf.enable = true;
               git.enable = true;
+              helix.enable = true;
               nixcord = {
                 enable = true;
                 theme = {

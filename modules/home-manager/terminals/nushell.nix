@@ -29,6 +29,7 @@ in
         v = "nvim";
         vi = "nvim";
         vim = "nvim";
+        h = "hx";
 
         # Operations
         ll = "ls";
