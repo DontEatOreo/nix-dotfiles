@@ -66,7 +66,7 @@ in
         "mp3-cut" = "${yt-dlp-script} mp3-cut";
         mp4 = "${yt-dlp-script} mp4";
         "mp4-cut" = "${yt-dlp-script} mp4-cut";
-      };
+      } // lib.optionalAttrs isDarwin { micfix = "sudo killall coreaudiod"; };
 
       plugins = builtins.attrValues {
         inherit (pkgs.nushellPlugins)
