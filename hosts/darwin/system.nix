@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+_: {
   launchd.user.agents."capslock-escape-swap" = {
     serviceConfig = {
       ProgramArguments =
@@ -84,7 +83,6 @@
         wvous-br-corner = 1;
       };
     };
-    activationScripts.postActivation.text = ''sudo chsh -s ${pkgs.zsh}/bin/zsh''; # Set Default Shell
 
     # Used for backwards compatibility, please read the changelog before changing.
     # $ darwin-rebuild changelog
