@@ -45,7 +45,6 @@ in
     variables = {
       SHELL = lib.getExe pkgs.zsh;
       ZDOTDIR = config.users.users.${username}.home;
-      MANPAGER = "nvim +Man!";
     };
   };
 }

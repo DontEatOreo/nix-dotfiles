@@ -37,9 +37,9 @@ let
   };
 
   editors = {
-    v = "nvim";
-    vi = "nvim";
-    vim = "nvim";
+    v = "hx";
+    vi = "hx";
+    vim = "hx";
     h = "hx";
   };
 

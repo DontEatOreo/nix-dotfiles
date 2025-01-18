@@ -26,9 +26,9 @@ in
         dc = "zi";
 
         # Editors
-        v = "nvim";
-        vi = "nvim";
-        vim = "nvim";
+        v = "hx";
+        vi = "hx";
+        vim = "hx";
         h = "hx";
 
         # Operations
@@ -79,10 +79,10 @@ in
 
       configFile.text = ''
         # Generic
-        $env.EDITOR = "nvim";
-        $env.VISUAL = "nvim";
+        $env.EDITOR = "hx";
+        $env.VISUAL = "hx";
         $env.config.show_banner = false;
-        $env.config.buffer_editor = "nvim";
+        $env.config.buffer_editor = "hx";
 
         # Vi
         $env.config.edit_mode = "vi";

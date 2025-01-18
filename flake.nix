@@ -22,9 +22,6 @@
 
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
-    nixvim.url = "github:elythh/nixvim";
-    nixvim.inputs.nixpkgs.follows = "nixpkgs";
-
     nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
     nix-vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
     nix-vscode-extensions.inputs.flake-compat.follows = "";

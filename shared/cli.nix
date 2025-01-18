@@ -33,8 +33,7 @@
           ;
       };
     variables = {
-      EDITOR = "nvim";
-      MANPAGER = "nvim +Man\!";
+      EDITOR = "hx";
     };
   };
 }

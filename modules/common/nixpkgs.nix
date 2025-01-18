@@ -21,11 +21,6 @@ in
       hostPlatform = system;
       overlays = [
         inputs.catppuccin-vsc.overlays.default
-        (final: prev: {
-          neovim = inputs.nixvim.packages.${system}.default.extend {
-            config.theme = lib.mkForce "decay";
-          };
-        })
       ] ++ (lib.optional isLinux inputs.nur.overlays.default);
     };
   };
