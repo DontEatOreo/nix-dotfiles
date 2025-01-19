@@ -30,10 +30,6 @@ in
         # Communication Tools
         telegram-desktop
 
-        # Password Management Tools
-        _1password-gui
-        keepassxc
-
         # Multimedia Tools
         pavucontrol
         ;
