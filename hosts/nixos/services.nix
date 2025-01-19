@@ -1,17 +1,11 @@
 _: {
   services = {
-    libinput = {
-      enable = true;
-    };
+    libinput.enable = true;
     xserver = {
+      enable = true;
       videoDrivers = [ "nvidia" ];
-      xkb = {
-        layout = "us";
-      };
-      enable = true;
+      xkb.layout = "us";
     };
-    openssh = {
-      enable = true;
-    };
+    openssh.enable = true;
   };
 }
