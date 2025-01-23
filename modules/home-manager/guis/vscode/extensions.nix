@@ -85,9 +85,6 @@ let
       (mkExt "jnoortheen" "nix-ide")
       (mkExt "kamadorueda" "alejandra")
 
-      # VIM
-      (mkExt "xadillax" "viml")
-
       # Markdown & Docs
       (mkExt "davidanson" "vscode-markdownlint")
       (mkExt "james-yu" "latex-workshop")
