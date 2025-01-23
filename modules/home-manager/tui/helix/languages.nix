@@ -1,18 +1,18 @@
 { pkgs, lib, ... }:
 let
   language = [
-    # {
-    #   name = "python";
-    #   auto-format = true;
-    #   formatter = {
-    #     args = [
-    #       "format"
-    #       "-"
-    #     ];
-    #     command = lib.getExe pkgs.ruff;
-    #   };
-    #   language-servers = [ "ruff-lsp" ];
-    # }
+    {
+      name = "python";
+      auto-format = true;
+      formatter = {
+        args = [
+          "format"
+          "-"
+        ];
+        command = lib.getExe pkgs.ruff;
+      };
+      language-servers = [ "ruff-lsp" ];
+    }
     {
       name = "nix";
       auto-format = true;
@@ -132,19 +132,19 @@ in
         command = lib.getExe pkgs.nil;
         config.nil.formatting.command = [ (lib.getExe pkgs.nixfmt-rfc-style) ];
       };
-      # ruff-lsp = {
-      #   command = lib.getExe pkgs.ruff-lsp;
-      #   config = {
-      #     settings = {
-      #       lint.enable = true;
-      #       organizeImports = true;
-      #       format = {
-      #         enable = true;
-      #         lineLength = 100;
-      #       };
-      #     };
-      #   };
-      # };
+      ruff-lsp = {
+        command = lib.getExe pkgs.ruff-lsp;
+        config = {
+          settings = {
+            lint.enable = true;
+            organizeImports = true;
+            format = {
+              enable = true;
+              lineLength = 100;
+            };
+          };
+        };
+      };
       deno = {
         command = lib.getExe pkgs.deno;
         args = [ "lsp" ];
