@@ -21,8 +21,6 @@ in
       ../../shared/tui.nix
       ../../shared/programs.nix
       {
-        services.nix-daemon.enable = true;
-
         users.users.${username} = {
           name = username;
           home = "/Users/${username}";
