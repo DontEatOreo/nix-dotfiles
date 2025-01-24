@@ -26,6 +26,7 @@ in
         users.users.${username} = {
           name = username;
           home = "/Users/${username}";
+          shell = inputs.nixpkgs.legacyPackages.${system}.zsh;
         };
       }
 
