@@ -1,4 +1,3 @@
----@diagnostic disable: undefined-global
 --- @sync entry
 return {
 	entry = function()

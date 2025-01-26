@@ -116,8 +116,8 @@ let
       "c"
       "n"
     ] "copy name_without_ext")
-    (genKeyBind "Paste a file" [ "p" ] "plugin --sync smart-paste")
-    (genKeyBind "Paste a file (force)" [ "P" ] "plugin --sync smart-paste --force")
+    (genKeyBind "Paste a file" [ "p" ] "plugin smart-paste")
+    (genKeyBind "Paste a file (force)" [ "P" ] "plugin smart-paste --force")
 
     (genKeyBind "Run a shell command" [ ":" ] "shell --interactive")
     (genKeyBind "Create a file (ends with / for directories)" [ "a" ] "create")
