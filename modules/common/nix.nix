@@ -2,11 +2,10 @@
   inputs,
   lib,
   config,
-  system,
   ...
 }:
 let
-  isLinux = builtins.match ".*linux.*" system != null;
+  inherit (config.nixpkgs.hostPlatform) isLinux;
 in
 {
   options.shared.nix.enable = lib.mkEnableOption "Nix";

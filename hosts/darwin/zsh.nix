@@ -3,16 +3,11 @@
   lib,
   config,
   username,
-  system,
   ...
 }:
 let
-  nixConfigPath = "${config.users.users.${username}.home}/.nixpkgs";
-  shellAliases = import ../../shared/aliases.nix {
-    inherit (pkgs) writeScriptBin;
-    inherit (lib) getExe;
-    inherit system nixConfigPath;
-  };
+  nixCfgPath = "${config.users.users.${username}.home}/.nixpkgs";
+  shellAliases = import ../../shared/aliases.nix { inherit pkgs lib nixCfgPath; };
   aliasesToString =
     aliases:
     let

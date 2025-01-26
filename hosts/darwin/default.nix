@@ -1,14 +1,10 @@
 { inputs, ... }:
 let
-  system = "aarch64-darwin";
   username = "anon";
 in
 {
   "anons-Mac-mini" = inputs.nix-darwin.lib.darwinSystem {
-    inherit system;
-    specialArgs = {
-      inherit inputs system username;
-    };
+    specialArgs = { inherit inputs username; };
     modules = [
       ./fonts.nix
       ./home.nix
@@ -21,10 +17,12 @@ in
       ../../shared/tui.nix
       ../../shared/programs.nix
       {
+        nixpkgs.hostPlatform.system = "aarch64-darwin";
+
         users.users.${username} = {
           name = username;
           home = "/Users/${username}";
-          shell = inputs.nixpkgs.legacyPackages.${system}.zsh;
+          shell = inputs.nixpkgs.legacyPackages.aarch64-darwin.zsh;
         };
       }
 

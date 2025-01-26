@@ -1,8 +1,8 @@
 {
   pkgs,
+  lib,
   inputs,
   username,
-  system,
   ...
 }:
 {
@@ -44,10 +44,8 @@
                 + "/dist/import.json";
 
               shellAliases = import ../../shared/aliases.nix {
-                inherit (pkgs) writeScriptBin;
-                inherit (pkgs.lib) getExe;
-                inherit system;
-                nixConfigPath = "${config.home.homeDirectory}/.nixpkgs/";
+                inherit pkgs lib;
+                nixCfgPath = "${config.home.homeDirectory}/.nixpkgs/";
               };
             };
           }
@@ -91,8 +89,6 @@
           }
         ];
       };
-    extraSpecialArgs = {
-      inherit inputs system;
-    };
+    extraSpecialArgs = { inherit inputs; };
   };
 }

@@ -1,14 +1,11 @@
 {
-  writeScriptBin,
-  getExe,
-  system,
-  nixConfigPath,
+  pkgs,
+  lib,
+  nixCfgPath,
 }:
 let
-  isLinux = builtins.match ".*linux.*" system != null;
-
-  yt-dlp-script = getExe (
-    writeScriptBin "yt-dlp-script" (builtins.readFile ../shared/scripts/yt-dlp-script.sh)
+  yt-dlp-script = lib.getExe (
+    pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../shared/scripts/yt-dlp-script.sh)
   );
 
   mergeAttrs =
@@ -49,18 +46,19 @@ let
   };
 
   nix = {
-    update = "nix flake update --flake ${nixConfigPath}";
+    update = "nix flake update --flake ${nixCfgPath}";
     check =
-      if isLinux then
-        "nix flake check ${nixConfigPath}"
+      if pkgs.stdenvNoCC.hostPlatform.isLinux then
+        "nix flake check ${nixCfgPath}"
       else
-        "darwin-rebuild check --flake ${nixConfigPath}";
+        "darwin-rebuild check --flake ${nixCfgPath}";
     rebuild =
-      if isLinux then
-        "nixos-rebuild switch --use-remote-sudo --flake ${nixConfigPath}"
+      if pkgs.stdenvNoCC.hostPlatform.isLinux then
+        "nixos-rebuild switch --use-remote-sudo --flake ${nixCfgPath}"
       else
-        "darwin-rebuild switch --flake ${nixConfigPath}";
-    test = if isLinux then "nixos-rebuild test --flake ${nixConfigPath}" else "true";
+        "darwin-rebuild switch --flake ${nixCfgPath}";
+    test =
+      if pkgs.stdenvNoCC.hostPlatform.isLinux then "nixos-rebuild test --flake ${nixCfgPath}" else "true";
   };
 
   operations = {

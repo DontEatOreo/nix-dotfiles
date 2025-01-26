@@ -2,11 +2,10 @@
   pkgs,
   lib,
   config,
-  system,
   ...
 }:
 let
-  isLinux = builtins.match ".*linux.*" system != null;
+  inherit (config.nixpkgs.hostPlatform) isLinux;
 in
 {
   options.nixOS.gnome.enable = lib.mkEnableOption "GNOME";

@@ -1,7 +1,7 @@
 {
   pkgs,
+  lib,
   inputs,
-  system,
   username,
   ...
 }:
@@ -31,10 +31,8 @@
               accent = "teal";
             };
             home.shellAliases = import ../../shared/aliases.nix {
-              inherit (pkgs) writeScriptBin;
-              inherit (pkgs.lib) getExe;
-              inherit system;
-              nixConfigPath = "/etc/nixos";
+              inherit pkgs lib;
+              nixCfgPath = "/etc/nixos";
             };
           }
           {
@@ -127,8 +125,6 @@
           }
         ];
       };
-    extraSpecialArgs = {
-      inherit inputs system;
-    };
+    extraSpecialArgs = { inherit inputs; };
   };
 }

@@ -1,12 +1,11 @@
 {
-  system,
   inputs,
   config,
   lib,
   ...
 }:
 let
-  isLinux = builtins.match ".*linux.*" system != null;
+  inherit (config.nixpkgs.hostPlatform) isLinux;
 in
 {
   options.shared.nixpkgs = {
@@ -18,7 +17,6 @@ in
   config = lib.mkIf config.shared.nixpkgs.enable {
     nixpkgs = {
       config = { inherit (config.shared.nixpkgs) allowUnfree cudaSupport; };
-      hostPlatform = system;
       overlays = [
         inputs.catppuccin-vsc.overlays.default
       ] ++ (lib.optional isLinux inputs.nur.overlays.default);

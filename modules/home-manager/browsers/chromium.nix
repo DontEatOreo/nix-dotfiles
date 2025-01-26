@@ -2,11 +2,11 @@
   pkgs,
   lib,
   config,
-  system,
+  osConfig,
   ...
 }:
 let
-  isLinux = builtins.match ".*linux.*" system != null;
+  inherit (osConfig.nixpkgs.hostPlatform) isLinux;
 in
 {
   options.hm.chromium.enable = lib.mkEnableOption "Chromium";

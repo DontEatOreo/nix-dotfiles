@@ -1,7 +1,7 @@
 {
   lib,
   config,
-  system,
+  osConfig,
   ...
 }:
 let
@@ -20,7 +20,7 @@ let
         }
       ) range
     );
-  isLinux = builtins.match ".*linux.*" system != null;
+  inherit (osConfig.nixpkgs.hostPlatform) isLinux;
 in
 {
   options.hm.dconf.enable = lib.mkEnableOption "Dconf";
