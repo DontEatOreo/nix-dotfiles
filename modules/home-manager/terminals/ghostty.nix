@@ -108,6 +108,7 @@ in
   config = lib.mkIf config.hm.ghostty.enable {
     programs.ghostty = {
       enable = true;
+      package = if isDarwin then null else pkgs.ghostty;
       enableBashIntegration = true;
       enableZshIntegration = true;
       clearDefaultKeybinds = true;

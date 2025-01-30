@@ -18,6 +18,7 @@
           ../../modules/home-manager/cli
           ../../modules/home-manager/guis
           ../../modules/home-manager/terminals/bash.nix
+          ../../modules/home-manager/terminals/ghostty.nix
           ../../modules/home-manager/terminals/nushell.nix
           ../../modules/home-manager/tui
           ../../modules/home-manager/config/starship.nix
@@ -56,6 +57,10 @@
               direnv.enable = true;
               fastfetch.enable = true;
               fzf.enable = true;
+              ghostty = {
+                enable = true;
+                theme.flavor = config.catppuccin.flavor;
+              };
               git.enable = true;
               helix.enable = true;
               nixcord = {
