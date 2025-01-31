@@ -84,7 +84,6 @@ let
     grep = "rg";
     diff = "delta";
     cat = "bat";
-    sed = "sd";
   };
 
   video = {
