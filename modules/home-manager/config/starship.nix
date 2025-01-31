@@ -46,16 +46,15 @@
         disabled = false;
         style = "bold blue";
         symbols.Macos = "󰀵 ";
-        symbols.NixOS = " ";
-        symbols.Linux = " ";
+        symbols.NixOS = "󱄅 ";
+        symbols.Linux = " ";
       };
 
       directory = {
         truncate_to_repo = false;
         fish_style_pwd_dir_length = 1;
         truncation_symbol = "../";
-        read_only = "";
-        format = "in [$path]($style)[$read_only]($read_only_style) ";
+        format = "in [$path]($style) ";
       };
 
       git_branch.symbol = "󰊢 ";
@@ -69,6 +68,7 @@
         modified = " \${count} ";
         staged = "󰸞 \${count} ";
         conflicted = "󰞇 \${count} ";
+        format = "[\\[ [$all_status$ahead_behind]($style)\\]](bold red) ";
       };
 
       character = {
