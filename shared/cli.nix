@@ -9,7 +9,7 @@
           yt-dlp # Video Downloader
 
           # Images Related
-          gallery-dl # Image Downloader
+          # gallery-dl # Image Downloader
           ghostscript # Interpreter for PostScript and PDF (Convert PDF to Image)
           imagemagick # Image Manipulation
 

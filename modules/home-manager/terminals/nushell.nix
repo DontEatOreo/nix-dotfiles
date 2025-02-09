@@ -73,7 +73,7 @@ in
           formats
           highlight
           query
-          units
+          # units
           ;
       };
 

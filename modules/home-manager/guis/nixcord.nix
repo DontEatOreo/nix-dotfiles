@@ -116,7 +116,6 @@
           noProfileThemes.enable = true;
           normalizeMessageLinks.enable = true;
           noRPC.enable = true;
-          noScreensharePreview.enable = true;
           noTypingAnimation.enable = true;
           noUnblockToJump.enable = true;
           onePingPerDM.enable = true;
