@@ -21,15 +21,6 @@
 
 
 
-/* ----- MUTE CHANNEL LIST EMOJIS ----- */
-
-[class*="modeMuted_"]:has([class^="icon_"]) [class^="name_"] {
-  color: var(--channel-icon);
-  opacity: 40%;
-}
-
-
-
 /* ----- REMOVE APP LAUNCHER ----- */
 [class*="channelAppLauncher_"] {
   display: none;
