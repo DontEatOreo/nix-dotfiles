@@ -15,7 +15,6 @@ in
       ../../shared/dev.nix
       ../../shared/gnuimp.nix
       ../../shared/tui.nix
-      ../../shared/programs.nix
       {
         nixpkgs.hostPlatform.system = "aarch64-darwin";
 

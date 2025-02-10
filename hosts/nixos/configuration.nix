@@ -20,7 +20,6 @@
     ../../shared/cli.nix
     ../../shared/dev.nix
     ../../shared/gnuimp.nix
-    ../../shared/programs.nix
     ../../shared/tui.nix
   ];
 
