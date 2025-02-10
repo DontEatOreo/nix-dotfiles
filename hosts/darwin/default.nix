@@ -13,7 +13,6 @@ in
 
       ../../shared/cli.nix
       ../../shared/dev.nix
-      ../../shared/gnuimp.nix
       ../../shared/tui.nix
       {
         nixpkgs.hostPlatform.system = "aarch64-darwin";

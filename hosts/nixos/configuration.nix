@@ -19,7 +19,6 @@
 
     ../../shared/cli.nix
     ../../shared/dev.nix
-    ../../shared/gnuimp.nix
     ../../shared/tui.nix
   ];
 
