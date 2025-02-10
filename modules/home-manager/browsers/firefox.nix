@@ -34,8 +34,8 @@ in
         };
         search = {
           force = true;
-          default = "Kagi";
-          privateDefault = "Kagi";
+          default = "Google";
+          privateDefault = "Google";
           order = [
             "GitHub"
             "Google"
