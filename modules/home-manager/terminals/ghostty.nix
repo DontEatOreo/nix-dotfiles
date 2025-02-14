@@ -118,6 +118,7 @@ in
           ## Font
           font-family = "MonaspiceKr Nerd Font";
           font-size = 18;
+          command = "${lib.getExe pkgs.zsh} -l -c 'nu -l -i'";
 
           ## Theme
           theme = "catppuccin-${config.hm.ghostty.theme.flavor}";
