@@ -9,6 +9,7 @@ let
 
   superKey = if isDarwin then "super" else "ctrl";
   mkSuper = k: c: "${superKey}+${k}=${c}";
+  mkSuperPerf = k: c: "performable:${superKey}+${k}=${c}";
   mkSuperShift = k: c: "${superKey}+shift+${k}=${c}";
   mkSuperShiftNested =
     p: k: c:
@@ -82,8 +83,8 @@ let
     ];
 
     clipboard = [
-      (mkSuperShift "c" "copy_to_clipboard")
-      (mkSuperShift "v" "paste_from_clipboard")
+      (mkSuperPerf "c" "copy_to_clipboard")
+      (mkSuperPerf "v" "paste_from_clipboard")
     ];
 
     misc = [
