@@ -41,7 +41,6 @@
     programs.nixcord = {
       enable = true;
       discord.vencord.unstable = true;
-      vesktop.enable = true;
       quickCss =
         ''
           /* ----- CATPPUCCIN THEME ----- */
