@@ -6,7 +6,7 @@
     catppuccin-vsc.url = "github:catppuccin/vscode";
     catppuccin-vsc.inputs.nixpkgs.follows = "nixpkgs";
 
-    dis.url = "github:DontEatOreo/dis";
+    dis.url = "github:DontEatOreo/dis/develop";
     dis.inputs.nixpkgs.follows = "nixpkgs";
 
     home-manager.url = "github:nix-community/home-manager";
