@@ -78,7 +78,6 @@
           fixSpotifyEmbeds.enable = true;
           fixYoutubeEmbeds.enable = true;
           forceOwnerCrown.enable = true;
-          friendInvites.enable = true;
           friendsSince.enable = true;
           fullSearchContext.enable = true;
           gifPaste.enable = true;
@@ -94,7 +93,6 @@
           imageZoom.enable = true;
           implicitRelationships.enable = true;
           memberCount.enable = true;
-          messageLatency.enable = true;
           messageLinkEmbeds.enable = true;
           messageLogger = {
             enable = true;
@@ -102,7 +100,6 @@
             ignoreSelf = true;
             ignoreBots = true;
           };
-          messageTags.enable = true;
           moreUserTags.enable = true;
           mutualGroupDMs.enable = true;
           newGuildSettings.enable = true;
@@ -121,11 +118,8 @@
           pauseInvitesForever.enable = true;
           permissionsViewer.enable = true;
           pictureInPicture.enable = true;
-          pinDMs.enable = true;
           platformIndicators.enable = true;
           previewMessage.enable = true;
-          quickMention.enable = true;
-          reactErrorDecoder.enable = true;
           readAllNotificationsButton.enable = true;
           relationshipNotifier.enable = true;
           replyTimestamp.enable = true;
@@ -158,7 +152,6 @@
           viewIcons.enable = true;
           viewRaw.enable = true;
           voiceChatDoubleClick.enable = true;
-          voiceDownload.enable = true;
           voiceMessages.enable = true;
           volumeBooster.enable = true;
           webScreenShareFixes.enable = true;
