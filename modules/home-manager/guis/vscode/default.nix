@@ -10,8 +10,8 @@
   config = lib.mkIf config.hm.vscode.enable {
     programs.vscode = {
       enable = true;
-      enableUpdateCheck = false;
-      enableExtensionUpdateCheck = false;
+      profiles.default.enableUpdateCheck = false;
+      profiles.default.enableExtensionUpdateCheck = false;
       mutableExtensionsDir = false;
     };
   };

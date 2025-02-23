@@ -207,6 +207,6 @@ let
       ) { } modules) excludePaths;
 in
 {
-  programs.vscode.extensions = mergeFrom "extensions";
-  programs.vscode.userSettings = mergeFrom "settings";
+  programs.vscode.profiles.default.extensions = mergeFrom "extensions";
+  programs.vscode.profiles.default.userSettings = mergeFrom "settings";
 }

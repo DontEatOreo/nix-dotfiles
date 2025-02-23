@@ -1,5 +1,5 @@
 _: {
-  programs.vscode.userSettings = {
+  programs.vscode.profiles.default.userSettings = {
     "editor.fontFamily" = "'MonaspiceKr Nerd Font Mono', 'UbuntuMono Nerd Font', monospace";
     "editor.wordWrap" = "on";
     "editor.mouseWheelZoom" = true;
@@ -12,7 +12,8 @@ _: {
     "window.titleBarStyle" = "custom";
     "window.zoomLevel" = 1.5;
     "terminal.integrated.minimumContrastRatio" = 1;
-    "terminal.integrated.fontFamily" = "'MonaspiceKr Nerd Font Mono', 'UbuntuMono Nerd Font', monospace";
+    "terminal.integrated.fontFamily" =
+      "'MonaspiceKr Nerd Font Mono', 'UbuntuMono Nerd Font', monospace";
 
     "diffEditor.ignoreTrimWhitespace" = false;
 

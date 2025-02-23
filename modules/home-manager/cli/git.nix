@@ -43,7 +43,7 @@ in
               "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
         };
       };
-      vscode.userSettings."git.enableCommitSigning" =
+      vscode.profiles.default.userSettings."git.enableCommitSigning" =
         if config.programs.git.signing.signByDefault then true else false;
     };
   };
