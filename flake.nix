@@ -26,7 +26,7 @@
     nix-vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
     nix-vscode-extensions.inputs.flake-compat.follows = "";
 
-    nixpkgs.url = "github:NixOS/nixpkgs/270d0e770b950b659d271f590793657fe3c1320c";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
     nur.url = "github:nix-community/NUR";
 
