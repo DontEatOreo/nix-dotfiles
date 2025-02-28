@@ -18,6 +18,7 @@ in
   options.hm.nushell.enable = lib.mkEnableOption "Nushell";
 
   config = lib.mkIf config.hm.nushell.enable {
+    programs.carapace.enable = true;
     programs.nushell = {
       enable = true;
       shellAliases = {
