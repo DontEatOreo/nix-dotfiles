@@ -61,13 +61,13 @@ let
       in
       lib.flatten (lib.mapAttrsToList mkSplitCommands directions)
       ++ [
-        (mkSuperShift "t" "new_tab")
-        (mkSuperShift "e" "equalize_splits")
+        (mkSuper "t" "new_tab")
+        (mkSuper "e" "equalize_splits")
       ];
 
     screen = [
       (mkSuper "k" "clear_screen")
-      (mkSuperShift "g" "write_screen_file:open")
+      (mkSuper "g" "write_screen_file:open")
       (mkSuperShift "left" "scroll_page_up")
       (mkSuperShift "right" "scroll_page_down")
     ];
@@ -89,7 +89,7 @@ let
 
     misc = [
       (mkSuper "a" "select_all")
-      (mkSuperShift "," "reload_config")
+      (mkSuper "," "reload_config")
       (mkSuperShift "backspace" "close_window")
     ];
 
