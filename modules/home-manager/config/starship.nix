@@ -68,6 +68,8 @@
         modified = " \${count} ";
         staged = "󰸞 \${count} ";
         conflicted = "󰞇 \${count} ";
+        renamed = " \${count} ";
+        deleted = " \${count} ";
         format = "[\\[ [$all_status$ahead_behind]($style)\\]](bold red) ";
       };
 
