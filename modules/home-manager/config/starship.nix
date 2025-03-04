@@ -19,9 +19,7 @@
         "$git_branch"
         "$git_state"
         "$git_status"
-        "$cmd_duration"
         "$status"
-        "$time"
         "$nix_shell"
         "$battery"
         "$line_break"
@@ -29,6 +27,11 @@
         "$character"
         "$command_timeout"
         "$git_commit"
+      ];
+
+      right_format = lib.concatStrings [
+        "$cmd_duration"
+        "$time"
       ];
 
       shell = {
