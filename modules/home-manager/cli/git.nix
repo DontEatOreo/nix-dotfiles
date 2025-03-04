@@ -20,6 +20,8 @@ in
       ${userEmail} ${key}
     '';
 
+    home.packages = builtins.attrValues { inherit (pkgs) watchman; };
+
     programs = {
       gitui.enable = true;
       gh.enable = true;
@@ -45,6 +47,37 @@ in
       };
       vscode.profiles.default.userSettings."git.enableCommitSigning" =
         if config.programs.git.signing.signByDefault then true else false;
+      jujutsu = {
+        enable = true;
+        settings = {
+          core.fsmonitor = "watchman";
+          core.watchman.register_snapshot_trigger = true;
+          user.email = userEmail;
+          user.name = userName;
+          ui = {
+            paginate = "auto";
+            merge-editor = "vscode";
+            diff.format = "git";
+          };
+          git = {
+            sign-on-push = true;
+            auto-local-bookmark = false;
+            push-bookmark-prefix = "donteatoreo/push-";
+            subprocess = true;
+          };
+          signing = {
+            behavior = "drop";
+            backend = "ssh";
+            inherit key;
+            backends.ssh.program =
+              if pkgs.stdenvNoCC.hostPlatform.isLinux then
+                (lib.getExe' pkgs._1password-gui "op-ssh-sign")
+              else
+                "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+            backends.ssh.allowed-signers = "${config.home.homeDirectory}/.ssh/allowed_signers";
+          };
+        };
+      };
     };
   };
 }
