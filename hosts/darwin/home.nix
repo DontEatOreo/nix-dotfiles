@@ -29,6 +29,7 @@
               enable = true;
               flavor = "frappe";
               accent = "teal";
+              ghostty.enable = false;
             };
           }
           {
