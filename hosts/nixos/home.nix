@@ -28,6 +28,7 @@
               enable = true;
               flavor = "frappe";
               accent = "teal";
+              ghostty.enable = false;
             };
             home.shellAliases = import ../../shared/aliases.nix {
               inherit pkgs lib;
