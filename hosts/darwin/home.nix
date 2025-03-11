@@ -58,10 +58,7 @@
               direnv.enable = true;
               fastfetch.enable = true;
               fzf.enable = true;
-              ghostty = {
-                enable = true;
-                theme.flavor = config.catppuccin.flavor;
-              };
+              ghostty.enable = true;
               git.enable = true;
               helix.enable = true;
               nixcord = {

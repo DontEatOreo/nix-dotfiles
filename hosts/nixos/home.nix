@@ -44,10 +44,7 @@
               fastfetch.enable = true;
               firefox.enable = true;
               fzf.enable = true;
-              ghostty = {
-                enable = true;
-                theme.flavor = config.catppuccin.flavor;
-              };
+              ghostty.enable = true;
               git.enable = true;
               helix.enable = true;
               mpv.enable = true;

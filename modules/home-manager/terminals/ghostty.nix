@@ -97,14 +97,7 @@ let
   };
 in
 {
-  options.hm.ghostty = {
-    enable = lib.mkEnableOption "Ghostty";
-    theme.flavor = lib.mkOption {
-      type = lib.types.str;
-      default = config.catppuccin.flavor;
-      description = "Catppuccin flavor for dark mode";
-    };
-  };
+  options.hm.ghostty.enable = lib.mkEnableOption "Ghostty";
 
   config = lib.mkIf config.hm.ghostty.enable {
     programs.ghostty = {
@@ -122,7 +115,7 @@ in
           command = "${lib.getExe pkgs.zsh} -l -c 'nu -l -i'";
 
           ## Theme
-          theme = "catppuccin-${config.hm.ghostty.theme.flavor}";
+          theme = "dark:catppuccin-${config.catppuccin.flavor},light:catppuccin-latte";
 
           ## Scroll
           scrollback-limit =
