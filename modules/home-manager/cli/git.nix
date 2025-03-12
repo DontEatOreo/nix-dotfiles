@@ -63,10 +63,9 @@ in
             sign-on-push = true;
             auto-local-bookmark = false;
             push-bookmark-prefix = "donteatoreo/push-";
-            subprocess = true;
           };
           signing = {
-            behavior = "drop";
+            behavior = "own";
             backend = "ssh";
             inherit key;
             backends.ssh.program =
