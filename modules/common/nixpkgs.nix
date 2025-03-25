@@ -17,9 +17,7 @@ in
   config = lib.mkIf config.shared.nixpkgs.enable {
     nixpkgs = {
       config = { inherit (config.shared.nixpkgs) allowUnfree cudaSupport; };
-      overlays = [
-        inputs.catppuccin-vsc.overlays.default
-      ] ++ (lib.optional isLinux inputs.nur.overlays.default);
+      overlays = [ ] ++ (lib.optional isLinux inputs.nur.overlays.default);
     };
   };
 }

@@ -3,8 +3,6 @@
 
   inputs = {
     catppuccin.url = "github:catppuccin/nix";
-    catppuccin-vsc.url = "github:catppuccin/vscode";
-    catppuccin-vsc.inputs.nixpkgs.follows = "nixpkgs";
 
     dis.url = "github:DontEatOreo/dis/develop";
     dis.inputs.nixpkgs.follows = "nixpkgs";
@@ -24,7 +22,6 @@
 
     nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
     nix-vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
-    nix-vscode-extensions.inputs.flake-compat.follows = "";
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 

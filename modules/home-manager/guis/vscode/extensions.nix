@@ -45,29 +45,10 @@ let
   };
 
   themes = {
-    extensions = [
-      (inputs.catppuccin-vsc.packages.${pkgs.system}.catppuccin-vsc.override {
-        inherit (config.catppuccin) accent;
-      })
-      vscode-marketplace.catppuccin.catppuccin-vsc-icons
-    ];
-    settings =
-      let
-        capitalizeFirst =
-          str:
-          let
-            firstChar = builtins.substring 0 1 str;
-            middlePart = builtins.substring 1 4 str;
-          in
-          if str == "frappe" then
-            (lib.toUpper firstChar) + middlePart + "é"
-          else
-            (lib.toUpper firstChar) + (builtins.substring 1 (builtins.stringLength str) str);
-      in
-      {
-        workbench.iconTheme = "catppuccin-${config.catppuccin.flavor}";
-        workbench.colorTheme = "Catppuccin ${capitalizeFirst config.catppuccin.flavor}";
-      };
+    extensions = [ vscode-marketplace.catppuccin.catppuccin-vsc-icons ];
+    settings = {
+      workbench.iconTheme = "catppuccin-${config.catppuccin.flavor}";
+    };
   };
 
   languages = {
