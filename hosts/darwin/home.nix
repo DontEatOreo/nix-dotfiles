@@ -15,13 +15,13 @@
       { config, ... }:
       {
         imports = [
-          ../../modules/home-manager/cli
-          ../../modules/home-manager/guis
-          ../../modules/home-manager/terminals/bash.nix
-          ../../modules/home-manager/terminals/ghostty.nix
-          ../../modules/home-manager/terminals/nushell.nix
-          ../../modules/home-manager/tui
-          ../../modules/home-manager/config/starship.nix
+          ../../modules/hm/cli
+          ../../modules/hm/guis
+          ../../modules/hm/terminals/bash.nix
+          ../../modules/hm/terminals/ghostty.nix
+          ../../modules/hm/terminals/nushell.nix
+          ../../modules/hm/tui
+          ../../modules/hm/config/starship.nix
           inputs.sops-nix.homeManagerModules.sops
           inputs.catppuccin.homeManagerModules.catppuccin
           {
@@ -35,12 +35,12 @@
           {
             home = {
               file.".warp/themes".source =
-                (pkgs.callPackage ../../modules/home-manager/custom/warp-terminal-catppuccin.nix {
+                (pkgs.callPackage ../../modules/hm/custom/warp-terminal-catppuccin.nix {
                   inherit (config.catppuccin) accent;
                 }).outPath
                 + "/share/warp/themes";
               file."Documents/catppuccin-userstyles.json".source =
-                (pkgs.callPackage ../../modules/home-manager/custom/catppuccin-userstyles.nix {
+                (pkgs.callPackage ../../modules/hm/custom/catppuccin-userstyles.nix {
                   inherit (config.catppuccin) accent flavor;
                 }).outPath
                 + "/dist/import.json";

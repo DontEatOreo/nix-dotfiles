@@ -14,7 +14,7 @@ looking at:
 settings; they're pretty opinionated compared to the macOS defaults, but I think
 they're very sensible
 
-[nixcord.nix](/modules/home-manager/guis/nixcord.nix) - My
+[nixcord.nix](/modules/hm/guis/nixcord.nix) - My
 [Nixcord](https://github.com/KaylorBen/nixcord) config; it has the Catppuccin
 theme and a bunch of QoL (Quality of Life) plugins, making using Discord much
 nicer
@@ -30,11 +30,11 @@ file *(except for vscode)*, so I made my own custom modules to automate the
 creation of the themes. This way, it also allows me to specify the exact theme
 and accents I want, and for it to be downstreamd from the catppuccin module
 
-[catppuccin-userstyles.nix](/modules/home-manager/custom/catppuccin-userstyles.nix) -
+[catppuccin-userstyles.nix](/modules/hm/custom/catppuccin-userstyles.nix) -
 Conveniently enough, Catppuccin has their theme for a bunch of sites. I love
 consistency, so I think it's a must-have, tbh
 
-[warp-terminal-catppuccin.nix](/modules/home-manager/custom/warp-terminal-catppuccin.nix) -
+[warp-terminal-catppuccin.nix](/modules/hm/custom/warp-terminal-catppuccin.nix) -
 Warp Terminal, not much else to say
 
 ## Scripts
@@ -44,7 +44,7 @@ download video in my own "niche" format
 
 [update.sh](/modules/update.sh) - A neat bash script
 I have to update any custom modules I have *(e.g
-[catppuccin-userstyles.nix](/modules/home-manager/custom/catppuccin-userstyles.n
+[catppuccin-userstyles.nix](/modules/hm/custom/catppuccin-userstyles.n
 ix))*
 
 If you want to build my dotfiles, here's how to do it:

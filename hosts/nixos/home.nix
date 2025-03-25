@@ -14,13 +14,13 @@
       { config, ... }:
       {
         imports = [
-          ../../modules/home-manager/browsers
-          ../../modules/home-manager/cli
-          ../../modules/home-manager/config/dconf.nix
-          ../../modules/home-manager/guis
-          ../../modules/home-manager/terminals
-          ../../modules/home-manager/tui
-          ../../modules/home-manager/config/starship.nix
+          ../../modules/hm/browsers
+          ../../modules/hm/cli
+          ../../modules/hm/config/dconf.nix
+          ../../modules/hm/guis
+          ../../modules/hm/terminals
+          ../../modules/hm/tui
+          ../../modules/hm/config/starship.nix
           inputs.sops-nix.homeManagerModules.sops
           inputs.catppuccin.homeManagerModules.catppuccin
           {
