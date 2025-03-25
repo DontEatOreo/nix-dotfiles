@@ -1,32 +1,4 @@
 _: {
-  launchd.user.agents."capslock-escape-swap" = {
-    serviceConfig = {
-      ProgramArguments =
-        let
-          ESC_KEY = "0x700000029";
-          CAPS_LOCK_KEY = "0x700000039";
-        in
-        [
-          "/usr/bin/hidutil"
-          "property"
-          "--set"
-          ''
-            {"UserKeyMapping":[
-              {
-                "HIDKeyboardModifierMappingSrc": ${ESC_KEY},
-                "HIDKeyboardModifierMappingDst": ${CAPS_LOCK_KEY}
-              },
-              {
-                "HIDKeyboardModifierMappingSrc": ${CAPS_LOCK_KEY},
-                "HIDKeyboardModifierMappingDst": ${ESC_KEY}
-              }
-            ]}
-          ''
-        ];
-      RunAtLoad = true;
-    };
-  };
-
   system = {
     # Global macOS System Settings
     defaults = {

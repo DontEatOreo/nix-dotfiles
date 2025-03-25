@@ -33,6 +33,13 @@
             };
           }
           {
+            services.macos-remap-keys.enable = true;
+            services.macos-remap-keys.keyboard = {
+              Capslock = "Escape";
+              Escape = "Capslock";
+            };
+          }
+          {
             home = {
               file.".warp/themes".source =
                 (pkgs.callPackage ../../modules/hm/custom/warp-terminal-catppuccin.nix {
