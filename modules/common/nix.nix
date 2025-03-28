@@ -1,6 +1,7 @@
 {
-  inputs,
+  pkgs,
   lib,
+  inputs,
   config,
   ...
 }:
@@ -11,6 +12,7 @@ in
   options.shared.nix.enable = lib.mkEnableOption "Nix";
 
   config = lib.mkIf config.shared.nix.enable {
+    nix.package = pkgs.nixVersions.latest;
     nix = {
       settings =
         {
