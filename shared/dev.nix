@@ -11,7 +11,6 @@
       delta # Better Diff
       github-copilot-cli # GitHub Copilot CLI
       jq
-      neovim
       nixfmt-rfc-style
       nixpkgs-review
       shellcheck # Warning hints for shell scripts
