@@ -129,7 +129,7 @@ in
         config.enable = true;
       };
       nil = {
-        command = lib.getExe pkgs.nil;
+        command = "nil";
         config.nil.formatting.command = [ (lib.getExe pkgs.nixfmt-rfc-style) ];
       };
       ruff-lsp = {

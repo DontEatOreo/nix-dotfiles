@@ -18,6 +18,9 @@
     nixcord.inputs.flake-compat.follows = "";
     nixcord.inputs.treefmt-nix.follows = "";
 
+    nil.url = "github:oxalica/nil";
+    nil.inputs.nixpkgs.follows = "nixpkgs";
+
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
     nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
