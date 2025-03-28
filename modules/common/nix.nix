@@ -15,7 +15,7 @@ in
       settings =
         {
           # Enable flakes and new 'nix3' command
-          experimental-features = "nix-command flakes";
+          experimental-features = "nix-command flakes pipe-operators";
 
           substituters = [
             "https://devenv.cachix.org"

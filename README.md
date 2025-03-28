@@ -69,7 +69,7 @@ nixos-rebuild switch --use-remote-sudo --flake "/etc/nixos"
 ### macOS (Darwin)
 
 ```bash
-nix --experimental-features 'nix-command flakes' run nix-darwin -- switch --flake "$HOME/.nixpkgs"
+nix --experimental-features 'nix-command flakes pipe-operators' run nix-darwin -- switch --flake "$HOME/.nixpkgs"
 
 darwin-rebuild switch --flake "$HOME/.nixpkgs"
 
