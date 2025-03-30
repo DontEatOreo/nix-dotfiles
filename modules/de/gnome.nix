@@ -26,6 +26,15 @@ in
     environment = {
       systemPackages = builtins.attrValues {
         inherit (pkgs) wl-clipboard;
+        inherit (pkgs)
+          apostrophe # Markdown Editor
+          decibels # Audio Player
+          gnome-obfuscate # Censor Private Info
+          loupe # Image Viewer
+          mousai # Shazam-like
+          resources # Task Manager
+          textpieces
+          ;
         inherit (pkgs.gnomeExtensions) appindicator clipboard-indicator;
       };
       gnome.excludePackages = builtins.attrValues {
