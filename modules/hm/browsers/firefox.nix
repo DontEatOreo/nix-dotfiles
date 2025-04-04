@@ -22,7 +22,7 @@ in
       enable = true;
       profiles.main = {
         isDefault = true;
-        extensions = builtins.attrValues {
+        extensions.packages = builtins.attrValues {
           inherit (pkgs.nur.repos.rycee.firefox-addons)
             ublock-origin # Ad Blocker
             tree-style-tab
@@ -34,14 +34,14 @@ in
         };
         search = {
           force = true;
-          default = "Google";
-          privateDefault = "Google";
+          default = "google";
+          privateDefault = "google";
           order = [
             "GitHub"
-            "Google"
+            "google"
             "Kagi"
             "Nix Packages"
-            "YouTube"
+            "youTube"
           ];
           engines = {
             "GitHub" = {
