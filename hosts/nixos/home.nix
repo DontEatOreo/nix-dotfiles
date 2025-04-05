@@ -22,7 +22,7 @@
           ../../modules/hm/tui
           ../../modules/hm/config/starship.nix
           inputs.sops-nix.homeManagerModules.sops
-          inputs.catppuccin.homeManagerModules.catppuccin
+          inputs.catppuccin.homeModules.catppuccin
           {
             catppuccin = {
               enable = true;

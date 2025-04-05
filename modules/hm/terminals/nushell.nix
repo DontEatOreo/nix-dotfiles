@@ -21,53 +21,55 @@ in
     programs.carapace.enable = true;
     programs.nushell = {
       enable = true;
-      shellAliases = {
-        # Directories
-        cd = "z";
-        dc = "zi";
+      shellAliases =
+        lib.mkForce {
+          # Directories
+          cd = "z";
+          dc = "zi";
 
-        # Editors
-        v = "hx";
-        vi = "hx";
-        vim = "hx";
-        h = "hx";
+          # Editors
+          v = "hx";
+          vi = "hx";
+          vim = "hx";
+          h = "hx";
 
-        # Operations
-        ll = "ls";
-        du = "dust";
+          # Operations
+          ll = "ls";
+          du = "dust";
 
-        # Text Processing
-        grep = "rg";
-        diff = "delta";
-        cat = "open";
-        open = "^open";
-        sed = "sd";
+          # Text Processing
+          grep = "rg";
+          diff = "delta";
+          cat = "open";
+          open = "^open";
+          sed = "sd";
 
-        # Programs
-        htop = "btop";
-        neofetch = "fastfetch";
+          # Programs
+          htop = "btop";
+          neofetch = "fastfetch";
 
-        # Nix
-        update = "nix flake update --flake ${nixConfigPath}";
-        check =
-          if isDarwin then
-            "darwin-rebuild check --flake ${nixConfigPath}"
-          else
-            "nix flake check ${nixConfigPath}";
-        rebuild =
-          if isDarwin then
-            "darwin-rebuild switch --flake ${nixConfigPath}"
-          else
-            "nixos-rebuild switch --use-remote-sudo --flake ${nixConfigPath}";
+          # Nix
+          update = "nix flake update --flake ${nixConfigPath}";
+          check =
+            if isDarwin then
+              "darwin-rebuild check --flake ${nixConfigPath}"
+            else
+              "nix flake check ${nixConfigPath}";
+          rebuild =
+            if isDarwin then
+              "darwin-rebuild switch --flake ${nixConfigPath}"
+            else
+              "nixos-rebuild switch --use-remote-sudo --flake ${nixConfigPath}";
 
-        # Video
-        m4a = "${yt-dlp-script} m4a";
-        "m4a-cut" = "${yt-dlp-script} m4a-cut";
-        mp3 = "${yt-dlp-script} mp3";
-        "mp3-cut" = "${yt-dlp-script} mp3-cut";
-        mp4 = "${yt-dlp-script} mp4";
-        "mp4-cut" = "${yt-dlp-script} mp4-cut";
-      } // lib.optionalAttrs isDarwin { micfix = "sudo killall coreaudiod"; };
+          # Video
+          m4a = "${yt-dlp-script} m4a";
+          "m4a-cut" = "${yt-dlp-script} m4a-cut";
+          mp3 = "${yt-dlp-script} mp3";
+          "mp3-cut" = "${yt-dlp-script} mp3-cut";
+          mp4 = "${yt-dlp-script} mp4";
+          "mp4-cut" = "${yt-dlp-script} mp4-cut";
+        }
+        // lib.optionalAttrs isDarwin { micfix = "sudo killall coreaudiod"; };
 
       plugins = builtins.attrValues {
         inherit (pkgs.nushellPlugins)
