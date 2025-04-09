@@ -32,6 +32,10 @@ in
             violentmonkey # Browser Scripts
             ;
         };
+        settings = {
+          "media.ffmpeg.vaapi.enabled" = true;
+          "media.gpu-process.enabled" = true;
+        };
         search = {
           force = true;
           default = "google";
