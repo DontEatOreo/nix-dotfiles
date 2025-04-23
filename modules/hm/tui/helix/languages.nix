@@ -4,19 +4,12 @@ let
     {
       name = "python";
       auto-format = true;
-      formatter = {
-        args = [
-          "format"
-          "-"
-        ];
-        command = lib.getExe pkgs.ruff;
-      };
-      language-servers = [ "ruff-lsp" ];
+      language-servers = [ "ruff" ];
     }
     {
       name = "nix";
       auto-format = true;
-      formatter.command = lib.getExe pkgs.nixfmt-rfc-style;
+      language-servers = [ "nil" ];
     }
     {
       name = "bash";
@@ -36,15 +29,6 @@ let
         unit = "    ";
       };
       language-servers = [ "deno" ];
-      formatter = {
-        command = lib.getExe pkgs.deno;
-        args = [
-          "fmt"
-          "-"
-          "--options-line-width=100"
-          "--options-indent-width=4"
-        ];
-      };
     }
     {
       name = "typescript";
@@ -54,27 +38,11 @@ let
         unit = "    ";
       };
       language-servers = [ "deno" ];
-      formatter = {
-        command = lib.getExe pkgs.deno;
-        args = [
-          "fmt"
-          "-"
-          "--options-line-width=100"
-          "--options-indent-width=4"
-        ];
-      };
     }
     {
       name = "css";
       auto-format = true;
       language-servers = [ "deno" ];
-      formatter = {
-        command = lib.getExe pkgs.deno;
-        args = [
-          "fmt"
-          "-"
-        ];
-      };
     }
     {
       name = "json";
@@ -84,38 +52,15 @@ let
         unit = "  ";
       };
       language-servers = [ "deno" ];
-      formatter = {
-        command = lib.getExe pkgs.deno;
-        args = [
-          "fmt"
-          "-"
-          "--options-line-width=100"
-          "--options-indent-width=2"
-        ];
-      };
     }
     {
       name = "yaml";
       auto-format = true;
-      formatter = {
-        command = lib.getExe pkgs.yaml-language-server;
-        args = [
-          "--format"
-          "-"
-        ];
-      };
       language-servers = [ "yaml-language-server" ];
     }
     {
       name = "toml";
       auto-format = true;
-      formatter = {
-        command = lib.getExe pkgs.taplo;
-        args = [
-          "fmt"
-          "-"
-        ];
-      };
       language-servers = [ "taplo" ];
     }
   ];
@@ -132,19 +77,18 @@ in
         command = "nil";
         config.nil.formatting.command = [ (lib.getExe pkgs.nixfmt-rfc-style) ];
       };
-      ruff-lsp = {
-        command = lib.getExe pkgs.ruff-lsp;
+      ruff = {
+        command = lib.getExe pkgs.ruff;
+        args = [
+          "server"
+          "--preview"
+        ];
         config = {
-          settings = {
-            lint.enable = true;
-            organizeImports = true;
-            format = {
-              enable = true;
-              lineLength = 100;
-            };
-          };
+          lineLength = 100;
+          lint.extendSelect = [ "I" ];
         };
       };
+
       deno = {
         command = lib.getExe pkgs.deno;
         args = [ "lsp" ];
@@ -152,6 +96,26 @@ in
           enable = true;
           lint = true;
           unstable = true;
+          format = {
+            options = {
+              lineWidth = 100;
+              indentWidth = 2;
+            };
+          };
+          javascript = {
+            format = {
+              options = {
+                indentWidth = 4;
+              };
+            };
+          };
+          typescript = {
+            format = {
+              options = {
+                indentWidth = 4;
+              };
+            };
+          };
           suggest = {
             imports = {
               hosts = {
@@ -192,9 +156,11 @@ in
           "lsp"
           "stdio"
         ];
-        config.formatter = {
-          alignEntries = true;
-          columnWidth = 100;
+        config = {
+          formatter = {
+            alignEntries = true;
+            columnWidth = 100;
+          };
         };
       };
     };
