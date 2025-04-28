@@ -19,10 +19,15 @@ let
     builtins.concatStringsSep "\n" transformed;
 in
 {
-  system.activationScripts.postActivation.text = ''
-    ln -sfn "/etc/zshrc" "${config.users.users.${username}.home}/.zshrc"
-    ln -sfn "/etc/zshenv" "${config.users.users.${username}.home}/.zshenv"
-  '';
+  launchd.user.agents."symlink-zsh-config" = {
+    script = ''
+      ln -sfn "/etc/zprofile" "${config.users.users.${username}.home}/.zprofile"
+      ln -sfn "/etc/zshenv" "${config.users.users.${username}.home}/.zshenv"
+      ln -sfn "/etc/zshrc" "${config.users.users.${username}.home}/.zshrc"
+    '';
+    serviceConfig.RunAtLoad = true;
+    serviceConfig.StartInterval = 0;
+  };
 
   programs.zsh = {
     enableSyntaxHighlighting = true;
