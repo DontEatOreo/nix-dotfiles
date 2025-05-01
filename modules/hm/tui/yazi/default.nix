@@ -23,8 +23,8 @@
           pluginsRepo = pkgs.fetchFromGitHub {
             owner = "yazi-rs";
             repo = "plugins";
-            rev = "a1738e8088366ba73b33da5f45010796fb33221e";
-            hash = "sha256-eiLkIWviGzG9R0XP1Cik3Bg0s6lgk3nibN6bZvo8e9o=";
+            rev = "864a0210d9ba1e8eb925160c2e2a25342031d8d3";
+            hash = "sha256-m3709h7/AHJAtoJ3ebDA40c77D+5dCycpecprjVqj/k=";
           };
         in
         {
@@ -37,8 +37,8 @@
           starship = pkgs.fetchFromGitHub {
             owner = "Rolv-Apneseth";
             repo = "starship.yazi";
-            rev = "c0707544f1d526f704dab2da15f379ec90d613c2";
-            hash = "sha256-H8j+9jcdcpPFXVO/XQZL3zq1l5f/WiOm4YUxAMduSRs=";
+            rev = "6fde3b2d9dc9a12c14588eb85cf4964e619842e6";
+            hash = "sha256-+CSdghcIl50z0MXmFwbJ0koIkWIksm3XxYvTAwoRlDY=";
           };
           system-clipboard = pkgs.fetchFromGitHub {
             owner = "orhnk";
