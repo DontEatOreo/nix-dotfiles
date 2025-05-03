@@ -6,8 +6,7 @@
   ...
 }:
 let
-  nixCfgPath = "${config.users.users.${username}.home}/.nixpkgs";
-  shellAliases = import ../../shared/aliases.nix { inherit pkgs lib nixCfgPath; };
+  shellAliases = (pkgs.callPackage ../../shared/aliases.nix { osConfig = config; }).aliases;
   aliasesToString =
     aliases:
     let

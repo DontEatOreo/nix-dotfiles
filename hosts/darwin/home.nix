@@ -12,7 +12,7 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     users.${username} =
-      { config, ... }:
+      { config, osConfig, ... }:
       {
         imports = [
           ../../modules/hm/cli
@@ -51,14 +51,14 @@
                   inherit (config.catppuccin) accent flavor;
                 }).outPath
                 + "/dist/import.json";
-
-              shellAliases = import ../../shared/aliases.nix {
-                inherit pkgs lib;
-                nixCfgPath = "${config.home.homeDirectory}/.nixpkgs/";
-              };
             };
           }
-
+          {
+            programs.bash.shellAliases =
+              (pkgs.callPackage ../../shared/aliases.nix { inherit osConfig; }).aliases;
+            programs.zsh.shellAliases =
+              (pkgs.callPackage ../../shared/aliases.nix { inherit osConfig; }).aliases;
+          }
           {
             hm = {
               bash.enable = true;

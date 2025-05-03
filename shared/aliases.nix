@@ -1,22 +1,15 @@
 {
-  pkgs,
+  writeScriptBin,
   lib,
-  nixCfgPath,
+  osConfig,
+  ...
 }:
 let
-  yt-dlp-script = lib.getExe (
-    pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../shared/scripts/yt-dlp-script.sh)
-  );
+  inherit (osConfig.nixpkgs.hostPlatform) isLinux;
 
-  mergeAttrs =
-    attrsList:
-    builtins.foldl' (
-      acc: set:
-      acc
-      // builtins.mapAttrs (
-        k: v: if builtins.isString v && builtins.match ".*[^ ]$" v != null then "${v} " else v
-      ) set
-    ) { } attrsList;
+  yt-dlp-script = lib.getExe (
+    writeScriptBin "yt-dlp-script" (builtins.readFile ../shared/scripts/yt-dlp-script.sh)
+  );
 
   date = {
     now = "date +'%T'";
@@ -30,7 +23,7 @@ let
     ".4" = "../../..";
     ".5" = "../../../../";
     cd = "z";
-    dc = "zi";
+    dc = "z";
   };
 
   editors = {
@@ -46,19 +39,14 @@ let
   };
 
   nix = {
-    update = "nix flake update --flake ${nixCfgPath}";
-    check =
-      if pkgs.stdenvNoCC.hostPlatform.isLinux then
-        "nix flake check ${nixCfgPath}"
-      else
-        "darwin-rebuild check --flake ${nixCfgPath}";
+    update = "nix flake update --flake /etc/nixos";
+    check = if isLinux then "nix flake check /etc/nixos" else "darwin-rebuild check --flake /etc/nixos";
     rebuild =
-      if pkgs.stdenvNoCC.hostPlatform.isLinux then
-        "nixos-rebuild switch --use-remote-sudo --flake ${nixCfgPath}"
+      if isLinux then
+        "nixos-rebuild switch --use-remote-sudo --flake /etc/nixos"
       else
-        "darwin-rebuild switch --flake ${nixCfgPath}";
-    test =
-      if pkgs.stdenvNoCC.hostPlatform.isLinux then "nixos-rebuild test --flake ${nixCfgPath}" else "true";
+        "darwin-rebuild switch --flake /etc/nixos";
+    test = if isLinux then "nixos-rebuild test --flake /etc/nixos" else "true";
   };
 
   operations = {
@@ -71,19 +59,11 @@ let
     rm = "rm -v";
     mkdir = "mkdir -pv";
     untar = "tar -zxvf";
-    du = "dust";
-    find = "fd";
   };
 
   programs = {
     htop = "btop";
     neofetch = "fastfetch";
-  };
-
-  text = {
-    grep = "rg";
-    diff = "delta";
-    cat = "bat";
   };
 
   video = {
@@ -95,14 +75,6 @@ let
     mp4-cut = "${yt-dlp-script} mp4-cut";
   };
 in
-mergeAttrs [
-  date
-  directories
-  editors
-  misc
-  nix
-  operations
-  programs
-  text
-  video
-]
+{
+  aliases = date // directories // editors // misc // nix // operations // programs // video;
+}

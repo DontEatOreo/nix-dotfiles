@@ -11,7 +11,7 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     users.${username} =
-      { config, ... }:
+      { config, osConfig, ... }:
       {
         imports = [
           ../../modules/hm/browsers
@@ -30,10 +30,12 @@
               accent = "teal";
               ghostty.enable = false;
             };
-            home.shellAliases = import ../../shared/aliases.nix {
-              inherit pkgs lib;
-              nixCfgPath = "/etc/nixos";
-            };
+          }
+          {
+            programs.bash.shellAliases =
+              (pkgs.callPackage ../../shared/aliases.nix { inherit osConfig; }).aliases;
+            programs.zsh.shellAliases =
+              (pkgs.callPackage ../../shared/aliases.nix { inherit osConfig; }).aliases;
           }
           {
             hm = {
