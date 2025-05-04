@@ -1,7 +1,9 @@
 {
+  inputs,
   pkgs,
   lib,
   config,
+  osConfig,
   ...
 }:
 let
@@ -49,6 +51,7 @@ in
         if config.programs.git.signing.signByDefault then true else false;
       jujutsu = {
         enable = true;
+        package = inputs.jj-vcs.packages.${osConfig.nixpkgs.hostPlatform.system}.jujutsu;
         settings = {
           core.fsmonitor = "watchman";
           core.watchman.register-snapshot-trigger = true;
@@ -74,6 +77,9 @@ in
               else
                 "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
             backends.ssh.allowed-signers = "${config.home.homeDirectory}/.ssh/allowed_signers";
+          };
+          templates = {
+            duplicate_description = "concat(description, \"\\n(cherry picked from commit \", commit_id, \")\")";
           };
         };
       };
