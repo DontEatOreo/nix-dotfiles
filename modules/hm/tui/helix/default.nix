@@ -1,6 +1,8 @@
 {
+  inputs,
   lib,
   config,
+  osConfig,
   ...
 }:
 {
@@ -13,6 +15,7 @@
 
   config = lib.mkIf config.hm.helix.enable {
     programs.helix.enable = true;
+    programs.helix.package = inputs.helix-editor.packages.${osConfig.nixpkgs.hostPlatform.system}.helix;
     programs.helix.defaultEditor = true;
   };
 }

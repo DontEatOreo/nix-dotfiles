@@ -10,6 +10,9 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    helix-editor.url = "github:helix-editor/helix";
+    helix-editor.inputs.nixpkgs.follows = "nixpkgs";
+
     jj-vcs.url = "github:jj-vcs/jj";
     jj-vcs.inputs.nixpkgs.follows = "nixpkgs";
 
