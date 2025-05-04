@@ -67,6 +67,12 @@ in
             auto-local-bookmark = false;
             push-bookmark-prefix = "donteatoreo/push-";
           };
+          aliases = {
+            d = [ "describe" ];
+            p = [ "git push" ];
+            e = [ "edit" ];
+            n = [ "new" ];
+          };
           signing = {
             behavior = "own";
             backend = "ssh";
