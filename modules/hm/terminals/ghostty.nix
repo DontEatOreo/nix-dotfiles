@@ -2,10 +2,11 @@
   pkgs,
   lib,
   config,
+  osConfig,
   ...
 }:
 let
-  inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
+  inherit (osConfig.nixpkgs.hostPlatform) isDarwin;
 
   superKey = if isDarwin then "super" else "ctrl";
   mkSuper = k: c: "${superKey}+${k}=${c}";
@@ -103,48 +104,21 @@ in
     programs.ghostty = {
       enable = true;
       package = if isDarwin then null else pkgs.ghostty;
-      enableBashIntegration = true;
-      enableZshIntegration = true;
       clearDefaultKeybinds = true;
-      settings =
-        {
-          # General
-          ## Font
-          font-family = "MonaspiceKr Nerd Font";
-          font-size = 18;
-          command = "${lib.getExe pkgs.zsh} -l -c 'nu -l -i'";
-
-          ## Theme
-          theme = "dark:catppuccin-${config.catppuccin.flavor},light:catppuccin-latte";
-
-          ## Scroll
-          scrollback-limit =
-            let
-              mkMillion = m: m * 1000000;
-            in
-            mkMillion 100;
-
-          ## Mouse & Cursor
-          cursor-style-blink = false;
-          mouse-scroll-multiplier = 3;
-
-          # Line height
-          adjust-underline-position = 4;
-
-          ## Keybinds
-          keybind = lib.flatten (lib.attrValues mkKeybindings);
-
-          # Misc
-          confirm-close-surface = false;
-          quit-after-last-window-closed = true;
-          clipboard-paste-protection = false;
-        }
-        // lib.optionalAttrs isDarwin {
-          macos-icon = "custom-style";
-          macos-icon-ghost-color = "#81C8BE";
-          macos-icon-screen-color = "#33364A";
-          macos-option-as-alt = true;
-        };
+      settings = lib.optionalAttrs isDarwin { macos-option-as-alt = true; } // {
+        adjust-underline-position = 4;
+        clipboard-paste-protection = false;
+        command = "${lib.getExe pkgs.zsh} -l -c 'nu -l -i'";
+        confirm-close-surface = false;
+        cursor-style-blink = false;
+        font-family = "MonaspiceKr Nerd Font";
+        font-size = 18;
+        keybind = lib.flatten (lib.attrValues mkKeybindings);
+        mouse-scroll-multiplier = 3;
+        quit-after-last-window-closed = true;
+        scrollback-limit = 10 * 10000000;
+        theme = "dark:catppuccin-${config.catppuccin.flavor},light:catppuccin-latte";
+      };
     };
   };
 }
