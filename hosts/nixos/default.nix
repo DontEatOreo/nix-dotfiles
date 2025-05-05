@@ -41,6 +41,7 @@ in
           enable = true;
           flavor = "frappe";
           accent = "teal";
+          mako.enable = false;
         };
       }
       inputs.nur.modules.nixos.default
