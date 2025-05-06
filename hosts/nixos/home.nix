@@ -28,6 +28,8 @@
               enable = true;
               flavor = "frappe";
               accent = "teal";
+              cache.enable = true;
+
               ghostty.enable = false;
             };
           }
