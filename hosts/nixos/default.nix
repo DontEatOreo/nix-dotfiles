@@ -40,6 +40,8 @@ in
           enable = true;
           flavor = "frappe";
           accent = "teal";
+          cache.enable = true;
+
           mako.enable = false;
         };
       }
