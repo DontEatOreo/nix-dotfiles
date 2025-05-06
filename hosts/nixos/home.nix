@@ -39,6 +39,7 @@
           }
           {
             hm = {
+              atuin.enable = true;
               bash.enable = true;
               chromium.enable = true;
               dconf.enable = true;

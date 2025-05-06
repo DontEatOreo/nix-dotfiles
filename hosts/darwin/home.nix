@@ -61,6 +61,7 @@
           }
           {
             hm = {
+              atuin.enable = true;
               bash.enable = true;
               direnv.enable = true;
               fastfetch.enable = true;
