@@ -32,7 +32,6 @@
               cache.enable = true;
 
               ghostty.enable = false;
-              mako.enable = false;
             };
           }
           {

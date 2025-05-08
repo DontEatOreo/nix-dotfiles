@@ -42,7 +42,6 @@ in
           accent = "teal";
           cache.enable = true;
 
-          mako.enable = false;
         };
       }
       inputs.nur.modules.nixos.default
