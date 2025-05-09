@@ -1,54 +1,32 @@
 { pkgs, lib, ... }:
 let
-
   language-server = {
     bash-language-server = {
       args = [ "start" ];
-      command = lib.getExe pkgs.bash-language-server;
+      command = "bash-language-server";
       config.enable = true;
     };
     nil = {
       command = "nil";
-      config.nil.formatting.command = [ (lib.getExe pkgs.nixfmt-rfc-style) ];
+      config.nil.formatting.command = [ "nixfmt" ];
     };
     ruff = {
-      command = lib.getExe pkgs.ruff;
-      args = [
-        "server"
-        "--preview"
-      ];
-      config = {
-        lineLength = 100;
-        lint.extendSelect = [ "I" ];
-      };
+      command = "ruff";
+      args = lib.splitString " " "server --preview";
+      config.lineLength = 100;
+      config.lint.extendSelect = [ "I" ];
     };
     deno = {
-      command = lib.getExe pkgs.deno;
+      command = "deno";
       args = [ "lsp" ];
       config = {
         enable = true;
         lint = true;
         unstable = true;
-        format = {
-          options = {
-            lineWidth = 100;
-            indentWidth = 2;
-          };
-        };
-        javascript = {
-          format = {
-            options = {
-              indentWidth = 4;
-            };
-          };
-        };
-        typescript = {
-          format = {
-            options = {
-              indentWidth = 4;
-            };
-          };
-        };
+        format.options.lineWidth = 100;
+        format.options.indentWidth = 2;
+        javascript.format.options.indentWidth = 4;
+        typescript.format.options.indentWidth = 4;
         suggest = {
           imports = {
             hosts = {
@@ -69,32 +47,21 @@ let
       };
     };
     yaml-language-server = {
-      command = lib.getExe pkgs.yaml-language-server;
+      command = "yaml-language-server";
       args = [ "--stdio" ];
       config = {
         yaml = {
-          format = {
-            enable = true;
-          };
+          format.enable = true;
           validation = true;
-          schemas = {
-            https = true;
-          };
+          schemas.https = true;
         };
       };
     };
     taplo = {
-      command = lib.getExe pkgs.taplo;
-      args = [
-        "lsp"
-        "stdio"
-      ];
-      config = {
-        formatter = {
-          alignEntries = true;
-          columnWidth = 100;
-        };
-      };
+      command = "taplo";
+      args = lib.splitString " " "lsp stdio";
+      config.formatter.alignEntries = true;
+      config.formatter.columnWidth = 100;
     };
   };
   language = [
@@ -112,28 +79,22 @@ let
       name = "bash";
       auto-format = true;
       diagnostic-severity = "warning";
-      formatter = {
-        args = [ "-w" ];
-        command = lib.getExe pkgs.shfmt;
-      };
+      formatter.args = [ "-w" ];
+      formatter.command = "shfmt";
       language-servers = [ "bash-language-server" ];
     }
     {
       name = "javascript";
       auto-format = true;
-      indent = {
-        tab-width = 4;
-        unit = "    ";
-      };
+      indent.tab-width = 4;
+      indent.unit = "    ";
       language-servers = [ "deno" ];
     }
     {
       name = "typescript";
       auto-format = true;
-      indent = {
-        tab-width = 4;
-        unit = "    ";
-      };
+      indent.tab-width = 4;
+      indent.unit = "    ";
       language-servers = [ "deno" ];
     }
     {
@@ -144,10 +105,8 @@ let
     {
       name = "json";
       auto-format = true;
-      indent = {
-        tab-width = 2;
-        unit = "  ";
-      };
+      indent.tab-width = 2;
+      indent.unit = "  ";
       language-servers = [ "deno" ];
     }
     {
@@ -163,5 +122,14 @@ let
   ];
 in
 {
+  home.packages = builtins.attrValues {
+    inherit (pkgs)
+      deno # JS, TS, CSS
+      ruff # Python
+      shfmt # Bash
+      taplo # TOML
+      yaml-language-server
+      ;
+  };
   programs.helix.languages = { inherit language-server language; };
 }
