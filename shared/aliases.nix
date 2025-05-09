@@ -1,5 +1,5 @@
 {
-  writeScriptBin,
+  pkgs,
   lib,
   osConfig,
   ...
@@ -8,7 +8,7 @@ let
   inherit (osConfig.nixpkgs.hostPlatform) isLinux;
 
   yt-dlp-script = lib.getExe (
-    writeScriptBin "yt-dlp-script" (builtins.readFile ../shared/scripts/yt-dlp-script.sh)
+    pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../shared/scripts/yt-dlp-script.sh)
   );
 
   date = {
@@ -74,7 +74,10 @@ let
     mp4 = "${yt-dlp-script} mp4";
     mp4-cut = "${yt-dlp-script} mp4-cut";
   };
+
+  merged = date // directories // editors // misc // nix // operations // programs // video;
 in
 {
-  aliases = date // directories // editors // misc // nix // operations // programs // video;
+  programs.bash.shellAliases = merged;
+  programs.zsh.shellAliases = merged;
 }

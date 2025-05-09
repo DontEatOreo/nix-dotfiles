@@ -22,6 +22,7 @@
           ../../modules/hm/terminals/nushell.nix
           ../../modules/hm/tui
           ../../modules/hm/config/starship.nix
+          ../../shared/aliases.nix
           inputs.sops-nix.homeManagerModules.sops
           inputs.catppuccin.homeModules.catppuccin
           {
@@ -54,12 +55,6 @@
                 }).outPath
                 + "/dist/import.json";
             };
-          }
-          {
-            programs.bash.shellAliases =
-              (pkgs.callPackage ../../shared/aliases.nix { inherit osConfig; }).aliases;
-            programs.zsh.shellAliases =
-              (pkgs.callPackage ../../shared/aliases.nix { inherit osConfig; }).aliases;
           }
           {
             hm = {

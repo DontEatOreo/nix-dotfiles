@@ -6,7 +6,9 @@
   ...
 }:
 let
-  shellAliases = (pkgs.callPackage ../../shared/aliases.nix { osConfig = config; }).aliases;
+  inherit ((pkgs.callPackage ../../shared/aliases.nix { osConfig = config; }).programs.zsh)
+    shellAliases
+    ;
   aliasesToString =
     aliases:
     let
