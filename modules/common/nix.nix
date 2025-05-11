@@ -1,5 +1,4 @@
 {
-  pkgs,
   lib,
   inputs,
   config,
@@ -9,15 +8,16 @@ let
   inherit (config.nixpkgs.hostPlatform) isLinux;
 in
 {
+  imports = [ inputs.lix-module.nixosModules.default ];
+
   options.shared.nix.enable = lib.mkEnableOption "Nix";
 
   config = lib.mkIf config.shared.nix.enable {
-    nix.package = pkgs.nixVersions.latest;
     nix = {
       settings =
         {
           # Enable flakes and new 'nix3' command
-          experimental-features = "nix-command flakes pipe-operators";
+          experimental-features = "nix-command flakes pipe-operator";
 
           substituters = [
             "https://devenv.cachix.org"

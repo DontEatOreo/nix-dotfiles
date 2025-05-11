@@ -16,6 +16,9 @@
     jj-vcs.url = "github:jj-vcs/jj";
     jj-vcs.inputs.nixpkgs.follows = "nixpkgs";
 
+    lix-module.url = "https://git.lix.systems/lix-project/nixos-module/archive/2.93.0.tar.gz";
+    lix-module.inputs.nixpkgs.follows = "nixpkgs";
+
     nix-darwin.url = "github:nix-darwin/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 
