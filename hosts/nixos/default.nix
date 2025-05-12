@@ -18,15 +18,6 @@ in
     modules = [
       ./configuration.nix
       ../../modules/common
-      {
-        shared = {
-          nix.enable = true;
-          nixpkgs = {
-            enable = true;
-            cudaSupport = true;
-          };
-        };
-      }
       ../../modules/de
       {
         nixOS = {
