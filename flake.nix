@@ -3,6 +3,7 @@
 
   inputs = {
     catppuccin.url = "github:catppuccin/nix";
+    catppuccin.inputs.nixpkgs.follows = "nixpkgs";
 
     dis.url = "github:DontEatOreo/dis/develop";
     dis.inputs.nixpkgs.follows = "nixpkgs";
