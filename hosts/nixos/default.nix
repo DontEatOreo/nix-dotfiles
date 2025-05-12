@@ -40,7 +40,6 @@ in
           enable = true;
           flavor = "frappe";
           accent = "teal";
-          cache.enable = true;
         };
       }
       inputs.nur.modules.nixos.default
