@@ -1,6 +1,5 @@
 {
   pkgs,
-  lib,
   inputs,
   username,
   ...
@@ -12,7 +11,7 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     users.${username} =
-      { config, osConfig, ... }:
+      { config, ... }:
       {
         imports = [
           ../../modules/hm/cli

@@ -1,17 +1,11 @@
-{
-  pkgs,
-  lib,
-  inputs,
-  username,
-  ...
-}:
+{ inputs, username, ... }:
 {
   imports = [ inputs.home-manager.nixosModules.home-manager ];
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
     users.${username} =
-      { config, osConfig, ... }:
+      { config, ... }:
       {
         imports = [
           ../../modules/hm/browsers
