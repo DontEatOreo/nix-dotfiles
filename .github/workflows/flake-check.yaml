@@ -25,7 +25,7 @@ jobs:
           github_access_token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Run Flake Checker
-        uses: DeterminateSystems/flake-checker-action@v9
+        uses: DeterminateSystems/flake-checker-action@main
         with:
           check-outdated: true
           check-owner: true
@@ -51,4 +51,4 @@ jobs:
           github_access_token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Check Darwin Configuration
-        run: nix run nix-darwin -- check --flake .
+        run: sudo nix run nix-darwin -- check --flake .
