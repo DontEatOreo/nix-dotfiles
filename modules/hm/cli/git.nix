@@ -60,7 +60,7 @@ in
           ui = {
             paginate = "auto";
             merge-editor = "vscode";
-            diff.format = "git";
+            diff-formatter = ":git";
           };
           git = {
             sign-on-push = true;
