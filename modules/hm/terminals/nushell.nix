@@ -78,15 +78,6 @@ in
           ;
       };
 
-      envFile.text = lib.optionalString (config.programs.starship.enable) ''
-        $env.TRANSIENT_PROMPT_COMMAND = ^starship module character
-        $env.TRANSIENT_PROMPT_INDICATOR = ""
-        $env.TRANSIENT_PROMPT_INDICATOR_VI_INSERT = ""
-        $env.TRANSIENT_PROMPT_INDICATOR_VI_NORMAL = ""
-        $env.TRANSIENT_PROMPT_MULTILINE_INDICATOR = ""
-        $env.TRANSIENT_PROMPT_COMMAND_RIGHT = ^starship module time
-      '';
-
       configFile.text = ''
         # Generic
         $env.EDITOR = "hx";
