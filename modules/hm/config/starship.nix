@@ -24,17 +24,14 @@
         "$shell"
         "$os"
         "$directory"
-        "$git_branch"
-        "$git_state"
-        "$git_status"
-        "$status"
+        "\${custom.jj_icon}"
+        "\${custom.jj_info}"
         "$nix_shell"
         "$battery"
         "$line_break"
         "$sudo"
         "$character"
         "$command_timeout"
-        "$git_commit"
       ];
 
       right_format = lib.concatStrings [
@@ -68,20 +65,22 @@
         format = "in [$path]($style) ";
       };
 
-      git_branch.symbol = "󰊢 ";
+      custom.jj_icon = {
+        detect_folders = [ ".jj" ];
+        format = "on [$symbol]($style) ";
+        style = "bold fg:#F4B8E5";
+        symbol = "󰠬";
+        when = "jj root --ignore-working-copy";
+      };
 
-      git_status = {
-        ahead = " \${count} ";
-        diverged = " \${ahead_count} \${behind_count} ";
-        behind = " \${count} ";
-        stashed = " \${count} ";
-        untracked = " \${count} ";
-        modified = " \${count} ";
-        staged = "󰸞 \${count} ";
-        conflicted = "󰞇 \${count} ";
-        renamed = " \${count} ";
-        deleted = " \${count} ";
-        format = "[\\[ [$all_status$ahead_behind]($style)\\]](bold red) ";
+      custom.jj_info = {
+        command = ''
+          jj log --color=always --revisions @ --no-graph --ignore-working-copy --limit 1 --template 'change_id.shortest() ++ " " ++ commit_id.shortest() ++ if(bookmarks, " " ++ bookmarks.map(|b| truncate_start(14, b.name(), "..")).join(", "), "") ++ raw_escape_sequence("\x1b[1;32m") ++ " " ++ if(empty, "(empty)", coalesce(truncate_start(24, description.first_line(), ".."), "(no description)")) ++ raw_escape_sequence("\x1b[0m")' | str trim
+        '';
+        detect_folders = [ ".jj" ];
+        format = "\\[$output\\]";
+        shell = [ "nu" ];
+        when = "jj root --ignore-working-copy";
       };
 
       character = {
