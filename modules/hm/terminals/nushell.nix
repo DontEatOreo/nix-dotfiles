@@ -100,7 +100,6 @@ in
             "ssh"
             "vscode"
             "zellij"
-            "zoxide"
           ];
           sourceCommands = map (
             t: "source ${customCompletions}/custom-completions/${t}/${t}-completions.nu"
