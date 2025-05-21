@@ -27,7 +27,6 @@
         "\${custom.jj_icon}"
         "\${custom.jj_info}"
         "$nix_shell"
-        "$battery"
         "$line_break"
         "$sudo"
         "$character"
@@ -100,12 +99,6 @@
         time_format = "%X";
         format = "at [$time]($style) ";
         style = "bold blue";
-      };
-
-      battery = {
-        full_symbol = " ";
-        charging_symbol = "󰂄 ";
-        empty_symbol = " ";
       };
 
       nix_shell = {
