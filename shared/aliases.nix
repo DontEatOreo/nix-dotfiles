@@ -39,14 +39,18 @@ let
   };
 
   nix = {
-    update = "nix flake update --flake /etc/nixos";
-    check = if isLinux then "nix flake check /etc/nixos" else "darwin-rebuild check --flake /etc/nixos";
+    update = "nix flake update --flake $(readlink -f /etc/nixos)";
+    check =
+      if isLinux then
+        "nix flake check $(readlink -f /etc/nixos)"
+      else
+        "sudo darwin-rebuild check --flake $(readlink -f /etc/nixos)";
     rebuild =
       if isLinux then
-        "nixos-rebuild switch --use-remote-sudo --flake /etc/nixos"
+        "nixos-rebuild switch --use-remote-sudo --flake $(readlink -f /etc/nixos)"
       else
-        "darwin-rebuild switch --flake /etc/nixos";
-    test = if isLinux then "nixos-rebuild test --flake /etc/nixos" else "true";
+        "sudo darwin-rebuild switch --flake $(readlink -f /etc/nixos)";
+    test = if isLinux then "nixos-rebuild test --flake $(readlink -f /etc/nixos)" else "true";
   };
 
   operations = {

@@ -2,46 +2,66 @@
   description = "My NixOS & Darwin System Flake";
 
   inputs = {
-    catppuccin.url = "github:catppuccin/nix";
     catppuccin.inputs.nixpkgs.follows = "nixpkgs";
+    catppuccin.url = "github:catppuccin/nix";
 
-    dis.url = "github:DontEatOreo/dis/develop";
     dis.inputs.nixpkgs.follows = "nixpkgs";
+    dis.url = "github:DontEatOreo/dis/develop";
 
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    flake-compat.url = "github:edolstra/flake-compat";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    flake-utils.url = "github:numtide/flake-utils";
 
-    helix-editor.url = "github:helix-editor/helix";
     helix-editor.inputs.nixpkgs.follows = "nixpkgs";
+    helix-editor.inputs.rust-overlay.follows = "rust-overlay";
+    helix-editor.url = "github:helix-editor/helix";
 
-    jj-vcs.url = "github:jj-vcs/jj";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager.url = "github:nix-community/home-manager/release-25.05";
+
+    jj-vcs.inputs.flake-utils.follows = "flake-utils";
     jj-vcs.inputs.nixpkgs.follows = "nixpkgs";
+    jj-vcs.inputs.rust-overlay.follows = "rust-overlay";
+    jj-vcs.url = "github:jj-vcs/jj";
 
-    lix-module.url = "https://git.lix.systems/lix-project/nixos-module/archive/2.93.0.tar.gz";
+    lix-module.inputs.flake-utils.follows = "flake-utils";
     lix-module.inputs.nixpkgs.follows = "nixpkgs";
+    lix-module.url = "https://git.lix.systems/lix-project/nixos-module/archive/2.93.0.tar.gz";
 
-    nix-darwin.url = "github:nix-darwin/nix-darwin";
-    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
-
-    nixcord.url = "github:KaylorBen/nixcord";
-    nixcord.inputs.nixpkgs.follows = "nixpkgs";
-    nixcord.inputs.flake-compat.follows = "";
-    nixcord.inputs.treefmt-nix.follows = "";
-
-    nil.url = "github:oxalica/nil";
+    nil.inputs.flake-utils.follows = "flake-utils";
     nil.inputs.nixpkgs.follows = "nixpkgs";
+    nil.inputs.rust-overlay.follows = "rust-overlay";
+    nil.url = "github:oxalica/nil";
+
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
+
+    nix-vscode-extensions.inputs.flake-utils.follows = "flake-utils";
+    nix-vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
+    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
+
+    nixcord.inputs.flake-compat.follows = "flake-compat";
+    nixcord.inputs.nixpkgs.follows = "nixpkgs";
+    nixcord.inputs.treefmt-nix.follows = "treefmt-nix";
+    nixcord.url = "github:KaylorBen/nixcord";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
-    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
-    nix-vscode-extensions.inputs.nixpkgs.follows = "nixpkgs";
-
     nixpkgs.url = "github:NixOS/nixpkgs/release-25.05";
 
+    nur.inputs.flake-parts.follows = "flake-parts";
+    nur.inputs.nixpkgs.follows = "nixpkgs";
+    nur.inputs.treefmt-nix.follows = "treefmt-nix";
     nur.url = "github:nix-community/NUR";
 
-    sops-nix.url = "github:Mic92/sops-nix";
+    rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
+    rust-overlay.url = "github:oxalica/rust-overlay";
+
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+    sops-nix.url = "github:Mic92/sops-nix";
+
+    treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
+    treefmt-nix.url = "github:numtide/treefmt-nix";
   };
 
   outputs = inputs: {

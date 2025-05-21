@@ -3,10 +3,11 @@ let
   username = "anon";
 in
 {
-  "anons-Mac-mini" = inputs.nix-darwin.lib.darwinSystem {
+  anons-Mac-mini = inputs.nix-darwin.lib.darwinSystem {
     specialArgs = { inherit inputs username; };
     modules = [
       ../../modules/common
+      ./configuration.nix
       ./fonts.nix
       ./home.nix
       ./system.nix
@@ -15,15 +16,6 @@ in
       ../../shared/cli.nix
       ../../shared/dev.nix
       ../../shared/tui.nix
-      {
-        nixpkgs.hostPlatform.system = "aarch64-darwin";
-
-        users.users.${username} = {
-          name = username;
-          home = "/Users/${username}";
-          shell = inputs.nixpkgs.legacyPackages.aarch64-darwin.zsh;
-        };
-      }
     ];
   };
 }

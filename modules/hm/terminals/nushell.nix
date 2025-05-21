@@ -7,8 +7,6 @@
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
 
-  nixConfigPath = if isDarwin then "${config.home.homeDirectory}/.nixpkgs" else "/etc/nixos";
-
   yt-dlp-script = lib.getExe (
     pkgs.writeScriptBin "yt-dlp-script" (builtins.readFile ../../../shared/scripts/yt-dlp-script.sh)
   );
@@ -47,18 +45,17 @@ in
         htop = "btop";
         neofetch = "fastfetch";
 
-        # Nix
-        update = "nix flake update --flake ${nixConfigPath}";
+        update = "nix flake update --flake (readlink -f /etc/nixos/)";
         check =
           if isDarwin then
-            "darwin-rebuild check --flake ${nixConfigPath}"
+            "sudo darwin-rebuild check --flake (readlink -f /etc/nixos/)"
           else
-            "nix flake check ${nixConfigPath}";
+            "nix flake check (readlink -f /etc/nixos/)";
         rebuild =
           if isDarwin then
-            "darwin-rebuild switch --flake ${nixConfigPath}"
+            "sudo darwin-rebuild switch --flake (readlink -f /etc/nixos/)"
           else
-            "nixos-rebuild switch --use-remote-sudo --flake ${nixConfigPath}";
+            "nixos-rebuild switch --use-remote-sudo --flake (readlink -f /etc/nixos/)";
 
         # Video
         m4a = "${yt-dlp-script} m4a";

@@ -61,7 +61,7 @@ if [ ! -f "hosts/nixos/hardware-configuration.nix" ]; then
   rm "configuration.nix"
 fi
 
-nixos-rebuild switch --use-remote-sudo --flake "/etc/nixos"
+nixos-rebuild switch --use-remote-sudo --flake $(readlink -f "/etc/nixos")
 
 # After initial build, you can use the `rebuild` alias
 ```
@@ -69,9 +69,9 @@ nixos-rebuild switch --use-remote-sudo --flake "/etc/nixos"
 ### macOS (Darwin)
 
 ```bash
-nix --experimental-features 'nix-command flakes pipe-operators' run nix-darwin -- switch --flake "$HOME/.nixpkgs"
+nix --experimental-features 'nix-command flakes pipe-operators' nix-darwin -- switch --flake $(readlink -f "/etc/nixos/")
 
-darwin-rebuild switch --flake "$HOME/.nixpkgs"
+sudo darwin-rebuild switch --flake $(readlink -f "/etc/nixos/")
 
 # After initial build, you can use the `rebuild` alias
 ```
