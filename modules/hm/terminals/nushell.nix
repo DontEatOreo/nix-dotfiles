@@ -20,28 +20,23 @@ in
     programs.nushell = {
       enable = true;
       shellAliases = {
-        # Directories
-        cd = "z";
-        dc = "zi";
+        cd = "__zoxide_z";
+        dc = "__zoxide_z";
 
-        # Editors
         v = "hx";
         vi = "hx";
         vim = "hx";
         h = "hx";
 
-        # Operations
         ll = "ls";
         du = "dust";
 
-        # Text Processing
         grep = "rg";
         diff = "delta";
         cat = "open";
         open = "^open";
         sed = "sd";
 
-        # Programs
         htop = "btop";
         neofetch = "fastfetch";
 
@@ -65,15 +60,6 @@ in
         mp4 = "${yt-dlp-script} mp4";
         "mp4-cut" = "${yt-dlp-script} mp4-cut";
       } // lib.optionalAttrs isDarwin { micfix = "sudo killall coreaudiod"; };
-
-      plugins = builtins.attrValues {
-        inherit (pkgs.nushellPlugins)
-          formats
-          highlight
-          query
-          # units
-          ;
-      };
 
       configFile.text = ''
         # Generic
@@ -101,13 +87,12 @@ in
           customCompletions = pkgs.fetchFromGitHub {
             owner = "nushell";
             repo = "nu_scripts";
-            rev = "618c0c035d15c3af7158ab122141c017acd454f5";
-            hash = "sha256-Tc1r1FrvLhfj6PzaLA1c6X3W7zL3UGhR4FSS3gRD+3g=";
+            rev = "b2d512f6c67f68895a26136c6ce552281efbec6e";
+            hash = "sha256-iC5Qmyn9vDr4b1BWtJkC3pl2dOam2Se51+ENvRdXlvA=";
           };
           completionTypes = [
             "bat"
             "curl"
-            "gh"
             "git"
             "man"
             "nix"
@@ -121,7 +106,19 @@ in
             t: "source ${customCompletions}/custom-completions/${t}/${t}-completions.nu"
           ) completionTypes;
         in
-        builtins.concatStringsSep "\n" sourceCommands;
+        builtins.concatStringsSep "\n" sourceCommands
+        + "\n"
+        + ''
+          def nix-build-file [
+              file: string,
+              args: string = "{}"
+          ] {
+            let prefix = "with import <nixpkgs> {}; callPackage " + (readlink -f $file)
+            let suffix = " " + $args
+            let expr   = $prefix + $suffix
+            nix-build -E $expr
+          }
+        '';
     };
   };
 }
