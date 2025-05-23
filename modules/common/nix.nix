@@ -9,6 +9,7 @@
 
   nix.settings =
     {
+      trusted-users = lib.splitString " " "anon nyx";
       experimental-features = "nix-command flakes pipe-operator";
       substituters = [
         "https://devenv.cachix.org"
@@ -26,6 +27,21 @@
       # Workaround for https://github.com/NixOS/nix/issues/9574
       nix-path = config.nix.nixPath;
     };
+  nix.buildMachines = [
+    {
+      hostName = "nyx";
+      protocol = "ssh-ng";
+      publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUFjM0R3aUc2T0pWSUNSN0ZRUUUrSTlSMjQ0N0dGTHJJUnlGOSt4UDZhTTUK";
+      sshKey = "/run/secrets/lenovo_legion_5_15arh05h_ssh";
+      sshUser = "nyx";
+      supportedFeatures = [
+        "nixos-test"
+        "big-parallel"
+        "benchmark"
+      ];
+      systems = [ "x86_64-linux" ];
+    }
+  ];
   nix = {
     channel.enable = false;
     # Opinionated: make flake registry and nix path match flake inputs
@@ -37,5 +53,6 @@
       # Flake Inputs
       lib.filterAttrs (_: lib.isType "flake") inputs
     );
+    distributedBuilds = true;
   };
 }

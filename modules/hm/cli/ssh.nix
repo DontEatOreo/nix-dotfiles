@@ -2,6 +2,7 @@
   lib,
   pkgs,
   config,
+  osConfig,
   ...
 }:
 let
@@ -32,7 +33,7 @@ in
           Hostname ssh.github.com
           Port 443
           User git
-          IdentityFile ${config.sops.secrets.github_ssh.path}
+          IdentityFile ${osConfig.sops.secrets.github_ssh.path}
       '';
     };
   };

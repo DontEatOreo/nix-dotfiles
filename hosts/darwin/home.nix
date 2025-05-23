@@ -22,7 +22,6 @@
           ../../modules/hm/tui
           ../../modules/hm/config/starship.nix
           ../../shared/aliases.nix
-          inputs.sops-nix.homeManagerModules.sops
           inputs.catppuccin.homeModules.catppuccin
           {
             catppuccin = {
@@ -83,13 +82,6 @@
               yazi.enable = true;
               zoxide.enable = true;
             };
-
-            sops = {
-              age.keyFile = "/Users/${username}/Library/Application Support/sops/age/keys.txt";
-              defaultSopsFile = ../../secrets/secrets.yaml;
-              secrets.github_ssh = { };
-            };
-
             home.stateVersion = "25.05";
           }
         ];
