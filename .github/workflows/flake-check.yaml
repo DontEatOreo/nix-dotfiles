@@ -23,6 +23,7 @@ jobs:
         uses: cachix/install-nix-action@v31.3.0
         with:
           github_access_token: "${{ secrets.GITHUB_TOKEN }}"
+          source-url: https://install.lix.systems/lix
 
       - name: Run Flake Checker
         uses: DeterminateSystems/flake-checker-action@main
