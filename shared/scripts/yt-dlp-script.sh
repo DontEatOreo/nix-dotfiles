@@ -1,8 +1,4 @@
-#! /usr/bin/env nix-shell
-#! nix-shell --pure -i bash -p bc cacert choose dust fd ffmpeg_7-full gum jq sd yt-dlp
 # shellcheck shell=bash
-
-set -euo pipefail
 
 BRIGHT_RED="${BRIGHT_RED:-131}"
 ORANGE="${ORANGE:-215}"
@@ -43,6 +39,8 @@ Examples:
   https://example.com/video 30-60 --compress
   https://example.com/video --compress
   https://example.com/video --compress --crf 22
+  https://example.com/video mp4 --write-subs --write-auto-subs
+  https://example.com/video mp4 --cookies-from-browser chrome
 EOF
 }
 
@@ -58,10 +56,10 @@ declare temp_dir=""
 declare -A FORMAT_ARGS=(
 	[m4a]='--embed-thumbnail --extract-audio --audio-quality 0 --audio-format m4a'
 	[mp3]='--embed-thumbnail --extract-audio --audio-quality 0 --audio-format mp3'
-	[mp4]='-f bv*[ext=mp4][vcodec^=avc1]+ba[ext=m4a]/b[ext=mp4]/best'
+	[mp4]='-f "bv*[ext=mp4][vcodec^=avc1]+ba[ext=m4a]/b[ext=mp4]/best" -S "ext:mp4:m4a"'
 	[m4a - cut]='--embed-thumbnail --extract-audio --audio-quality 0 --audio-format m4a'
 	[mp3 - cut]='--embed-thumbnail --extract-audio --audio-quality 0 --audio-format mp3'
-	[mp4 - cut]='-f bv*[ext=mp4][vcodec^=avc1]+ba[ext=m4a]/b[ext=mp4]/best'
+	[mp4 - cut]='-f "bv*[ext=mp4][vcodec^=avc1]+ba[ext=m4a]/b[ext=mp4]/best" -S "ext:mp4:m4a"'
 )
 declare -a COMMON_ARGS=(--progress --console-title --embed-metadata)
 declare -a OUTPUT_ARGS=()
@@ -71,6 +69,8 @@ declare -A arg_state=(
 
 parse_arguments() {
 	local arg
+	local -a additional_args=()
+
 	for arg in "$@"; do
 		if [[ "${arg_state[expecting_crf]}" == true ]]; then
 			crf="$arg"
@@ -97,15 +97,19 @@ parse_arguments() {
 			[[ "$arg" == *-cut ]] && cut_option=true
 			;;
 		*)
-			# Try time range regex
+			# Try time range regex first
 			if [[ "$arg" =~ ^[0-9]+(\.[0-9]+)?-[0-9]+(\.[0-9]+)?$ ]]; then
 				time_range="$arg"
 			else
-				final_args+=("$arg")
+				# Collect additional arguments
+				additional_args+=("$arg")
 			fi
 			;;
 		esac
 	done
+
+	# Add additional arguments to final_args after processing
+	final_args+=("${additional_args[@]}")
 }
 
 validate_arguments() {
@@ -123,8 +127,14 @@ validate_arguments() {
 }
 
 fetch_json_metadata() {
-	json_metadata="$(yt-dlp "$url" -j)" || {
+	# Use the same arguments for metadata fetch as for the main download
+	local -a metadata_cmd=(yt-dlp "$url" -j "${final_args[@]}")
+	log_info "Fetching metadata with: ${metadata_cmd[*]}"
+
+	json_metadata="$(yt-dlp "$url" -j "${final_args[@]}")" || {
 		log_error "Failed to fetch JSON metadata"
+		log_error "This might be due to age restrictions, geo-blocking, or missing authentication"
+		log_error "Make sure you're using the correct cookies or authentication method"
 		exit 1
 	}
 }
@@ -158,8 +168,13 @@ format_time_range() {
 }
 
 execute_yt_dlp() {
+	local format_args_string="${FORMAT_ARGS[$format]:-}"
 	local -a format_args
-	IFS=' ' read -r -a format_args <<<"${FORMAT_ARGS[$format]:-}"
+
+	# Parse format args string into array, handling quoted arguments properly
+	if [[ -n "$format_args_string" ]]; then
+		eval "format_args=($format_args_string)"
+	fi
 
 	# Add --no-embed-chapters if chapters present
 	if [[ "$(jq '(.chapters // []) | length > 0' <<<"$json_metadata")" == "true" ]]; then
@@ -182,8 +197,19 @@ execute_yt_dlp() {
 		OUTPUT_ARGS=(-o "$temp_dir/%(display_id)s.%(ext)s")
 	fi
 
-	yt-dlp "$url" "${format_args[@]}" "${COMMON_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${final_args[@]}" \
+	# Build the complete command
+	local -a yt_dlp_cmd=(
+		yt-dlp
+		"$url"
+		"${format_args[@]}"
+		"${COMMON_ARGS[@]}"
+		"${OUTPUT_ARGS[@]}"
+		"${final_args[@]}"
 		--postprocessor-args "ffmpeg:-hide_banner"
+	)
+
+	log_info "Executing: ${yt_dlp_cmd[*]}"
+	"${yt_dlp_cmd[@]}"
 
 	if [[ "$compress_option" == true ]]; then
 		compress_video "$temp_dir" "$time_suffix"
