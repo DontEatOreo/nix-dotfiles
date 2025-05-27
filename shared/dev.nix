@@ -14,6 +14,8 @@
       nixfmt-rfc-style
       nixpkgs-review
       shellcheck # Warning hints for shell scripts
+      cargo
+      rustc
       ;
     nil = inputs.nil.packages.${config.nixpkgs.hostPlatform.system}.nil; # Nix language server
   };
