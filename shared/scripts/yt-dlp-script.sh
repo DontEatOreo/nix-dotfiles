@@ -61,7 +61,6 @@ declare -A FORMAT_ARGS=(
 	[mp3 - cut]='--embed-thumbnail --extract-audio --audio-quality 0 --audio-format mp3'
 	[mp4 - cut]='-f "bv*[ext=mp4][vcodec^=avc1]+ba[ext=m4a]/b[ext=mp4]/best" -S "ext:mp4:m4a"'
 )
-declare -a COMMON_ARGS=(--progress --console-title --embed-metadata)
 declare -a OUTPUT_ARGS=()
 declare -A arg_state=(
 	[expecting_crf]=false
@@ -414,6 +413,88 @@ format_time_range() {
 	printf -- "-%s-%s" "${start//./_}" "${end//./_}"
 }
 
+parse_progress() {
+	local line="$1"
+	local percentage speed eta downloaded total
+
+	# Parse custom progress template format: PROGRESS|percentage|speed|eta|downloaded|total
+	if [[ "$line" =~ ^PROGRESS\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)$ ]]; then
+		percentage="${BASH_REMATCH[1]// /}" # Remove spaces
+		speed="${BASH_REMATCH[2]// /}"      # Remove spaces
+		eta="${BASH_REMATCH[3]// /}"        # Remove spaces
+		downloaded="${BASH_REMATCH[4]// /}" # Remove spaces
+		total="${BASH_REMATCH[5]// /}"      # Remove spaces
+
+		# Calculate percentage if it's N/A but we have downloaded/total
+		if [[ "$percentage" == "N/A" && "$downloaded" != "N/A" && "$total" != "N/A" && "$total" -gt 0 ]]; then
+			percentage=$(echo "scale=1; $downloaded * 100 / $total" | bc 2>/dev/null || echo "0")
+		fi
+
+		# Skip if percentage is still empty or invalid
+		[[ -z "$percentage" || "$percentage" == "N/A" ]] && return 1
+
+		# Convert percentage to number, handle potential decimals
+		local perc_num
+		perc_num=${percentage//[^0-9.]/}
+		[[ -z "$perc_num" ]] && return 1
+
+		# Create a visual progress bar
+		local bar_length=50
+		local filled_length
+		filled_length=$(echo "scale=0; $perc_num * $bar_length / 100" | bc 2>/dev/null || echo "0")
+		local empty_length=$((bar_length - filled_length))
+
+		# Ensure filled_length is within bounds
+		((filled_length < 0)) && filled_length=0
+		((filled_length > bar_length)) && filled_length=$bar_length
+		empty_length=$((bar_length - filled_length))
+
+		# Create colored progress bar using gum - blue fill, gray empty
+		local filled_bar=""
+		local empty_bar=""
+		for ((i = 0; i < filled_length; i++)); do filled_bar+="█"; done
+		for ((i = 0; i < empty_length; i++)); do empty_bar+="░"; done
+
+		local colored_bar
+		colored_bar="$(gum style --foreground="$BLUE" "$filled_bar")$(gum style --foreground=8 "$empty_bar")"
+
+		# Format file sizes for display
+		local progress_info=""
+		if [[ -n "$downloaded" && -n "$total" && "$total" != "N/A" && "$downloaded" != "N/A" ]]; then
+			local downloaded_mb total_mb
+			downloaded_mb=$(echo "scale=1; $downloaded / 1024 / 1024" | bc 2>/dev/null || echo "0")
+			total_mb=$(echo "scale=1; $total / 1024 / 1024" | bc 2>/dev/null || echo "0")
+			progress_info=" • ${downloaded_mb}MB/${total_mb}MB"
+		elif [[ -n "$downloaded" && "$downloaded" != "N/A" ]]; then
+			local downloaded_mb
+			downloaded_mb=$(echo "scale=1; $downloaded / 1024 / 1024" | bc 2>/dev/null || echo "0")
+			progress_info=" • ${downloaded_mb}MB"
+		fi
+
+		# Format speed for display
+		local speed_info=""
+		if [[ -n "$speed" && "$speed" != "N/A" ]]; then
+			local speed_mb
+			speed_mb=$(echo "scale=1; $speed / 1024 / 1024" | bc 2>/dev/null || echo "0")
+			speed_info=" • ${speed_mb}MB/s"
+		fi
+
+		local eta_info=""
+		[[ -n "$eta" && "$eta" != "N/A" ]] && eta_info=" • ETA: ${eta}s"
+
+		# Style the entire progress line in blue to match [download] messages
+		local progress_text="${percentage}%${progress_info}${speed_info}${eta_info}"
+		local styled_prefix styled_suffix
+		styled_prefix="$(gum style --foreground="$BLUE" "[download] [")"
+		styled_suffix="$(gum style --foreground="$BLUE" "] ${progress_text}")"
+
+		printf "\r\033[K%s%s%s" "$styled_prefix" "$colored_bar" "$styled_suffix"
+
+		return 0
+	fi
+	return 1
+}
+
 execute_yt_dlp() {
 	local format_args_string="${FORMAT_ARGS[$format]:-}"
 	local -a format_args
@@ -444,60 +525,60 @@ execute_yt_dlp() {
 		OUTPUT_ARGS=(-o "$temp_dir/%(display_id)s.%(ext)s")
 	fi
 
-	# Build the complete command
+	# Build the complete command with custom progress template
 	local -a yt_dlp_cmd=(
 		yt-dlp
 		"$url"
 		"${format_args[@]}"
-		"${COMMON_ARGS[@]}"
+		--console-title
+		--embed-metadata
 		"${OUTPUT_ARGS[@]}"
 		"${final_args[@]}"
 		--postprocessor-args "ffmpeg:-hide_banner"
+		--newline
+		--progress-template "download:PROGRESS|%(progress._percent_str)s|%(progress._speed_str)s|%(progress._eta_str)s|%(progress.downloaded_bytes)s|%(progress.total_bytes)s"
 	)
 
 	log_info "Executing: ${yt_dlp_cmd[*]}"
 
-	# Use a temporary file to capture stderr while allowing stdout to pass through
-	local stderr_file
-	stderr_file="$(mktemp)"
-
-	if ! "${yt_dlp_cmd[@]}" 2>"$stderr_file"; then
-		local error_output
-		error_output="$(cat "$stderr_file")"
-		rm -f "$stderr_file"
-
-		if is_format_error "$error_output"; then
-			log_warning "Requested format not available"
-			log_question "Would you like to see available formats or try with best available quality?"
-
-			local response
-			response=$(printf "%s\n" "List formats" "Use best quality" "Cancel" | gum choose) || response="Cancel"
-
-			case "$response" in
-			"List formats")
-				log_info "Available formats:"
-				yt-dlp "$url" --list-formats "${final_args[@]}"
-				log_question "Try again with best available quality?"
-				local retry_response
-				retry_response=$(printf "%s\n" "Yes" "No" | gum choose) || retry_response="No"
-				[[ "$retry_response" == "Yes" ]] && retry_with_fallback || exit 1
-				;;
-			"Use best quality")
-				retry_with_fallback
-				;;
-			"Cancel")
-				log_info "Download cancelled"
-				exit 0
-				;;
-			esac
-		else
-			log_error "Download failed"
-			log_error "Error output:"
-			printf "%s\n" "$error_output" >&2
-			exit 1
+	# Process output line by line
+	"${yt_dlp_cmd[@]}" 2>&1 | while IFS= read -r line; do
+		if parse_progress "$line"; then
+			continue # Progress handled
+		elif [[ "$line" =~ ^PROGRESS\| ]]; then
+			# Remove debug output since we're now handling progress properly
+			continue
+		elif [[ "$line" =~ ^\[download\].*Destination: ]]; then
+			log_style "$BLUE" "$line"
+		elif [[ "$line" =~ ^\[download\].*100%.*in ]]; then
+			printf "\r\033[K"
+			log_style "$GREEN" "$line"
+		elif [[ "$line" =~ ^\[info\] ]]; then
+			printf "\r\033[K"
+			log_style "$ORANGE" "$line"
+		elif [[ "$line" =~ ^\[Metadata\] ]]; then
+			printf "\r\033[K"
+			log_style "$BLUE" "$line"
+		elif [[ "$line" =~ ^Extracting\ cookies|^Extracted.*cookies ]]; then
+			log_style "$YELLOW" "$line"
+		elif [[ "$line" =~ ^\[youtube\] ]]; then
+			log_style "$ORANGE" "$line"
+		elif [[ -n "$line" && ! "$line" =~ ^\[download\] ]]; then
+			printf "\r\033[K"
+			echo "$line"
 		fi
+	done
+
+	local exit_code=${PIPESTATUS[0]}
+
+	# Clear progress line without adding newline
+	printf "\r\033[K"
+
+	if ((exit_code != 0)); then
+		log_error "Download failed with exit code $exit_code"
+		return 1
 	else
-		rm -f "$stderr_file"
+		log_success "Download completed successfully!"
 	fi
 
 	if [[ "$compress_option" == true ]]; then
@@ -513,10 +594,13 @@ retry_with_fallback() {
 	local -a fallback_cmd=(
 		yt-dlp
 		"$url"
-		"${COMMON_ARGS[@]}"
+		--console-title
+		--embed-metadata
 		"${OUTPUT_ARGS[@]}"
 		"${final_args[@]}"
 		--postprocessor-args "ffmpeg:-hide_banner"
+		--newline
+		--progress-template "download:PROGRESS|%(progress._percent_str)s|%(progress._speed_str)s|%(progress._eta_str)s|%(progress.downloaded_bytes)s|%(progress.total_bytes)s"
 	)
 
 	# Add format-specific fallbacks
@@ -532,20 +616,28 @@ retry_with_fallback() {
 
 	log_info "Executing fallback: ${fallback_cmd[*]}"
 
-	# Same approach for fallback - capture stderr only
-	local stderr_file
-	stderr_file="$(mktemp)"
+	# Same approach for fallback
+	"${fallback_cmd[@]}" 2>&1 | while IFS= read -r line; do
+		if parse_progress "$line"; then
+			continue
+		elif [[ "$line" =~ ^PROGRESS\| ]]; then
+			continue
+		elif [[ "$line" =~ ^\[download\]|\[info\] ]]; then
+			printf "\n"
+			log_style "$BLUE" "$line"
+		elif [[ -n "$line" ]]; then
+			echo "$line"
+		fi
+	done
 
-	if ! "${fallback_cmd[@]}" 2>"$stderr_file"; then
-		local error_output
-		error_output="$(cat "$stderr_file")"
-		rm -f "$stderr_file"
+	local exit_code=${PIPESTATUS[0]}
+	printf "\r\033[K\n"
+
+	if ((exit_code != 0)); then
 		log_error "Fallback download also failed"
-		log_error "Error output:"
-		printf "%s\n" "$error_output" >&2
-		exit 1
+		return 1
 	else
-		rm -f "$stderr_file"
+		log_success "Fallback download completed successfully!"
 	fi
 }
 
