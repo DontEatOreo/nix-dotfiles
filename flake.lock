@@ -279,11 +279,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1748353155,
-        "narHash": "sha256-wYuZ4139oBsHlYULsK5KmTIfZSlYfUFvRmvn3Bzi6OY=",
+        "lastModified": 1748359092,
+        "narHash": "sha256-bfQVlnTe1PZ3DfulcHUwJzh6qcir0n1F8B0xYUV+Vu0=",
         "owner": "helix-editor",
         "repo": "helix",
-        "rev": "c9e7b0f84fb638411036da0a027d36b9bd12ffbb",
+        "rev": "2bd7452fe0309e273d06280d15caad6943034377",
         "type": "github"
       },
       "original": {
@@ -509,18 +509,14 @@
         ],
         "nixpkgs": [
           "nixpkgs"
-        ],
-        "systems": "systems_2",
-        "treefmt-nix": [
-          "treefmt-nix"
         ]
       },
       "locked": {
-        "lastModified": 1748137719,
-        "narHash": "sha256-yBiIy+eb0QxYoIOzOY7QyjqXY5PiLgIoNbFtg4SbUH8=",
+        "lastModified": 1748367899,
+        "narHash": "sha256-wcCIIHHRMytxHkdxOIit0Yez7Hz5OZ0RljBleTdMjc8=",
         "owner": "KaylorBen",
         "repo": "nixcord",
-        "rev": "c4d7ccc9ae9fc1c46820bdc5b800b4f66e972ccc",
+        "rev": "6a367227b00a2b9463391ca76be1649b3f52be5b",
         "type": "github"
       },
       "original": {
@@ -651,11 +647,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1748354062,
-        "narHash": "sha256-1s+AHz4o+L4WlFdpmPrXW9Gp72N6dJQwtWWHw5rUmbU=",
+        "lastModified": 1748366953,
+        "narHash": "sha256-4BCsyj5kXkPir1pPANhMGrPiowBf+F7sjkjCU1nw6LQ=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "a738c8a505813b8dfc986325deb85c45a8445101",
+        "rev": "a996fdfb1c94c5acb6dc270a333752732e3b0fef",
         "type": "github"
       },
       "original": {
@@ -740,20 +736,6 @@
         "owner": "nix-systems",
         "repo": "default",
         "type": "github"
-      }
-    },
-    "systems_2": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "id": "systems",
-        "type": "indirect"
       }
     },
     "treefmt-nix": {
