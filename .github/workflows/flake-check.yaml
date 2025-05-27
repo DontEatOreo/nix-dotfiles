@@ -52,4 +52,4 @@ jobs:
           github_access_token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Check Darwin Configuration
-        run: sudo nix run nix-darwin -- check --flake .
+        run: sudo nix run nix-darwin -- check --flake .#anons-Mac-mini
