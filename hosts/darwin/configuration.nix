@@ -18,5 +18,4 @@
     secrets.github_ssh = { };
     secrets.lenovo_legion_5_15arh05h_ssh = { };
   };
-
 }

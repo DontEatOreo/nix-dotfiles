@@ -40,6 +40,7 @@ in
         sops = {
           age.keyFile = "/home/${username}/.config/sops/age/keys.txt";
           defaultSopsFile = ../../secrets/secrets.yaml;
+          secrets.github_ssh = { };
           secrets.lenovo_legion_5_15arh05h_ssh = { };
         };
       }
