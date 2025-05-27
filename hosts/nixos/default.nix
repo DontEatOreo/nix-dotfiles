@@ -30,7 +30,7 @@ in
         catppuccin = {
           enable = true;
           flavor = "frappe";
-          accent = "teal";
+          accent = "blue";
         };
       }
       inputs.nur.modules.nixos.default

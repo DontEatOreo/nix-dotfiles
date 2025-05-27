@@ -21,7 +21,7 @@
             catppuccin = {
               enable = true;
               flavor = "frappe";
-              accent = "teal";
+              accent = "blue";
               cache.enable = true;
 
               ghostty.enable = false;
