@@ -22,8 +22,6 @@
               enable = true;
               flavor = "frappe";
               accent = "blue";
-              cache.enable = true;
-
               ghostty.enable = false;
             };
           }
