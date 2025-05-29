@@ -27,7 +27,7 @@ in
       };
       enableVteIntegration = true;
       autocd = true;
-      initExtraFirst = ''
+      initContent = lib.mkBefore ''
         eval "$(github-copilot-cli alias -- "$0")"
       '';
       historySubstringSearch.enable = true;
