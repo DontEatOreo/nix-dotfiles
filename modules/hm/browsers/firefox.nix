@@ -45,10 +45,10 @@ in
             "google"
             "Kagi"
             "Nix Packages"
-            "youTube"
+            "youtube"
           ];
           engines = {
-            "GitHub" = {
+            GitHub = {
               urls = [
                 {
                   template = "https://github.com/search";
@@ -60,12 +60,12 @@ in
                   ];
                 }
               ];
-              iconUpdateURL = "https://github.com/favicon.ico";
+              icon = "https://github.com/favicon.ico";
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "@gh" ];
             };
-            "Google".metaData.alias = "@g"; # builtin engines only support specifying one additional alias
-            "Kagi " = {
+            google.metaData.alias = "@g"; # builtin engines only support specifying one additional alias
+            Kagi = {
               urls = [
                 {
                   template = "https://kagi.com/search";
@@ -77,7 +77,7 @@ in
                   ];
                 }
               ];
-              iconUpdateURL = "https://assets.kagi.com/v2/apple-touch-icon.png";
+              icon = "https://assets.kagi.com/v2/apple-touch-icon.png";
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "@k" ];
             };
@@ -100,7 +100,7 @@ in
               icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
               definedAliases = [ "@np" ];
             };
-            "YouTube" = {
+            youtube = {
               urls = [
                 {
                   template = "https://www.youtube.com/results";
@@ -112,7 +112,7 @@ in
                   ];
                 }
               ];
-              iconUpdateURL = "https://youtube.com/favicon.ico";
+              icon = "https://youtube.com/favicon.ico";
               updateInterval = 24 * 60 * 60 * 1000;
               definedAliases = [ "@yt" ];
             };
