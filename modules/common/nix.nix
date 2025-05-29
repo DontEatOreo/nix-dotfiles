@@ -27,7 +27,8 @@
       # Workaround for https://github.com/NixOS/nix/issues/9574
       nix-path = config.nix.nixPath;
     };
-  nix.buildMachines = [
+
+  nix.buildMachines = lib.optionals config.nixpkgs.hostPlatform.isDarwin [
     {
       hostName = "nyx";
       protocol = "ssh-ng";
@@ -42,6 +43,7 @@
       systems = [ "x86_64-linux" ];
     }
   ];
+
   nix = {
     channel.enable = false;
     # Opinionated: make flake registry and nix path match flake inputs
