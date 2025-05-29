@@ -30,7 +30,7 @@
 
   nix.buildMachines = lib.optionals config.nixpkgs.hostPlatform.isDarwin [
     {
-      hostName = "nyx";
+      hostName = "lenovo-legion";
       protocol = "ssh-ng";
       publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUFjM0R3aUc2T0pWSUNSN0ZRUUUrSTlSMjQ0N0dGTHJJUnlGOSt4UDZhTTUK";
       sshKey = "/run/secrets/lenovo_legion_5_15arh05h_ssh";

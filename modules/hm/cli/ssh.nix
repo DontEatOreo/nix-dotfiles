@@ -29,6 +29,10 @@ in
         Host *
           IdentityAgent "${home}/${sockPath}"
 
+        Host lenovo-legion
+          Hostname lenovo-legion.local
+          User nyx
+
         Host github.com
           Hostname ssh.github.com
           Port 443

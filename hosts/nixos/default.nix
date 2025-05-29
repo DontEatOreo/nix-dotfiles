@@ -2,7 +2,7 @@
 let
   system = "x86_64-linux";
   username = "nyx";
-  hostname = "nyx";
+  hostname = "lenovo-legion";
 in
 {
   ${username} = inputs.nixpkgs.lib.nixosSystem {
