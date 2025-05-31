@@ -356,7 +356,15 @@
       }
     },
     "lix": {
-      "flake": false,
+      "inputs": {
+        "flake-compat": [],
+        "nix2container": [],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nixpkgs-regression": "nixpkgs-regression",
+        "pre-commit-hooks": []
+      },
       "locked": {
         "lastModified": 1746827285,
         "narHash": "sha256-hsFe4Tsqqg4l+FfQWphDtjC79WzNCZbEFhHI8j2KJzw=",
@@ -375,7 +383,7 @@
           "flake-utils"
         ],
         "flakey-profile": "flakey-profile",
-        "lix": "lix",
+        "lix": "lix_2",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -393,6 +401,20 @@
         "ref": "2.93.0",
         "type": "git",
         "url": "https://git.lix.systems/lix-project/nixos-module"
+      }
+    },
+    "lix_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1746827285,
+        "narHash": "sha256-hsFe4Tsqqg4l+FfQWphDtjC79WzNCZbEFhHI8j2KJzw=",
+        "rev": "47aad376c87e2e65967f17099277428e4b3f8e5a",
+        "type": "tarball",
+        "url": "https://git.lix.systems/api/v1/repos/lix-project/lix/archive/47aad376c87e2e65967f17099277428e4b3f8e5a.tar.gz?rev=47aad376c87e2e65967f17099277428e4b3f8e5a"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://git.lix.systems/lix-project/lix/archive/2.93.0.tar.gz"
       }
     },
     "nil": {
@@ -586,6 +608,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-regression": {
+      "locked": {
+        "lastModified": 1643052045,
+        "narHash": "sha256-uGJ0VXIhWKGXxkeNnq4TvV3CIOkUJ3PAoLZ3HMzNVMw=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "215d4d0fd80ca5163643b03a33fde804a29cc1e2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "215d4d0fd80ca5163643b03a33fde804a29cc1e2",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1717432640,
@@ -670,6 +708,7 @@
         "helix-editor": "helix-editor",
         "home-manager": "home-manager",
         "jj-vcs": "jj-vcs",
+        "lix": "lix",
         "lix-module": "lix-module",
         "nil": "nil",
         "nix-darwin": "nix-darwin",
