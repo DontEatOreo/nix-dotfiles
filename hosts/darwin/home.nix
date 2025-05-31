@@ -41,12 +41,12 @@
           {
             home = {
               file.".warp/themes".source =
-                (pkgs.callPackage ../../modules/hm/custom/warp-terminal-catppuccin.nix {
+                (pkgs.callPackage ../../pkgs/warp-terminal-catppuccin.nix {
                   inherit (config.catppuccin) accent;
                 }).outPath
                 + "/share/warp/themes";
               file."Documents/catppuccin-userstyles.json".source =
-                (pkgs.callPackage ../../modules/hm/custom/catppuccin-userstyles.nix {
+                (pkgs.callPackage ../../pkgs/catppuccin-userstyles.nix {
                   inherit (config.catppuccin) accent flavor;
                 }).outPath
                 + "/dist/import.json";
