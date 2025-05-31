@@ -8,11 +8,11 @@
       { config, ... }:
       {
         imports = [
-          ../../modules/hm/browsers
+          ../../modules/hm/browser
           ../../modules/hm/cli
           ../../modules/hm/config/dconf.nix
-          ../../modules/hm/guis
-          ../../modules/hm/terminals
+          ../../modules/hm/gui
+          ../../modules/hm/terminal
           ../../modules/hm/tui
           ../../modules/hm/config/starship.nix
           ../../shared/aliases.nix

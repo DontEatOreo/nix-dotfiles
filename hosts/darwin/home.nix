@@ -15,10 +15,10 @@
       {
         imports = [
           ../../modules/hm/cli
-          ../../modules/hm/guis
-          ../../modules/hm/terminals/bash.nix
-          ../../modules/hm/terminals/ghostty.nix
-          ../../modules/hm/terminals/nushell.nix
+          ../../modules/hm/gui
+          ../../modules/hm/terminal/bash.nix
+          ../../modules/hm/terminal/ghostty.nix
+          ../../modules/hm/terminal/nushell.nix
           ../../modules/hm/tui
           ../../modules/hm/config/starship.nix
           ../../shared/aliases.nix

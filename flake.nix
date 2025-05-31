@@ -65,6 +65,6 @@
 
   outputs = inputs: {
     darwinConfigurations = import ./hosts/darwin { inherit inputs; };
-    nixosConfigurations = import ./hosts/nixos { inherit inputs; };
+    nixosConfigurations = import ./hosts/linux { inherit inputs; };
   };
 }
