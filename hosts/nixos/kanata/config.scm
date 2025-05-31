@@ -7,7 +7,6 @@
 (defvar
   tap-timeout   220
   hold-timeout  240 ;; (>= tap-timeout)
-  combo-timeout 50  ;; Chord detection window
   toggle-hold-time 500 ;; Hold duration for 'o' layer toggle
 
   ;; Keys that resolve left-hand mods (a,s,d,f) as TAP early.
@@ -25,15 +24,6 @@
     h j k l ;
     n m , . /    
   )
-)
-
-;; Bilateral Combinations aka (Chords) aka (Combos)
-(defchordsv2
-  ;; Keys  Action Timeout Behavior                Disabled-Layers
-  (a s)    bspc   $combo-timeout first-release () ;; Left index-middle -> Backspace
-  (s d)    del    $combo-timeout first-release () ;; Left middle-ring  -> Delete
-  (k l)    ret    $combo-timeout first-release () ;; Right middle-ring -> Enter
-  (j k)    tab    $combo-timeout first-release () ;; Right index-middle-> Tab
 )
 
 ;; Layers
