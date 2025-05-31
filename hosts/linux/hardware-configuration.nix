@@ -19,8 +19,12 @@
   };
 
   fileSystems."/boot" = {
-    device = "systemd-1";
-    fsType = "autofs";
+    device = "/dev/disk/by-uuid/CDE1-027E";
+    fsType = "vfat";
+    options = [
+      "fmask=0077"
+      "dmask=0077"
+    ];
   };
 
   swapDevices = [ { device = "/dev/disk/by-uuid/5546ec59-1370-419a-8e41-b36743f4f292"; } ];
