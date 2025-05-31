@@ -5,7 +5,7 @@ let
   hostname = "lenovo-legion";
 in
 {
-  ${username} = inputs.nixpkgs.lib.nixosSystem {
+  ${hostname} = inputs.nixpkgs.lib.nixosSystem {
     inherit system;
     specialArgs = {
       inherit
