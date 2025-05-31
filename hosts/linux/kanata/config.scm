@@ -1,7 +1,14 @@
+(deflocalkeys-linux
+  ;; Define custom names for the OS keycodes 275 and 276
+  ;; These numbers come from your "osc to u16" mapping for BTN_SIDE and BTN_EXTRA
+  my_side_button   275  ;; This will correspond to your physical K275
+  my_extra_button  276  ;; This will correspond to your physical K276
+)
+
 (defsrc
   ;; Define intercepted physical keys. Order determines layer mapping.
-  ;; 1    2    3   4   5   6   7   8   9   10  11  12  13  14
-  esc    caps  a   s   d   f   e   h   j   k   l   ;   o   spc
+  ;; 1    2    3   4   5   6   7   8   9   10  11  12  13  14    15                16
+  esc    caps  a   s   d   f   e   h   j   k   l   ;   o   spc   my_side_button    my_extra_button
 )
 
 (defvar
@@ -29,19 +36,21 @@
 ;; Layers
 (deflayer base
   ;; Default layer: Home Row Mods (HRMs) active. Spacebar uses @spc-nav.
-  caps   esc   @a  @s  @d  @f  e   h   @j  @k  @l  @;  @o-mods-on  @spc-nav
+  ;; my_side_button (K275) -> VolDown, my_extra_button (K276) -> VolUp
+  caps   esc   @a  @s  @d  @f  e   h   @j  @k  @l  @;  @o-mods-on  @spc-nav  vold  volu
 )
 
 (deflayer base-no-mods
   ;; Base layer variant: HRMs toggled OFF via 'o'. Spacebar uses @spc-nav.
-  caps   esc   a   s   d   f   e   h   j   k   l   ;   @o-mods-off @spc-nav
+  ;; my_side_button (K275) -> VolDown, my_extra_button (K276) -> VolUp
+  caps   esc   a   s   d   f   e   h   j   k   l   ;   @o-mods-off @spc-nav  vold  volu
 )
 
 (deflayer arrow-layer
   ;; Arrow Navigation layer: Active while Space (@spc-nav) is HELD.
-  ;; Maps HJKL to arrows. Underscores `_` denote transparency, passing keys
-  ;; through to the underlying layer (e.g., allows holding 'd' for Ctrl + Arrow).
-  _      _     _   _   _   _   _   left down up right _   _   _
+  ;; Maps HJKL to arrows. Underscores `_` denote transparency.
+  ;; my_side_button (K275) -> VolDown, my_extra_button (K276) -> VolUp
+  _      _     _   _   _   _   _   left down up right _   _   _           vold  volu
 )
 
 ;; Key behavior aliases (mod-taps, layer switching, etc.)
