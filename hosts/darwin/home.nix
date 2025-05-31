@@ -1,16 +1,11 @@
-{
-  pkgs,
-  inputs,
-  username,
-  ...
-}:
+{ pkgs, inputs, ... }:
 {
   imports = [ inputs.home-manager.darwinModules.home-manager ];
 
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    users.${username} =
+    users.anon =
       { config, ... }:
       {
         imports = [

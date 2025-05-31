@@ -1,9 +1,9 @@
-{ config, hostname, ... }:
+{ config, ... }:
 {
   sops.secrets.wireless.neededForUsers = true;
 
   networking = {
-    hostName = hostname;
+    hostName = "lenovo-legion";
     networkmanager = {
       enable = true;
       ensureProfiles.environmentFiles = [ config.sops.secrets.wireless.path ];

@@ -2,7 +2,6 @@
   pkgs,
   lib,
   config,
-  username,
   ...
 }:
 let
@@ -22,9 +21,9 @@ in
 {
   launchd.user.agents."symlink-zsh-config" = {
     script = ''
-      ln -sfn "/etc/zprofile" "${config.users.users.${username}.home}/.zprofile"
-      ln -sfn "/etc/zshenv" "${config.users.users.${username}.home}/.zshenv"
-      ln -sfn "/etc/zshrc" "${config.users.users.${username}.home}/.zshrc"
+      ln -sfn "/etc/zprofile" "/Users/${config.system.primaryUser}/.zprofile"
+      ln -sfn "/etc/zshenv" "/Users/${config.system.primaryUser}/.zshenv"
+      ln -sfn "/etc/zshrc" "/Users/${config.system.primaryUser}/.zshrc"
     '';
     serviceConfig.RunAtLoad = true;
     serviceConfig.StartInterval = 0;

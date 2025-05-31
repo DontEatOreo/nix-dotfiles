@@ -1,16 +1,11 @@
-{
-  pkgs,
-  username,
-  config,
-  ...
-}:
+{ pkgs, config, ... }:
 {
   sops.secrets.nyx-password.neededForUsers = true;
 
   users.mutableUsers = false;
 
   users.users = {
-    ${username} = {
+    nyx = {
       isNormalUser = true;
       extraGroups = [
         "wheel"

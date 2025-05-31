@@ -1,20 +1,8 @@
 { inputs, ... }:
-let
-  system = "x86_64-linux";
-  username = "nyx";
-  hostname = "lenovo-legion";
-in
 {
-  ${hostname} = inputs.nixpkgs.lib.nixosSystem {
-    inherit system;
-    specialArgs = {
-      inherit
-        inputs
-        system
-        username
-        hostname
-        ;
-    };
+  lenovo-legion = inputs.nixpkgs.lib.nixosSystem {
+    system = "x86_64-linux";
+    specialArgs = { inherit inputs; };
     modules = [
       ./configuration.nix
       ../../modules/common
@@ -38,7 +26,7 @@ in
       inputs.sops-nix.nixosModules.sops
       {
         sops = {
-          age.keyFile = "/home/${username}/.config/sops/age/keys.txt";
+          age.keyFile = "/home/lenovo-legion/.config/sops/age/keys.txt";
           defaultSopsFile = ../../secrets/secrets.yaml;
           secrets.github_ssh = { };
           secrets.lenovo_legion_5_15arh05h_ssh = { };

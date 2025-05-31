@@ -1,10 +1,7 @@
 { inputs, ... }:
-let
-  username = "anon";
-in
 {
   anons-Mac-mini = inputs.nix-darwin.lib.darwinSystem {
-    specialArgs = { inherit inputs username; };
+    specialArgs = { inherit inputs; };
     modules = [
       ../../modules/common
       ./configuration.nix
