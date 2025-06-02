@@ -47,6 +47,7 @@
     nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
 
     nixcord.inputs.flake-compat.follows = "flake-compat";
+    nixcord.inputs.flake-parts.follows = "flake-parts";
     nixcord.inputs.nixpkgs.follows = "nixpkgs";
     nixcord.url = "github:KaylorBen/nixcord";
 
