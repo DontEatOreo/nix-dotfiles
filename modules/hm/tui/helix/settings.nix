@@ -3,7 +3,7 @@ let
   editor = {
     # Core
     auto-format = true;
-    auto-save = true;
+    auto-save = false;
     idle-timeout = 50;
 
     # Visual
