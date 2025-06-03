@@ -1,5 +1,6 @@
-{ lib, ... }:
+{ pkgs, lib, ... }:
 {
+  home.packages = builtins.attrValues { inherit (pkgs) nodejs_24; };
   programs.vscode.profiles.default.userSettings = {
     "editor.fontFamily" = "'MonaspiceKr Nerd Font Mono', 'UbuntuMono Nerd Font', monospace";
     "editor.wordWrap" = "on";
@@ -25,5 +26,17 @@
     "terminal.integrated.minimumContrastRatio" = 1;
     ## Make the window's titlebar use the workbench colors
     "window.titleBarStyle" = "custom";
+    mcp = {
+      servers = {
+        context7 = {
+          type = "stdio";
+          command = "npx";
+          args = [
+            "-y"
+            "@upstash/context7-mcp"
+          ];
+        };
+      };
+    };
   };
 }
