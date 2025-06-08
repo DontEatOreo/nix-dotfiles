@@ -56,10 +56,10 @@ declare temp_dir=""
 declare -A FORMAT_ARGS=(
 	[m4a]='--embed-thumbnail --extract-audio --audio-quality 0 --audio-format m4a'
 	[mp3]='--embed-thumbnail --extract-audio --audio-quality 0 --audio-format mp3'
-	[mp4]='-f "bv*[ext=mp4][vcodec^=avc1]+ba[ext=m4a]/b[ext=mp4]/best" -S "ext:mp4:m4a"'
-	[m4a - cut]='--embed-thumbnail --extract-audio --audio-quality 0 --audio-format m4a'
-	[mp3 - cut]='--embed-thumbnail --extract-audio --audio-quality 0 --audio-format mp3'
-	[mp4 - cut]='-f "bv*[ext=mp4][vcodec^=avc1]+ba[ext=m4a]/b[ext=mp4]/best" -S "ext:mp4:m4a"'
+	[mp4]='-S "vcodec:h264,ext:mp4:m4a"'
+	[m4a-cut]='--embed-thumbnail --extract-audio --audio-quality 0 --audio-format m4a'
+	[mp3-cut]='--embed-thumbnail --extract-audio --audio-quality 0 --audio-format mp3'
+	[mp4-cut]='-S "vcodec:h264,ext:mp4:m4a"'
 )
 declare -a OUTPUT_ARGS=()
 declare -A arg_state=(
@@ -606,7 +606,7 @@ retry_with_fallback() {
 	# Add format-specific fallbacks
 	case "$format" in
 	mp4* | "")
-		fallback_cmd+=(-f "best[ext=mp4]/best")
+		fallback_cmd+=(-S "ext:mp4:m4a")
 		;;
 	m4a* | mp3*)
 		fallback_cmd+=(--extract-audio --audio-format "${format%-cut}" --audio-quality 0)
@@ -685,7 +685,7 @@ compress_video() {
 	log_question "Choose a tune for compression:"
 	tune="$(printf "%s\n" "${tune_options[@]}" | gum choose)"
 
-	local ffmpeg_cmd=(ffmpeg -hide_banner -i "$input_file" -c:v libx264 -profile:v high -preset veryslow -crf "$crf" -c:a copy)
+	local ffmpeg_cmd=(ffmpeg -i "$input_file" -c:v libx264 -profile:v high -preset veryslow -crf "$crf" -c:a copy)
 	[[ "$tune" != "none" ]] && ffmpeg_cmd+=(-tune "$tune")
 	ffmpeg_cmd+=("$output_file")
 
