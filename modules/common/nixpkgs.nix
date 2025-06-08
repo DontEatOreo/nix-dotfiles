@@ -13,6 +13,7 @@ in
       allowUnfree = true;
     } // lib.optionalAttrs isLinux { nixpkgs.config.cudaSupport = true; };
     overlays = [
+      inputs.nur.overlays.default
       (final: prev: { yt-dlp = final.callPackage ../../pkgs/yt-dlp.nix { }; })
       (final: prev: {
         lix =
@@ -30,6 +31,6 @@ in
               doCheck = false;
             });
       })
-    ] ++ (lib.optional isLinux inputs.nur.overlays.default);
+    ];
   };
 }
