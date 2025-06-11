@@ -15,8 +15,8 @@
       nixpkgs-review
       shellcheck # Warning hints for shell scripts
       cargo
-      rustc
       ;
+    inherit (inputs.rust-overlay.packages.${config.nixpkgs.hostPlatform.system}) default;
     nil = inputs.nil.packages.${config.nixpkgs.hostPlatform.system}.nil; # Nix language server
   };
 }
