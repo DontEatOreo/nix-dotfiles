@@ -34,9 +34,7 @@
     lix.inputs.pre-commit-hooks.follows = "";
     lix.url = "https://git.lix.systems/lix-project/lix/archive/2.93.0.tar.gz";
 
-    nil.inputs.flake-utils.follows = "flake-utils";
     nil.inputs.nixpkgs.follows = "nixpkgs";
-    nil.inputs.rust-overlay.follows = "rust-overlay";
     nil.url = "github:oxalica/nil";
 
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
