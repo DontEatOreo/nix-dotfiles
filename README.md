@@ -30,11 +30,11 @@ file *(except for vscode)*, so I made my own custom modules to automate the
 creation of the themes. This way, it also allows me to specify the exact theme
 and accents I want, and for it to be downstreamd from the catppuccin module
 
-[catppuccin-userstyles.nix](/modules/hm/custom/catppuccin-userstyles.nix) -
+[catppuccin-userstyles.nix](/pkgs/catppuccin-userstyles.nix) -
 Conveniently enough, Catppuccin has their theme for a bunch of sites. I love
 consistency, so I think it's a must-have, tbh
 
-[warp-terminal-catppuccin.nix](/modules/hm/custom/warp-terminal-catppuccin.nix) -
+[warp-terminal-catppuccin.nix](/pkgs/warp-terminal-catppuccin.nix) -
 Warp Terminal, not much else to say
 
 ## Scripts
@@ -42,7 +42,7 @@ Warp Terminal, not much else to say
 [yt-dlp-script.sh](scripts/yt-dlp-script.sh) - A bash script, I have to
 download video in my own "niche" format
 
-[update.sh](/modules/update.sh) - A neat bash script
+[update.sh](/pkgs/update.sh) - A neat bash script
 I have to update any custom modules I have *(e.g
 [catppuccin-userstyles.nix](/modules/hm/custom/catppuccin-userstyles.n
 ix))*
