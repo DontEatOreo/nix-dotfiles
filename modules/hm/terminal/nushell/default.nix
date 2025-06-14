@@ -9,7 +9,7 @@ let
   yt-dlp-script = lib.getExe (
     pkgs.writeShellApplication {
       name = "yt-dlp-script";
-      text = (builtins.readFile ../../../scripts/yt-dlp-script.sh);
+      text = (builtins.readFile ../../../../scripts/yt-dlp-script.sh);
       runtimeInputs = builtins.attrValues {
         inherit (pkgs)
           bc
@@ -121,19 +121,7 @@ in
             t: "source ${customCompletions}/custom-completions/${t}/${t}-completions.nu"
           ) completionTypes;
         in
-        builtins.concatStringsSep "\n" sourceCommands
-        + "\n"
-        + ''
-          def nix-build-file [
-              file: string,
-              args: string = "{}"
-          ] {
-            let prefix = "with import <nixpkgs> {}; callPackage " + (readlink -f $file)
-            let suffix = " " + $args
-            let expr   = $prefix + $suffix
-            nix-build -E $expr
-          }
-        '';
+        builtins.concatStringsSep "\n" sourceCommands + "\n" + builtins.readFile ./aliases.nu;
     };
   };
 }
