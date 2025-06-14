@@ -73,19 +73,7 @@
                 ghostty.enable = true;
                 git.enable = true;
                 helix.enable = true;
-                nixcord = {
-                  enable = true;
-                  theme = {
-                    dark = {
-                      flavor = config.catppuccin.flavor;
-                      accent = config.catppuccin.accent;
-                    };
-                    light = {
-                      flavor = "latte";
-                      accent = config.catppuccin.accent;
-                    };
-                  };
-                };
+                nixcord.enable = true;
                 nushell.enable = true;
                 ssh.enable = true;
                 starship.enable = true;
