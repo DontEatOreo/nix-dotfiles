@@ -14,7 +14,6 @@
           ../../modules/hm/gui
           ../../modules/hm/terminal
           ../../modules/hm/tui
-          ../../modules/hm/config/starship.nix
           ../../shared/aliases.nix
           inputs.catppuccin.homeModules.catppuccin
           {

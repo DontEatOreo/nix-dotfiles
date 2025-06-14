@@ -19,8 +19,8 @@
             ../../modules/hm/terminal/bash.nix
             ../../modules/hm/terminal/ghostty.nix
             ../../modules/hm/terminal/nushell.nix
+            ../../modules/hm/terminal/starship.nix
             ../../modules/hm/tui
-            ../../modules/hm/config/starship.nix
             ../../shared/aliases.nix
             { home.stateVersion = "25.05"; }
           ];
