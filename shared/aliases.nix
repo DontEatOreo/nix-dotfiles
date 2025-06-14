@@ -10,7 +10,7 @@ let
   yt-dlp-script = lib.getExe (
     pkgs.writeShellApplication {
       name = "yt-dlp-script";
-      text = (builtins.readFile ./scripts/yt-dlp-script.sh);
+      text = (builtins.readFile ../scripts/yt-dlp-script.sh);
       runtimeInputs = builtins.attrValues {
         inherit (pkgs)
           bc

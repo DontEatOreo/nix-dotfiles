@@ -39,7 +39,7 @@ Warp Terminal, not much else to say
 
 ## Scripts
 
-[yt-dlp-script.sh](/shared/scripts/yt-dlp-script.sh) - A bash script, I have to
+[yt-dlp-script.sh](scripts/yt-dlp-script.sh) - A bash script, I have to
 download video in my own "niche" format
 
 [update.sh](/modules/update.sh) - A neat bash script
