@@ -34,9 +34,6 @@
     lix.inputs.pre-commit-hooks.follows = "";
     lix.url = "https://git.lix.systems/lix-project/lix/archive/2.93.0.tar.gz";
 
-    nil.inputs.nixpkgs.follows = "nixpkgs";
-    nil.url = "github:oxalica/nil";
-
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
 
@@ -52,6 +49,7 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs-master.url = "github:NixOS/nixpkgs";
 
     nur.inputs.flake-parts.follows = "flake-parts";
     nur.inputs.nixpkgs.follows = "nixpkgs";

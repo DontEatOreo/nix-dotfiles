@@ -10,9 +10,7 @@
       ./system.nix
       ./zsh.nix
 
-      ../../shared/cli.nix
-      ../../shared/dev.nix
-      ../../shared/tui.nix
+      ../../shared/packages.nix
     ];
   };
 }
