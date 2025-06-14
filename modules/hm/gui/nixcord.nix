@@ -13,15 +13,13 @@
     programs.nixcord = {
       enable = true;
       discord.vencord.unstable = true;
-      quickCss =
-        ''
-          /* ----- CATPPUCCIN THEME ----- */
-          @import url("https://catppuccin.github.io/discord/dist/catppuccin-${config.catppuccin.flavor}-${config.catppuccin.accent}.theme.css")
-          (prefers-color-scheme: dark);
-          @import url("https://catppuccin.github.io/discord/dist/catppuccin-latte-${config.catppuccin.accent}.theme.css")
-          (prefers-color-scheme: light);
-        ''
-        + builtins.readFile ../config/quickCSS.css;
+      quickCss = ''
+        /* ----- CATPPUCCIN THEME ----- */
+        @import url("https://catppuccin.github.io/discord/dist/catppuccin-${config.catppuccin.flavor}-${config.catppuccin.accent}.theme.css")
+        (prefers-color-scheme: dark);
+        @import url("https://catppuccin.github.io/discord/dist/catppuccin-latte-${config.catppuccin.accent}.theme.css")
+        (prefers-color-scheme: light);
+      '';
       config = {
         useQuickCss = true;
         plugins = {
