@@ -33,24 +33,6 @@
               };
             }
           ];
-          homePkgs =
-            let
-              catppuccin-userstyles = pkgs.callPackage ../../pkgs/catppuccin-userstyles.nix {
-                inherit (config.catppuccin) accent flavor;
-              };
-              warp-terminal-catppuccin = pkgs.callPackage ../../pkgs/warp-terminal-catppuccin.nix {
-                inherit (config.catppuccin) accent;
-              };
-            in
-            [
-              {
-                home = {
-                  file.".warp/themes".source = "${warp-terminal-catppuccin.outPath}/share/warp/themes";
-                  file."Documents/catppuccin-userstyles.json".source =
-                    "${catppuccin-userstyles.outPath}/dist/import.json";
-                };
-              }
-            ];
           hm = [
             {
               hm = {
@@ -77,6 +59,6 @@
             }
           ];
         in
-        modulesImports ++ catppuccin ++ homePkgs ++ hm;
+        modulesImports ++ catppuccin ++ hm;
     };
 }
