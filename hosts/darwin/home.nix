@@ -16,10 +16,7 @@
           modulesImports = [
             ../../modules/hm/cli
             ../../modules/hm/gui
-            ../../modules/hm/terminal/bash.nix
-            ../../modules/hm/terminal/ghostty.nix
-            ../../modules/hm/terminal/nushell.nix
-            ../../modules/hm/terminal/starship.nix
+            ../../modules/hm/terminal
             ../../modules/hm/tui
             ../../shared/aliases.nix
             { home.stateVersion = "25.05"; }
