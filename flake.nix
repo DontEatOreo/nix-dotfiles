@@ -48,7 +48,7 @@
 
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05-small";
     nixpkgs-master.url = "github:NixOS/nixpkgs";
 
     nur.inputs.flake-parts.follows = "flake-parts";
