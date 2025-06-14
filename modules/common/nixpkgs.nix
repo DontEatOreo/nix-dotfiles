@@ -26,8 +26,7 @@ in
                   substituteInPlace lix/libmain/shared.cc \
                     --replace-fail "(Lix, like Nix)" "(Lix, like Nix but better)"        
                 '';
-              # Okay, I'm making a huge bet they will never break CI, which
-              # probably hold up
+              # This assumes that the tests will never break
               doCheck = false;
             });
       })
