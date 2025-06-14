@@ -137,8 +137,8 @@ let
 in
 {
   programs.yazi.keymap = {
-    manager.prepend_keymap = prependKeymap;
-    manager.keymap =
+    mgr.prepend_keymap = prependKeymap;
+    mgr.keymap =
       keymap
       ++ taskKeymap
       ++ navigationKeymap
