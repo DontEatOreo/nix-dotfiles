@@ -7,6 +7,19 @@
 }:
 let
   inherit (osConfig.nixpkgs.hostPlatform) isLinux;
+
+  chromiumConfig = {
+    dictionaries = builtins.attrValues {
+      inherit (pkgs.hunspellDictsChromium) en_US;
+    };
+    extensions = [
+      { id = "cjpalhdlnbpafiamejdnhcphjbkeiagm"; } # Ublock Origin
+      { id = "mnjggcdmjocbbbhaepdhchncahnbgone"; } # Sponsor Block
+      { id = "enamippconapkdmgfgjchkhakpfinmaj"; } # Dearrow
+      { id = "gebbhagfogifgggkldgodflihgfeippi"; } # Return YT Dislikes
+      { id = "pobhoodpcipjmedfenaigbeloiidbflp"; } # Minimal Twitter/X Theme
+    ];
+  };
 in
 {
   options.hm.chromium.enable = lib.mkEnableOption "Chromium";
@@ -20,15 +33,9 @@ in
     ];
     programs.chromium = {
       enable = true;
-      package = pkgs.brave;
-      dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
-      extensions = [
-        { id = "cjpalhdlnbpafiamejdnhcphjbkeiagm"; } # Ublock Origin
-        { id = "mnjggcdmjocbbbhaepdhchncahnbgone"; } # Sponsor Block
-        { id = "enamippconapkdmgfgjchkhakpfinmaj"; } # Dearrow
-        { id = "gebbhagfogifgggkldgodflihgfeippi"; } # Return YT Dislikes
-        { id = "pobhoodpcipjmedfenaigbeloiidbflp"; } # Minimal Twitta Theme
-      ];
-    };
+    } // chromiumConfig;
+    programs.brave = {
+      enable = true;
+    } // chromiumConfig;
   };
 }
