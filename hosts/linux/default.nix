@@ -6,7 +6,7 @@
     modules = [
       ./configuration.nix
       ../../modules/common
-      ../../modules/de
+      ../../modules/nixos
       {
         nixOS = {
           gnome.enable = true;

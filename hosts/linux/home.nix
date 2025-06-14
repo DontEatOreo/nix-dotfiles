@@ -16,7 +16,6 @@
           modulesImports = [
             ../../modules/hm/browser
             ../../modules/hm/cli
-            ../../modules/hm/config/dconf.nix
             ../../modules/hm/gui
             ../../modules/hm/terminal
             ../../modules/hm/tui

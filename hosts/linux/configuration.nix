@@ -17,6 +17,11 @@
     ./systemd.nix
     ./users.nix
     ./kanata
+    ../../modules/nixos
+    {
+      nixOS.gnome.enable = true;
+      nixOS.dconf.enable = true;
+    }
 
     ../../shared/packages.nix
   ];
