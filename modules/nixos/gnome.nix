@@ -5,6 +5,15 @@
   ...
 }:
 let
+  inherit (lib.gvariant)
+    mkBoolean
+    mkInt32
+    mkString
+    mkArray
+    mkEmptyArray
+    type
+    ;
+
   generateKeybindings =
     prefix: super: modifiers: range:
     builtins.listToAttrs (
@@ -16,7 +25,7 @@ let
         in
         {
           name = "${prefix}-${num}";
-          value = [ "${super}${modifierStr}${num}" ];
+          value = mkArray [ "${super}${modifierStr}${num}" ];
         }
       ) range
     );
@@ -63,17 +72,17 @@ in
           lockAll = true; # Prevents overriding
           settings = {
             "org/gnome/desktop/interface" = {
-              gtk-enable-primary-paste = false;
-              enable-animations = false;
-              clock-show-date = true;
-              clock-show-seconds = true;
-              clock-format = "24h";
+              gtk-enable-primary-paste = mkBoolean false;
+              enable-animations = mkBoolean false;
+              clock-show-date = mkBoolean true;
+              clock-show-seconds = mkBoolean true;
+              clock-format = mkString "24h";
             };
 
             "org/gnome/desktop/wm/preferences" = {
-              num-workspaces = 9;
-              button-layout = "close,minimize,maximize:";
-              resize-with-right-button = true;
+              num-workspaces = mkInt32 9;
+              button-layout = mkString "close,minimize,maximize:";
+              resize-with-right-button = mkBoolean true;
             };
 
             /*
@@ -81,46 +90,31 @@ in
               `switch-to-application`, which we do not want as it breaks
               everything, so we have to explicitly set it to nothing
             */
-            "org/gnome/shell/keybindings" =
-              let
-                otherKeybindings = { };
-                switchKeybindings = (
-                  lib.genAttrs (map (n: "switch-to-application-${toString n}") (lib.range 1 9)) (_: [ ])
-                );
-              in
-              lib.mkMerge [
-                otherKeybindings
-                switchKeybindings
-              ];
+            "org/gnome/shell/keybindings" = lib.genAttrs (map (n: "switch-to-application-${toString n}") (
+              lib.range 1 9
+            )) (_: mkEmptyArray type.string);
 
             "org/gnome/mutter/keybindings" = {
-              toggle-tiled-left = [ "<Super>a" ];
-              toggle-tiled-right = [ "<Super>d" ];
-              move-to-center = [ "<Super>Return" ];
+              toggle-tiled-left = mkArray [ "<Super>a" ];
+              toggle-tiled-right = mkArray [ "<Super>d" ];
+              move-to-center = mkArray [ "<Super>Return" ];
             };
 
             "org/gnome/desktop/wm/keybindings" =
-              let
-                otherKeybindings = {
-                  maximize = [ "<Super><Shift>Return" ];
-                  move-to-side-n = [ "<Super>w" ];
-                  move-to-side-s = [ "<Super>s" ];
-                };
-                switchKeybindings = generateKeybindings "switch-to-workspace" "<Super>" [ ] 9;
-                moveKeybindings = generateKeybindings "move-to-workspace" "<Super>" [ "<Shift>" ] 9;
-              in
-              lib.mkMerge [
-                otherKeybindings
-                switchKeybindings
-                moveKeybindings
-              ];
+              {
+                maximize = mkArray [ "<Super><Shift>Return" ];
+                move-to-side-n = mkArray [ "<Super>w" ];
+                move-to-side-s = mkArray [ "<Super>s" ];
+              }
+              // (generateKeybindings "switch-to-workspace" "<Super>" [ ] 9)
+              // (generateKeybindings "move-to-workspace" "<Super>" [ "<Shift>" ] 9);
 
             "org/gnome/shell/app-switcher" = {
-              current-workspace-only = false;
+              current-workspace-only = mkBoolean false;
             };
 
             "org/gnome/shell" = {
-              enabled-extensions = [
+              enabled-extensions = mkArray [
                 "appindicatorsupport@rgcjonas.gmail.com"
                 "places-menu@gnome-shell-extensions.gcampax.github.com"
                 "clipboard-indicator@tudmotu.com"
