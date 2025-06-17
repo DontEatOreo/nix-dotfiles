@@ -77,7 +77,7 @@
           jj log --color=always --revisions @ --no-graph --ignore-working-copy --limit 1 --template 'change_id.shortest() ++ " " ++ commit_id.shortest() ++ if(bookmarks, " " ++ bookmarks.map(|b| truncate_start(14, b.name(), "..")).join(", "), "") ++ raw_escape_sequence("\x1b[1;32m") ++ " " ++ if(empty, "(empty)", coalesce(truncate_start(24, description.first_line(), ".."), "(no description)")) ++ raw_escape_sequence("\x1b[0m")' | str trim
         '';
         detect_folders = [ ".jj" ];
-        format = "\\[$output\\]";
+        format = "\\[$output\\] ";
         shell = [ "nu" ];
         when = "jj root --ignore-working-copy";
       };
