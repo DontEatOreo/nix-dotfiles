@@ -71,5 +71,6 @@
 
     nvidia.package = config.boot.kernelPackages.nvidiaPackages.latest;
     nvidia.modesetting.enable = true;
+    nvidia.powerManagement.enable = true;
   };
 }
