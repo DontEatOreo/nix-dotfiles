@@ -25,6 +25,10 @@ in
       # Rust
       inherit (inputs.rust-overlay.packages.${config.nixpkgs.hostPlatform.system}) default;
 
+      # .NET
+      inherit (pkgs) nuget-to-nix;
+      inherit (pkgs.dotnetCorePackages) sdk_9_0_3xx sdk_10_0-bin;
+
       # Modern Rust Alternatives
       inherit (pkgs)
         bat # cat
