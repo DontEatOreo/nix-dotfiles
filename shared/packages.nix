@@ -6,17 +6,17 @@
   ...
 }:
 let
-  pkgsMaster = inputs.nixpkgs-master.legacyPackages.${config.nixpkgs.hostPlatform.system};
+  pkgsUnstable = inputs.nixpkgs-unstable.legacyPackages.${config.nixpkgs.hostPlatform.system};
 in
 {
   environment.systemPackages =
     builtins.attrValues {
       # Nix Related
-      inherit (pkgsMaster) nil;
+      inherit (pkgsUnstable) nil;
       inherit (pkgs) nixfmt-rfc-style nixpkgs-review;
 
       # Rust re-implementations of coreutils
-      inherit (pkgsMaster)
+      inherit (pkgsUnstable)
         uutils-coreutils-noprefix
         uutils-diffutils
         uutils-findutils
