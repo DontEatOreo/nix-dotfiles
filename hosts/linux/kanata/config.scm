@@ -35,22 +35,15 @@
 
 ;; Layers
 (deflayer base
-  ;; Default layer: Home Row Mods (HRMs) active. Spacebar uses @spc-nav.
+  ;; Default layer: Home Row Mods (HRMs) active.
   ;; my_side_button (K275) -> VolDown, my_extra_button (K276) -> VolUp
-  caps   esc   @a  @s  @d  @f  e   h   @j  @k  @l  @;  @o-mods-on  @spc-nav  vold  volu
+  caps   esc   @a  @s  @d  @f  e   h   @j  @k  @l  @;  @o-mods-on  spc  vold  volu
 )
 
 (deflayer base-no-mods
-  ;; Base layer variant: HRMs toggled OFF via 'o'. Spacebar uses @spc-nav.
+  ;; Base layer variant: HRMs toggled OFF via 'o'.
   ;; my_side_button (K275) -> VolDown, my_extra_button (K276) -> VolUp
-  caps   esc   a   s   d   f   e   h   j   k   l   ;   @o-mods-off @spc-nav  vold  volu
-)
-
-(deflayer arrow-layer
-  ;; Arrow Navigation layer: Active while Space (@spc-nav) is HELD.
-  ;; Maps HJKL to arrows. Underscores `_` denote transparency.
-  ;; my_side_button (K275) -> VolDown, my_extra_button (K276) -> VolUp
-  _      _     _   _   _   _   _   left down up right _   _   _           vold  volu
+  caps   esc   a   s   d   f   e   h   j   k   l   ;   @o-mods-off spc  vold  volu
 )
 
 ;; Key behavior aliases (mod-taps, layer switching, etc.)
@@ -70,9 +63,6 @@
   k (tap-hold $tap-timeout $hold-timeout k rctl)
   l (tap-hold $tap-timeout $hold-timeout l ralt)
   ; (tap-hold $tap-timeout $hold-timeout ; rmet)
-
-  ;; Spacebar: Tap for Space, Hold for arrow-layer activation
-  spc-nav (tap-hold $tap-timeout $hold-timeout spc (layer-while-held arrow-layer))
 
   ;; 'o' Key: Tap for 'o', Hold ($toggle-hold-time) to toggle HRM layer.
   o-mods-on  (tap-hold $tap-timeout $toggle-hold-time o (layer-switch base-no-mods)) ;; Turns mods OFF
