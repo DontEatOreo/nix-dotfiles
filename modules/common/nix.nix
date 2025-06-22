@@ -10,7 +10,7 @@
   nix.settings =
     {
       trusted-users = lib.splitString " " "anon nyx";
-      experimental-features = "nix-command flakes pipe-operator";
+      experimental-features = "nix-command flakes";
       substituters = [
         "https://devenv.cachix.org"
         "https://nix-community.cachix.org"
