@@ -13,7 +13,7 @@ in
     builtins.attrValues {
       # Nix Related
       inherit (pkgsMaster) nil;
-      inherit (pkgs) nixfmt-rfc-style;
+      inherit (pkgs) nixfmt-rfc-style nixpkgs-review;
 
       # Rust re-implementations of coreutils
       inherit (pkgsMaster)
