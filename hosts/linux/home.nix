@@ -14,11 +14,6 @@
       imports =
         let
           modulesImports = [
-            ../../modules/hm/browser
-            ../../modules/hm/cli
-            ../../modules/hm/gui
-            ../../modules/hm/terminal
-            ../../modules/hm/tui
             ../../shared/aliases.nix
             { home.stateVersion = "25.05"; }
           ];
@@ -34,6 +29,11 @@
             }
           ];
           hm = [
+            ../../modules/hm/browser
+            ../../modules/hm/cli
+            ../../modules/hm/gui
+            ../../modules/hm/terminal
+            ../../modules/hm/tui
             {
               hm = {
                 atuin.enable = true;
