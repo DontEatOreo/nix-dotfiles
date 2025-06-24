@@ -77,6 +77,7 @@
                 vscode.enable = true;
                 yazi.enable = true;
                 zoxide.enable = true;
+                zellij.enable = true;
               };
             }
           ];

@@ -50,28 +50,7 @@ let
       "alt+right=text:${ctrl.ESC}${ctrl.WORD_FORWARD}"
     ];
 
-    splits =
-      let
-        # k: is used for new_split/resize_split commands (up/down/left/right)
-        # v: is used for goto_split commands which expect top/bottom/left/right
-        mkSplitCommands = k: v: [
-          (mkSuperShiftNested "s" k "new_split:${k}")
-          (mkSuperShiftNested "r" k "resize_split:${k},30")
-          (mkSuperShift k "goto_split:${v}")
-        ];
-      in
-      lib.flatten (lib.mapAttrsToList mkSplitCommands directions)
-      ++ [
-        (mkSuper "t" "new_tab")
-        (mkSuper "e" "equalize_splits")
-      ];
-
-    screen = [
-      (mkSuper "k" "clear_screen")
-      (mkSuper "g" "write_screen_file:open")
-      (mkSuperShift "left" "scroll_page_up")
-      (mkSuperShift "right" "scroll_page_down")
-    ];
+    screen = [ (mkSuper "g" "write_screen_file:open") ];
 
     font = [
       (mkSuper "0" "reset_font_size")
@@ -91,10 +70,7 @@ let
     misc = [
       (mkSuper "a" "select_all")
       (mkSuper "," "reload_config")
-      (mkSuperShift "backspace" "close_window")
     ];
-
-    tabs = map (n: mkSuper (toString n) "goto_tab:${toString n}") (lib.range 1 9);
   };
 in
 {
@@ -108,7 +84,7 @@ in
       settings = lib.optionalAttrs isDarwin { macos-option-as-alt = true; } // {
         adjust-underline-position = 4;
         clipboard-paste-protection = false;
-        command = "${lib.getExe pkgs.zsh} -l -c 'nu -l -i'";
+        command = "zsh -l -c 'nu -l -e zellij'";
         confirm-close-surface = false;
         cursor-style-blink = false;
         font-family = "MonaspiceKr Nerd Font";
