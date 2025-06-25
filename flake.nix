@@ -26,13 +26,13 @@
 
     lix-module.inputs.flake-utils.follows = "flake-utils";
     lix-module.inputs.nixpkgs.follows = "nixpkgs";
-    lix-module.url = "git+https://git.lix.systems/lix-project/nixos-module?ref=2.93.0";
+    lix-module.url = "git+https://git.lix.systems/lix-project/nixos-module?ref=2.93.1";
 
     lix.inputs.flake-compat.follows = "";
     lix.inputs.nix2container.follows = "";
     lix.inputs.nixpkgs.follows = "nixpkgs";
     lix.inputs.pre-commit-hooks.follows = "";
-    lix.url = "https://git.lix.systems/lix-project/lix/archive/2.93.0.tar.gz";
+    lix.url = "https://git.lix.systems/lix-project/lix/archive/2.93.1.tar.gz";
 
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
