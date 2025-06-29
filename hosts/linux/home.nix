@@ -24,6 +24,7 @@
                 enable = true;
                 flavor = "frappe";
                 accent = "blue";
+                vscode.enable = false;
                 ghostty.enable = false;
               };
             }
