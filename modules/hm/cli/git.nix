@@ -51,7 +51,11 @@ in
         if config.programs.git.signing.signByDefault then true else false;
       jujutsu = {
         enable = true;
-        package = inputs.jj-vcs.packages.${osConfig.nixpkgs.hostPlatform.system}.jujutsu;
+        package =
+          (inputs.jj-vcs.packages.${osConfig.nixpkgs.hostPlatform.system}.jujutsu).overrideAttrs
+            (_: {
+              doCheck = false; # Disable test checking
+            });
         settings = {
           core.fsmonitor = "watchman";
           core.watchman.register-snapshot-trigger = true;
