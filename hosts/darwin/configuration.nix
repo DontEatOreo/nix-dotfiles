@@ -1,4 +1,9 @@
-{ inputs, pkgs, ... }:
+{
+  inputs,
+  pkgs,
+  config,
+  ...
+}:
 {
   imports = [ inputs.sops-nix.darwinModules.sops ];
 
@@ -10,6 +15,16 @@
     name = "anon";
     home = "/Users/anon";
     shell = pkgs.zsh;
+  };
+
+  launchd.user.agents."symlink-zsh-config" = {
+    script = ''
+      ln -sfn "/etc/zprofile" "/Users/${config.system.primaryUser}/.zprofile"
+      ln -sfn "/etc/zshenv" "/Users/${config.system.primaryUser}/.zshenv"
+      ln -sfn "/etc/zshrc" "/Users/${config.system.primaryUser}/.zshrc"
+    '';
+    serviceConfig.RunAtLoad = true;
+    serviceConfig.StartInterval = 0;
   };
 
   sops = {

@@ -22,6 +22,9 @@ in
         uutils-findutils
         ;
 
+      # Shells (No Config)
+      inherit (pkgs) bash zsh;
+
       # Rust
       inherit (inputs.rust-overlay.packages.${config.nixpkgs.hostPlatform.system}) default;
 

@@ -13,10 +13,7 @@
     {
       imports =
         let
-          modulesImports = [
-            ../../shared/aliases.nix
-            { home.stateVersion = "25.05"; }
-          ];
+          modulesImports = [ { home.stateVersion = "25.05"; } ];
           catppuccin = [
             inputs.catppuccin.homeModules.catppuccin
             {
@@ -38,7 +35,6 @@
             {
               hm = {
                 atuin.enable = true;
-                bash.enable = true;
                 chromium.enable = true;
                 direnv.enable = true;
                 fastfetch.enable = true;
@@ -54,7 +50,6 @@
                 starship.enable = true;
                 vscode.enable = true;
                 yazi.enable = true;
-                zsh.enable = true;
                 zoxide.enable = true;
                 zellij.enable = true;
               };

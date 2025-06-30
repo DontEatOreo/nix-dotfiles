@@ -8,7 +8,6 @@
       ./fonts.nix
       ./home.nix
       ./system.nix
-      ./zsh.nix
 
       ../../shared/packages.nix
     ];
