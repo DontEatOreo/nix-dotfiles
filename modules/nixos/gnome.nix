@@ -67,7 +67,7 @@ in
       };
     })
     # Fix for GNOME suspend/resume issues with NVIDIA GPUs
-    (lib.mkIf config.nixos.nvidia.enable {
+    (lib.mkIf config.nixOS.nvidia.enable {
       systemd.services = {
         gnome-suspend = {
           description = "Suspend gnome shell";

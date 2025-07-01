@@ -1,1 +1,8 @@
-_: { imports = [ ./gnome.nix ]; }
+_: {
+  imports = [
+    ./gnome.nix
+    ./hardware.nix
+    ./networking.nix
+    ./services.nix
+  ];
+}

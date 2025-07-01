@@ -13,6 +13,9 @@
         {
           nixOS = {
             gnome.enable = true;
+            dconf.enable = true;
+            nvidia.enable = true;
+            amd.enable = true;
           };
         }
       ]

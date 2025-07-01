@@ -7,7 +7,6 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ./hardware.nix
     ./home.nix
     ./networking.nix
     ./packages.nix
@@ -17,20 +16,11 @@
     ./systemd.nix
     ./users.nix
     ./kanata
-    ../../modules/nixos
-    {
-      nixOS.gnome.enable = true;
-      nixOS.dconf.enable = true;
-    }
 
     ../../shared/packages.nix
   ];
 
   environment = {
-    sessionVariables = {
-      NIXOS_OZONE_WL = "1";
-    };
-
     # Add inputs to legacy (nix2) channels, making legacy nix commands consistent
     etc = lib.mapAttrs' (name: value: {
       name = "nix/path/${name}";
@@ -52,6 +42,11 @@
       LC_TELEPHONE = "en_US.UTF-8";
       LC_TIME = "en_US.UTF-8";
     };
+  };
+
+  hardware = {
+    bluetooth.enable = true;
+    bluetooth.powerOnBoot = true;
   };
 
   boot.loader.systemd-boot.enable = true;

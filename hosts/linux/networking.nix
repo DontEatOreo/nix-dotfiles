@@ -5,18 +5,8 @@
   networking = {
     hostName = "lenovo-legion";
     networkmanager = {
-      enable = true;
       ensureProfiles.environmentFiles = [ config.sops.secrets.wireless.path ];
       ensureProfiles.profiles = {
-        ethernet = {
-          connection = {
-            id = "ethernet";
-            type = "ethernet";
-            master = "bond0";
-            slave-type = "bond";
-          };
-          ipv4.method = "auto";
-        };
         "2ghz" = {
           connection = {
             id = "2ghz";
@@ -32,7 +22,6 @@
             psk = "$PSK_HOME";
           };
         };
-
         "5ghz" = {
           connection = {
             id = "5ghz";
