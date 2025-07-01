@@ -66,6 +66,44 @@ in
           ;
       };
     })
+    # Fix for GNOME suspend/resume issues with NVIDIA GPUs
+    (lib.mkIf config.nixos.nvidia.enable {
+      systemd.services = {
+        gnome-suspend = {
+          description = "Suspend gnome shell";
+          before = [
+            "systemd-suspend.service"
+            "systemd-hibernate.service"
+            "nvidia-suspend.service"
+            "nvidia-hibernate.service"
+          ];
+          wantedBy = [
+            "systemd-suspend.service"
+            "systemd-hibernate.service"
+          ];
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "${lib.getExe' pkgs.procps "pkill"} -f -STOP ${lib.getExe' pkgs.gnome-shell "gnome-shell"}";
+          };
+        };
+        gnome-resume = {
+          description = "Resume gnome shell";
+          after = [
+            "systemd-suspend.service"
+            "systemd-hibernate.service"
+            "nvidia-resume.service"
+          ];
+          wantedBy = [
+            "systemd-suspend.service"
+            "systemd-hibernate.service"
+          ];
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "${lib.getExe' pkgs.procps "pkill"} -f -CONT ${lib.getExe' pkgs.gnome-shell "gnome-shell"}";
+          };
+        };
+      };
+    })
     (lib.mkIf config.nixOS.dconf.enable {
       programs.dconf.profiles.user.databases = [
         {
