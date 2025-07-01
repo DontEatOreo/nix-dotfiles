@@ -33,8 +33,9 @@ in
             ;
         };
         settings = {
-          "media.ffmpeg.vaapi.enabled" = true;
-          "media.gpu-process.enabled" = true;
+          "media.hardware-video-decoding.force-enabled" = true;
+          "gfx.x11-egl.force-enabled" = true;
+          "widget.dmabuf.force-enabled" = true;
         };
         search = {
           force = true;
