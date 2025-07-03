@@ -16,17 +16,25 @@ in
       enable = true;
       profiles.main = {
         isDefault = true;
-        extensions.packages = builtins.attrValues {
-          inherit (pkgs.nur.repos.rycee.firefox-addons)
-            ublock-origin
-            sponsorblock
-            dearrow
-            return-youtube-dislikes
-            violentmonkey
-            catppuccin-web-file-icons
-            clearurls
-            ;
-        };
+        extensions.packages =
+          builtins.attrValues {
+            inherit (pkgs.nur.repos.rycee.firefox-addons)
+              ublock-origin
+              sponsorblock
+              dearrow
+              return-youtube-dislikes
+              violentmonkey
+              catppuccin-web-file-icons
+              clearurls
+              ;
+          }
+          ++ [
+            (pkgs.fetchFirefoxAddon {
+              name = "minimal-twitter";
+              url = "https://addons.mozilla.org/firefox/downloads/latest/minimaltwitter/addon-6.3.0.xpi";
+              sha256 = "sha256-h6r9hA2U2froAHU8x5hExwHgtU9010Cc/nHrLPW0kFo=";
+            })
+          ];
         settings = {
           "media.hardware-video-decoding.force-enabled" = true;
           "gfx.x11-egl.force-enabled" = true;
