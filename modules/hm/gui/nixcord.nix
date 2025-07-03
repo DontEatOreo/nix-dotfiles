@@ -12,7 +12,7 @@
   config = lib.mkIf config.hm.nixcord.enable {
     programs.nixcord = {
       enable = true;
-      discord.vencord.unstable = true;
+      # discord.vencord.unstable = true;
       quickCss = ''
         /* ----- CATPPUCCIN THEME ----- */
         @import url("https://catppuccin.github.io/discord/dist/catppuccin-${config.catppuccin.flavor}-${config.catppuccin.accent}.theme.css")

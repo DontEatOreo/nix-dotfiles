@@ -16,9 +16,9 @@
       add_newline = true;
       command_timeout =
         let
-          secToMin = s: s * 1000;
+          secToMs = s: s * 1000;
         in
-        secToMin 10;
+        secToMs 5;
 
       format = lib.concatStrings [
         "$shell"
