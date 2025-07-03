@@ -86,8 +86,8 @@ in
           customCompletions = pkgs.fetchFromGitHub {
             owner = "nushell";
             repo = "nu_scripts";
-            rev = "b2d512f6c67f68895a26136c6ce552281efbec6e";
-            hash = "sha256-iC5Qmyn9vDr4b1BWtJkC3pl2dOam2Se51+ENvRdXlvA=";
+            rev = "f0cd46cafc9d0d73efde0f2a0b6f455dd2dfbfe3";
+            hash = "sha256-JEytcntdN+krsjzJdwa+pbF76Z2XhStdKS9/GZ9JjtE=";
           };
           completionTypes = [
             "bat"
