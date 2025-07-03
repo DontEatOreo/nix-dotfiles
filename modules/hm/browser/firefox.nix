@@ -24,6 +24,7 @@ in
             return-youtube-dislikes
             violentmonkey
             catppuccin-web-file-icons
+            clearurls
             ;
         };
         settings = {
