@@ -11,124 +11,69 @@ let
     vscode-marketplace
     ;
   mkExt = p: e: vscode-marketplace.${p}.${e};
-
-  mkFormatterConfig = f: {
-    "editor.defaultFormatter" = f;
-    "editor.formatOnPaste" = true;
-    "editor.formatOnSave" = true;
-    "editor.formatOnType" = true;
-  };
-
-  utils = {
-    extensions = [
-      (mkExt "esbenp" "prettier-vscode")
-      (mkExt "mkhl" "direnv")
-      (mkExt "oderwat" "indent-rainbow")
-      (mkExt "visualstudioexptteam" "vscodeintellicode")
-      (mkExt "editorconfig" "editorconfig")
-    ];
-    settings = { };
-  };
-
-  themes = {
-    extensions = [ vscode-marketplace.catppuccin.catppuccin-vsc-icons ];
-    settings = {
-      workbench.iconTheme = "catppuccin-${config.catppuccin.flavor}";
-    };
-  };
-
-  languages = {
-    extensions = [
-      # Bash
-      (mkExt "mads-hartmann" "bash-ide-vscode")
-      (mkExt "timonwong" "shellcheck")
-
-      # JS & TS
-      (mkExt "dbaeumer" "vscode-eslint")
-      (mkExt "mgmcdermott" "vscode-language-babel")
-
-      # Nix
-      (mkExt "bbenoist" "nix")
-      (mkExt "jnoortheen" "nix-ide")
-      (mkExt "kamadorueda" "alejandra")
-
-      # Markdown & Docs
-      (mkExt "davidanson" "vscode-markdownlint")
-      (mkExt "redhat" "vscode-xml")
-    ];
-    settings = {
-      "[nix]" = mkFormatterConfig "kamadorueda.alejandra";
-      "[javascript]" = mkFormatterConfig "esbenp.prettier-vscode";
-      "[typescript]" = mkFormatterConfig "esbenp.prettier-vscode";
-
-      # Language server settings
-      nix.enableLanguageServer = true;
-      nix.serverPath = "nil";
-      alejandra.program = "nixfmt";
-      bashIde.explainshellEndpoint = "http://localhost:5134";
-
-      # RedHat XML
-      redhat.telemetry.enabled = false;
-    };
-  };
-
-  flattenAttrs =
-    attrs: excludePaths:
-    let
-      isAttrSet = v: builtins.isAttrs v && !builtins.isList v;
-      isExcluded = path: lib.any (excludePath: path == excludePath) excludePaths;
-
-      # Convert nested set to flat dot-notation
-      go =
-        prefix: set:
-        lib.concatMap (
-          name:
-          let
-            value = set.${name};
-            newPrefix = if prefix == "" then name else "${prefix}.${name}";
-          in
-          if isExcluded newPrefix then
-            [
-              {
-                name = newPrefix;
-                value = value;
-              }
-            ]
-          else if isAttrSet value then
-            go newPrefix value
-          else
-            [
-              {
-                name = newPrefix;
-                value = value;
-              }
-            ]
-        ) (builtins.attrNames set);
-    in
-    builtins.listToAttrs (go "" attrs);
-
-  mergeFrom =
-    let
-      modules = [
-        utils
-        themes
-        languages
-      ];
-      excludePaths = [
-        "[javascript]"
-        "[nix]"
-        "[typescript]"
-      ];
-    in
-    p:
-    if p == "extensions" then
-      lib.concatLists (map (module: module.${p}) modules)
-    else
-      flattenAttrs (lib.foldl' (
-        acc: module: lib.recursiveUpdate acc module.${p}
-      ) { } modules) excludePaths;
 in
 {
-  programs.vscode.profiles.default.extensions = mergeFrom "extensions";
-  programs.vscode.profiles.default.userSettings = mergeFrom "settings";
+  programs.vscode.profiles.default.extensions = [
+    # Utils
+    (mkExt "esbenp" "prettier-vscode")
+    (mkExt "mkhl" "direnv")
+    (mkExt "oderwat" "indent-rainbow")
+    (mkExt "visualstudioexptteam" "vscodeintellicode")
+    (mkExt "editorconfig" "editorconfig")
+
+    # Themes
+    vscode-marketplace.catppuccin.catppuccin-vsc-icons
+
+    # Languages
+    # Bash
+    (mkExt "mads-hartmann" "bash-ide-vscode")
+    (mkExt "timonwong" "shellcheck")
+
+    # JS & TS
+    (mkExt "dbaeumer" "vscode-eslint")
+    (mkExt "mgmcdermott" "vscode-language-babel")
+
+    # Nix
+    (mkExt "bbenoist" "nix")
+    (mkExt "jnoortheen" "nix-ide")
+    (mkExt "kamadorueda" "alejandra")
+
+    # Markdown & Docs
+    (mkExt "davidanson" "vscode-markdownlint")
+    (mkExt "redhat" "vscode-xml")
+  ];
+
+  programs.vscode.profiles.default.userSettings = {
+    # Theme
+    "workbench.iconTheme" = "catppuccin-${config.catppuccin.flavor}";
+
+    # Language specific formatters
+    "[nix]" = {
+      "editor.defaultFormatter" = "kamadorueda.alejandra";
+      "editor.formatOnPaste" = true;
+      "editor.formatOnSave" = true;
+      "editor.formatOnType" = true;
+    };
+    "[javascript]" = {
+      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+      "editor.formatOnPaste" = true;
+      "editor.formatOnSave" = true;
+      "editor.formatOnType" = true;
+    };
+    "[typescript]" = {
+      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+      "editor.formatOnPaste" = true;
+      "editor.formatOnSave" = true;
+      "editor.formatOnType" = true;
+    };
+
+    # Language server settings
+    "nix.enableLanguageServer" = true;
+    "nix.serverPath" = "nil";
+    "alejandra.program" = "nixfmt";
+    "bashIde.explainshellEndpoint" = "http://localhost:5134";
+
+    # RedHat XML
+    "redhat.telemetry.enabled" = false;
+  };
 }
