@@ -19,7 +19,6 @@ in
         extensions.packages = builtins.attrValues {
           inherit (pkgs.nur.repos.rycee.firefox-addons)
             ublock-origin
-            tree-style-tab
             sponsorblock
             dearrow
             return-youtube-dislikes
