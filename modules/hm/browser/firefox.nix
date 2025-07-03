@@ -12,12 +12,6 @@ in
   options.hm.firefox.enable = lib.mkEnableOption "Declerative Firefox";
 
   config = lib.mkIf config.hm.firefox.enable {
-    assertions = [
-      {
-        assertion = isLinux;
-        message = "Declerative Firefox is only available on Linux";
-      }
-    ];
     programs.firefox = {
       enable = true;
       profiles.main = {
