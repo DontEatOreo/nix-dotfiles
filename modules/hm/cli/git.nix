@@ -69,7 +69,6 @@ in
           git = {
             sign-on-push = true;
             auto-local-bookmark = false;
-            push-bookmark-prefix = "donteatoreo/push-";
           };
           aliases = {
             d = [ "describe" ];
@@ -89,6 +88,7 @@ in
             backends.ssh.allowed-signers = "${config.home.homeDirectory}/.ssh/allowed_signers";
           };
           templates = {
+            push-bookmark-prefix = "donteatoreo/push- ++ change_id.short()";
             duplicate_description = "concat(description, \"\\n(cherry picked from commit \", commit_id, \")\")";
           };
         };
