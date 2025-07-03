@@ -54,7 +54,6 @@ let
 
       # Markdown & Docs
       (mkExt "davidanson" "vscode-markdownlint")
-      (mkExt "james-yu" "latex-workshop")
       (mkExt "redhat" "vscode-xml")
     ];
     settings = {
@@ -68,49 +67,6 @@ let
       alejandra.program = "nixfmt";
       bashIde.explainshellEndpoint = "http://localhost:5134";
 
-      # LaTeX settings
-      latex-workshop.latex = {
-        outDir = "./output";
-        recipes = [
-          {
-            name = "xeLaTeX -> Biber -> xeLaTeX";
-            tools = [
-              "xelatex"
-              "biber"
-              "xelatex"
-            ];
-          }
-          {
-            name = "xeLaTeX -> pdflatex";
-            tools = [
-              "xelatex"
-              "pdflatex"
-            ];
-          }
-        ];
-        tools =
-          let
-            commonLatexArgs = [
-              "-synctex=1"
-              "-interaction=nonstopmode"
-              "-file-line-error"
-              "-shell-escape"
-              "-output-directory=output"
-              "%DOC%"
-            ];
-            mkLatexTool = name: command: args: {
-              inherit name command args;
-            };
-          in
-          [
-            (mkLatexTool "xelatex" "xelatex" commonLatexArgs)
-            (mkLatexTool "biber" "biber" [
-              "--output-directory=output"
-              "%DOCFILE%"
-            ])
-            (mkLatexTool "pdflatex" "pdflatex" commonLatexArgs)
-          ];
-      };
       # RedHat XML
       redhat.telemetry.enabled = false;
     };
