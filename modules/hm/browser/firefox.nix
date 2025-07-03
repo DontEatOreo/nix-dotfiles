@@ -18,12 +18,12 @@ in
         isDefault = true;
         extensions.packages = builtins.attrValues {
           inherit (pkgs.nur.repos.rycee.firefox-addons)
-            ublock-origin # Ad Blocker
+            ublock-origin
             tree-style-tab
-            sponsorblock # YouTube Sponsor Skipper
-            dearrow # YouTube Clickbait Remover
+            sponsorblock
+            dearrow
             return-youtube-dislikes
-            violentmonkey # Browser Scripts
+            violentmonkey
             ;
         };
         settings = {
