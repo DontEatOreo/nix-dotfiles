@@ -26,22 +26,8 @@ let
       (mkExt "oderwat" "indent-rainbow")
       (mkExt "visualstudioexptteam" "vscodeintellicode")
       (mkExt "editorconfig" "editorconfig")
-      pkgs.vscode-extensions.github.copilot
-      pkgs.vscode-extensions.github.copilot-chat
     ];
-    settings = {
-      github.copilot.enable = {
-        "*" = true;
-        css = false;
-        json = false;
-        lock = false;
-        markdown = false;
-        nix = false;
-        plaintext = false;
-        scminput = false;
-        tape = false;
-      };
-    };
+    settings = { };
   };
 
   themes = {
@@ -176,7 +162,6 @@ let
         "[javascript]"
         "[nix]"
         "[typescript]"
-        "github.copilot.enable"
       ];
     in
     p:

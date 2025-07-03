@@ -107,7 +107,6 @@ in
         hyperfine
         tokei
         patch
-        github-copilot-cli
         shellcheck
         tldr
         which
