@@ -23,6 +23,7 @@ in
             dearrow
             return-youtube-dislikes
             violentmonkey
+            catppuccin-web-file-icons
             ;
         };
         settings = {
