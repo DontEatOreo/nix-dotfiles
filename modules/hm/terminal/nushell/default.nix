@@ -8,26 +8,6 @@
 }:
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
-  yt-dlp-script = lib.getExe (
-    pkgs.writeShellApplication {
-      name = "yt-dlp-script";
-      text = (builtins.readFile ../../../../scripts/yt-dlp-script.sh);
-      runtimeInputs = builtins.attrValues {
-        inherit (pkgs)
-          bc
-          cacert
-          choose
-          dust
-          fd
-          ffmpeg_7-full
-          gum
-          jq
-          sd
-          yt-dlp
-          ;
-      };
-    }
-  );
 in
 {
 
@@ -72,12 +52,12 @@ in
             "nixos-rebuild switch --use-remote-sudo --flake (readlink -f /etc/nixos/)";
 
         # Video
-        m4a = "${yt-dlp-script} m4a";
-        "m4a-cut" = "${yt-dlp-script} m4a-cut";
-        mp3 = "${yt-dlp-script} mp3";
-        "mp3-cut" = "${yt-dlp-script} mp3-cut";
-        mp4 = "${yt-dlp-script} mp4";
-        "mp4-cut" = "${yt-dlp-script} mp4-cut";
+        m4a = "${lib.getExe pkgs.yt-dlp-script} m4a";
+        "m4a-cut" = "${lib.getExe pkgs.yt-dlp-script} m4a-cut";
+        mp3 = "${lib.getExe pkgs.yt-dlp-script} mp3";
+        "mp3-cut" = "${lib.getExe pkgs.yt-dlp-script} mp3-cut";
+        mp4 = "${lib.getExe pkgs.yt-dlp-script} mp4";
+        "mp4-cut" = "${lib.getExe pkgs.yt-dlp-script} mp4-cut";
       } // lib.optionalAttrs isDarwin { micfix = "sudo killall coreaudiod"; };
 
       configFile.text = ''

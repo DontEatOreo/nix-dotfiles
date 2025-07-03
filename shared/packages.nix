@@ -61,6 +61,7 @@ in
         imagemagick
         mediainfo
         yt-dlp
+        yt-dlp-script
         ;
 
       # File Management & Archiving
