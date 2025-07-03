@@ -30,11 +30,8 @@ in
         ll = "ls";
         du = "dust";
 
-        grep = "rg";
-        diff = "delta";
         cat = "open";
         open = "^open";
-        sed = "sd";
 
         htop = "btop";
         neofetch = "fastfetch";
