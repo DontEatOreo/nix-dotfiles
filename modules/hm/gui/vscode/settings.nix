@@ -26,17 +26,5 @@
     "terminal.integrated.minimumContrastRatio" = 1;
     ## Make the window's titlebar use the workbench colors
     "window.titleBarStyle" = "custom";
-    mcp = {
-      servers = {
-        context7 = {
-          type = "stdio";
-          command = "npx";
-          args = [
-            "-y"
-            "@upstash/context7-mcp"
-          ];
-        };
-      };
-    };
   };
 }
