@@ -1,12 +1,18 @@
 { inputs, ... }:
 {
   lenovo-legion = inputs.nixpkgs.lib.nixosSystem {
-    specialArgs = {
-      inherit inputs;
-      pkgsUnstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
-    };
+    specialArgs = { inherit inputs; };
     modules =
       [
+        (
+          { config, ... }:
+          {
+            _module.args.pkgsUnstable = import inputs.nixpkgs-unstable {
+              system = "x86_64-linux";
+              config = config.nixpkgs.config;
+            };
+          }
+        )
         { nixpkgs.hostPlatform.system = "x86_64-linux"; }
         ./configuration.nix
       ]

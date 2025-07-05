@@ -14,6 +14,7 @@ in
 
   config = lib.mkIf config.hm.nushell.enable {
     programs.carapace.enable = true;
+    programs.carapace.package = pkgsUnstable.carapace;
     programs.nushell = {
       enable = true;
       package = pkgsUnstable.nushell;
