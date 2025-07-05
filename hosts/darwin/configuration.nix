@@ -1,6 +1,7 @@
 {
   inputs,
   pkgs,
+  pkgsUnstable,
   config,
   ...
 }:
@@ -28,8 +29,7 @@
   };
 
   services.tailscale.enable = true;
-  services.tailscale.package =
-    inputs.nixpkgs-unstable.legacyPackages.${config.nixpkgs.hostPlatform.system}.tailscale;
+  services.tailscale.package = pkgsUnstable.tailscale;
 
   sops = {
     age.keyFile = "/Users/anon/Library/Application Support/sops/age/keys.txt";

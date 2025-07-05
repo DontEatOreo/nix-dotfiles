@@ -5,7 +5,10 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    extraSpecialArgs = { inherit inputs; };
+    extraSpecialArgs = {
+      inherit inputs;
+      pkgsUnstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
+    };
   };
 
   home-manager.users.nyx =

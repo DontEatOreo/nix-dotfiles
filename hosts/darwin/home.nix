@@ -5,7 +5,10 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    extraSpecialArgs = { inherit inputs; };
+    extraSpecialArgs = {
+      inherit inputs;
+      pkgsUnstable = inputs.nixpkgs-unstable.legacyPackages.aarch64-darwin;
+    };
   };
 
   home-manager.users.anon =
