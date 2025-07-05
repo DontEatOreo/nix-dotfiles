@@ -24,10 +24,14 @@ in
               dearrow
               return-youtube-dislikes
               violentmonkey
-              catppuccin-web-file-icons
               clearurls
               ;
           }
+          ++ lib.optionals config.catppuccin.enable (
+            builtins.attrValues {
+              inherit (pkgs.nur.repos.rycee.firefox-addons) catppuccin-web-file-icons;
+            }
+          )
           ++ [
             (pkgs.fetchFirefoxAddon {
               name = "minimal-twitter";
