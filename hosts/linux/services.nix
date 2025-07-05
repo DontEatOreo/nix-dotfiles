@@ -1,17 +1,14 @@
-_: {
+{
+  inputs,
+  pkgs,
+  config,
+  ...
+}:
+{
   services = {
     xserver.enable = true;
-    avahi = {
-      enable = true;
-      nssmdns4 = true; # IPv4
-      publish = {
-        enable = true;
-        addresses = true;
-        domain = true;
-        hinfo = true;
-        userServices = true;
-        workstation = true;
-      };
-    };
+    tailscale.enable = true;
+    tailscale.package =
+      inputs.nixpkgs-unstable.legacyPackages.${config.nixpkgs.hostPlatform.system}.tailscale;
   };
 }

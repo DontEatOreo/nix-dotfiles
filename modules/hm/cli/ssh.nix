@@ -29,15 +29,20 @@ in
         Host *
           IdentityAgent "${home}/${sockPath}"
 
-        Host lenovo-legion
-          Hostname lenovo-legion.local
+        Host laptop
+          Hostname lenovo-legion.tail54ae6e.ts.net
           User nyx
+
+        Host mac
+          Hostname anons-mac-mini.tail54ae6e.ts.net
+          User anon
 
         Host github.com
           Hostname ssh.github.com
           Port 443
           User git
           IdentityFile ${osConfig.sops.secrets.github_ssh.path}
+
       '';
     };
   };

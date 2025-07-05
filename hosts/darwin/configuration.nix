@@ -27,6 +27,10 @@
     serviceConfig.StartInterval = 0;
   };
 
+  services.tailscale.enable = true;
+  services.tailscale.package =
+    inputs.nixpkgs-unstable.legacyPackages.${config.nixpkgs.hostPlatform.system}.tailscale;
+
   sops = {
     age.keyFile = "/Users/anon/Library/Application Support/sops/age/keys.txt";
     defaultSopsFile = ../../secrets/secrets.yaml;
