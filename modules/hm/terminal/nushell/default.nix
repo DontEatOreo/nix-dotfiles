@@ -1,9 +1,8 @@
 {
-  inputs,
   pkgs,
+  pkgsUnstable,
   lib,
   config,
-  osConfig,
   ...
 }:
 let
@@ -17,7 +16,7 @@ in
     programs.carapace.enable = true;
     programs.nushell = {
       enable = true;
-      package = inputs.nixpkgs-unstable.legacyPackages.${osConfig.nixpkgs.hostPlatform.system}.nushell;
+      package = pkgsUnstable.nushell;
       shellAliases = {
         cd = "__zoxide_z";
         dc = "__zoxide_z";

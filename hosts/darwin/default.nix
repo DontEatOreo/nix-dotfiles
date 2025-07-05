@@ -1,7 +1,10 @@
 { inputs, ... }:
 {
   anons-Mac-mini = inputs.nix-darwin.lib.darwinSystem {
-    specialArgs = { inherit inputs; };
+    specialArgs = {
+      inherit inputs;
+      pkgsUnstable = inputs.nixpkgs-unstable.legacyPackages.aarch64-darwin;
+    };
     modules = [
       ../../modules/common
       ./configuration.nix

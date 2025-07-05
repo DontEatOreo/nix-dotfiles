@@ -1,13 +1,11 @@
 {
   pkgs,
+  pkgsUnstable,
   inputs,
   lib,
   config,
   ...
 }:
-let
-  pkgsUnstable = inputs.nixpkgs-unstable.legacyPackages.${config.nixpkgs.hostPlatform.system};
-in
 {
   environment.systemPackages =
     builtins.attrValues {
