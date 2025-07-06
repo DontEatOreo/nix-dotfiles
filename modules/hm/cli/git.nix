@@ -65,6 +65,7 @@ in
             paginate = "auto";
             merge-editor = "vscode";
             diff-formatter = ":git";
+            default-command = "log";
           };
           git = {
             sign-on-push = true;
