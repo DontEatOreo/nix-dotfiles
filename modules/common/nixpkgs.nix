@@ -11,7 +11,7 @@ in
   nixpkgs = {
     config = {
       allowUnfree = true;
-    } // lib.optionalAttrs isLinux { nixpkgs.config.cudaSupport = true; };
+    } // lib.optionalAttrs isLinux { cudaSupport = true; };
     overlays = [
       inputs.nur.overlays.default
       (final: prev: {
