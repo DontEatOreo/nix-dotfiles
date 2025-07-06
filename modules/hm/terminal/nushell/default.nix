@@ -9,7 +9,6 @@ let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
 in
 {
-
   options.hm.nushell.enable = lib.mkEnableOption "Nushell";
 
   config = lib.mkIf config.hm.nushell.enable {

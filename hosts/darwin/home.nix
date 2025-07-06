@@ -76,8 +76,9 @@
                 starship.enable = true;
                 vscode.enable = true;
                 yazi.enable = true;
-                zoxide.enable = true;
+                zed-editor.enable = true;
                 zellij.enable = true;
+                zoxide.enable = true;
               };
             }
           ];
