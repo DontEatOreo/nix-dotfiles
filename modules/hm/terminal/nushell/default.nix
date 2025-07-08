@@ -56,26 +56,25 @@ in
         "mp4-cut" = "${lib.getExe pkgs.yt-dlp-script} mp4-cut";
       } // lib.optionalAttrs isDarwin { micfix = "sudo killall coreaudiod"; };
 
-      configFile.text = ''
-        # Generic
-        $env.EDITOR = "hx";
-        $env.VISUAL = "hx";
-        $env.config.show_banner = false;
-        $env.config.buffer_editor = "hx";
+      configFile.text =
+        let
+          conf = builtins.toJSON {
+            cursor_shape.vi_insert = "line";
+            cursor_shape.vi_normal = "block";
+            edit_mode = "vi";
+            buffer_editor = "hx";
 
-        # Vi
-        $env.config.edit_mode = "vi";
-        $env.config.cursor_shape.vi_insert = "line"
-        $env.config.cursor_shape.vi_normal = "block"
-
-        let $config = {
-          rm_always_trash: true
-          shell_integration: true
-          highlight_resolved_externals: true
-          use_kitty_protocol: true
-          completion_algorithm: "fuzzy"
-        }
-      '';
+            highlight_resolved_externals = true;
+            rm.always_trash = true;
+            show_banner = false;
+            use_kitty_protocol = true;
+          };
+        in
+        ''
+          $env.EDITOR = "hx";
+          $env.VISUAL = "hx";
+          $env.config = ${conf};
+        '';
 
       extraConfig =
         let
