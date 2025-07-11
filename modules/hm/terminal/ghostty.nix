@@ -93,7 +93,6 @@ in
         mouse-scroll-multiplier = 3;
         quit-after-last-window-closed = true;
         scrollback-limit = 10 * 10000000;
-        theme = "dark:catppuccin-${config.catppuccin.flavor},light:catppuccin-latte";
       };
     };
   };
