@@ -12,8 +12,6 @@ in
   options.hm.nushell.enable = lib.mkEnableOption "Nushell";
 
   config = lib.mkIf config.hm.nushell.enable {
-    programs.carapace.enable = true;
-    programs.carapace.package = pkgsUnstable.carapace;
     programs.nushell = {
       enable = true;
       package = pkgsUnstable.nushell;
