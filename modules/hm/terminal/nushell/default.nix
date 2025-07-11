@@ -7,6 +7,9 @@
 }:
 let
   inherit (pkgs.stdenvNoCC.hostPlatform) isDarwin;
+  jj-completions = pkgs.runCommand "jj-completions.nu" {
+    buildInputs = builtins.attrValues { inherit (pkgsUnstable) jujutsu; };
+  } ''jj util completion nushell > "$out"'';
 in
 {
   options.hm.nushell.enable = lib.mkEnableOption "Nushell";
@@ -96,7 +99,11 @@ in
             t: "source ${customCompletions}/custom-completions/${t}/${t}-completions.nu"
           ) completionTypes;
         in
-        builtins.concatStringsSep "\n" sourceCommands + "\n" + builtins.readFile ./aliases.nu;
+        ''
+          ${builtins.concatStringsSep "\n" sourceCommands}
+          ${builtins.readFile ./aliases.nu}
+          ${lib.optionalString config.programs.jujutsu.enable "source ${jj-completions}"}
+        '';
     };
   };
 }
