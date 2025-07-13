@@ -10,7 +10,7 @@
   config = lib.mkIf config.hm.firefox.enable {
     programs.firefox = {
       enable = true;
-      profiles.main = {
+      profiles.default = {
         isDefault = true;
         extensions.packages =
           builtins.attrValues {
