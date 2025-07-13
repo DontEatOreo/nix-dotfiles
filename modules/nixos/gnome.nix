@@ -50,7 +50,6 @@ in
           loupe # Image Viewer
           mousai # Shazam-like
           resources # Task Manager
-          textpieces
           ;
         inherit (pkgs.gnomeExtensions) appindicator clipboard-indicator;
       };
