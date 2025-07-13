@@ -49,7 +49,9 @@ in
           gnome-obfuscate # Censor Private Info
           loupe # Image Viewer
           mousai # Shazam-like
+          papers # PDF Viewer
           resources # Task Manager
+          showtime # Video Player
           ;
         inherit (pkgs.gnomeExtensions) appindicator clipboard-indicator;
       };
