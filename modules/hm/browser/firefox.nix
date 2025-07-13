@@ -2,12 +2,8 @@
   pkgs,
   lib,
   config,
-  osConfig,
   ...
 }:
-let
-  inherit (osConfig.nixpkgs.hostPlatform) isLinux;
-in
 {
   options.hm.firefox.enable = lib.mkEnableOption "Declerative Firefox";
 
