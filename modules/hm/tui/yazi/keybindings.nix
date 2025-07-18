@@ -11,7 +11,7 @@ let
   ];
 
   taskKeymap = [
-    (genKeyBind "Show the tasks manager" [ "w" ] "tasks_show")
+    (genKeyBind "Show the tasks manager" [ "w" ] "tasks:show")
     (genKeyBind "Inspect the task" [ "<Enter>" ] "inspect")
     (genKeyBind "Cancel the task" [ "x" ] "cancel")
   ];
