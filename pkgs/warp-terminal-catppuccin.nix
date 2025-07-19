@@ -5,13 +5,13 @@
 }:
 pkgs.stdenvNoCC.mkDerivation {
   pname = "warp-terminal-catppuccin";
-  version = "0-unstable-2024-07-20";
+  version = "0-unstable-2025-03-09";
 
   src = pkgs.fetchFromGitHub {
     owner = "catppuccin";
     repo = "warp";
-    rev = "7e3328b346ebe5ca7c59cfaa2b4bce755db62094";
-    hash = "sha256-pUmO0po/fSPXIcKstWocCSX+Yg5l+H9JsEva+pCLNhI=";
+    rev = "b6891cc339b3a1bb70a5c3063add4bdbd0455603";
+    hash = "sha256-ypzSeSWT2XfdjfdeE/lLdiRgRmxewAqiWhGp6jjF7hE=";
   };
 
   nativeBuildInputs = builtins.attrValues { inherit (pkgs) just catppuccin-whiskers; };

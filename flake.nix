@@ -43,8 +43,8 @@
 
     nixcord.inputs.flake-compat.follows = "flake-compat";
     nixcord.inputs.flake-parts.follows = "flake-parts";
-    nixcord.inputs.nixpkgs.follows = "nixpkgs";
-    nixcord.url = "github:KaylorBen/nixcord";
+    # nixcord.inputs.nixpkgs.follows = "nixpkgs";
+    nixcord.url = "github:KaylorBen/nixcord/dev";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
