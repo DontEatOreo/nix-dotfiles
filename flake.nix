@@ -26,7 +26,7 @@
 
     lix-module.inputs.flake-utils.follows = "flake-utils";
     lix-module.inputs.nixpkgs.follows = "nixpkgs";
-    lix-module.url = "git+https://git.lix.systems/lix-project/nixos-module?ref=2.93.2-1";
+    lix-module.url = "https://git.lix.systems/lix-project/nixos-module/archive/2.93.2-1.tar.gz";
 
     lix.inputs.flake-compat.follows = "";
     lix.inputs.nix2container.follows = "";
