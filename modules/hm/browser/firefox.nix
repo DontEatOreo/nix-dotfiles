@@ -12,6 +12,7 @@
       enable = true;
       profiles.default = {
         isDefault = true;
+        extensions.force = true;
         extensions.packages =
           builtins.attrValues {
             inherit (pkgs.nur.repos.rycee.firefox-addons)
