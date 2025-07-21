@@ -89,7 +89,7 @@ in
             backends.ssh.allowed-signers = "${config.home.homeDirectory}/.ssh/allowed_signers";
           };
           templates = {
-            push-bookmark-prefix = "${lib.strings.toLower userName}/push- ++ change_id.short()";
+            git_push_bookmark = ''"${lib.strings.toLower userName}/push-" ++ change_id.short()'';
             duplicate_description = "concat(description, \"\\n(cherry picked from commit \", commit_id, \")\")";
           };
         };
