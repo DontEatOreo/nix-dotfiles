@@ -57,8 +57,8 @@ in
               doCheck = false; # Disable test checking
             });
         settings = {
-          core.fsmonitor = "watchman";
-          core.watchman.register-snapshot-trigger = true;
+          fsmonitor.backend = "watchman";
+          fsmonitor.watchman.register-snapshot-trigger = true;
           user.email = userEmail;
           user.name = userName;
           ui = {
