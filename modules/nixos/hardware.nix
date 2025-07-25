@@ -40,24 +40,23 @@
         __GLX_VRR_ALLOWED = "1";
       };
 
-      hardware.graphics =
-        {
-          enable = true;
-          enable32Bit = lib.mkIf config.nixpkgs.hostPlatform.isx86_64 true;
-          extraPackages = builtins.attrValues {
-            inherit (pkgs)
-              libva-vdpau-driver
-              libvdpau-va-gl
-              mesa
-              vulkan-loader
-              ;
-          };
-        }
-        // lib.optionalAttrs config.nixpkgs.hostPlatform.isx86_64 {
-          extraPackages32 = builtins.attrValues {
-            inherit (pkgs.pkgsi686Linux) libva-vdpau-driver libvdpau-va-gl mesa;
-          };
+      hardware.graphics = {
+        enable = true;
+        enable32Bit = lib.mkIf config.nixpkgs.hostPlatform.isx86_64 true;
+        extraPackages = builtins.attrValues {
+          inherit (pkgs)
+            libva-vdpau-driver
+            libvdpau-va-gl
+            mesa
+            vulkan-loader
+            ;
         };
+      }
+      // lib.optionalAttrs config.nixpkgs.hostPlatform.isx86_64 {
+        extraPackages32 = builtins.attrValues {
+          inherit (pkgs.pkgsi686Linux) libva-vdpau-driver libvdpau-va-gl mesa;
+        };
+      };
     })
     (lib.mkIf config.nixOS.nvidia.enable {
       services.xserver.videoDrivers = [ "nvidia" ];

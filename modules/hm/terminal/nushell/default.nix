@@ -54,7 +54,8 @@ in
         "mp3-cut" = "${lib.getExe pkgs.yt-dlp-script} mp3-cut";
         mp4 = "${lib.getExe pkgs.yt-dlp-script} mp4";
         "mp4-cut" = "${lib.getExe pkgs.yt-dlp-script} mp4-cut";
-      } // lib.optionalAttrs isDarwin { micfix = "sudo killall coreaudiod"; };
+      }
+      // lib.optionalAttrs isDarwin { micfix = "sudo killall coreaudiod"; };
 
       configFile.text =
         let

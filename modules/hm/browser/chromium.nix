@@ -33,9 +33,11 @@ in
     ];
     programs.chromium = {
       enable = true;
-    } // chromiumConfig;
+    }
+    // chromiumConfig;
     programs.brave = {
       enable = true;
-    } // chromiumConfig;
+    }
+    // chromiumConfig;
   };
 }

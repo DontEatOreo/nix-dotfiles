@@ -139,14 +139,13 @@ in
               move-to-center = mkArray [ "<Super>Return" ];
             };
 
-            "org/gnome/desktop/wm/keybindings" =
-              {
-                maximize = mkArray [ "<Super><Shift>Return" ];
-                move-to-side-n = mkArray [ "<Super>w" ];
-                move-to-side-s = mkArray [ "<Super>s" ];
-              }
-              // (generateKeybindings "switch-to-workspace" "<Super>" [ ] 9)
-              // (generateKeybindings "move-to-workspace" "<Super>" [ "<Shift>" ] 9);
+            "org/gnome/desktop/wm/keybindings" = {
+              maximize = mkArray [ "<Super><Shift>Return" ];
+              move-to-side-n = mkArray [ "<Super>w" ];
+              move-to-side-s = mkArray [ "<Super>s" ];
+            }
+            // (generateKeybindings "switch-to-workspace" "<Super>" [ ] 9)
+            // (generateKeybindings "move-to-workspace" "<Super>" [ "<Shift>" ] 9);
 
             "org/gnome/shell/app-switcher" = {
               current-workspace-only = mkBoolean false;
