@@ -18,6 +18,8 @@
     shell = pkgs.zsh;
   };
 
+  nixOS.lix.enable = true;
+
   launchd.user.agents."symlink-zsh-config" = {
     script = ''
       ln -sfn "/etc/zprofile" "/Users/${config.system.primaryUser}/.zprofile"
