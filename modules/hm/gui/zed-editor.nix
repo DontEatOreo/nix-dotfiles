@@ -1,9 +1,17 @@
-{ lib, config, ... }:
+{
+  inputs,
+  lib,
+  config,
+  osConfig,
+  ...
+}:
 {
   options.hm.zed-editor.enable = lib.mkEnableOption "Zed Editor";
 
   config = lib.mkIf config.hm.zed-editor.enable {
     programs.zed-editor.enable = true;
+    programs.zed-editor.package =
+      inputs.nixpkgs-unstable.legacyPackages.${osConfig.nixpkgs.hostPlatform.system}.zed-editor;
 
     programs.zed-editor.extensions = [
       "nix"
