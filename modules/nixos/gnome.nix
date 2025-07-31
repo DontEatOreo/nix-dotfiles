@@ -53,7 +53,6 @@ in
           resources # Task Manager
           showtime # Video Player
           ;
-        inherit (pkgs.gnomeExtensions) appindicator clipboard-indicator;
       };
       environment.gnome.excludePackages = builtins.attrValues {
         inherit (pkgs)
@@ -107,6 +106,9 @@ in
       };
     })
     (lib.mkIf config.nixOS.dconf.enable {
+      environment.systemPackages = builtins.attrValues {
+        inherit (pkgs.gnomeExtensions) appindicator clipboard-indicator;
+      };
       programs.dconf.profiles.user.databases = [
         {
           lockAll = true; # Prevents overriding
