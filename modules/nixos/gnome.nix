@@ -64,6 +64,7 @@ in
           epiphany # Browser
           geary # Email
           evince # Docs
+          totem # Videos
           ;
       };
     })
