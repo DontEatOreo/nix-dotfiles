@@ -149,10 +149,7 @@ in
             "org/gnome/shell" = {
               enabled-extensions = mkArray [
                 "appindicatorsupport@rgcjonas.gmail.com"
-                "places-menu@gnome-shell-extensions.gcampax.github.com"
                 "clipboard-indicator@tudmotu.com"
-                "system-monitor@gnome-shell-extensions.gcampax.github.com"
-                "light-style@gnome-shell-extensions.gcampax.github.com"
               ];
             };
           };
