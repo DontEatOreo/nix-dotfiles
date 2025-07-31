@@ -134,12 +134,6 @@ in
               lib.range 1 9
             )) (_: mkEmptyArray type.string);
 
-            "org/gnome/mutter/keybindings" = {
-              toggle-tiled-left = mkArray [ "<Super>a" ];
-              toggle-tiled-right = mkArray [ "<Super>d" ];
-              move-to-center = mkArray [ "<Super>Return" ];
-            };
-
             "org/gnome/desktop/wm/keybindings" = {
               maximize = mkArray [ "<Super><Shift>Return" ];
               move-to-side-n = mkArray [ "<Super>w" ];
