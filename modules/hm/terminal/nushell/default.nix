@@ -17,6 +17,7 @@ in
   config = lib.mkIf config.hm.nushell.enable {
     programs.nushell = {
       enable = true;
+      package = pkgsUnstable.nushell;
       shellAliases = {
         cd = "__zoxide_z";
         dc = "__zoxide_z";
