@@ -49,7 +49,7 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05-small";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
     nur.inputs.flake-parts.follows = "flake-parts";
     nur.inputs.nixpkgs.follows = "nixpkgs";

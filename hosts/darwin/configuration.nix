@@ -31,7 +31,7 @@
   };
 
   services.tailscale.enable = true;
-  services.tailscale.package = pkgsUnstable.tailscale;
+  services.tailscale.package = pkgsUnstable.tailscale.overrideAttrs { doCheck = false; };
 
   sops = {
     age.keyFile = "/Users/anon/Library/Application Support/sops/age/keys.txt";
