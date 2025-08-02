@@ -45,11 +45,19 @@
             rev = "a63550b2f91f0553cc545fd8081a03810bc41bc0";
             hash = "sha256-PYeR6fiWDbUMpJbTFSkM57FzmCbsB4W4IXXe25wLncg=";
           };
-          system-clipboard = pkgs.fetchFromGitHub {
-            owner = "orhnk";
-            repo = "system-clipboard.yazi";
-            rev = "efb8f03e632adcdc6677fd5f471c74f4c71fdf9a";
-            hash = "sha256-zOQQvbkXq71t2E4x45oM4MzVRlZ4hhe6RkvgcP8tdYE=";
+          system-clipboard = pkgs.applyPatches {
+            src = pkgs.fetchFromGitHub {
+              owner = "orhnk";
+              repo = "system-clipboard.yazi";
+              rev = "efb8f03e632adcdc6677fd5f471c74f4c71fdf9a";
+              hash = "sha256-zOQQvbkXq71t2E4x45oM4MzVRlZ4hhe6RkvgcP8tdYE=";
+            };
+            patches = [
+              (pkgs.fetchpatch {
+                url = "https://patch-diff.githubusercontent.com/raw/orhnk/system-clipboard.yazi/pull/8.diff";
+                hash = "sha256-ry69NDWbrQ7dHP5N2CVPEcxe7LEFNQ4Ojgmso2NptJ8=";
+              })
+            ];
           };
         };
       initLua = ''
