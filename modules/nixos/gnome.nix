@@ -140,6 +140,11 @@ in
               maximize = mkArray [ "<Super><Shift>Return" ];
               move-to-side-n = mkArray [ "<Super>w" ];
               move-to-side-s = mkArray [ "<Super>s" ];
+              switch-applications = mkEmptyArray type.string;
+              switch-windows = mkArray [
+                "<Alt>Tab"
+                "<Super>Tab"
+              ];
             }
             // (generateKeybindings "switch-to-workspace" "<Super>" [ ] 9)
             // (generateKeybindings "move-to-workspace" "<Super>" [ "<Shift>" ] 9);
