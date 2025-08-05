@@ -1,46 +1,39 @@
 {
-  inputs,
-  pkgs,
   config,
-  lib,
+  osConfig,
+  myLib,
   ...
 }:
 let
-  inherit
-    (inputs.nix-vscode-extensions.extensions.${pkgs.system}.forVSCodeVersion pkgs.vscode.version)
-    vscode-marketplace
-    ;
-  mkExt = p: e: vscode-marketplace.${p}.${e};
+  s = { inherit (osConfig.nixpkgs.hostPlatform) system; };
+  inherit (myLib) mkExt;
 in
 {
   programs.vscode.profiles.default.extensions = [
     # Utils
-    (mkExt "esbenp" "prettier-vscode")
-    (mkExt "mkhl" "direnv")
-    (mkExt "oderwat" "indent-rainbow")
-    (mkExt "visualstudioexptteam" "vscodeintellicode")
-    (mkExt "editorconfig" "editorconfig")
-
-    # Themes
-    vscode-marketplace.catppuccin.catppuccin-vsc-icons
+    (mkExt s "esbenp" "prettier-vscode")
+    (mkExt s "mkhl" "direnv")
+    (mkExt s "oderwat" "indent-rainbow")
+    (mkExt s "visualstudioexptteam" "vscodeintellicode")
+    (mkExt s "editorconfig" "editorconfig")
 
     # Languages
     # Bash
-    (mkExt "mads-hartmann" "bash-ide-vscode")
-    (mkExt "timonwong" "shellcheck")
+    (mkExt s "mads-hartmann" "bash-ide-vscode")
+    (mkExt s "timonwong" "shellcheck")
 
     # JS & TS
-    (mkExt "dbaeumer" "vscode-eslint")
-    (mkExt "mgmcdermott" "vscode-language-babel")
+    (mkExt s "dbaeumer" "vscode-eslint")
+    (mkExt s "mgmcdermott" "vscode-language-babel")
 
     # Nix
-    (mkExt "bbenoist" "nix")
-    (mkExt "jnoortheen" "nix-ide")
-    (mkExt "kamadorueda" "alejandra")
+    (mkExt s "bbenoist" "nix")
+    (mkExt s "jnoortheen" "nix-ide")
+    (mkExt s "kamadorueda" "alejandra")
 
     # Markdown & Docs
-    (mkExt "davidanson" "vscode-markdownlint")
-    (mkExt "redhat" "vscode-xml")
+    (mkExt s "davidanson" "vscode-markdownlint")
+    (mkExt s "redhat" "vscode-xml")
   ];
 
   programs.vscode.profiles.default.userSettings = {

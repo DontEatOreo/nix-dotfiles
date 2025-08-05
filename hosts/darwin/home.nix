@@ -1,4 +1,9 @@
-{ pkgs, inputs, ... }:
+{
+  pkgs,
+  inputs,
+  myLib,
+  ...
+}:
 {
   imports = [ inputs.home-manager.darwinModules.home-manager ];
 
@@ -6,7 +11,7 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     extraSpecialArgs = {
-      inherit inputs;
+      inherit inputs myLib;
       pkgsUnstable = inputs.nixpkgs-unstable.legacyPackages.aarch64-darwin;
     };
   };

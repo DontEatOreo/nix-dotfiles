@@ -15,7 +15,7 @@
     ./sound.nix
     ./systemd.nix
     ./users.nix
-    ./kanata
+    ./kanata.nix
 
     ../../shared/packages.nix
   ];

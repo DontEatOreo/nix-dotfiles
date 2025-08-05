@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ inputs, myLib, ... }:
 {
   imports = [ inputs.home-manager.nixosModules.home-manager ];
 
@@ -6,7 +6,7 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     extraSpecialArgs = {
-      inherit inputs;
+      inherit inputs myLib;
       pkgsUnstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
     };
   };

@@ -1,7 +1,7 @@
-{ inputs, ... }:
+{ inputs, myLib, ... }:
 {
   anons-Mac-mini = inputs.nix-darwin.lib.darwinSystem {
-    specialArgs = { inherit inputs; };
+    specialArgs = { inherit inputs myLib; };
     modules = [
       (
         { config, ... }:

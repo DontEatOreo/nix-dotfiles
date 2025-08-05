@@ -1,5 +1,6 @@
 {
   lib,
+  myLib,
   config,
   pkgs,
   osConfig,
@@ -7,21 +8,18 @@
 }:
 let
   inherit (osConfig.nixpkgs.hostPlatform) isDarwin;
+  inherit (myLib)
+    mkBind
+    mkShiftBind
+    mkSimpleBind
+    mkDirectionalNav
+    mkModeSwitch
+    mkQuit
+    ;
+
   modKey = if isDarwin then "Super" else "Ctrl";
+
   copy_command = if isDarwin then "pbcopy" else "wl-copy";
-
-  mkBind = key: action: {
-    "bind \"${modKey} ${key}\"" = action;
-  };
-
-  mkShiftBind = key: action: {
-    "bind \"${modKey} Shift ${key}\"" = action;
-  };
-
-  # (no modifier key)
-  mkSimpleBind = key: action: {
-    "bind \"${key}\"" = action;
-  };
 
   # Direction mappings
   directions = {
@@ -37,10 +35,6 @@ let
     "Left" = "Left";
     "Right" = "Right";
   };
-
-  mkDirectionalNav = lib.mkMerge (
-    lib.mapAttrsToList (k: v: mkShiftBind k { MoveFocus = v; }) directions
-  );
 
   mkDirectionalNewPane = lib.mkMerge (
     lib.mapAttrsToList (
@@ -61,9 +55,6 @@ let
       }
     ) directionKeys
   );
-
-  mkModeSwitch = key: mode: mkBind key { SwitchToMode = mode; };
-  mkQuit = key: mkBind key { Quit = { }; };
 in
 {
   options.hm.zellij.enable = lib.mkEnableOption "Zellij";
@@ -120,32 +111,24 @@ in
 
       keybinds = {
         normal = lib.mkMerge [
-          (mkBind "t" { NewTab = { }; }) # New tab
-          (mkBind "k" { Clear = { }; }) # Clear pane text
-          (mkShiftBind "Backspace" { CloseFocus = { }; }) # Close pane
+          (mkBind modKey "t" { NewTab = { }; }) # New tab
+          (mkBind modKey "k" { Clear = { }; }) # Clear pane text
+          (mkShiftBind modKey "Backspace" { CloseFocus = { }; }) # Close pane
 
-          (mkBind "c" { Copy = { }; })
+          (mkBind modKey "c" { Copy = { }; })
 
-          # Tab switching
-          (mkBind "1" { GoToTab = 1; })
-          (mkBind "2" { GoToTab = 2; })
-          (mkBind "3" { GoToTab = 3; })
-          (mkBind "4" { GoToTab = 4; })
-          (mkBind "5" { GoToTab = 5; })
-          (mkBind "6" { GoToTab = 6; })
-          (mkBind "7" { GoToTab = 7; })
-          (mkBind "8" { GoToTab = 8; })
-          (mkBind "9" { GoToTab = 9; })
+          # Tab switching (1-9)
+          (lib.mkMerge (map (n: mkBind modKey (toString n) { GoToTab = n; }) (lib.range 1 9)))
 
           # Super+Shift+direction
-          mkDirectionalNav
+          (mkDirectionalNav modKey)
 
-          (mkModeSwitch "g" "Locked")
-          (mkShiftBind "r" { SwitchToMode = "Resize"; }) # Resize mode
-          (mkShiftBind "s" { SwitchToMode = "Pane"; }) # Pane mode
-          (mkModeSwitch "s" "Search")
-          (mkModeSwitch "o" "Session")
-          (mkQuit "q")
+          (mkModeSwitch modKey "g" "Locked")
+          (mkShiftBind modKey "r" { SwitchToMode = "Resize"; }) # Resize mode
+          (mkShiftBind modKey "s" { SwitchToMode = "Pane"; }) # Pane mode
+          (mkModeSwitch modKey "s" "Search")
+          (mkModeSwitch modKey "o" "Session")
+          (mkQuit modKey "q")
         ];
 
         # Pane mode (Super+Shift+s > direction)
@@ -177,7 +160,7 @@ in
           (mkSimpleBind "Esc" { SwitchToMode = "Normal"; })
         ];
 
-        locked = mkModeSwitch "g" "Normal";
+        locked = (mkModeSwitch modKey "g" "Normal");
 
         search = lib.mkMerge [
           (mkSimpleBind "/" {

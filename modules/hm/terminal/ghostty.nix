@@ -1,20 +1,16 @@
 {
   pkgs,
   lib,
+  myLib,
   config,
   osConfig,
   ...
 }:
 let
   inherit (osConfig.nixpkgs.hostPlatform) isDarwin;
+  inherit (myLib) mkSuper mkSuperPerf;
 
   superKey = if isDarwin then "super" else "ctrl";
-  mkSuper = k: c: "${superKey}+${k}=${c}";
-  mkSuperPerf = k: c: "performable:${superKey}+${k}=${c}";
-  mkSuperShift = k: c: "${superKey}+shift+${k}=${c}";
-  mkSuperShiftNested =
-    p: k: c:
-    "${superKey}+shift+${p}>${k}=${c}";
 
   # Source: https://vt100.net/docs/vt100-ug/chapter3.html
   # Converter: https://www.rapidtables.com/convert/number/hex-to-octal.html
@@ -43,33 +39,33 @@ let
 
   mkKeybindings = {
     cursor = [
-      (mkSuper "left" "text:${ctrl.SOH}")
-      (mkSuper "right" "text:${ctrl.ENQ}")
+      (mkSuper superKey "left" "text:${ctrl.SOH}")
+      (mkSuper superKey "right" "text:${ctrl.ENQ}")
 
       "alt+left=text:${ctrl.ESC}${ctrl.WORD_BACK}"
       "alt+right=text:${ctrl.ESC}${ctrl.WORD_FORWARD}"
     ];
 
-    screen = [ (mkSuper "g" "write_screen_file:open") ];
+    screen = [ (mkSuper superKey "g" "write_screen_file:open") ];
 
     font = [
-      (mkSuper "0" "reset_font_size")
+      (mkSuper superKey "0" "reset_font_size")
 
-      (mkSuper "equal" "increase_font_size:1")
+      (mkSuper superKey "equal" "increase_font_size:1")
       "${superKey}+shift+equal=increase_font_size:1"
 
-      (mkSuper "minus" "decrease_font_size:1")
+      (mkSuper superKey "minus" "decrease_font_size:1")
       "${superKey}+shift+minus=decrease_font_size:1"
     ];
 
     clipboard = [
-      (mkSuperPerf "c" "copy_to_clipboard")
-      (mkSuperPerf "v" "paste_from_clipboard")
+      (mkSuperPerf superKey "c" "copy_to_clipboard")
+      (mkSuperPerf superKey "v" "paste_from_clipboard")
     ];
 
     misc = [
-      (mkSuper "a" "select_all")
-      (mkSuper "," "reload_config")
+      (mkSuper superKey "a" "select_all")
+      (mkSuper superKey "," "reload_config")
     ];
   };
 in

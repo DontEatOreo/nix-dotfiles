@@ -69,8 +69,14 @@
     yazi.inputs.rust-overlay.follows = "rust-overlay";
   };
 
-  outputs = inputs: {
-    darwinConfigurations = import ./hosts/darwin { inherit inputs; };
-    nixosConfigurations = import ./hosts/linux { inherit inputs; };
-  };
+  outputs =
+    inputs:
+    let
+      myLib = inputs.nixpkgs.lib.extend (import ./lib inputs);
+    in
+    {
+      inherit myLib;
+      darwinConfigurations = import ./hosts/darwin { inherit inputs myLib; };
+      nixosConfigurations = import ./hosts/linux { inherit inputs myLib; };
+    };
 }
