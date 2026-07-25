@@ -1,0 +1,145 @@
+[browser]
+name = "Helium"
+log_prefix = "helium-browser"
+executable_name = "helium-browser"
+alias_name = "helium"
+flags_file = "helium-flags.conf"
+
+[browser.linux]
+desktop_id = "helium-browser"
+portal_app_id = "net.imput.helium"
+launcher_name = "helium-wrapper"
+desktop_name = "helium.desktop"
+desktop_exec = "helium"
+icon_name = "helium.png"
+icon_source = "product_logo_256.png"
+
+[browser.macos]
+app_dir = "/Applications/Helium.app"
+launcher_path = "Contents/MacOS/Helium"
+
+[browser.paths.macos]
+profile_dir = "${home}/Library/Application Support/net.imput.helium/Default"
+external_extension_dirs = [
+  "${home}/Library/Application Support/net.imput.helium/External Extensions",
+  "${home}/Library/Application Support/Helium/External Extensions",
+]
+
+[browser.paths.linux]
+profile_dir = "${config_home}/net.imput.helium/Default"
+external_extension_dirs = [
+  "${config_home}/net.imput.helium/External Extensions",
+]
+
+[browser.extension_id_aliases]
+cjpalhdlnbpafiamejdnhcphjbkeiagm = "blockjmkbacgjkknlgpkjjiijinjdanf"
+
+[browser.preferences.cookies]
+default = "session_only"
+
+[[browser.preferences.local_state_values]]
+path = "hardware_acceleration_mode_previous"
+value = true
+
+[[browser.preferences.local_state_values]]
+path = "variations_crash_streak"
+value = 0
+
+[[browser.preferences.local_state_values]]
+path = "user_experience_metrics.stability.exited_cleanly"
+value = true
+
+[[browser.preferences.local_state_values]]
+path = "helium.browser.default_browser_infobar_rejected"
+value = true
+
+[[browser.preferences.variation_values]]
+path = "user_experience_metrics.stability.exited_cleanly"
+value = true
+
+[[browser.preferences.variation_values]]
+path = "variations_crash_streak"
+value = 0
+
+[[browser.preferences.values]]
+path = "helium.services.schema_version"
+value = 1
+
+[browser.helium]
+completed_onboarding = true
+crash_reporting = "disabled"
+
+[browser.helium.services]
+enabled = true
+user_consented = true
+extension_proxy = true
+bangs = true
+spellcheck_files = true
+browser_updates = true
+ublock_assets = true
+
+[extension_settings]
+files = [
+  "settings/control-panel-for-twitter.json",
+  "settings/enhancer-for-youtube.json",
+  "settings/minimal-twitter-theme.json",
+  "settings/refined-github.json",
+  "settings/ublock-origin.json",
+  "settings/ublock-origin-helium.json",
+]
+
+[extensions]
+chrome_store_update_url = "https://clients2.google.com/service/update2/crx"
+
+[[extensions.chrome_store]]
+id = "aeblfdkhhhdcdjpifhhbdiojplfjncoa"
+name = "1Password"
+
+[[extensions.chrome_store]]
+id = "lnjaiaapbakfhlbjenjkhffcdpoompki"
+name = "Catppuccin for Web File Explorer Icons"
+
+[[extensions.chrome_store]]
+id = "ponfpcnoihfmfllpaingbgckeeldkhle"
+name = "Enhancer for YouTube"
+
+[[extensions.chrome_store]]
+id = "kpmjjdhbcfebfjgdnpjagcndoelnidfj"
+name = "Control Panel for Twitter"
+
+[[extensions.chrome_store]]
+id = "pobhoodpcipjmedfenaigbeloiidbflp"
+name = "Minimal Theme for Twitter"
+
+[[extensions.chrome_store]]
+id = "ldgfbffkinooeloadekpmfoklnobpien"
+name = "Raindrop"
+
+[[extensions.chrome_store]]
+id = "mnjggcdmjocbbbhaepdhchncahnbgone"
+name = "SponsorBlock for YouTube"
+
+[[extensions.chrome_store]]
+id = "hlepfoohegkhhmjieoechaddaejaokhf"
+name = "Refined GitHub"
+
+[[extensions.update_url]]
+id = "lkbebcjgcmobigpeffafkodonchffocl"
+name = "Bypass Paywalls Clean"
+update_url = "https://gitflic.ru/project/magnolia1234/bpc_updates/blob/raw?file=updates.xml"
+
+[[extensions.crx]]
+id = "bolggfoncklhniejomgplkjcllmnonbh"
+name = "TWP - Translate Web Pages"
+version = "10.1.1.0"
+url = "https://github.com/FilipePS/Traduzir-paginas-web/releases/download/v10.1.1.0/TWP_10.1.1.0_Chromium.crx"
+sha256 = "sha256-X4m1To1n/1zQGrzQPXPyR8KIA4JleyyAh5AjuS2BvYw="
+
+[[extensions.zip]]
+id = "cjpalhdlnbpafiamejdnhcphjbkeiagm"
+name = "uBlock Origin"
+update_policy = "latest"
+repository = "gorhill/uBlock"
+asset_template = "uBlock0_{tag}.chromium.zip"
+archive_root = "uBlock0.chromium"
+load_unpacked = true

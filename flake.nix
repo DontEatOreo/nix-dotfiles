@@ -2,6 +2,9 @@
   description = "My NixOS system flake";
 
   inputs = {
+    browser.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    browser.url = "github:4evy/browser";
+
     eupkgs.inputs.nixpkgs.follows = "nixpkgs-unstable";
     eupkgs.url = "github:euvlok/pkgs";
 

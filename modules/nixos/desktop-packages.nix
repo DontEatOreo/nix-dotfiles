@@ -8,6 +8,7 @@ let
   inherit (lib.attrsets) attrValues;
   inherit (lib.modules) mkIf;
   inherit (lib.strings) concatStringsSep;
+  inherit (lib) getExe;
 
   desktopEnabled = config.local.gnome.enable || config.local.kde.enable;
   heliumProfileDir = "/home/4evy/.config/net.imput.helium/Default";
@@ -40,19 +41,13 @@ let
     "--wayland-text-input-version=3"
   ];
 
-  extensionCatalog = builtins.fromTOML (
-    builtins.readFile ../../internal/chromiumbrowser/extensions/extensions.toml
-  );
-
-  heliumBrowserTool = pkgs.callPackage ../../packages/go-workspace-package.nix { } {
-    pname = "helium-browser";
-    subPackages = [ "cmd/helium-browser" ];
-
-    meta = {
-      description = "Install and configure Helium browser";
-      mainProgram = "helium-browser";
+  heliumConfigSource = builtins.fromTOML (builtins.readFile ../../browser/helium.toml);
+  heliumConfig = heliumConfigSource // {
+    extension_settings = heliumConfigSource.extension_settings // {
+      files = map (path: ../../browser + "/${path}") heliumConfigSource.extension_settings.files;
     };
   };
+  extensionCatalog = heliumConfig.extensions;
 
   externalExtensionFile = id: value: {
     name = "xdg/net.imput.helium/External Extensions/${id}.json";
@@ -89,6 +84,10 @@ in
 {
   config = mkIf desktopEnabled {
     programs.chromium.enable = true;
+    programs.browser = {
+      enable = true;
+      configurations.helium = heliumConfig;
+    };
 
     environment.systemPackages = attrValues {
       inherit heliumBrowser;
@@ -103,9 +102,9 @@ in
     };
 
     environment.etc = builtins.listToAttrs (
-      map chromeStoreExternalExtensionFile extensionCatalog.chrome_store_extensions
-      ++ map updateUrlExternalExtensionFile extensionCatalog.update_url_extensions
-      ++ map crxExternalExtensionFile extensionCatalog.crx_extensions
+      map chromeStoreExternalExtensionFile extensionCatalog.chrome_store
+      ++ map updateUrlExternalExtensionFile extensionCatalog.update_url
+      ++ map crxExternalExtensionFile extensionCatalog.crx
     );
 
     system.activationScripts.heliumProfileSettings = {
@@ -118,7 +117,8 @@ in
           token="$(runuser -u 4evy -- ${pkgs.gh}/bin/gh auth token 2>/dev/null || true)"
           input="$(${pkgs.jq}/bin/jq -nc --arg token "$token" \
             '{extension_values: (if $token == "" then {} else {"refined-github-personal-token": $token} end)}')"
-          printf '%s' "$input" | runuser -u 4evy -- ${heliumBrowserTool}/bin/helium-browser apply-profile-settings \
+          printf '%s' "$input" | runuser -u 4evy -- ${getExe config.programs.browser.package} apply-profile-settings \
+            --config '${config.programs.browser.configFiles.helium}' \
             --profile-dir '${heliumProfileDir}' \
             --input - || true
         else
@@ -126,7 +126,7 @@ in
           input="$(${pkgs.jq}/bin/jq -nc --arg token "$token" \
             '{extension_values: (if $token == "" then {} else {"refined-github-personal-token": $token} end)}')"
           printf '%s' "$input" | su -s /bin/sh 4evy -c \
-            '${heliumBrowserTool}/bin/helium-browser apply-profile-settings --profile-dir ${heliumProfileDir} --input -' || true
+            '${getExe config.programs.browser.package} apply-profile-settings --config ${config.programs.browser.configFiles.helium} --profile-dir ${heliumProfileDir} --input -' || true
         fi
       '';
     };

@@ -2,6 +2,7 @@
 {
   imports = [
     ../cross
+    inputs.browser.nixosModules.default
     ./desktop-packages.nix
     ./gnome.nix
     ./ghidra-mcp.nix

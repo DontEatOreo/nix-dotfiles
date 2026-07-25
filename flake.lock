@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "browser": {
+      "inputs": {
+        "home-manager": "home-manager",
+        "nix-darwin": "nix-darwin",
+        "nixpkgs": ["nixpkgs-unstable"]
+      },
+      "locked": {
+        "lastModified": 1784925900,
+        "narHash": "sha256-VWEw77zztUcf8XOofNbs0LdoKTJ0p0zNXzhBWuIBgX0=",
+        "owner": "4evy",
+        "repo": "browser",
+        "rev": "bc72616c345fefa747c0f8dd069c5b7b3b3c8fbb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "4evy",
+        "repo": "browser",
+        "type": "github"
+      }
+    },
     "eupkgs": {
       "inputs": {
         "nixpkgs": ["nixpkgs-unstable"]
@@ -47,6 +67,42 @@
       "original": {
         "owner": "hercules-ci",
         "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "home-manager": {
+      "inputs": {
+        "nixpkgs": ["browser", "nixpkgs"]
+      },
+      "locked": {
+        "lastModified": 1784877405,
+        "narHash": "sha256-W649GocILahx7Vb/JMx834217+OLKBrq014VmC/8+NM=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "32de400b6ac9f43042bca706f4a64f6ad08117e8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "nix-darwin": {
+      "inputs": {
+        "nixpkgs": ["browser", "nixpkgs"]
+      },
+      "locked": {
+        "lastModified": 1784500460,
+        "narHash": "sha256-UvORnAxTRHax7RG74W8Z2t4GvIkX6AjJ5kk0QlwZomo=",
+        "owner": "nix-darwin",
+        "repo": "nix-darwin",
+        "rev": "57a3171f94705599a2499248ca5758d5eb47c0e0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-darwin",
+        "repo": "nix-darwin",
         "type": "github"
       }
     },
@@ -136,6 +192,7 @@
     },
     "root": {
       "inputs": {
+        "browser": "browser",
         "eupkgs": "eupkgs",
         "nixcord": "nixcord",
         "nixpkgs": "nixpkgs",

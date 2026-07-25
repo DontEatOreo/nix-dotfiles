@@ -952,7 +952,7 @@ _check-python: python-complexity python-dead-code
     bytecode_dir=$(mktemp -d)
     build_dir=$(mktemp -d)
     trap 'rm -rf "$bytecode_dir" "$build_dir"' EXIT
-    PYTHONPYCACHEPREFIX="$bytecode_dir" uv run --locked python -m compileall -q ansible/files/scripts dotfiles/.chezmoiscripts internal/chromiumbrowser/scripts packages/toshy spectrum/scripts
+    PYTHONPYCACHEPREFIX="$bytecode_dir" uv run --locked python -m compileall -q ansible/files/scripts dotfiles/.chezmoiscripts packages/toshy spectrum/scripts
     uv run --locked pytest
     uv build --out-dir "$build_dir" --no-build-logs
 

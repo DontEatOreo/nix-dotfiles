@@ -45,6 +45,7 @@ GHOSTTY_SOURCE_URL = (
 GHOSTTY_SOURCE_SHA256 = GHOSTTY_PIN["source_sha256"]
 GHOSTTY_ZIG_VERSION = GHOSTTY_PIN["zig_version"]
 GHOSTTY_ZIG_SHA256 = GHOSTTY_PIN["zig_sha256"]
+BROWSER_GO_PACKAGE = "github.com/4evy/browser/cmd/browser@latest"
 
 
 def _repo_root() -> Path:
@@ -639,9 +640,21 @@ def _run_helium_configurer(
 ) -> None:
     require_commands("go", "sops")
     ensure_directory(installer_bin)
+    browser_checkout = _repo_root().parent / "browser"
+    if (
+        browser_checkout.is_dir()
+        and (browser_checkout / "go.mod").is_file()
+        and "module github.com/4evy/browser"
+        in (browser_checkout / "go.mod").read_text()
+    ):
+        install_command = ("go", "install", "./cmd/browser")
+        install_cwd = browser_checkout
+    else:
+        install_command = ("go", "install", BROWSER_GO_PACKAGE)
+        install_cwd = _repo_root()
     run(
-        ("go", "install", "./cmd/helium-browser"),
-        cwd=_repo_root(),
+        install_command,
+        cwd=install_cwd,
         env={
             "GOBIN": os.fspath(installer_bin),
             "CGO_ENABLED": "0"
@@ -651,18 +664,23 @@ def _run_helium_configurer(
     )
     run(
         (
-            installer_bin / "helium-browser",
+            installer_bin / "browser",
             "configure",
+            "--config",
+            _repo_root() / "browser/helium.toml",
+            "--mode",
+            platform_name,
+            "--root",
+            root,
+            "--app-dir",
+            app_dir,
+            "--bin-dir",
+            bin_dir,
             "--input",
             "-",
-            "--",
-            platform_name,
-            root,
-            app_dir,
-            bin_dir,
-            flags,
+            f"--flags={flags}",
         ),
-        cwd=_repo_root(),
+        cwd=_repo_root() / "browser",
         input_text=_helium_apply_input(secrets),
     )
 
