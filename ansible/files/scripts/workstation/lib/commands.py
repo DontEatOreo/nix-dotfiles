@@ -89,11 +89,10 @@ def run(
         "retcode": 0 if check else None,
         "timeout": timeout,
     }
-    if input_text is not None:
-        kwargs["stdin"] = input_text
+    runnable = command if input_text is None else command << input_text
     _configure_output(kwargs, capture=capture, output_mode=output_mode)
     try:
-        returncode, stdout, stderr = command.run((), **kwargs)
+        returncode, stdout, stderr = runnable.run((), **kwargs)
     except ProcessTimedOut as error:
         raise DotfilesError(
             f"command timed out after {timeout} seconds: {' '.join(arguments)}"
