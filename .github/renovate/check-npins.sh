@@ -53,7 +53,12 @@ problems=$(
         (
           $pins
           | to_entries[]
-          | select(.value.type == "Git" or .value.type == "GitRelease" or .value.type == "Url")
+          | select(
+              .value.type == "Git"
+              or .value.type == "GitRelease"
+              or .value.type == "PyPi"
+              or .value.type == "Url"
+            )
           | select((.value.hash // "") | test("^sha256-[A-Za-z0-9+/]{43}=$") | not)
           | "\(.key): missing or malformed SHA-256 SRI hash"
         )

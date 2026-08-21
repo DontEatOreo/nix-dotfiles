@@ -94,6 +94,15 @@
       "matchStrings": [
         "$each(pins, function($v, $k) { $v.type = \"GitRelease\" and $v.repository.type = \"GitHub\" and $not($v.frozen = true) ? { \"depName\": $v.repository.owner & \"/\" & $v.repository.repo, \"currentValue\": $v.version, \"datasource\": \"github-tags\", \"versioning\": \"loose\", \"depType\": \"npins\" } })"
       ]
+    },
+    {
+      "customType": "jsonata",
+      "description": "Discover non-frozen npins PyPI releases",
+      "fileFormat": "json",
+      "managerFilePatterns": ["/^npins\\/sources\\.json$/"],
+      "matchStrings": [
+        "$each(pins, function($v, $k) { $v.type = \"PyPi\" and $not($v.frozen = true) ? { \"depName\": $v.name, \"currentValue\": $v.version, \"datasource\": \"pypi\", \"versioning\": \"pep440\", \"depType\": \"npins\" } })"
+      ]
     }
   ],
   "packageRules": [

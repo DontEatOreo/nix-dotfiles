@@ -22,27 +22,52 @@ stages:
   - name: python-runtime
     from: registry.fedoraproject.org/fedora:45@sha256:880a6f885db64973f88e01289baa74e3854506afaafdb8d705d18f408bddaa56
     modules:
+      - type: copy@v1
+        src: npins/sources.json
+        dest: /src/npins/sources.json
       - type: dnf@v1
         source: ghcr.io/blue-build/modules@sha256:c5ed99f07b15c8d575a4fa64a77e5cd5602b00da4c84379f5675db2ae4757061
         install:
           install-weak-deps: false
           packages:
-            - curl
             - python3
       - type: script@v1
         source: ghcr.io/blue-build/modules@sha256:c5ed99f07b15c8d575a4fa64a77e5cd5602b00da4c84379f5675db2ae4757061
-        env:
-          ASTRAL_URL: https://files.pythonhosted.org/packages/2d/80/d6edd9c3259913cfe39aff2bea4da65de5ad0235a578405e37aabace5f2c/astral-3.2-py3-none-any.whl
-          ASTRAL_SHA256: cb7b49a3f0d4c64ae666be131276d2a3226134c598db10e672028cf8ff855f83
         snippets:
           - |
-            workdir=$(mktemp -d)
-            trap 'rm -rf -- "$workdir"' EXIT
-            curl --fail --location --silent --show-error "$ASTRAL_URL" --output "$workdir/astral.whl"
-            printf '%s  %s\n' "$ASTRAL_SHA256" "$workdir/astral.whl" | sha256sum --check --strict
-            python3 -m zipfile -e "$workdir/astral.whl" "$workdir/unpacked"
-            install -d -m 0755 /out/usr/lib/dotfiles/python
-            cp -a "$workdir/unpacked"/. /out/usr/lib/dotfiles/python/
+            python3 - <<'PYTHON'
+            import base64
+            import hashlib
+            import json
+            import shutil
+            import tarfile
+            import tempfile
+            import urllib.request
+            from pathlib import Path
+
+            pin = json.loads(Path("/src/npins/sources.json").read_text())["pins"]["python_astral"]
+            with tempfile.TemporaryDirectory() as temporary_directory:
+                temporary_path = Path(temporary_directory)
+                archive = temporary_path / "astral.tar.gz"
+                urllib.request.urlretrieve(pin["url"], archive)
+
+                algorithm, expected_digest = pin["hash"].split("-", maxsplit=1)
+                if algorithm != "sha256":
+                    raise ValueError(f"unsupported Astral hash algorithm: {algorithm}")
+                actual_digest = base64.b64encode(
+                    hashlib.sha256(archive.read_bytes()).digest()
+                ).decode()
+                if actual_digest != expected_digest:
+                    raise ValueError("Astral source archive checksum mismatch")
+
+                with tarfile.open(archive) as source_archive:
+                    source_archive.extractall(temporary_path, filter="data")
+                source = temporary_path / f"astral-{pin['version']}" / "src" / "astral"
+                destination = Path("/out/usr/lib/dotfiles/python/astral")
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(source, destination)
+                (destination.parent / ".astral-version").write_text(f"{pin['version']}\n")
+            PYTHON
 
   - name: ghostty
     from: registry.fedoraproject.org/fedora:45@sha256:880a6f885db64973f88e01289baa74e3854506afaafdb8d705d18f408bddaa56
@@ -243,7 +268,9 @@ modules:
       - test "$(systemctl is-enabled bootc-unified-storage.service 2>/dev/null || true)" = disabled
       - >-
         PYTHONPATH=/usr/lib/dotfiles/python /usr/bin/python3.14 -c
-        'import astral; assert astral.__version__ == "3.2"'
+        'import astral, pathlib;
+        assert astral.__version__ ==
+        pathlib.Path("/usr/lib/dotfiles/python/.astral-version").read_text().strip()'
       - rpm -q kmscon kmscon-freetype
       - test -f /usr/lib64/kmscon/mod-freetype.so
       - bootc container lint

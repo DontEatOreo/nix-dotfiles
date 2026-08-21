@@ -186,20 +186,12 @@
       "frozen": true
     },
     "python_astral": {
-      "type": "GitRelease",
-      "repository": {
-        "type": "GitHub",
-        "owner": "sffjunkie",
-        "repo": "astral"
-      },
-      "pre_releases": false,
+      "type": "PyPi",
+      "name": "astral",
       "version_upper_bound": null,
-      "release_prefix": null,
-      "submodules": false,
       "version": "3.2",
-      "revision": "0be1187d09aadfdadc1b7331b918082213764b5d",
-      "url": "https://api.github.com/repos/sffjunkie/astral/tarball/refs/tags/3.2",
-      "hash": "sha256-KdKbIMHKYqjmvPJ2TS34WEM06UdEwECXMF+WOfbR66o="
+      "url": "https://files.pythonhosted.org/packages/04/d1/1adbf06a38dc339e41a1666f6c7135924594c20fd46e060fb263248c564d/astral-3.2.tar.gz",
+      "hash": "sha256-m3w7QS6eadFyz7JL4Oat3MnxvQGijbi+vmbXXMxTPYg="
     },
     "sushi": {
       "type": "Git",
