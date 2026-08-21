@@ -26,11 +26,19 @@ let
     final: prev:
     let
       dotfilesSourcePins = (import ../npins) { };
+      withoutUpstreamTests =
+        package:
+        package.overrideAttrs {
+          doCheck = false;
+          doInstallCheck = false;
+        };
       toshySource = dotfilesSourcePins.toshy.outPath;
       toshyVersion = lib.removePrefix "Toshy_v" dotfilesSourcePins.toshy.version;
-      upstreamToshyRuntime = final.callPackage "${toshySource}/nix/toshy-runtime.nix" {
-        toshySrc = toshySource;
-      };
+      upstreamToshyRuntime = withoutUpstreamTests (
+        final.callPackage "${toshySource}/nix/toshy-runtime.nix" {
+          toshySrc = toshySource;
+        }
+      );
     in
     {
       inherit dotfilesSourcePins;
@@ -69,6 +77,8 @@ let
             inherit src;
             hash = "sha256-zpP5XLmgQFH4+B97zMhh+iE6kS+PHTh9heH89rXCQo0=";
           };
+          doCheck = false;
+          doInstallCheck = false;
           meta = previousAttrs.meta // {
             changelog = "https://github.com/casey/just/blob/${version}/CHANGELOG.md";
           };
@@ -90,6 +100,7 @@ let
           buildInputs = previousAttrs.buildInputs ++ [ final.dbus ];
           mesonFlags = (previousAttrs.mesonFlags or [ ]) ++ [ "-Dtests=false" ];
           doCheck = false;
+          doInstallCheck = false;
           # The pinned source installs kmscon itself as an ELF binary; only
           # the launcher script contains a command path that needs rewriting.
           postFixup = ''

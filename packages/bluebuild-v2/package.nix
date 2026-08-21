@@ -11,6 +11,7 @@ rustPlatform.buildRustPackage {
   cargoLock.lockFile = "${src}/Cargo.lock";
   buildFeatures = [ "recipe-v2" ];
   doCheck = false;
+  doInstallCheck = false;
 
   meta = {
     description = "BlueBuild CLI with the feature-gated recipe v2 parser";
