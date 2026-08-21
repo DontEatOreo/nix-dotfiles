@@ -18,9 +18,9 @@ let
   equicordParseRules = builtins.fromJSON (
     builtins.readFile "${inputs.nixcord}/modules/plugins/parse-rules.json"
   );
-  blackRoseDollPalette = builtins.fromJSON (
-    builtins.readFile ../dotfiles/.chezmoitemplates/black_rose_doll_palette.json
-  );
+  blackRoseDollPalette =
+    (builtins.fromJSON (builtins.readFile ../dotfiles/.chezmoidata/black_rose_doll.json))
+    .black_rose_doll;
   equicordExceptionsCss = builtins.readFile ../packages/equicord-settings/quick-css.css;
   equicordQuickCss = import ../packages/equicord-settings/theme.nix {
     inherit lib;

@@ -1,13 +1,14 @@
-{{- $repo := joinPath .chezmoi.sourceDir ".." -}}
+{{- $repo := .chezmoi.workingTree -}}
 #!/usr/bin/env python3.14
-# Helium source fingerprint: {{ output "git" "-C" $repo "hash-object" (joinPath $repo "ansible/site.yml") (joinPath $repo "ansible/roles/applications/defaults/main.yml") (joinPath $repo "ansible/roles/applications/tasks/main.yml") (joinPath $repo "ansible/roles/applications/tasks/helium.yml") (joinPath $repo "ansible/roles/applications/tasks/helium-profile.yml") (joinPath $repo "ansible/roles/applications/tasks/private-settings.yml") (joinPath $repo "browser/helium.toml") (joinPath $repo "browser/settings/control-panel-for-twitter.json") (joinPath $repo "browser/settings/enhancer-for-youtube.json") (joinPath $repo "browser/settings/minimal-twitter-theme.json") (joinPath $repo "browser/settings/refined-github.json") (joinPath $repo "browser/settings/ublock-origin-helium.json") (joinPath $repo "browser/settings/ublock-origin.json") (joinPath $repo "dotfiles/.chezmoitemplates/black_rose_doll_palette.json") (joinPath $repo "secrets/secrets.yaml") | sha256sum }}
+# Helium source fingerprint: {{ output "git" "-C" $repo "hash-object" (joinPath $repo "ansible/site.yml") (joinPath $repo "ansible/roles/applications/defaults/main.yml") (joinPath $repo "ansible/roles/applications/tasks/main.yml") (joinPath $repo "ansible/roles/applications/tasks/helium.yml") (joinPath $repo "ansible/roles/applications/tasks/helium-profile.yml") (joinPath $repo "ansible/roles/applications/tasks/private-settings.yml") (joinPath $repo "browser/helium.toml") (joinPath $repo "browser/settings/control-panel-for-twitter.json") (joinPath $repo "browser/settings/enhancer-for-youtube.json") (joinPath $repo "browser/settings/minimal-twitter-theme.json") (joinPath $repo "browser/settings/refined-github.json") (joinPath $repo "browser/settings/ublock-origin-helium.json") (joinPath $repo "browser/settings/ublock-origin.json") (joinPath $repo "dotfiles/.chezmoidata/black_rose_doll.json") (joinPath $repo "secrets/secrets.yaml") | sha256sum }}
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
 
-repository = Path({{ $repo | quote }})
+repository = Path(os.environ["CHEZMOI_WORKING_TREE"])
 ansible = shutil.which("ansible-playbook")
 uvx = shutil.which("uvx")
 if ansible is not None:

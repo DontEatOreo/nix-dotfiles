@@ -1,5 +1,5 @@
 #!/bin/sh
-# Theme fingerprint: {{ include ".chezmoitemplates/black_rose_doll_palette.json" | sha256sum }}
+# Theme fingerprint: {{ .black_rose_doll | toJson | sha256sum }}
 set -eu
 
 if command -v bat >/dev/null 2>&1; then

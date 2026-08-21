@@ -17,7 +17,7 @@ LIGHT_PREFIX = "__black_rose_doll_light__"
 PALETTE_VARIABLE = re.compile(r"var\(--vscode-ctp-([a-z0-9-]+)\)")
 
 BLACK_ROSE_DOLL = json.loads(
-    r"""{{ include `.chezmoitemplates/black_rose_doll_palette.json` }}"""
+    r"""{{ .black_rose_doll | toJson }}"""
 )
 
 type Association = str | dict[str, str]

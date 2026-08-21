@@ -13,7 +13,7 @@ on:
       - ansible/roles/system/templates/macos/tailscale-ssh-helper.py.in
       - browser/helium.toml
       - browser/settings/**
-      - dotfiles/.chezmoitemplates/black_rose_doll_palette.json
+      - dotfiles/.chezmoidata/black_rose_doll.json
       - packages/dotfiles-python/assets/**
   push:
     branches:

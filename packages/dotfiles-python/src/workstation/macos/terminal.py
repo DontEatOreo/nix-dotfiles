@@ -9,9 +9,10 @@ from workstation.lib.paths import asset_path
 
 
 def _dark_palette() -> dict[str, str]:
-    palette = TypeAdapter(dict[str, dict[str, str]]).validate_json(
+    data = TypeAdapter(dict[str, dict[str, dict[str, str]]]).validate_json(
         asset_path("desktop", "black_rose_doll_palette.json").read_text()
     )
+    palette = data["black_rose_doll"]
     return palette["dark"]
 
 

@@ -1,7 +1,9 @@
-{{- $brd := include ".chezmoitemplates/black_rose_doll_palette.json" | fromJson -}}
-{{- $p := index $brd . -}}
+{{- $root := index . "root" -}}
+{{- $variant := index . "variant" -}}
+{{- $brd := $root.black_rose_doll -}}
+{{- $p := index $brd $variant -}}
 {{- $syntaxTheme := "base16-ocean.dark" -}}
-{{- if eq . "light" -}}
+{{- if eq $variant "light" -}}
 {{- $syntaxTheme = "base16-ocean.light" -}}
 {{- end -}}
 syntax_theme: {{ $syntaxTheme }}

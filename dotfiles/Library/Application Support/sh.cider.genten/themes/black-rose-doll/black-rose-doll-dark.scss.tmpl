@@ -1,4 +1,4 @@
-{{- $brd := include ".chezmoitemplates/black_rose_doll_palette.json" | fromJson -}}
+{{- $brd := .black_rose_doll -}}
 {{- $p := index $brd "dark" -}}
 
 body.body--dark {

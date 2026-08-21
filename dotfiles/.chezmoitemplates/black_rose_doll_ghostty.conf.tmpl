@@ -1,5 +1,6 @@
-{{- $variant := . -}}
-{{- $brd := include ".chezmoitemplates/black_rose_doll_palette.json" | fromJson -}}
+{{- $root := index . "root" -}}
+{{- $variant := index . "variant" -}}
+{{- $brd := $root.black_rose_doll -}}
 {{- $p := index $brd $variant -}}
 {{- $palette0 := "surface1" -}}
 {{- $palette7 := "subtext0" -}}

@@ -1,4 +1,8 @@
 {
+  "files.associations": {
+    "*.css": "css",
+    "*.html": "html"
+  },
   "chat.disableAIFeatures": true,
   "github.copilot.enable": {
     "*": false
@@ -26,7 +30,7 @@
   "catppuccin.extraBordersEnabled": true,
   "catppuccin.colorOverrides": {
     "mocha": {
-      "rosewater": "{{- $brd := include `.chezmoitemplates/black_rose_doll_palette.json` | fromJson -}}{{- $light := index $brd `light` -}}{{- $dark := index $brd `dark` -}}{{ index $dark `rosewater` }}",
+      "rosewater": "{{- $brd := .black_rose_doll -}}{{- $light := index $brd `light` -}}{{- $dark := index $brd `dark` -}}{{ index $dark `rosewater` }}",
       "flamingo": "{{ index $dark `flamingo` }}",
       "pink": "{{ index $dark `pink` }}",
       "mauve": "{{ index $dark `mauve` }}",

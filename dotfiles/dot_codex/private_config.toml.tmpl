@@ -1,4 +1,4 @@
-{{- $brd := include ".chezmoitemplates/black_rose_doll_palette.json" | fromJson -}}
+{{- $brd := .black_rose_doll -}}
 {{- $light := index $brd "light" -}}
 {{- $dark := index $brd "dark" -}}
 {{- $derived := index $brd "_derived" -}}
@@ -22,6 +22,9 @@ notify = [
 {{- end }}
 {{- end }}
 
+# Keep a custom root-write profile so ChatGPT does not classify the default as
+# its built-in Full access mode. Use `codex --profile safe` or `review` when a
+# task should run with narrower permissions.
 [permissions.unrestricted]
 description = "Unrestricted access without the desktop Full access warning"
 
@@ -201,6 +204,8 @@ default_tools_approval_mode = "approve"
 hide_full_access_warning = true
 hide_world_writable_warning = true
 
+# ChatGPT derives ~/.codex/computer-use/config.json from these desktop theme
+# values and the active locale; leave that generated file app-owned.
 [desktop]
 appearanceLightCodeThemeId = "black-rose-doll-light"
 appearanceDarkCodeThemeId = "black-rose-doll-dark"

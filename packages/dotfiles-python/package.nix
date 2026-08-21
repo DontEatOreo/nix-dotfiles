@@ -18,7 +18,7 @@ python314Packages.buildPythonApplication {
     root = repositoryRoot;
     fileset = lib.fileset.unions [
       (repositoryRoot + /pyproject.toml)
-      (repositoryRoot + /dotfiles/.chezmoitemplates/black_rose_doll_palette.json)
+      (repositoryRoot + /dotfiles/.chezmoidata/black_rose_doll.json)
       (packageRoot + /assets)
       (packageRoot + /src/workstation)
     ];

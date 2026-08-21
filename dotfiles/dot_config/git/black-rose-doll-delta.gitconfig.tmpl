@@ -1,4 +1,5 @@
-{{- $brd := include ".chezmoitemplates/black_rose_doll_palette.json" | fromJson -}}
+{{- $brd := .black_rose_doll -}}
+{{- $derived := index $brd "_derived" -}}
 {{- $light := index $brd "light" -}}
 {{- $dark := index $brd "dark" -}}
 [delta "black-rose-doll-light"]
@@ -16,10 +17,10 @@
     line-numbers-plus-style = bold "{{ index $light "green" }}"
     line-numbers-right-style = "{{ index $light "overlay0" }}"
     line-numbers-zero-style = "{{ index $light "overlay0" }}"
-    minus-emph-style = bold syntax "{{ index $light "red" }}"
-    minus-style = syntax "{{ index $light "maroon" }}"
-    plus-emph-style = bold syntax "{{ index $light "green" }}"
-    plus-style = syntax "{{ index $light "teal" }}"
+    minus-emph-style = bold syntax "{{ index $derived "lightDiffRemovedBg" }}"
+    minus-style = syntax "{{ index $derived "lightDiffRemovedBg" }}"
+    plus-emph-style = bold syntax "{{ index $derived "lightDiffAddedBg" }}"
+    plus-style = syntax "{{ index $derived "lightDiffAddedBg" }}"
     syntax-theme = Black Rose Doll Light
 
 [delta "black-rose-doll-dark"]
@@ -37,8 +38,8 @@
     line-numbers-plus-style = bold "{{ index $dark "green" }}"
     line-numbers-right-style = "{{ index $dark "overlay0" }}"
     line-numbers-zero-style = "{{ index $dark "overlay0" }}"
-    minus-emph-style = bold syntax "{{ index $dark "red" }}"
-    minus-style = syntax "{{ index $dark "maroon" }}"
-    plus-emph-style = bold syntax "{{ index $dark "green" }}"
-    plus-style = syntax "{{ index $dark "teal" }}"
+    minus-emph-style = bold syntax "{{ index $derived "darkDiffRemovedBg" }}"
+    minus-style = syntax "{{ index $derived "darkDiffRemovedBg" }}"
+    plus-emph-style = bold syntax "{{ index $derived "darkDiffAddedBg" }}"
+    plus-style = syntax "{{ index $derived "darkDiffAddedBg" }}"
     syntax-theme = Black Rose Doll Dark

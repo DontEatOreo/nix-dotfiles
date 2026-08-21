@@ -170,7 +170,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     with args.palette_json.open(encoding="utf-8") as handle:
-        palette = json.load(handle)
+        palette = json.load(handle)["black_rose_doll"]
     output_path = args.output_config
     write_if_changed(output_path, render_config(palette))
     return 0

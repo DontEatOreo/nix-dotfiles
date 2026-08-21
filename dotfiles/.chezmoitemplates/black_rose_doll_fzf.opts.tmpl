@@ -1,5 +1,7 @@
-{{- $brd := include ".chezmoitemplates/black_rose_doll_palette.json" | fromJson -}}
-{{- $p := index $brd . -}}
+{{- $root := index . "root" -}}
+{{- $variant := index . "variant" -}}
+{{- $brd := $root.black_rose_doll -}}
+{{- $p := index $brd $variant -}}
 --height=40%
 --layout=reverse
 --border

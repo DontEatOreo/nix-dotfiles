@@ -1,5 +1,5 @@
 {{- if eq .chezmoi.os "darwin" -}}
-{{- $repo := joinPath .chezmoi.sourceDir ".." -}}
+{{- $repo := .chezmoi.workingTree -}}
 #!/usr/bin/env python3.14
 # command fingerprint: {{ template "executable_fingerprint" (joinPath .chezmoi.homeDir ".local/bin/terminal-black-rose-doll") }}
 # helper source hash: {{ output "cat" (joinPath $repo "packages/dotfiles-python/src/workstation/macos/terminal.py") | sha256sum }}
@@ -9,7 +9,7 @@ import os
 import shutil
 from pathlib import Path
 
-command = Path.home() / ".local/bin/terminal-black-rose-doll"
+command = Path(os.environ["CHEZMOI_HOME_DIR"]) / ".local/bin/terminal-black-rose-doll"
 if not command.is_file():
     command = Path(shutil.which("terminal-black-rose-doll") or command)
 if not command.is_file() or not os.access(command, os.X_OK):

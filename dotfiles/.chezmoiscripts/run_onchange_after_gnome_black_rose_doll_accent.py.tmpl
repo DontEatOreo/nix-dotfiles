@@ -1,5 +1,5 @@
 {{- if eq .chezmoi.os "linux" -}}
-{{- $repo := joinPath .chezmoi.sourceDir ".." -}}
+{{- $repo := .chezmoi.workingTree -}}
 #!/usr/bin/env python3.14
 # command fingerprint: {{ template "executable_fingerprint" (joinPath .chezmoi.homeDir ".local/bin/gnome-black-rose-doll-accent") }}
 # helper source hash: {{ output "cat" (joinPath $repo "packages/dotfiles-python/src/workstation/local/gnome.py") (joinPath $repo "packages/dotfiles-python/assets/desktop/black_rose_doll_palette.json") (joinPath $repo "packages/dotfiles-python/assets/desktop/gtk-3-accent.css.in") (joinPath $repo "packages/dotfiles-python/assets/desktop/gtk-4-accent.css.in") | sha256sum }}
@@ -10,7 +10,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-command = Path.home() / ".local/bin/gnome-black-rose-doll-accent"
+command = Path(os.environ["CHEZMOI_HOME_DIR"]) / ".local/bin/gnome-black-rose-doll-accent"
 if not command.is_file():
     command = Path(shutil.which("gnome-black-rose-doll-accent") or command)
 if command.is_file() and os.access(command, os.X_OK):
