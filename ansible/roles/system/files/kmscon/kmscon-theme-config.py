@@ -9,7 +9,6 @@ import pathlib
 import re
 import sys
 import tempfile
-from contextlib import suppress
 from dataclasses import dataclass
 
 ASTRAL_VENDOR_PATH = pathlib.Path("/usr/lib/dotfiles/python")
@@ -65,8 +64,7 @@ HEX_COLOR_RE = re.compile(r"#[0-9a-fA-F]{6}\Z")
 def hex_to_rgb_csv(value: str) -> str:
     if HEX_COLOR_RE.fullmatch(value) is None:
         raise ValueError(f"invalid hex color: {value!r}")
-    value = value[1:]
-    return ",".join(str(int(value[index : index + 2], 16)) for index in (0, 2, 4))
+    return ",".join(map(str, bytes.fromhex(value.removeprefix("#"))))
 
 
 def coordinate_from_env(name: str, minimum: float, maximum: float) -> float | None:
@@ -149,19 +147,17 @@ def write_if_changed(path: pathlib.Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists() and path.read_text(encoding="utf-8") == text:
         return
-    tmp_path: pathlib.Path | None = None
-    try:
-        with tempfile.NamedTemporaryFile(
-            "w", encoding="utf-8", dir=path.parent, delete=False
-        ) as handle:
-            handle.write(text)
-            tmp_path = pathlib.Path(handle.name)
-        tmp_path.chmod(0o644)
-        tmp_path.replace(path)
-    finally:
-        if tmp_path is not None:
-            with suppress(FileNotFoundError):
-                tmp_path.unlink()
+    with tempfile.NamedTemporaryFile(
+        "w",
+        encoding="utf-8",
+        dir=path.parent,
+        delete_on_close=False,
+    ) as handle:
+        handle.write(text)
+        handle.flush()
+        os.fchmod(handle.fileno(), 0o644)
+        handle.close()
+        pathlib.Path(handle.name).replace(path)
 
 
 def parse_args() -> argparse.Namespace:

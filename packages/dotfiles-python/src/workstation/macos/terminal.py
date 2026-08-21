@@ -30,11 +30,12 @@ def terminal_profile() -> None:
         return ns_keyed_archiver.archivedDataWithRootObject_(value)
 
     def color(value: str) -> object:
+        red, green, blue = bytes.fromhex(value.removeprefix("#"))
         return archived(
             ns_color.colorWithSRGBRed_green_blue_alpha_(
-                int(value[1:3], 16) / 255,
-                int(value[3:5], 16) / 255,
-                int(value[5:7], 16) / 255,
+                red / 255,
+                green / 255,
+                blue / 255,
                 1,
             )
         )

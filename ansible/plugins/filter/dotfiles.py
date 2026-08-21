@@ -10,7 +10,7 @@ def hex_color_to_rgb_csv(value: object) -> str:
     if len(text) != 6:
         raise ValueError(f"expected a six-digit hex color, got {value!r}")
     try:
-        channels = tuple(int(text[index : index + 2], 16) for index in (0, 2, 4))
+        channels = bytes.fromhex(text)
     except ValueError as error:
         raise ValueError(f"expected a six-digit hex color, got {value!r}") from error
     return ",".join(map(str, channels))

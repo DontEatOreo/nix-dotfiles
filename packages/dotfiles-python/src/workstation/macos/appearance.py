@@ -23,11 +23,8 @@ def _accent() -> str:
 
 
 def _components(color: str) -> tuple[float, float, float]:
-    return (
-        int(color[1:3], 16) / 255,
-        int(color[3:5], 16) / 255,
-        int(color[5:7], 16) / 255,
-    )
+    red, green, blue = bytes.fromhex(color.removeprefix("#"))
+    return red / 255, green / 255, blue / 255
 
 
 def _preference_color(color: str, *, alpha: bool = False) -> str:

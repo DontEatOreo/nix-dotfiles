@@ -3,10 +3,10 @@
 import argparse
 import hashlib
 import json
+import os
 import pathlib
 import subprocess
 import tempfile
-from contextlib import suppress
 
 LOGINCTL = "/usr/bin/loginctl"
 SYSTEMCTL = "/usr/bin/systemctl"
@@ -77,19 +77,17 @@ def write_state(state_path: pathlib.Path, digest: str, pending: set[str]) -> Non
         indent=2,
         sort_keys=True,
     )
-    temporary: pathlib.Path | None = None
-    try:
-        with tempfile.NamedTemporaryFile(
-            "w", encoding="utf-8", dir=state_path.parent, delete=False
-        ) as handle:
-            handle.write(f"{content}\n")
-            temporary = pathlib.Path(handle.name)
-        temporary.chmod(0o644)
-        temporary.replace(state_path)
-    finally:
-        if temporary is not None:
-            with suppress(FileNotFoundError):
-                temporary.unlink()
+    with tempfile.NamedTemporaryFile(
+        "w",
+        encoding="utf-8",
+        dir=state_path.parent,
+        delete_on_close=False,
+    ) as handle:
+        handle.write(f"{content}\n")
+        handle.flush()
+        os.fchmod(handle.fileno(), 0o644)
+        handle.close()
+        pathlib.Path(handle.name).replace(state_path)
 
 
 def refresh(config: pathlib.Path, state_path: pathlib.Path) -> int:
