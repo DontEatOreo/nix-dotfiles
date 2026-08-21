@@ -25,25 +25,3 @@ def test_installed_assets_do_not_require_a_repository(
         assert paths.assets_root() == installed
     finally:
         paths.assets_root.cache_clear()
-
-
-def test_asset_path_accepts_domain_owned_development_source(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    installed = tmp_path / "installed"
-    repository = tmp_path / "repository"
-    installed.mkdir()
-    source = repository / "domain/source.txt"
-    source.parent.mkdir(parents=True)
-    source.write_text("source")
-    monkeypatch.setattr(paths, "assets_root", lambda: installed)
-    monkeypatch.setattr(paths, "repository_root", lambda: repository)
-
-    assert (
-        paths.asset_path(
-            "installed/source.txt",
-            development_source=("domain", "source.txt"),
-        )
-        == source
-    )

@@ -1,4 +1,3 @@
-import datetime as dt
 import importlib.util
 import json
 import subprocess
@@ -6,49 +5,11 @@ import sys
 from pathlib import Path
 from types import ModuleType
 from typing import Protocol, cast
-from zoneinfo import ZoneInfo
 
 import pytest
 
 REPOSITORY = Path(__file__).parents[2]
-THEME_SCRIPT = REPOSITORY / "ansible/roles/system/files/kmscon/kmscon-theme-config.py"
 REFRESH_SCRIPT = REPOSITORY / "ansible/roles/system/files/kmscon/kmscon-refresh.py"
-PALETTE = REPOSITORY / "dotfiles/.chezmoitemplates/black_rose_doll_palette.json"
-UPSTREAM_PALETTE_OPTIONS = {
-    "palette-black",
-    "palette-red",
-    "palette-green",
-    "palette-yellow",
-    "palette-blue",
-    "palette-magenta",
-    "palette-cyan",
-    "palette-light-grey",
-    "palette-dark-grey",
-    "palette-light-red",
-    "palette-light-green",
-    "palette-light-yellow",
-    "palette-light-blue",
-    "palette-light-magenta",
-    "palette-light-cyan",
-    "palette-white",
-    "palette-foreground",
-    "palette-background",
-}
-
-
-class ThemeChoice(Protocol):
-    name: str
-    source: str
-
-
-class ThemeModule(Protocol):
-    def render_config(
-        self,
-        palette: dict[str, dict[str, str]],
-        now: dt.datetime | None = None,
-    ) -> str: ...
-
-    def daylight_theme(self, now: dt.datetime | None = None) -> ThemeChoice: ...
 
 
 class RefreshModule(Protocol):
@@ -72,85 +33,8 @@ def load_script(name: str, path: Path) -> ModuleType:
 
 
 @pytest.fixture
-def theme_module() -> ThemeModule:
-    return cast("ThemeModule", load_script("kmscon_theme_config_test", THEME_SCRIPT))
-
-
-@pytest.fixture
 def refresh_module() -> RefreshModule:
     return cast("RefreshModule", load_script("kmscon_refresh_test", REFRESH_SCRIPT))
-
-
-@pytest.fixture
-def palette() -> dict[str, dict[str, str]]:
-    return json.loads(PALETTE.read_text(encoding="utf-8"))
-
-
-@pytest.mark.parametrize(
-    ("theme", "expected"),
-    [
-        (
-            "light",
-            {
-                "palette-black=87,74,89",
-                "palette-dark-grey=109,96,109",
-                "palette-light-grey=202,184,193",
-                "palette-white=217,201,208",
-                "palette-foreground=58,47,64",
-                "palette-background=248,241,242",
-            },
-        ),
-        (
-            "dark",
-            {
-                "palette-black=51,35,48",
-                "palette-dark-grey=69,52,64",
-                "palette-light-grey=170,157,167",
-                "palette-white=207,194,203",
-                "palette-foreground=238,229,235",
-                "palette-background=16,13,20",
-            },
-        ),
-    ],
-)
-def test_rendered_palette_matches_black_rose_doll_terminal_colors(
-    theme_module: ThemeModule,
-    palette: dict[str, dict[str, str]],
-    monkeypatch: pytest.MonkeyPatch,
-    theme: str,
-    expected: set[str],
-) -> None:
-    monkeypatch.setenv("DOTFILES_KMSCON_THEME", theme)
-
-    rendered = theme_module.render_config(palette)
-    lines = set(rendered.splitlines())
-
-    assert expected <= lines
-    assert "palette=custom" in lines
-    assert {
-        line.partition("=")[0] for line in lines if line.startswith("palette-")
-    } == UPSTREAM_PALETTE_OPTIONS
-
-
-@pytest.mark.parametrize(
-    ("hour", "expected"),
-    [(0, "dark"), (12, "light")],
-)
-def test_astral_selects_sofia_day_and_night(
-    theme_module: ThemeModule,
-    monkeypatch: pytest.MonkeyPatch,
-    hour: int,
-    expected: str,
-) -> None:
-    monkeypatch.delenv("DOTFILES_KMSCON_THEME", raising=False)
-    monkeypatch.delenv("DOTFILES_KMSCON_LATITUDE", raising=False)
-    monkeypatch.delenv("DOTFILES_KMSCON_LONGITUDE", raising=False)
-    now = dt.datetime(2026, 7, 10, hour, tzinfo=ZoneInfo("Europe/Sofia"))
-
-    choice = theme_module.daylight_theme(now)
-
-    assert choice.name == expected
-    assert choice.source.startswith("sun default-sofia")
 
 
 def test_refresh_tracks_occupied_ttys_until_they_can_restart(

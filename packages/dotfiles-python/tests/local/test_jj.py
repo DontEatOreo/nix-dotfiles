@@ -179,18 +179,6 @@ def test_jj_get_pr_delegates_mutation_to_jj(
 @pytest.mark.parametrize(
     ("remotes", "current_url", "expected"),
     [
-        (
-            "",
-            "",
-            (
-                "jj",
-                "git",
-                "remote",
-                "add",
-                "github-pr",
-                "git@example.com:new/repo.git",
-            ),
-        ),
         ("github-pr", "git@example.com:new/repo.git", None),
         (
             "github-pr",

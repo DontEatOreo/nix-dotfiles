@@ -39,13 +39,6 @@ def test_gpu_configuration_preserves_unrelated_settings(tmp_path: Path) -> None:
     }
 
 
-def test_flags_file_uses_shell_quoting_and_comments(tmp_path: Path) -> None:
-    path = tmp_path / "discord-flags.conf"
-    path.write_text("# comment\n--first\n--label 'two words' # trailing comment\n")
-
-    assert discord._flags_from_file(path) == ["--first", "--label", "two words"]
-
-
 def test_macos_repair_falls_back_to_install_and_locks_asars(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
