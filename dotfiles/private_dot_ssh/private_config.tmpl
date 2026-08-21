@@ -19,8 +19,10 @@ Host codeberg.org
   ForwardAgent no
   UserKnownHostsFile ~/.ssh/known_hosts ~/.ssh/known_hosts.d/codeberg
 
-Host ublue
-  HostName ublue
+Host fedora fedora.*.ts.net fedora.*.ts.net. 100.123.214.78 ublue
+  # Forward 1Password directly even when the launching shell has no
+  # SSH_AUTH_SOCK (for example, an older already-running terminal session).
+  IdentityAgent "{{ $onePasswordAgent }}"
   ForwardAgent yes
 
 Match host * exec "test -z \"$SSH_CONNECTION\" && test -z \"$SSH_AUTH_SOCK\""
