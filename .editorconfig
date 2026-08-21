@@ -1,0 +1,73 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{py,py.in,py.j2,py.tmpl,pyi,pyw}]
+indent_size = 4
+
+[{bluebuild/files/system/usr/bin/open,dotfiles/dot_local/bin/executable_helix-rumdl-lsp}]
+indent_size = 4
+
+[*.{gradle,gradle.kts,kt,kts}]
+indent_size = 4
+
+[packages/fido-phone/src/android/**/*.xml]
+indent_size = 4
+
+[*.{zig,zon}]
+indent_size = 4
+
+[Justfile]
+indent_size = 4
+
+[{Makefile,makefile,*.mk}]
+indent_style = tab
+indent_size = tab
+
+[*.{if,lua,lua.tmpl,te}]
+indent_style = tab
+indent_size = tab
+
+[*.{bash,bash.tmpl,sh,sh.tmpl}]
+indent_style = tab
+indent_size = tab
+binary_next_line = false
+simplify = false
+switch_case_indent = true
+
+[{dotfiles/dot_bashenv.tmpl,dotfiles/dot_bashrc.tmpl,dotfiles/dot_zprofile,dotfiles/dot_local/bin/executable_carmenta,dotfiles/dot_local/bin/executable_carmenta-activate,dotfiles/dot_local/bin/executable_solaar-no-tray,dotfiles/dot_local/bin/executable_sops-age-key-1password,packages/fido-phone/src/bin/fido-phone,packages/fido-phone/src/bin/fido-phone-install-android}]
+indent_style = tab
+indent_size = tab
+binary_next_line = false
+simplify = false
+switch_case_indent = true
+
+[*.{md,md.tmpl}]
+trim_trailing_whitespace = false
+
+[*.{diff,patch}]
+indent_style = unset
+indent_size = unset
+insert_final_newline = unset
+trim_trailing_whitespace = false
+
+[*.{lock,lockb}]
+indent_style = unset
+indent_size = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
+[**/{node_modules,vendor,zig-pkg}/**]
+charset = unset
+end_of_line = unset
+indent_style = unset
+indent_size = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+ignore = true

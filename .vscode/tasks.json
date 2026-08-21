@@ -1,90 +1,317 @@
 {
   "version": "2.0.0",
+  "presentation": {
+    "reveal": "always",
+    "revealProblems": "onProblem",
+    "panel": "dedicated",
+    "clear": true,
+    "showReuseMessage": false,
+    "preserveTerminalName": true
+  },
   "tasks": [
     {
-      "label": "just: check",
+      "label": "repo: check",
       "detail": "Run the full repository validation suite.",
       "type": "process",
       "command": "just",
       "args": ["check"],
+      "inAgents": true,
+      "icon": {
+        "id": "beaker",
+        "color": "terminal.ansiGreen"
+      },
       "group": {
         "kind": "test",
         "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "repo: lint",
+      "detail": "Run formatting checks, linters, and project validation.",
+      "type": "process",
+      "command": "just",
+      "args": ["lint"],
+      "inAgents": true,
+      "icon": {
+        "id": "checklist",
+        "color": "terminal.ansiCyan"
+      },
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "repo: check format",
+      "detail": "Check repository formatting without rewriting files.",
+      "type": "process",
+      "command": "just",
+      "args": ["check-format"],
+      "inAgents": true,
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "repo: format",
+      "detail": "Format files managed by this repo.",
+      "type": "process",
+      "command": "just",
+      "args": ["fmt"],
+      "icon": {
+        "id": "wand",
+        "color": "terminal.ansiMagenta"
+      },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "repo: doctor",
+      "detail": "Check commands required by a selected repository workflow.",
+      "type": "process",
+      "command": "just",
+      "args": ["doctor", "${input:doctorProfile}"],
+      "icon": {
+        "id": "heart-pulse",
+        "color": "terminal.ansiBlue"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "repo: watch check",
+      "detail": "Rerun the validation suite whenever tracked inputs change.",
+      "type": "process",
+      "command": "just",
+      "args": ["watch", "check"],
+      "isBackground": true,
+      "promptOnClose": true,
+      "runOptions": {
+        "instanceLimit": 1,
+        "instancePolicy": "terminateOldest"
       },
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
-        "clear": true
+        "clear": false,
+        "group": "watch"
       }
     },
     {
-      "label": "just: check-format",
-      "detail": "Check repository formatting without rewriting files.",
-      "type": "process",
-      "command": "just",
-      "args": ["check-format"],
-      "group": "test",
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      }
-    },
-    {
-      "label": "just: fmt",
-      "detail": "Format files managed by this repo.",
-      "type": "process",
-      "command": "just",
-      "args": ["fmt"],
-      "group": "build",
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      }
-    },
-    {
-      "label": "just: doctor all",
-      "detail": "Check all commands required by local workflows.",
-      "type": "process",
-      "command": "just",
-      "args": ["doctor", "all"],
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      }
-    },
-    {
-      "label": "just: smoke",
+      "label": "containers: smoke test",
       "detail": "Build and run the Fedora smoke-test container.",
       "type": "process",
       "command": "just",
       "args": ["smoke"],
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      }
+      "icon": {
+        "id": "package",
+        "color": "terminal.ansiBlue"
+      },
+      "problemMatcher": []
     },
     {
       "label": "python: test",
       "detail": "Run the configured pytest suite through the uv environment.",
       "type": "process",
-      "command": "uv",
-      "args": ["run", "pytest"],
+      "command": "just",
+      "args": ["python-test"],
+      "inAgents": true,
       "group": "test",
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      }
+      "problemMatcher": "$python"
+    },
+    {
+      "label": "python: test current file",
+      "detail": "Run pytest for the active Python file through the uv environment.",
+      "type": "process",
+      "command": "just",
+      "args": ["python-test", "${relativeFile}"],
+      "group": "test",
+      "problemMatcher": "$python"
+    },
+    {
+      "label": "bun: check",
+      "detail": "Run Biome and every Bun workspace type check.",
+      "type": "process",
+      "command": "bun",
+      "args": ["run", "check"],
+      "inAgents": true,
+      "group": "test",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "ruby: lint",
+      "detail": "Run the repository RuboCop configuration.",
+      "type": "process",
+      "command": "bundle",
+      "args": ["exec", "rubocop", "libexec", "test"],
+      "inAgents": true,
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "ruby: test",
+      "detail": "Run the Ruby tool test suite.",
+      "type": "process",
+      "command": "ruby",
+      "args": ["-Itest", "test/ruby_tools_test.rb"],
+      "inAgents": true,
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "zig: test",
+      "detail": "Test both the root Zig build and standalone package build.",
+      "dependsOrder": "sequence",
+      "dependsOn": ["zig: test root", "zig: test package"],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "zig: test root",
+      "type": "process",
+      "command": "zig",
+      "args": ["build", "test"],
+      "hide": true,
+      "problemMatcher": "$gcc"
+    },
+    {
+      "label": "zig: test package",
+      "type": "process",
+      "command": "zig",
+      "args": ["build", "test"],
+      "options": {
+        "cwd": "${workspaceFolder}/packages/terminal-theme-tools"
+      },
+      "hide": true,
+      "problemMatcher": "$gcc"
+    },
+    {
+      "label": "nix: flake check (no build)",
+      "detail": "Evaluate all flake checks without building their derivations.",
+      "type": "process",
+      "command": "nix",
+      "args": ["flake", "check", "--keep-going", "--no-build"],
+      "inAgents": true,
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "nix: build package",
+      "detail": "Build a selected package output for the current system.",
+      "type": "process",
+      "command": "nix",
+      "args": ["build", ".#${input:nixPackage}"],
+      "icon": {
+        "id": "package",
+        "color": "terminal.ansiBlue"
+      },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "dotfiles: preview",
+      "detail": "Preview pending chezmoi changes without refreshing externals.",
+      "type": "process",
+      "command": "just",
+      "args": ["dotfiles-diff"],
+      "icon": {
+        "id": "diff"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "bootstrap: simulate",
+      "detail": "Exercise bootstrap orchestration with disposable fake tools.",
+      "type": "process",
+      "command": "just",
+      "args": ["bootstrap-simulate", "${input:bootstrapScenario}"],
+      "inAgents": true,
+      "group": "test",
+      "problemMatcher": "$python"
+    },
+    {
+      "label": "spectrum: validate",
+      "detail": "Validate the BlueBuild recipe and its pinned base image.",
+      "type": "process",
+      "command": "just",
+      "args": ["spectrum-validate"],
+      "inAgents": true,
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "spectrum: build",
+      "detail": "Build the local Spectrum image on a supported Linux host.",
+      "type": "process",
+      "command": "just",
+      "args": ["spectrum-build"],
+      "icon": {
+        "id": "layers",
+        "color": "terminal.ansiBlue"
+      },
+      "group": "build",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "doctorProfile",
+      "type": "pickString",
+      "description": "Workflow dependencies to check",
+      "default": "all",
+      "options": [
+        "all",
+        "status",
+        "reboot",
+        "install",
+        "build",
+        "setup",
+        "apply",
+        "shell",
+        "spectrum",
+        "fmt",
+        "lint",
+        "zig",
+        "ansible",
+        "bun",
+        "smoke",
+        "nix",
+        "watch",
+        "check"
+      ]
+    },
+    {
+      "id": "bootstrapScenario",
+      "type": "pickString",
+      "description": "Bootstrap simulation scenario",
+      "default": "success",
+      "options": ["success", "apply-failure"]
+    },
+    {
+      "id": "nixPackage",
+      "type": "pickString",
+      "description": "Flake package to build for the current system",
+      "default": "default",
+      "options": [
+        "default",
+        "bluebuild-v2",
+        "bun2nix",
+        "check-jsonschema",
+        "dotfiles-python",
+        "equicord-settings",
+        "fido-phone",
+        "ghidra",
+        "ghidra-mcp",
+        "ghidra-mcp-bridge",
+        "ghidra-mcp-headless",
+        "ghidra-mcp-httpd",
+        "ghidra-mcp-launcher",
+        "ghostty-patched",
+        "hyper-window-tiling-gnome",
+        "hyper-window-tiling-kde",
+        "kanata-with-cmd",
+        "kmscon",
+        "terminal-theme-tools",
+        "uresourced"
+      ]
     }
   ]
 }

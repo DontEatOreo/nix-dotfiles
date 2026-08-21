@@ -1,0 +1,42 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: current file",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "UV_LOCKED": "1"
+      }
+    },
+    {
+      "name": "Python: pytest current file",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["${relativeFile}", "-vv"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "UV_LOCKED": "1"
+      }
+    },
+    {
+      "name": "Ruby: current file",
+      "type": "ruby_lsp",
+      "request": "launch",
+      "program": "ruby ${file}"
+    },
+    {
+      "name": "Ruby: test current file",
+      "type": "ruby_lsp",
+      "request": "launch",
+      "program": "ruby -Itest ${relativeFile}"
+    }
+  ]
+}
