@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" role="img" aria-labelledby="title desc">
+  <defs>
+    <linearGradient id="colors" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d595a3"/>
+      <stop offset="0.2" stop-color="#d595a3"/>
+      <stop offset="0.2" stop-color="#b092b7"/>
+      <stop offset="0.3" stop-color="#b092b7"/>
+      <stop offset="0.3" stop-color="#8797c2"/>
+      <stop offset="0.5" stop-color="#8797c2"/>
+      <stop offset="0.5" stop-color="#c5ae70"/>
+      <stop offset="0.625" stop-color="#c5ae70"/>
+      <stop offset="0.625" stop-color="#eee5eb"/>
+      <stop offset="0.75" stop-color="#eee5eb"/>
+      <stop offset="0.75" stop-color="#b092b7"/>
+      <stop offset="0.875" stop-color="#b092b7"/>
+      <stop offset="0.875" stop-color="#100d14"/>
+      <stop offset="1" stop-color="#100d14"/>
+    </linearGradient>
+    <clipPath id="frame">
+      <rect width="1200" height="120" rx="24"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1200" height="120" fill="url(#colors)" clip-path="url(#frame)"/>
+  <rect x="0.75" y="0.75" width="1198.5" height="118.5" rx="23.25" fill="none" stroke="#453440" stroke-opacity="0.7" stroke-width="1.5"/>
+</svg>

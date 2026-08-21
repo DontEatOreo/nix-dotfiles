@@ -1,63 +1,54 @@
 # dotfiles 🌹🎀
 
-Personal Spectrum/Bluefin, NixOS, and macOS workstation configuration, built
-with Homebrew, Nix, Ansible, and chezmoi.
-
-<p>
-  <a href="https://github.com/4evy/dotfiles/pkgs/container/spectrum"><img alt="GHCR Spectrum image" src="https://img.shields.io/badge/GHCR-spectrum-ce98a5?style=flat-square&logo=github&logoColor=ce98a5&labelColor=110e17"></a>
-</p>
-
-<p>
-  <a href="https://projectbluefin.io"><img alt="Bluefin" src="https://img.shields.io/badge/Bluefin-ce98a5?style=flat-square&logo=fedora&logoColor=ce98a5&labelColor=110e17"></a>
-  <a href="https://nixos.org"><img alt="NixOS" src="https://img.shields.io/badge/NixOS-ce98a5?style=flat-square&logo=nixos&logoColor=ce98a5&labelColor=110e17"></a>
-  <a href="https://www.apple.com/macos"><img alt="macOS" src="https://img.shields.io/badge/macOS-ce98a5?style=flat-square&logo=apple&logoColor=ce98a5&labelColor=110e17"></a>
-</p>
-
-<p>
-  <a href="https://brew.sh"><img alt="Homebrew" src="https://img.shields.io/badge/Homebrew-ce98a5?style=flat-square&logo=homebrew&logoColor=ce98a5&labelColor=110e17"></a>
-  <a href="https://www.chezmoi.io"><img alt="chezmoi" src="https://img.shields.io/badge/chezmoi-ce98a5?style=flat-square&logo=homeassistant&logoColor=ce98a5&labelColor=110e17"></a>
-  <a href="https://www.ansible.com"><img alt="Ansible" src="https://img.shields.io/badge/Ansible-ce98a5?style=flat-square&logo=ansible&logoColor=ce98a5&labelColor=110e17"></a>
-  <img alt="Black Rose Doll light and dark theme" src="https://img.shields.io/badge/Theme-Black%20Rose%20Doll-ce98a5?style=flat-square&labelColor=110e17">
-</p>
+My personal workstation config for Spectrum/Bluefin, NixOS, and macOS
 
 > [!IMPORTANT]
-> This is my personal setup. It is public for reference, not a universal installer.
+> This repository is for my machines. It's public for reference, but it isn't a reusable
+> installer or a supported project
 
-## What's here
+<p align="center">
+  <img src=".github/assets/readme-hero.svg" width="72%">
+</p>
 
-- **Spectrum / Bluefin:** custom bootc image and desktop setup
-- **NixOS:** declarative system and user configuration
-- **Apple Silicon macOS:** Homebrew and Ansible bootstrap
-- **Everywhere:** shared dotfiles managed by chezmoi
+The goal is to make every machine feel like mine without maintaining the same config
+four times
 
-## Setup
+## Rebuilding a machine
 
-Clone the repository first:
+I keep the repo at `~/dotfiles`:
 
 ```bash
 git clone https://github.com/4evy/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ```
 
-### Spectrum / Bluefin
+<details>
+<summary><strong>Spectrum / Bluefin</strong></summary>
 
-From a fresh Bluefin install:
+<br>
+
+On a fresh Bluefin install, I switch to the Spectrum image:
 
 ```bash
 sudo bootc switch ghcr.io/4evy/spectrum:latest
 systemctl reboot
 ```
 
-After rebooting:
+After the reboot, I finish the setup:
 
 ```bash
 cd ~/dotfiles
 just setup
 ```
 
-### NixOS
+</details>
 
-From an installed NixOS system:
+<details>
+<summary><strong>NixOS</strong></summary>
+
+<br>
+
+On an installed NixOS system, I apply the flake and finish the shared setup:
 
 ```bash
 sudo nixos-rebuild \
@@ -68,62 +59,75 @@ sudo nixos-rebuild \
 just setup
 ```
 
-The extra cache options are only needed for the first rebuild. Later rebuilds can use:
+The extra cache options are only needed for the first rebuild. Afterward, this shorter
+command is enough:
 
 ```bash
 sudo nixos-rebuild switch --flake .#nixos
 ```
 
-### Apple Silicon macOS
+</details>
 
-Requires macOS 26 or newer. From the cloned repository, run:
+<details>
+<summary><strong>macOS</strong></summary>
+
+<br>
+
+This path needs macOS 26 or newer. From the cloned repo, I run:
 
 ```bash
 ./ansible/bootstrap.sh --setup
 ```
 
-This bootstraps Homebrew and Ansible, installs the complete userland, applies the
-dotfiles, and configures the host. It prompts for administrator and 1Password access
-when needed.
+The script bootstraps Homebrew and Ansible, installs the userland, applies the dotfiles,
+and configures the Mac. It asks for administrator and 1Password access when needed
 
-Exercise the same flow against disposable fake tools without changing the host:
+I can exercise the same flow with disposable fake tools without changing the host:
 
 ```bash
 just bootstrap-simulate
 ```
 
-Pass a scenario such as `apply-failure` to test error handling.
+I pass a scenario such as `apply-failure` to test the unhappy path
 
-## Everyday commands
+</details>
 
-Run `just` or `just --list` for the complete recipe list.
+## Commands
+
+`just` or `just --list` shows every recipe
+
+<details>
+<summary><strong>Everyday commands</strong></summary>
+
+<br>
 
 ```bash
-just setup          # Bootstrap and apply everything
-just update         # Update userland, dotfiles, and host setup
-just dotfiles-diff  # Preview pending chezmoi changes
-just apply          # Apply chezmoi dotfiles only
-just status         # Show Spectrum image status
+just setup               # Bootstrap and apply everything
+just update              # Update userland, dotfiles, and host setup
+just dotfiles-diff       # Preview pending chezmoi changes
+just apply               # Apply chezmoi dotfiles only
+just status              # Show Spectrum image status
 just determinate-status  # Show Determinate version, features, and daemon state
 just determinate-upgrade # Upgrade installer-managed Determinate Nix
 
-just spectrum-validate # Validate the BlueBuild recipe and base digest
-just spectrum-build    # Build Spectrum locally
-just spectrum-inspect  # Inspect and test the local image
+just spectrum-validate   # Validate the BlueBuild recipe and base digest
+just spectrum-build      # Build Spectrum locally
+just spectrum-inspect    # Inspect and test the local image
 
-just fmt            # Format the repository
-just lint           # Run static checks
-just check          # Run the full validation suite
+just fmt                 # Format the repository
+just lint                # Run static checks
+just check               # Run the full validation suite
 ```
 
-For direct Nix work:
+For direct Nix work, drop down a level:
 
 ```bash
 nix develop
 nix flake check
-nix run .#ghidra-mcp
 ```
+
+</details>
 
 ## License
 
-[LICENSE](LICENSE)
+[MIT](LICENSE)
