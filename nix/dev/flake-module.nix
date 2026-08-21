@@ -142,6 +142,7 @@
           ++ (with pkgs; [
             git
             just
+            quilt
           ]);
           inherit (config.pre-commit) shellHook;
         };

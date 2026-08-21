@@ -56,6 +56,7 @@ bootstrap_build_toolchain_packages:
     - patch
     - perl
     - pkg-config
+    - quilt
     - zlib1g-dev
     - zig
   apk:
@@ -70,6 +71,7 @@ bootstrap_build_toolchain_packages:
     - patch
     - perl
     - pkgconf
+    - quilt
     - zlib-dev
     - zig
   dnf:
@@ -86,6 +88,7 @@ bootstrap_build_toolchain_packages:
     - patch
     - perl
     - pkgconf-pkg-config
+    - quilt
     - zlib-devel
     - zig
   pacman:
@@ -99,5 +102,6 @@ bootstrap_build_toolchain_packages:
     - patch
     - perl
     - pkgconf
+    - quilt
     - zlib
     - zig

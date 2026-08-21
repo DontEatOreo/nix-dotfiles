@@ -118,6 +118,7 @@ in
         pinentry-gnome3
         pkg-config
         poppler-utils
+        quilt
         resvg
         ripgrep
         rsync
