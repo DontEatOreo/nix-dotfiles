@@ -17,7 +17,7 @@ class AltTabLicense < Formula
 
   def install
     libexec.install "alt-tab-license.rb"
-    chmod 0o755, libexec/"alt-tab-license.rb"
+    chmod 0755, libexec/"alt-tab-license.rb"
     bin.install_symlink (libexec/"alt-tab-license.rb") => "alt-tab-license"
   end
 

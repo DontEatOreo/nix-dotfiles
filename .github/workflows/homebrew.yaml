@@ -29,21 +29,12 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 15
     steps:
-      - name: Set Up Homebrew
-        id: homebrew
-        uses: Homebrew/actions/setup-homebrew@fd832223f9f99ebf0244dd20658680e5d4aca049 # 2026.08.03.2
-
-      - name: Restore Homebrew RubyGems
-        id: cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Checkout Repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          path: ${{ steps.homebrew.outputs.gems-path }}
-          key: ${{ runner.os }}-${{ runner.arch }}-homebrew-rubygems-${{ steps.homebrew.outputs.gems-hash }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-homebrew-rubygems-
+          persist-credentials: false
 
       - name: Install Homebrew RubyGems
-        if: steps.cache.outputs.cache-hit != 'true'
         run: brew install-bundler-gems
 
       - name: Check Formula Style

@@ -84,6 +84,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Set Up Nix
@@ -101,10 +102,32 @@ jobs:
           nix flake check
           --keep-going --no-build
 
-      # Build every native package/test check while leaving the full NixOS
-      # closure as an evaluation check. This catches stale fixed-output hashes
-      # and incomplete filtered sources without turning CI into a system build.
+      - name: Build Repository Checks
+        run: >-
+          nix build
+          --keep-going --no-link --print-build-logs
+          .#checks.x86_64-linux.pre-commit
+          .#checks.x86_64-linux.treefmt
+
+      - name: Detect Native Check Inputs
+        id: native-inputs
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" || "$BASE_SHA" =~ ^0+$ ]]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          elif git diff --quiet "$BASE_SHA" "$GITHUB_SHA" -- ':(exclude,glob)**/*.md'; then
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Build package/test checks when non-documentation inputs change while
+      # leaving the full NixOS closure as an evaluation check. Keeping these
+      # separate from repository linters avoids an hour-long build for docs.
       - name: Build Native Checks
+        if: steps.native-inputs.outputs.build == 'true'
         run: >-
           nix build
           --keep-going --no-link --print-build-logs
@@ -113,7 +136,5 @@ jobs:
           .#checks.x86_64-linux.hyper-window-tiling
           .#checks.x86_64-linux.nixos-integration
           .#checks.x86_64-linux.nixos-module
-          .#checks.x86_64-linux.pre-commit
           .#checks.x86_64-linux.terminal-theme-tools
           .#checks.x86_64-linux.toshy-runtime
-          .#checks.x86_64-linux.treefmt

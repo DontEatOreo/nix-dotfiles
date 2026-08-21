@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "base64"
 require "json"
 
 class GhosttyPatched < Formula
@@ -8,12 +7,12 @@ class GhosttyPatched < Formula
   pins = JSON.load_file(tap_root/"npins/sources.json").fetch("pins")
   ghostty = pins.fetch("ghostty")
   archive = pins.fetch("ghostty_archive")
-  digest = Base64.strict_decode64(archive.fetch("hash").delete_prefix("sha256-")).unpack1("H*")
+  digest = archive.fetch("hash").delete_prefix("sha256-").unpack1("m0").unpack1("H*")
 
   desc "Fast, native terminal emulator with dotfiles scrollback patches"
   homepage "https://ghostty.org"
   url archive.fetch("url")
-  version "1.3.2-dev.#{ghostty.fetch('revision')[0, 7]}"
+  version "1.3.2-dev.#{ghostty.fetch("revision")[0, 7]}"
   sha256 digest
   license "MIT"
 

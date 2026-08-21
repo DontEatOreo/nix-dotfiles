@@ -42,8 +42,8 @@ class ShottrLicense < Formula
     resource("secrets").stage do
       libexec.install "secrets.yaml"
     end
-    chmod 0o755, libexec/"shottr-license.rb"
-    chmod 0o600, libexec/"secrets.yaml"
+    chmod 0755, libexec/"shottr-license.rb"
+    chmod 0600, libexec/"secrets.yaml"
     bin.install_symlink (libexec/"shottr-license.rb") => "shottr-license"
   end
 

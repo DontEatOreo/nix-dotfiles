@@ -17,14 +17,14 @@ class RaycastBeta < Formula
   depends_on "ruby"
 
   allow_network_access! :postinstall
-  deny_network_access! %i[build test]
+  deny_network_access! [:build, :test]
 
   def install
     libexec.install "raycast-beta-manager.rb"
     inreplace libexec/"raycast-beta-manager.rb",
               "#!/usr/bin/env ruby",
-              "#!#{formula_opt_bin('ruby')}/ruby"
-    chmod 0o755, libexec/"raycast-beta-manager.rb"
+              "#!#{formula_opt_bin("ruby")}/ruby"
+    chmod 0755, libexec/"raycast-beta-manager.rb"
     bin.install_symlink (libexec/"raycast-beta-manager.rb") => "raycast-beta-manager"
   end
 
