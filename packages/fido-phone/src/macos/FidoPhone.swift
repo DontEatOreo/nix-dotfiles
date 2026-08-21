@@ -175,16 +175,20 @@ private func captureDisplays() async throws -> [CGImage] {
     guard !content.displays.isEmpty else {
       throw BridgeError.unavailable("no displays are available")
     }
-    return try await content.displays.asyncMap { display in
+    var images: [CGImage] = []
+    for display in content.displays {
       let configuration = SCStreamConfiguration()
       configuration.width = display.width
       configuration.height = display.height
       configuration.showsCursor = false
-      return try await SCScreenshotManager.captureImage(
-        contentFilter: SCContentFilter(display: display, excludingWindows: []),
-        configuration: configuration
+      images.append(
+        try await SCScreenshotManager.captureImage(
+          contentFilter: SCContentFilter(display: display, excludingWindows: []),
+          configuration: configuration
+        )
       )
     }
+    return images
   } catch let error as BridgeError {
     throw error
   } catch {
@@ -380,16 +384,6 @@ private func run() async throws {
   try await sendToPhone(uri: uri, options: options)
   if options.notify {
     notify(title: "Passkey sent", message: "Continue in 1Password on your Android phone")
-  }
-}
-
-private extension Sequence {
-  func asyncMap<T>(_ transform: (Element) async throws -> T) async rethrows -> [T] {
-    var values: [T] = []
-    for element in self {
-      values.append(try await transform(element))
-    }
-    return values
   }
 }
 

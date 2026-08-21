@@ -19,7 +19,7 @@ readonly TOKEN_FILE="${FIDO_PHONE_TOKEN_FILE:-${CONFIG_DIRECTORY}/token}"
 temporary_helper=''
 
 err() {
-	echo "${APPLICATION_NAME}: $*" >&2
+	printf '%s: %s\n' "${APPLICATION_NAME}" "$*" >&2
 }
 
 cleanup() {
@@ -44,7 +44,7 @@ compile_helper() {
 	fi
 
 	mkdir -p -- "${CACHE_DIRECTORY}"
-	temporary_helper="${CACHE_DIRECTORY}/fido-phone-helper.$$"
+	temporary_helper="$(mktemp "${CACHE_DIRECTORY}/fido-phone-helper.XXXXXX")"
 	swift_target="$(uname -m)-apple-macos26.0"
 	/usr/bin/swiftc \
 		-O \
@@ -79,7 +79,7 @@ resolve_phone_address() {
 		err "Tailscale device not found: ${phone_device}"
 		return 1
 	fi
-	echo "${phone_address}"
+	printf '%s\n' "${phone_address}"
 }
 
 main() {

@@ -19,7 +19,7 @@ readonly CONFIG_DIRECTORY="${XDG_CONFIG_HOME:-${HOME}/.config}/fido-phone"
 readonly TOKEN_FILE="${FIDO_PHONE_TOKEN_FILE:-${CONFIG_DIRECTORY}/token}"
 
 err() {
-	echo "${APPLICATION_NAME}: $*" >&2
+	printf '%s: %s\n' "${APPLICATION_NAME}" "$*" >&2
 }
 
 require_command() {
@@ -51,7 +51,7 @@ read_token() {
 		err "invalid 256-bit base64 token: ${TOKEN_FILE}"
 		return 1
 	fi
-	echo "${token}"
+	printf '%s\n' "${token}"
 }
 
 resolve_adb_serial() {
@@ -60,7 +60,7 @@ resolve_adb_serial() {
 	local tailscale_command
 
 	if [[ -n "${FIDO_PHONE_ADB_SERIAL:-}" ]]; then
-		echo "${FIDO_PHONE_ADB_SERIAL}"
+		printf '%s\n' "${FIDO_PHONE_ADB_SERIAL}"
 		return
 	fi
 
@@ -74,7 +74,7 @@ resolve_adb_serial() {
 		err "Tailscale device not found: ${phone_device}"
 		return 1
 	fi
-	echo "${phone_address}:5555"
+	printf '%s:5555\n' "${phone_address}"
 }
 
 build_apk() {
@@ -148,7 +148,7 @@ main() {
 		return 1
 	fi
 	install_apk "${adb_serial}" "${apk_path}" "${token}"
-	echo 'FIDO Phone is installed and listening over Tailscale.'
+	printf '%s\n' 'FIDO Phone is installed and listening over Tailscale.'
 }
 
 main "$@"
