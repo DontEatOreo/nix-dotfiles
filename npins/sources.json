@@ -202,9 +202,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "058a6417f60c66de1d7c8905d18856c082e25665",
-      "url": "https://github.com/GNOME/sushi/archive/058a6417f60c66de1d7c8905d18856c082e25665.tar.gz",
-      "hash": "sha256-uRH6T10H4SQUnPcuTyT9CAdzPjlJQ6ozYdqdCUsz7dg="
+      "revision": "f9851fcc439d9aaf1c87a800dadb92e53f6fbd56",
+      "url": "https://github.com/GNOME/sushi/archive/f9851fcc439d9aaf1c87a800dadb92e53f6fbd56.tar.gz",
+      "hash": "sha256-O3BO67LQQJ9z23V/UHlFcXEhC5UikTpL4kk+2bbsm1c="
     },
     "terminal_theme_tools_ghostty": {
       "type": "Git",
