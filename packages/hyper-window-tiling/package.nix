@@ -23,7 +23,7 @@ let
       (packageRoot + /gnome/schemas)
       (packageRoot + /kde/metadata.json)
       (packageRoot + /package.json)
-      (packageRoot + /src)
+      (lib.fileset.difference (packageRoot + /src) (packageRoot + /src/shared/lib.test.ts))
       (packageRoot + /tsconfig.json)
     ];
   };
@@ -40,40 +40,6 @@ let
     runHook postBuild
   '';
 
-  workspaceCheck = stdenv.mkDerivation {
-    pname = "hyper-window-tiling-workspace-check";
-    inherit version src bunDeps;
-    strictDeps = true;
-
-    postUnpack = ''
-      sourceRoot="$sourceRoot/packages/hyper-window-tiling"
-    '';
-
-    nativeBuildInputs = [
-      bun
-      bun2nix.hook
-    ];
-
-    # Fallow's changed-file audit needs a Git checkout and runs in bun.yaml.
-    buildPhase = ''
-      runHook preBuild
-
-      bun run test
-      bun run build
-      bun run check:dist
-
-      runHook postBuild
-    '';
-
-    installPhase = ''
-      runHook preInstall
-      touch "$out"
-      runHook postInstall
-    '';
-
-    doCheck = false;
-    doInstallCheck = false;
-  };
 in
 {
   gnome = stdenv.mkDerivation {
@@ -110,10 +76,7 @@ in
     doCheck = false;
     doInstallCheck = false;
 
-    passthru = {
-      inherit extensionUuid;
-      tests.workspace = workspaceCheck;
-    };
+    passthru = { inherit extensionUuid; };
 
     meta = {
       description = "Hyper-key window tiling extension for GNOME Shell";

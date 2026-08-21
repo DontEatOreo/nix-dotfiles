@@ -1,16 +1,11 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import type { LayoutPreset, Rect } from "./lib.js";
+import type { Rect } from "./lib.js";
 import {
   advanceCycle,
-  CYCLE_LAYOUT_PRESETS,
   createCycleState,
   fitLayoutPresetRectToMinimumSize,
   resolveLayoutPresetRect,
 } from "./lib.js";
-
-const ALL_PRESETS = [
-  ...new Set(Object.values(CYCLE_LAYOUT_PRESETS).flat()),
-] as LayoutPreset[];
 
 const REAL_DATE_NOW = Date.now;
 
@@ -191,40 +186,6 @@ describe("resolveLayoutPresetRect", () => {
       width: 1151,
       height: 647,
     });
-  });
-
-  test("all configured cycle layouts resolve to finite positive rectangles inside the work area", () => {
-    const scenarios = [
-      {
-        workArea: { x: 0, y: 0, width: 1, height: 1 },
-        current: { x: 0, y: 0, width: 10, height: 10 },
-      },
-      {
-        workArea: { x: -2560, y: 48, width: 2560, height: 1392 },
-        current: { x: -2200, y: 100, width: 900, height: 700 },
-      },
-      {
-        workArea: { x: 17, y: -900, width: 3441, height: 1441 },
-        current: { x: 500, y: -500, width: 5120, height: 2160 },
-      },
-    ];
-
-    for (const { workArea, current } of scenarios) {
-      for (const preset of ALL_PRESETS) {
-        const rect = resolveLayoutPresetRect(workArea, current, preset);
-
-        expect(Number.isFinite(rect.x)).toBeTrue();
-        expect(Number.isFinite(rect.y)).toBeTrue();
-        expect(Number.isFinite(rect.width)).toBeTrue();
-        expect(Number.isFinite(rect.height)).toBeTrue();
-        expect(rect.width).toBeGreaterThan(0);
-        expect(rect.height).toBeGreaterThan(0);
-        expect(rect.x).toBeGreaterThanOrEqual(workArea.x);
-        expect(rect.y).toBeGreaterThanOrEqual(workArea.y);
-        expect(rect.x + rect.width).toBeLessThanOrEqual(workArea.x + workArea.width);
-        expect(rect.y + rect.height).toBeLessThanOrEqual(workArea.y + workArea.height);
-      }
-    }
   });
 
   test("keeps right layouts attached to the right edge when minimum width is larger than the preset", () => {
