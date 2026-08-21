@@ -1,0 +1,31 @@
+{{- $repo := joinPath .chezmoi.sourceDir ".." -}}
+#!/usr/bin/env python3.14
+# Helium source fingerprint: {{ output "git" "-C" $repo "hash-object" (joinPath $repo "ansible/site.yml") (joinPath $repo "ansible/roles/applications/defaults/main.yml") (joinPath $repo "ansible/roles/applications/tasks/main.yml") (joinPath $repo "ansible/roles/applications/tasks/macos.yml") (joinPath $repo "ansible/roles/applications/tasks/helium-linux.yml") (joinPath $repo "ansible/roles/applications/tasks/helium-macos.yml") (joinPath $repo "ansible/roles/applications/tasks/helium-profile.yml") (joinPath $repo "ansible/roles/applications/tasks/private-settings.yml") (joinPath $repo "browser/helium.toml") (joinPath $repo "browser/settings/control-panel-for-twitter.json") (joinPath $repo "browser/settings/enhancer-for-youtube.json") (joinPath $repo "browser/settings/minimal-twitter-theme.json") (joinPath $repo "browser/settings/refined-github.json") (joinPath $repo "browser/settings/ublock-origin-helium.json") (joinPath $repo "browser/settings/ublock-origin.json") (joinPath $repo "dotfiles/.chezmoitemplates/black_rose_doll_palette.json") (joinPath $repo "secrets/secrets.yaml") | sha256sum }}
+from __future__ import annotations
+
+import shutil
+import subprocess
+from pathlib import Path
+
+repository = Path({{ $repo | quote }})
+ansible = shutil.which("ansible-playbook")
+uvx = shutil.which("uvx")
+if ansible is not None:
+    command = (ansible,)
+elif uvx is not None:
+    command = (uvx, "--from", "ansible-core", "ansible-playbook")
+else:
+    raise SystemExit(
+        "Helium reconciliation failed: ansible-playbook/uvx is not available"
+    )
+
+subprocess.run(
+    (
+        *command,
+        "ansible/site.yml",
+        "--tags",
+        "always,helium",
+    ),
+    cwd=repository,
+    check=True,
+)
