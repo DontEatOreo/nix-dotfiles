@@ -1,22 +1,23 @@
 {
+  dotfilesSourcePins,
   glib,
   lib,
   meson,
   ninja,
   pipewire,
   pkg-config,
-  source,
   stdenv,
   systemd,
-  version,
 }:
-
+let
+  sourcePin = dotfilesSourcePins.uresourced;
+in
 stdenv.mkDerivation {
   pname = "uresourced";
-  inherit version;
+  version = lib.removePrefix "v" sourcePin.version;
   strictDeps = true;
 
-  src = source;
+  src = sourcePin.outPath;
 
   nativeBuildInputs = [
     glib

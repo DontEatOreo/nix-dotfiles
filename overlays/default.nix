@@ -26,43 +26,10 @@ let
     final: prev:
     let
       dotfilesSourcePins = (import ../npins) { };
-      kanataPatchDirectory = ../packages/kanata-with-cmd/patches;
-      kanataPatchNames = lib.init (
-        lib.splitString "\n" (builtins.readFile (kanataPatchDirectory + /series))
-      );
-      kanataPatches = map (name: kanataPatchDirectory + "/${name}") kanataPatchNames;
-      kanataSourcePin = dotfilesSourcePins.kanata_homebrew;
-      kanataSource = kanataSourcePin.outPath;
-      kanataManifest = fromTOML (builtins.readFile (kanataSource + "/Cargo.toml"));
-      kanataVersion = "${kanataManifest.package.version}-unstable-${
-        lib.substring 0 7 kanataSourcePin.revision
-      }";
-      withoutUpstreamTests =
-        package:
-        package.overrideAttrs {
-          doCheck = false;
-          doInstallCheck = false;
-        };
-      toshySource = dotfilesSourcePins.toshy.outPath;
-      toshyVersion = lib.removePrefix "Toshy_v" dotfilesSourcePins.toshy.version;
-      upstreamToshyRuntime = withoutUpstreamTests (
-        final.callPackage "${toshySource}/nix/toshy-runtime.nix" {
-          toshySrc = toshySource;
-        }
-      );
     in
     {
       inherit dotfilesSourcePins;
-      bluebuild-v2 = final.callPackage ../packages/bluebuild-v2/package.nix {
-        src = dotfilesSourcePins.bluebuild-cli.outPath;
-        version =
-          let
-            manifest = fromTOML (builtins.readFile "${dotfilesSourcePins.bluebuild-cli.outPath}/Cargo.toml");
-          in
-          "${manifest.workspace.package.version}-unstable-${
-            lib.substring 0 8 dotfilesSourcePins.bluebuild-cli.revision
-          }";
-      };
+      bluebuild-v2 = final.callPackage ../packages/bluebuild-v2/package.nix { };
       bun2nix = inputs.bun2nix.packages.${final.stdenv.hostPlatform.system}.default;
       gh = final.unstable.gh;
       lldb-mcp-launcher = final.eupkgs.lldb-mcp-launcher;
@@ -95,20 +62,7 @@ let
           zig_0_15 = final.unstable.zig;
         };
       };
-      kanata-with-cmd = (final.kanata.override { withCmd = true; }).overrideAttrs (previousAttrs: {
-        src = kanataSource;
-        version = kanataVersion;
-        patches = kanataPatches;
-        cargoDeps = final.rustPlatform.fetchCargoVendor {
-          inherit (previousAttrs) pname;
-          src = kanataSource;
-          version = kanataVersion;
-          patches = kanataPatches;
-          hash = "sha256-QbxpUX8z1vrgVEiPTLs5ah6+qqMtZGJgbMPSYXACr10=";
-        };
-        doCheck = false;
-        doInstallCheck = false;
-      });
+      kanata-with-cmd = final.callPackage ../packages/kanata-with-cmd/package.nix { };
       kmscon = prev.kmscon.overrideAttrs (
         _: previousAttrs: {
           # The pin follows upstream main rather than a release tag.
@@ -133,28 +87,9 @@ let
         inherit (final.unstable) python314Packages;
       };
       fido-phone = final.callPackage ../packages/fido-phone/package.nix { };
-      uresourced = final.callPackage ../packages/uresourced/package.nix {
-        source = dotfilesSourcePins.uresourced.outPath;
-        version = lib.removePrefix "v" dotfilesSourcePins.uresourced.version;
-      };
+      uresourced = final.callPackage ../packages/uresourced/package.nix { };
       terminal-theme-tools = final.callPackage ../packages/terminal-theme-tools/package.nix { };
-      # Toshy's runtime and installer deliberately share one source revision.
-      # The marker lets provisioning reject a mixed-version installation.
-      toshy-runtime = final.symlinkJoin {
-        name = "toshy-runtime-${toshyVersion}";
-        paths = [ upstreamToshyRuntime ];
-        postBuild = ''
-          mkdir -p $out/share/toshy
-          echo '${dotfilesSourcePins.toshy.revision}' > $out/share/toshy/revision
-          echo '${dotfilesSourcePins.toshy.version}' > $out/share/toshy/version
-        '';
-        passthru = (upstreamToshyRuntime.passthru or { }) // {
-          source = toshySource;
-          revision = dotfilesSourcePins.toshy.revision;
-          version = dotfilesSourcePins.toshy.version;
-        };
-        inherit (upstreamToshyRuntime) meta;
-      };
+      toshy-runtime = final.callPackage ../packages/toshy-runtime/package.nix { };
     };
 
   packages = lib.composeManyExtensions [

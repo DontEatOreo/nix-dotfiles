@@ -1,9 +1,14 @@
 {
+  dotfilesSourcePins,
   lib,
   rustPlatform,
-  src,
-  version,
 }:
+let
+  sourcePin = dotfilesSourcePins.bluebuild-cli;
+  src = sourcePin.outPath;
+  manifest = builtins.fromTOML (builtins.readFile (src + "/Cargo.toml"));
+  version = "${manifest.workspace.package.version}-unstable-${lib.substring 0 8 sourcePin.revision}";
+in
 rustPlatform.buildRustPackage {
   pname = "bluebuild";
   inherit version src;
