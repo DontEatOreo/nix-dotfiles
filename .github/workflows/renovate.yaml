@@ -12,7 +12,9 @@ on:
       - .github/actions/setup-nix/**
       - .github/renovate.json
       - .github/renovate/bun.lock
+      - .github/renovate/check-npins.sh
       - .github/renovate/package.json
+      - .github/renovate/update-npins.sh
       - .github/workflows/renovate.yaml
       - .github/workflows/validate-renovate.yaml
       - ansible/roles/applications/defaults/main.yml
@@ -80,4 +82,4 @@ jobs:
           RENOVATE_ONBOARDING: "false"
           RENOVATE_REPOSITORIES: '["${{ github.repository }}"]'
           RENOVATE_ALLOWED_COMMANDS: >-
-            ["^nix shell nixpkgs#npins --command npins update$"]
+            ["^bash \\.github/renovate/update-npins\\.sh$"]

@@ -22,9 +22,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "ea650fca90adcc5434446ecfcc04865156c68778",
-      "url": "https://github.com/bethington/ghidra-mcp/archive/ea650fca90adcc5434446ecfcc04865156c68778.tar.gz",
-      "hash": "sha256-kT/SUbFQrsouJlEQ0a6Hnb7JwQCI/yzzd55H91FTDPo=",
+      "revision": "bb6a518d3ae25b35149972441a92b2cc8a781b37",
+      "url": "https://github.com/bethington/ghidra-mcp/archive/bb6a518d3ae25b35149972441a92b2cc8a781b37.tar.gz",
+      "hash": "sha256-CRndlxoDVSnPITYYA6wsn3iQRl/YAWy3MFj8nOO1658=",
       "frozen": true
     },
     "ghostty": {
@@ -36,16 +36,16 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "7e463bc65d430e8a8f0aa786abf83601cf2b9598",
-      "url": "https://github.com/ghostty-org/ghostty/archive/7e463bc65d430e8a8f0aa786abf83601cf2b9598.tar.gz",
-      "hash": "sha256-ZtBVoytrYqQLPyZbWNQNjqvChecnoqSH6Yjwq69GSzM=",
+      "revision": "94d775fefc21f74d9cc85a46b34c4e1d85318fd0",
+      "url": "https://github.com/ghostty-org/ghostty/archive/94d775fefc21f74d9cc85a46b34c4e1d85318fd0.tar.gz",
+      "hash": "sha256-bhdN4c7zZzQPV5nLSbWCYvec+nIrs+KsVqqTitSOTnY=",
       "frozen": true
     },
     "ghostty_archive": {
       "type": "Url",
-      "url": "https://github.com/ghostty-org/ghostty/archive/7e463bc65d430e8a8f0aa786abf83601cf2b9598.tar.gz",
+      "url": "https://github.com/ghostty-org/ghostty/archive/94d775fefc21f74d9cc85a46b34c4e1d85318fd0.tar.gz",
       "unpack": false,
-      "hash": "sha256-0TOiIpc2qWz8EKFb5WKDdL/KXXAXnsQ+lYtykyDgcMU=",
+      "hash": "sha256-TFVUccilKp/Nx8j0ceAoNayewt6Vj5fCVfLNmjyPx0Y=",
       "frozen": true
     },
     "ghostty_zig_aarch64_linux": {
@@ -125,9 +125,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "07dda0ef1d314bcd423819741e7eb02ac9c68b58",
-      "url": "https://github.com/kmscon/kmscon/archive/07dda0ef1d314bcd423819741e7eb02ac9c68b58.tar.gz",
-      "hash": "sha256-xkdG8hgCDQvEsSfEhTgn0Qbz23iFWQVmgpb2ZJRGd1U=",
+      "revision": "65d5fba58430105c56f04a3227733ff0b9ca644c",
+      "url": "https://github.com/kmscon/kmscon/archive/65d5fba58430105c56f04a3227733ff0b9ca644c.tar.gz",
+      "hash": "sha256-yRaW3ivt8SrDK0P6hAqXvEUIvWjEkV0pzIMcQQ+bx5M=",
       "frozen": true
     },
     "libtsm": {
@@ -173,8 +173,8 @@
       "branch": "main",
       "submodules": false,
       "revision": "058a6417f60c66de1d7c8905d18856c082e25665",
-      "url": "https://github.com/GNOME/sushi/archive/7a5db764e5b2300b515ed99b61e256f57d101dcf.tar.gz",
-      "hash": "sha256-Vcwv0myu8orNnn6WZCYB4y9Fnz/M23J1e1/Npc6jxkE="
+      "url": "https://github.com/GNOME/sushi/archive/058a6417f60c66de1d7c8905d18856c082e25665.tar.gz",
+      "hash": "sha256-uRH6T10H4SQUnPcuTyT9CAdzPjlJQ6ozYdqdCUsz7dg="
     },
     "toshy": {
       "type": "GitRelease",

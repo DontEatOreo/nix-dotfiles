@@ -517,7 +517,7 @@ _format mode:
 
 [parallel]
 [private]
-_lint-files: _check-worktree-paths _lint-chezmoi-source (_run-files 'jq' ['*.json', 'flake.lock', ':(exclude).vscode/settings.json'] ['empty']) (_run-files 'hadolint' ['Dockerfile', 'Containerfile']) (_run-files 'luacheck' ['*.lua'] ['--globals', 'Command', 'cx', 'ya', '--']) (_run 'rumdl' ['check', '--respect-gitignore', '--exclude', 'packages/terminal-theme-tools/vendor/**', '.']) _lint-nix (_run 'uv' ['run', 'ruff', 'check', '.']) _lint-shell-files _lint-shell-templates-portable _lint-templates (_run-files 'taplo' ['*.toml'] ['lint']) _lint-xml
+_lint-files: _check-worktree-paths _lint-chezmoi-source (_run-files 'jq' ['*.json', 'flake.lock', ':(exclude).vscode/settings.json'] ['empty']) (_run-files 'hadolint' ['Dockerfile', 'Containerfile']) (_run-files 'luacheck' ['*.lua'] ['--globals', 'Command', 'cx', 'ya', '--']) (_run 'rumdl' ['check', '--respect-gitignore', '--exclude', 'packages/terminal-theme-tools/vendor/**', '.']) _lint-nix npins-check (_run 'uv' ['run', 'ruff', 'check', '.']) _lint-shell-files _lint-shell-templates-portable _lint-templates (_run-files 'taplo' ['*.toml'] ['lint']) _lint-xml
 
 [private]
 _check-worktree-paths:
@@ -846,6 +846,11 @@ _check-python: python-complexity python-dead-code python-dependencies python-typ
 [group('dev')]
 source-update:
     nix shell nixpkgs#npins --command npins update
+
+# Verify that npins metadata and fetch URLs describe the same sources.
+[group('dev')]
+npins-check:
+    bash .github/renovate/check-npins.sh
 
 # Check declared dependencies against first-party imports.
 [group('dev')]

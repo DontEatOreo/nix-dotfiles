@@ -17,24 +17,25 @@ diff --git a/src/apprt/gtk/class/application.zig b/src/apprt/gtk/class/applicati
 index 8cc5918eb..6f4cea0a7 100644
 --- a/src/apprt/gtk/class/application.zig
 +++ b/src/apprt/gtk/class/application.zig
-@@ -740,7 +740,7 @@ pub const Application = extern struct {
+@@ -743,7 +743,7 @@ pub const Application = extern struct {
  
-             .open_config => return Action.openConfig(self),
+             .open_config => return Action.openConfig(self, value),
  
 -            .open_url => Action.openUrl(self, value),
 +            .open_url => Action.openUrl(self, target, value),
  
              .pwd => Action.pwd(target, value),
  
-@@ -2594,14 +2594,21 @@ const Action = struct {
+@@ -2762,7 +2762,7 @@ const Action = struct {
+             .os_open => {
+                 // Open it using openUrl. "path" isn't actually a URL but
+                 // at the time of writing that works just fine for GTK.
+-                openUrl(self, .{ .kind = .text, .url = path });
++                openUrl(self, .app, .{ .kind = .text, .url = path });
+             },
  
-         // Open it using openURL. "path" isn't actually a URL but
-         // at the time of writing that works just fine for GTK.
--        openUrl(self, .{ .kind = .text, .url = path });
-+        openUrl(self, .app, .{ .kind = .text, .url = path });
-         return true;
-     }
- 
+             .new_window => {
+@@ -2803,7 +2803,14 @@ const Action = struct {
      pub fn openUrl(
          self: *Application,
 +        target: apprt.Target,
@@ -49,7 +50,7 @@ index 8cc5918eb..6f4cea0a7 100644
          if (std.mem.startsWith(u8, value.url, "/")) {
              self.openUrlFallback(value.kind, value.url);
              return;
-@@ -2618,6 +2625,158 @@ const Action = struct {
+@@ -2818,6 +2825,158 @@ const Action = struct {
          };
      }
  

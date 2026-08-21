@@ -115,7 +115,7 @@
       "groupName": "npins sources",
       "groupSlug": "npins-sources",
       "postUpgradeTasks": {
-        "commands": ["nix shell nixpkgs#npins --command npins update"],
+        "commands": ["bash .github/renovate/update-npins.sh"],
         "fileFilters": ["npins/sources.json"],
         "executionMode": "branch"
       }
