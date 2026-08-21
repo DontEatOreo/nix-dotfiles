@@ -12,7 +12,7 @@ have no history, so export their active screen instead.
 
 --- a/src/Surface.zig
 +++ b/src/Surface.zig
-@@ -5744,15 +5744,14 @@ fn writeScreenFile(
+@@ -5760,15 +5760,14 @@ fn writeScreenFile(
          const pages = &self.io.terminal.screens.active.pages;
          const sel_: ?terminal.Selection = switch (loc) {
              .history => history: {

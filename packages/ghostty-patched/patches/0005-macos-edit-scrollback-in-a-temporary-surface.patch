@@ -32,7 +32,7 @@ the exported file directory when the editor exits.
                  }
 --- a/macos/Sources/Ghostty/Ghostty.App.swift
 +++ b/macos/Sources/Ghostty/Ghostty.App.swift
-@@ -329,6 +329,27 @@ extension Ghostty {
+@@ -278,6 +278,27 @@ extension Ghostty {
  
          static func closeSurface(_ userdata: UnsafeMutableRawPointer?, processAlive: Bool) {
              let surface = self.surfaceUserdata(from: userdata)
@@ -60,7 +60,7 @@ the exported file directory when the editor exits.
              NotificationCenter.default.post(name: Notification.ghosttyCloseSurface, object: surface, userInfo: [
                  "process_alive": processAlive,
              ])
-@@ -638,7 +659,7 @@ extension Ghostty {
+@@ -600,7 +621,7 @@ extension Ghostty {
                  checkForUpdates(app)
  
              case GHOSTTY_ACTION_OPEN_URL:
@@ -69,7 +69,7 @@ the exported file directory when the editor exits.
  
              case GHOSTTY_ACTION_UNDO:
                  return undo(app, target: target)
-@@ -709,7 +730,31 @@ extension Ghostty {
+@@ -661,7 +682,31 @@ extension Ghostty {
              }
          }
  
@@ -101,7 +101,7 @@ the exported file directory when the editor exits.
              _ v: ghostty_action_open_url_s
          ) -> Bool {
              let action = Ghostty.Action.OpenURL(c: v)
-@@ -736,6 +781,12 @@ extension Ghostty {
+@@ -688,6 +733,12 @@ extension Ghostty {
              }
  
              switch action.kind {
@@ -114,7 +114,7 @@ the exported file directory when the editor exits.
              case .text:
                  // Open with the default editor for `*.ghostty` file or just system text editor
                  let editor = NSWorkspace.shared.defaultApplicationURL(forExtension: url.pathExtension) ?? NSWorkspace.shared.defaultTextEditor
-@@ -785,6 +836,54 @@ extension Ghostty {
+@@ -737,6 +788,54 @@ extension Ghostty {
              return true
          }
  

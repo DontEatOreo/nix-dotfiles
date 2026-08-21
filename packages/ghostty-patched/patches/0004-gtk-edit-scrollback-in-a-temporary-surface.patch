@@ -15,7 +15,7 @@ exit, and clean up the temporary export directory.
 
 --- a/src/apprt/gtk/class/application.zig
 +++ b/src/apprt/gtk/class/application.zig
-@@ -740,7 +740,7 @@ pub const Application = extern struct {
+@@ -741,7 +741,7 @@ pub const Application = extern struct {
  
              .open_config => return Action.openConfig(self, value),
  
@@ -24,7 +24,7 @@ exit, and clean up the temporary export directory.
  
              .pwd => Action.pwd(target, value),
  
-@@ -2762,7 +2762,7 @@ const Action = struct {
+@@ -2791,7 +2791,7 @@ const Action = struct {
              .os_open => {
                  // Open it using openUrl. "path" isn't actually a URL but
                  // at the time of writing that works just fine for GTK.
@@ -33,7 +33,7 @@ exit, and clean up the temporary export directory.
              },
  
              .new_window => {
-@@ -2802,8 +2802,15 @@ const Action = struct {
+@@ -2831,8 +2831,15 @@ const Action = struct {
  
      pub fn openUrl(
          self: *Application,
@@ -49,7 +49,7 @@ exit, and clean up the temporary export directory.
          if (std.mem.startsWith(u8, value.url, "/")) {
              self.openUrlFallback(value.kind, value.url);
              return;
-@@ -2820,6 +2827,158 @@ const Action = struct {
+@@ -2849,6 +2856,158 @@ const Action = struct {
          };
      }
  
@@ -210,7 +210,7 @@ exit, and clean up the temporary export directory.
          value: apprt.action.Pwd,
 --- a/src/apprt/gtk/class/split_tree.zig
 +++ b/src/apprt/gtk/class/split_tree.zig
-@@ -453,6 +453,32 @@ pub const SplitTree = extern struct {
+@@ -455,6 +455,32 @@ pub const SplitTree = extern struct {
          }
      }
  

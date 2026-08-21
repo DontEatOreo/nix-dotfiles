@@ -15,7 +15,7 @@ fallback.
 
 --- a/include/ghostty.h
 +++ b/include/ghostty.h
-@@ -831,6 +831,7 @@ typedef enum {
+@@ -832,6 +832,7 @@ typedef enum {
    GHOSTTY_ACTION_OPEN_URL_KIND_TEXT,
    GHOSTTY_ACTION_OPEN_URL_KIND_HTML,
    GHOSTTY_ACTION_OPEN_URL_KIND_OSC8,
@@ -25,7 +25,7 @@ fallback.
  // apprt.action.OpenUrl.C
 --- a/src/Surface.zig
 +++ b/src/Surface.zig
-@@ -5814,7 +5814,10 @@ fn writeScreenFile(
+@@ -5830,7 +5830,10 @@ fn writeScreenFile(
          },
          .open => try self.openUrl(.{
              .kind = switch (write_screen.emit) {
@@ -39,7 +39,7 @@ fallback.
              .url = path,
 --- a/src/apprt/action.zig
 +++ b/src/apprt/action.zig
-@@ -950,6 +950,10 @@ pub const OpenUrl = struct {
+@@ -955,6 +955,10 @@ pub const OpenUrl = struct {
          /// safe-opening policy.
          osc8,
  
