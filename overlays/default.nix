@@ -66,13 +66,9 @@ let
       # while both pinned nixpkgs package sets still provide 1.57.0.
       just =
         let
-          version = "1.58.0";
-          src = final.fetchFromGitHub {
-            owner = "casey";
-            repo = "just";
-            tag = version;
-            hash = "sha256-yAjirHM3/+Pv9AhcaW7Ab992vwQhh20axK42Gl2LNEA=";
-          };
+          source = dotfilesSourcePins.just;
+          inherit (source) version;
+          src = source.outPath;
         in
         prev.just.overrideAttrs (previousAttrs: {
           inherit src version;

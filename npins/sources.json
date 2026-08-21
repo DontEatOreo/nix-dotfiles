@@ -96,6 +96,23 @@
       "hash": "sha256-JuccMBVHkQxqsSpPMUaH/R5glI5u+0/VBYiasytNpk4=",
       "frozen": true
     },
+    "just": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "casey",
+        "repo": "just"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "1.58.0",
+      "revision": "ebedee5bafe1ce779e93d91a2eff0c1bf3687b9c",
+      "url": "https://api.github.com/repos/casey/just/tarball/refs/tags/1.58.0",
+      "hash": "sha256-yAjirHM3/+Pv9AhcaW7Ab992vwQhh20axK42Gl2LNEA=",
+      "frozen": true
+    },
     "kanata": {
       "type": "Git",
       "repository": {
