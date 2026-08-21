@@ -68,7 +68,6 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  actions: write # replace superseded bounded Nix store caches on trusted runs
   contents: read # needed to checkout repository contents
 
 jobs:
@@ -93,10 +92,6 @@ jobs:
 
       - name: Set Up Nix
         uses: ./.github/actions/setup-nix
-        with:
-          cache-builds: "true"
-          cache-scope: repository-checks
-          cache-write: ${{ github.event_name == 'push' }}
 
       - name: Materialize Flake Partitions
         run: |
@@ -156,15 +151,13 @@ jobs:
 
       - name: Set Up Nix
         uses: ./.github/actions/setup-nix
-        with:
-          cache-builds: "true"
-          cache-scope: native-${{ matrix.check }}
-          cache-write: ${{ github.event_name == 'push' }}
 
       # Independent runners prevent one expensive package from consuming the
       # entire workflow timeout and preserve successful caches for other checks.
       - name: Build Native Check
+        env:
+          CHECK: ${{ matrix.check }}
         run: >-
           nix build
           --print-build-logs
-          .#checks.x86_64-linux.${{ matrix.check }}
+          ".#checks.x86_64-linux.${CHECK}"

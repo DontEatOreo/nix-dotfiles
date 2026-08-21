@@ -41,7 +41,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
-      actions: write # replace superseded Bun dependency caches
       contents: write # needed to create and update dependency branches
       pull-requests: write # needed to inspect and create fallback dependency PRs
       statuses: write # needed to report Renovate branch status

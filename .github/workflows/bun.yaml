@@ -39,7 +39,6 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  actions: write # replace superseded Bun dependency caches on trusted runs
   contents: read # needed to checkout repository contents
 
 jobs:

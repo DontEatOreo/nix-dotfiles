@@ -1,44 +1,8 @@
 name: Set Up Nix
-description: Install pinned Determinate Nix and optionally restore a bounded Nix store cache.
-
-inputs:
-  cache-builds:
-    description: Whether to restore a GitHub-backed Nix store cache.
-    required: false
-    default: "false"
-  cache-scope:
-    description: Stable namespace for the bounded Nix store cache.
-    required: false
-    default: shared
-  cache-write:
-    description: Whether a successful trusted run may save and prune this cache scope.
-    required: false
-    default: "false"
-  cache-size:
-    description: Maximum Nix store size retained before saving a cache.
-    required: false
-    default: 1G
+description: Install pinned Determinate Nix.
 
 runs:
   using: composite
   steps:
     - name: Install Determinate Nix
       uses: DeterminateSystems/determinate-nix-action@61cbfe2efc2d4e7a8a6d56967c3c1058e846c858 # v3.21.9
-
-    - name: Restore Bounded Nix Store Cache
-      if: inputs.cache-builds == 'true'
-      uses: nix-community/cache-nix-action@7df957e333c1e5da7721f60227dbba6d06080569 # v7
-      with:
-        primary-key: >-
-          nix-${{ runner.os }}-${{ runner.arch }}-${{ inputs.cache-scope }}-v1-${{
-          hashFiles('flake.lock', 'npins/sources.json', 'uv.lock',
-          'packages/hyper-window-tiling/bun.lock') }}
-        restore-prefixes-first-match: >-
-          nix-${{ runner.os }}-${{ runner.arch }}-${{ inputs.cache-scope }}-v1-
-        save: ${{ inputs.cache-write }}
-        gc-max-store-size-linux: ${{ inputs.cache-size }}
-        purge: ${{ inputs.cache-write }}
-        purge-prefixes: >-
-          nix-${{ runner.os }}-${{ runner.arch }}-${{ inputs.cache-scope }}-v1-
-        purge-created: "0"
-        purge-primary-key: never
