@@ -68,14 +68,7 @@ sudo nixos-rebuild \
 just setup
 ```
 
-Toshy uses one pinned upstream release on both system families. On NixOS the
-rebuild installs Toshy's native system module and Nix runtime, then `just setup`
-installs the matching user files. On other Linux systems `just setup` runs the
-matching upstream installer directly. Keep that order after a Toshy pin update;
-provisioning rejects a Nix runtime and user-files revision mismatch.
-
-The extra cache options are only needed for the first rebuild. Later rebuilds
-can use:
+The extra cache options are only needed for the first rebuild. Later rebuilds can use:
 
 ```bash
 sudo nixos-rebuild switch --flake .#nixos
@@ -89,9 +82,9 @@ Requires macOS 26 or newer. From the cloned repository, run:
 ./ansible/bootstrap.sh --setup
 ```
 
-This bootstraps Homebrew and Ansible, installs the complete userland, applies
-the dotfiles, and configures the host. It prompts for administrator and
-1Password access when needed.
+This bootstraps Homebrew and Ansible, installs the complete userland, applies the
+dotfiles, and configures the host. It prompts for administrator and 1Password access
+when needed.
 
 Exercise the same flow against disposable fake tools without changing the host:
 
