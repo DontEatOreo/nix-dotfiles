@@ -34,15 +34,17 @@ in
           "nix-command"
         ];
         builders-use-substitutes = true;
-        keep-outputs = true;
-        substituters = [
+        # Append public caches without replacing Determinate's and Nix's
+        # defaults. Keeping build-time-only outputs would also prevent
+        # Determinate Nixd's managed garbage collector from reclaiming them.
+        extra-substituters = [
           "https://devenv.cachix.org"
           "https://euvlok.cachix.org"
           "https://eupkgs.cachix.org"
           "https://nix-community.cachix.org"
           "https://cache.flox.dev"
         ];
-        trusted-public-keys = [
+        extra-trusted-public-keys = [
           "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
           "euvlok.cachix.org-1:cmFWCSs7rxPiyE1qfaJn8TY7QaRoGOrzKuNvtGw2gcU="
           "eupkgs.cachix.org-1:V9Y0HdASNNSU9U6EkXhR1j85bZGRtNgW7wSyTiQrwGU="

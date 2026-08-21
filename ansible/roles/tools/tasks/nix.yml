@@ -65,7 +65,41 @@
     dest: "{{ dotfiles_cache_dir }}/installers/nix-installer.sh"
     checksum: "{{ tools_nix_installer_checksum | default(omit) }}"
     mode: "0755"
-  when: tools_nix_command.rc != 0
+  when:
+    - platform_is_linux
+    - tools_nix_command.rc != 0
+  tags:
+    - nix
+
+- name: Download signed Determinate Nix package
+  ansible.builtin.get_url:
+    url: "{{ tools_determinate_nix_pkg_url }}"
+    dest: "{{ dotfiles_cache_dir }}/installers/Determinate.pkg"
+    mode: "0644"
+  when:
+    - platform_is_macos
+    - tools_nix_command.rc != 0
+  tags:
+    - nix
+
+- name: Validate Determinate Nix package signature
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/spctl
+      - -a
+      - -vv
+      - -t
+      - install
+      - "{{ dotfiles_cache_dir }}/installers/Determinate.pkg"
+  changed_when: false
+  failed_when: >-
+    tools_determinate_nix_pkg_signature.rc != 0
+    or ('(' ~ tools_determinate_nix_team_id ~ ')')
+    not in tools_determinate_nix_pkg_signature.stderr
+  register: tools_determinate_nix_pkg_signature
+  when:
+    - platform_is_macos
+    - tools_nix_command.rc != 0
   tags:
     - nix
 
@@ -78,6 +112,7 @@
       - "{{ 'ostree' if platform_has_rpm_ostree else 'linux' }}"
       - --no-confirm
       - --no-modify-profile
+      - --determinate
   args:
     creates: "{{ tools_nix_bin }}"
   become: true
@@ -89,15 +124,15 @@
   tags:
     - nix
 
-- name: Install Determinate Nix on macOS
+- name: Install signed Determinate Nix package on macOS
   ansible.builtin.command:
     argv:
-      - /bin/sh
-      - "{{ dotfiles_cache_dir }}/installers/nix-installer.sh"
-      - install
-      - macos
-      - --no-confirm
-      - --no-modify-profile
+      - /usr/sbin/installer
+      - -verboseR
+      - -pkg
+      - "{{ dotfiles_cache_dir }}/installers/Determinate.pkg"
+      - -tgt
+      - /
   args:
     creates: "{{ tools_nix_bin }}"
   become: true
@@ -136,10 +171,39 @@
   tags:
     - nix
 
-- name: Configure Determinate Nix overrides on macOS
+- name: Configure Determinate Nix overrides
   ansible.builtin.copy:
     src: nix.custom.conf
     dest: /etc/nix/nix.custom.conf
+    owner: root
+    group: "{{ 'wheel' if platform_is_macos else 'root' }}"
+    mode: "0644"
+  become: true
+  notify: Restart Determinate Nix daemon
+  when:
+    - not platform_is_nixos
+    - "'Determinate Nix' in tools_nix_version.stdout"
+  tags:
+    - nix
+
+- name: Ensure Determinate Nixd configuration directory exists
+  ansible.builtin.file:
+    path: /etc/determinate
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0755"
+  become: true
+  when:
+    - platform_is_macos
+    - "'Determinate Nix' in tools_nix_version.stdout"
+  tags:
+    - nix
+
+- name: Disable account-gated native Linux builder on macOS
+  ansible.builtin.copy:
+    src: determinate.config.json
+    dest: /etc/determinate/config.json
     owner: root
     group: wheel
     mode: "0644"

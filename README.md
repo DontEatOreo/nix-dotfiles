@@ -104,6 +104,8 @@ just update         # Update userland, dotfiles, and host setup
 just dotfiles-diff  # Preview pending chezmoi changes
 just apply          # Apply chezmoi dotfiles only
 just status         # Show Spectrum image status
+just determinate-status  # Show Determinate version, features, and daemon state
+just determinate-upgrade # Upgrade installer-managed Determinate Nix
 
 just spectrum-validate # Validate the BlueBuild recipe and base digest
 just spectrum-build    # Build Spectrum locally

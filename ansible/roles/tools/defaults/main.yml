@@ -28,6 +28,8 @@ tools_bun_global_packages:
     bin: opencode
 
 tools_determinate_nix_installer_url: https://install.determinate.systems/nix
+tools_determinate_nix_pkg_url: https://install.determinate.systems/determinate-pkg/stable/Universal
+tools_determinate_nix_team_id: X3JQ4VPJZ6
 tools_nix_installer_url: "{{ tools_determinate_nix_installer_url }}"
 tools_nix_bin: /nix/var/nix/profiles/default/bin/nix
 tools_nix_paths:
