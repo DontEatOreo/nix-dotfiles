@@ -10,8 +10,6 @@ on:
       - uv.lock
       - '**/*.py'
       - ansible/bootstrap.sh
-      - ansible/tests/bootstrap-simulate.sh
-      - ansible/tests/fixtures/bootstrap/**
       - ansible/roles/system/templates/macos/tailscale-ssh-helper.py.in
       - browser/helium.toml
       - browser/settings/**

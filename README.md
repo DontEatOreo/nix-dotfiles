@@ -82,14 +82,6 @@ This path needs macOS 26 or newer. From the cloned repo, I run:
 The script bootstraps Homebrew and Ansible, installs the userland, applies the dotfiles,
 and configures the Mac. It asks for administrator and 1Password access when needed
 
-I can exercise the same flow with disposable fake tools without changing the host:
-
-```bash
-just bootstrap-simulate
-```
-
-I pass a scenario such as `apply-failure` to test the unhappy path
-
 </details>
 
 ## Commands
