@@ -475,9 +475,15 @@ dotfiles-diff: (doctor 'apply')
       --refresh-externals=never \
       diff
 
+# Apply Helium extensions and settings; quit Helium first so profile writes run.
+[group('setup')]
+helium: (doctor 'setup')
+    ansible/bootstrap.sh --tags helium
+
 [doc('Bootstrap userland, apply dotfiles, then apply host stages.')]
 [group('setup')]
-setup: (doctor 'setup') _userland apply _host
+setup: (doctor 'setup')
+    ansible/bootstrap.sh --setup
 
 # Refresh userland, dotfiles, and host stages on an already-bootstrapped machine.
 [group('setup')]
