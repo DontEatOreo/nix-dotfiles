@@ -13,6 +13,8 @@ custom-shader = {{ .chezmoi.homeDir }}/.config/ghostty/shaders/black-rose-doll-l
 custom-shader-animation = false
 adjust-underline-position = 4
 confirm-close-surface = false
+# Closing a tab/split means terminate it; do not retain its PTY for macOS undo.
+undo-timeout = 0
 cursor-style = bar
 cursor-style-blink = false
 font-family = JetBrainsMono Nerd Font Mono
