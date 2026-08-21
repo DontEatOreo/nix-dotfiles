@@ -4,27 +4,6 @@ let
   inherit (final) dotfilesSourcePins;
 in
 {
-  # Keep the flake formatter and dev shell at the Justfile's minimum version,
-  # independently of the versions in the two nixpkgs inputs.
-  just =
-    let
-      source = dotfilesSourcePins.just;
-      inherit (source) version;
-      src = source.outPath;
-    in
-    prev.just.overrideAttrs (previousAttrs: {
-      inherit src version;
-      cargoDeps = final.rustPlatform.fetchCargoVendor {
-        inherit src;
-        hash = "sha256-zpP5XLmgQFH4+B97zMhh+iE6kS+PHTh9heH89rXCQo0=";
-      };
-      doCheck = false;
-      doInstallCheck = false;
-      meta = previousAttrs.meta // {
-        changelog = "https://github.com/casey/just/blob/${version}/CHANGELOG.md";
-      };
-    });
-
   kmscon = prev.kmscon.overrideAttrs (
     _finalAttrs: previousAttrs: {
       # The pin follows upstream main rather than a release tag.
