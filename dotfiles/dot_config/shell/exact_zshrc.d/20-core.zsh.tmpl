@@ -20,14 +20,11 @@ _dotfiles_wrap_themed_command() {
 
 _dotfiles_repo_path="${DOTFILES_REPO:-}"
 if [[ -z "$_dotfiles_repo_path" ]]; then
-  case "$(uname -s 2>/dev/null)" in
-    Darwin)
-      _dotfiles_repo_candidates=("$HOME/Developer/dotfiles" "$HOME/dotfiles")
-      ;;
-    *)
-      _dotfiles_repo_candidates=("$HOME/dotfiles")
-      ;;
-  esac
+{{- if eq .chezmoi.os "darwin" }}
+  _dotfiles_repo_candidates=("$HOME/Developer/dotfiles" "$HOME/dotfiles")
+{{- else }}
+  _dotfiles_repo_candidates=("$HOME/dotfiles")
+{{- end }}
   for _dotfiles_repo_candidate in "${_dotfiles_repo_candidates[@]}"; do
     [[ -f "$_dotfiles_repo_candidate/Justfile" ]] || continue
     [[ -d "$_dotfiles_repo_candidate/ansible" ]] || continue
@@ -39,11 +36,8 @@ if [[ -z "$_dotfiles_repo_path" ]]; then
   _dotfiles_repo_path="$HOME/dotfiles"
 fi
 if [[ -d "$_dotfiles_repo_path" ]]; then
-  _dotfiles_repo_path="$(
-    cd -P -- "$_dotfiles_repo_path" 2>/dev/null &&
-      pwd ||
-      printf '%s\n' "$_dotfiles_repo_path"
-  )"
+  # :A resolves the absolute physical path natively, without a subshell.
+  _dotfiles_repo_path="${_dotfiles_repo_path:A}"
 fi
 unset _dotfiles_repo_candidate _dotfiles_repo_candidates
 

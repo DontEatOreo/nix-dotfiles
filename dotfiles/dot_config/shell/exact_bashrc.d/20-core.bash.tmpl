@@ -1,6 +1,28 @@
 # 02 / shell options
-# Keep glob and array expansion behavior predictable.
-shopt -s array_expand_once globskipdots
+# Keep interactive pipelines, history, completion, and globbing predictable.
+# Probe options individually so the configuration stays quiet if an older
+# system Bash is used before the managed Bash is installed.
+set -o pipefail
+for _dotfiles_shopt_option in \
+	array_expand_once \
+	autocd \
+	cdspell \
+	checkwinsize \
+	cmdhist \
+	dirspell \
+	extglob \
+	globasciiranges \
+	globskipdots \
+	globstar \
+	histappend \
+	histreedit \
+	histverify \
+	lithist \
+	no_empty_cmd_completion \
+	progcomp_alias; do
+	shopt -s "$_dotfiles_shopt_option" 2>/dev/null || true
+done
+unset _dotfiles_shopt_option
 
 # 03 / startup helpers
 # Resolve real binaries before generated init scripts replace command names.
@@ -45,14 +67,11 @@ _dotfiles_ansible_playbook() {
 
 _dotfiles_repo_path="${DOTFILES_REPO:-}"
 if [[ -z "$_dotfiles_repo_path" ]]; then
-	case "$(uname -s 2>/dev/null)" in
-		Darwin)
-			_dotfiles_repo_candidates=("$HOME/Developer/dotfiles" "$HOME/dotfiles")
-			;;
-		*)
-			_dotfiles_repo_candidates=("$HOME/dotfiles")
-			;;
-	esac
+{{- if eq .chezmoi.os "darwin" }}
+	_dotfiles_repo_candidates=("$HOME/Developer/dotfiles" "$HOME/dotfiles")
+{{- else }}
+	_dotfiles_repo_candidates=("$HOME/dotfiles")
+{{- end }}
 	for _dotfiles_repo_candidate in "${_dotfiles_repo_candidates[@]}"; do
 		[[ -f "$_dotfiles_repo_candidate/Justfile" ]] || continue
 		[[ -d "$_dotfiles_repo_candidate/ansible" ]] || continue

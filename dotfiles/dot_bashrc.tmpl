@@ -8,11 +8,6 @@
 
 _dotfiles_bash_module_dir="$HOME/.config/shell/bashrc.d"
 _dotfiles_bash_local_dir="$HOME/.config/shell/bashrc.local.d"
-_dotfiles_bash_nullglob_was_set=0
-if shopt -q nullglob; then
-	_dotfiles_bash_nullglob_was_set=1
-fi
-shopt -s nullglob
 
 for _dotfiles_bash_module in \
 	"$_dotfiles_bash_module_dir"/*.bash \
@@ -22,12 +17,10 @@ for _dotfiles_bash_module in \
 	source "$_dotfiles_bash_module"
 done
 
-((_dotfiles_bash_nullglob_was_set)) || shopt -u nullglob
 unset \
 	_dotfiles_bash_module \
 	_dotfiles_bash_module_dir \
-	_dotfiles_bash_local_dir \
-	_dotfiles_bash_nullglob_was_set
+	_dotfiles_bash_local_dir
 
 # Startup-only helpers are intentionally unavailable after initialization.
 unset -f _dotfiles_wrap_command _dotfiles_wrap_themed_command _dotfiles_command_path

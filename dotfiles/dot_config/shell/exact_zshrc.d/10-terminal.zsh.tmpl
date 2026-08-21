@@ -5,8 +5,11 @@
 #  /"\/\_|---------------------|_/\/"\
 # (     _|                     |_     )
 #  \_/\/ `---------------------' \/\_/
-if [[ "${TERM:-}" == "xterm-ghostty" ]] && ! infocmp xterm-ghostty &>/dev/null; then
-  export TERM=xterm-256color
+if [[ "${TERM:-}" == "xterm-ghostty" ]]; then
+  zmodload zsh/terminfo 2>/dev/null
+  if [[ -z "${terminfo[colors]-}" ]]; then
+    export TERM=xterm-256color
+  fi
 fi
 
 # Detect once without writing a query into the shell's input stream. Theme-aware
@@ -25,7 +28,12 @@ fi
 # detected client appearance so remote shells inherit it before consulting the
 # remote desktop's theme.
 case "${TERMINAL_THEME:-}" in
-  dark | light) export LC_TERMINAL_THEME="$TERMINAL_THEME" ;;
+  dark | light)
+    export LC_TERMINAL_THEME="$TERMINAL_THEME"
+    # Starship runs several times per prompt. Select its managed profile once
+    # instead of putting terminal-theme-run in that hot path.
+    export STARSHIP_CONFIG="$HOME/.config/starship-black-rose-doll-${TERMINAL_THEME}.toml"
+    ;;
 esac
 
 if [[ -n "${GHOSTTY_RESOURCES_DIR:-}" ]] \

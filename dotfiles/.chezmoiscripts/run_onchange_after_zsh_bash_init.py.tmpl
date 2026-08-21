@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.14
-{{- range $tool := list "atuin" "chezmoi" "delta" "deno" "fzf" "jj" "op" "rustup" "starship" }}
+{{- range $tool := list "atuin" "chezmoi" "delta" "deno" "fzf" "gh" "jj" "op" "rustup" "starship" }}
 # {{ $tool }} fingerprint: {{ template "executable_fingerprint" (lookPath $tool) }}
 {{- end }}
 from __future__ import annotations
@@ -12,6 +12,7 @@ from pathlib import Path
 
 COMPLETION_COMMANDS = (
     ("chezmoi", ("chezmoi", "completion", "{shell}")),
+    ("gh", ("gh", "completion", "--shell", "{shell}")),
     ("op", ("op", "completion", "{shell}")),
     ("jj", ("jj", "util", "completion", "{shell}")),
     ("starship", ("starship", "completions", "{shell}")),
@@ -38,13 +39,24 @@ def write_if_changed(path: Path, content: str) -> None:
         raise
 
 
+def remove_owned(path: Path) -> None:
+    if path.is_file() or path.is_symlink():
+        path.unlink()
+
+
 def capture(command: tuple[str, ...], target: Path) -> None:
     executable = shutil.which(command[0])
     if executable is None:
+        remove_owned(target)
         return
-    result = subprocess.run(command, check=False, capture_output=True, text=True)
+    result = subprocess.run(
+        (executable, *command[1:]),
+        check=False,
+        capture_output=True,
+        text=True,
+    )
     if result.returncode != 0:
-        print(f"failed to generate shell init for {command[0]}")
+        print(f"failed to generate shell integration for {command[0]}")
         return
     write_if_changed(target, result.stdout)
 
@@ -52,6 +64,7 @@ def capture(command: tuple[str, ...], target: Path) -> None:
 def fzf_zsh(target: Path) -> None:
     fzf = shutil.which("fzf")
     if fzf is None:
+        remove_owned(target)
         return
     result = subprocess.run(
         (fzf, "--zsh"),
@@ -71,20 +84,25 @@ def fzf_zsh(target: Path) -> None:
     write_if_changed(target, content.replace(marker, replacement))
 
 
-home = Path.home()
+home = Path(os.environ["CHEZMOI_HOME_DIR"])
 cache = Path(os.environ.get("XDG_CACHE_HOME", home / ".cache"))
+data = Path(os.environ.get("XDG_DATA_HOME", home / ".local/share"))
 for shell in ("zsh", "bash"):
-    completion_dir = cache / shell / "completions"
+    completion_dir = (
+        cache / "zsh/completions"
+        if shell == "zsh"
+        else data / "bash-completion/completions"
+    )
     completion_dir.mkdir(parents=True, exist_ok=True)
     if shell == "zsh":
         fzf_zsh(cache / "fzf/init.zsh")
     else:
         capture(("fzf", "--bash"), cache / "fzf/init.bash")
-    # Atuin, broot, Starship, and zoxide init files are managed directly by
-    # chezmoi templates. Do not rewrite them here or the target state will
-    # permanently drift from chezmoi's rendered state.
-    if (atuin := shutil.which("atuin")) is not None:
-        subprocess.run(
+    atuin_target = completion_dir / ("_atuin" if shell == "zsh" else "atuin.bash")
+    if (atuin := shutil.which("atuin")) is None:
+        remove_owned(atuin_target)
+    else:
+        result = subprocess.run(
             (
                 atuin,
                 "gen-completions",
@@ -95,6 +113,10 @@ for shell in ("zsh", "bash"):
             ),
             check=False,
         )
+        if result.returncode == 0 and atuin_target.is_file():
+            atuin_target.chmod(0o644)
+        elif result.returncode != 0:
+            print(f"failed to generate shell completions for atuin ({shell})")
     prefix = "_" if shell == "zsh" else ""
     for name, command in COMPLETION_COMMANDS:
         capture(

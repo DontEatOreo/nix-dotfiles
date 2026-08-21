@@ -8,7 +8,7 @@
 _zoxide_bin="$(_dotfiles_command_path zoxide 2>/dev/null || true)"
 if [[ -n "$_zoxide_bin" ]]; then
 	if [[ -r "$HOME/.cache/zoxide/init.bash" ]] &&
-		grep -Fq 'function cd()' "$HOME/.cache/zoxide/init.bash"; then
+		[[ "$(<"$HOME/.cache/zoxide/init.bash")" == *'function cd()'* ]]; then
 		# shellcheck source=/dev/null
 		source "$HOME/.cache/zoxide/init.bash"
 	else

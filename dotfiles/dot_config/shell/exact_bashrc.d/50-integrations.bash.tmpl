@@ -30,11 +30,9 @@ unset _atuin_bin
 
 _starship_bin="$(_dotfiles_command_path starship 2>/dev/null || true)"
 if [[ -n "$_starship_bin" ]]; then
-	if _dotfiles_command_path terminal-theme-run >/dev/null; then
-		_dotfiles_wrap_themed_command starship
-	else
-		_dotfiles_wrap_command starship "$_starship_bin"
-	fi
+	# 10-terminal selected STARSHIP_CONFIG once; keep Starship's prompt-time
+	# calls on the direct binary path.
+	_dotfiles_wrap_command starship "$_starship_bin"
 fi
 if [[ -n "$_starship_bin" && -r "$HOME/.cache/starship/init.bash" ]]; then
 	# shellcheck source=/dev/null
