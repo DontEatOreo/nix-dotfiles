@@ -15,9 +15,6 @@
       mode: "0755"
     - path: "{{ dotfiles_config_home }}/systemd/user/toshy-config.service.d"
       mode: "0755"
-  tags:
-    - host
-    - toshy
 
 - name: Check out pinned Toshy source
   ansible.builtin.git:
@@ -27,9 +24,6 @@
     depth: 1
     force: true
   register: keyboard_toshy_source
-  tags:
-    - host
-    - toshy
 
 - name: Install Toshy setup automation
   ansible.builtin.copy:
@@ -43,9 +37,6 @@
       dest: sudo
   loop_control:
     label: "{{ item.dest }}"
-  tags:
-    - host
-    - toshy
 
 - name: Check Toshy installation state
   ansible.builtin.stat:
@@ -60,18 +51,12 @@
   loop_control:
     label: "{{ item.label }}"
   register: keyboard_toshy_state_files
-  tags:
-    - host
-    - toshy
 
 - name: Select Toshy installation state
   ansible.builtin.set_fact:
     keyboard_toshy_config_file: "{{ keyboard_toshy_state_files.results[0] }}"
     keyboard_toshy_installed_revision_file: "{{ keyboard_toshy_state_files.results[1] }}"
     keyboard_toshy_runtime_revision_file: "{{ keyboard_toshy_state_files.results[2] }}"
-  tags:
-    - host
-    - toshy
 
 - name: Read recorded Toshy revisions
   ansible.builtin.slurp:
@@ -87,9 +72,6 @@
     label: "{{ item.label }}"
   when: item.exists | bool
   register: keyboard_toshy_revision_files
-  tags:
-    - host
-    - toshy
 
 - name: Select recorded Toshy revisions
   ansible.builtin.set_fact:
@@ -107,18 +89,12 @@
         | b64decode
         | trim
       }}
-  tags:
-    - host
-    - toshy
 
 - name: Read the existing Toshy configuration
   ansible.builtin.slurp:
     src: "{{ keyboard_toshy_config }}"
   register: keyboard_toshy_existing_config
   when: keyboard_toshy_config_file.stat.exists | default(false)
-  tags:
-    - host
-    - toshy
 
 - name: Require the pinned Toshy Nix runtime
   ansible.builtin.assert:
@@ -132,9 +108,6 @@
       user files. Found runtime revision:
       {{ keyboard_toshy_runtime_revision_value | default('missing', true) }}.
   when: platform_is_nixos
-  tags:
-    - host
-    - toshy
 
 - name: Decide whether Toshy user files need an upstream refresh
   ansible.builtin.set_fact:
@@ -162,25 +135,6 @@
       - "SLICE_MARK_START: kbtype_override"
       - "SLICE_MARK_START: user_custom_functions"
       - "SLICE_MARK_START: barebones_user_cfg"
-  tags:
-    - host
-    - toshy
-
-- name: Authorize Toshy's non-interactive sudo calls through Ansible
-  ansible.builtin.command:
-    argv:
-      - "{{ ansible_playbook_python }}"
-      - -c
-      - pass
-  become: true
-  changed_when: false
-  when:
-    - not ansible_check_mode
-    - keyboard_toshy_install_required | bool
-    - not platform_is_nixos
-  tags:
-    - host
-    - toshy
 
 - name: Detect host sudo for the Toshy installer
   ansible.builtin.command:
@@ -195,9 +149,6 @@
   when:
     - keyboard_toshy_install_required | bool
     - not platform_is_nixos
-  tags:
-    - host
-    - toshy
 
 - name: Require non-interactive sudo for the standard Toshy installer
   ansible.builtin.assert:
@@ -208,9 +159,6 @@
   when:
     - keyboard_toshy_install_required | bool
     - not platform_is_nixos
-  tags:
-    - host
-    - toshy
 
 - name: Select the platform-specific Toshy installer path
   ansible.builtin.set_fact:
@@ -239,46 +187,60 @@
           + (['--no-dbus-python'] if keyboard_toshy_no_dbus_python else [])
         )
       }}
-  tags:
-    - host
-    - toshy
 
-- name: Run the pinned upstream Toshy installer
-  ansible.builtin.command:
-    argv: >-
-      {{
-        [
-          keyboard_toshy_setup_python,
-          keyboard_toshy_automation_dir ~ '/setup.py',
-          keyboard_toshy_source_dir ~ '/setup_toshy.py'
-        ] + keyboard_toshy_installer_args
-      }}
-  environment:
-    PATH: >-
-      {{
-        keyboard_toshy_automation_dir
-        ~ ':/run/wrappers/bin:/usr/sbin:/usr/bin:/sbin:/bin:'
-        ~ '/usr/local/sbin:/usr/local/bin:' ~ dotfiles_path
-      }}
-    TOSHY_RUNTIME_DIR: "{{ keyboard_toshy_runtime_dir if platform_is_nixos else '' }}"
-    TOSHY_SUDO: >-
-      {{ keyboard_toshy_sudo.stdout | default('') | trim }}
-    TOSHY_SUDO_SHIM_DIR: "{{ keyboard_toshy_automation_dir }}"
-  changed_when: true
+- name: Refresh Toshy from the pinned upstream installer
   when:
     - not ansible_check_mode
     - keyboard_toshy_install_required | bool
-  tags:
-    - host
-    - toshy
+  block:
+    - name: Temporarily authorize the pinned Toshy installer
+      ansible.builtin.copy:
+        content: |
+          {{ ansible_facts.user_id }} ALL=(ALL:ALL) NOPASSWD: ALL
+        dest: /etc/sudoers.d/dotfiles-toshy-installer
+        owner: root
+        group: root
+        mode: "0440"
+        validate: /usr/sbin/visudo -cf %s
+      become: true
+      when: not platform_is_nixos
+
+    - name: Run the pinned upstream Toshy installer
+      ansible.builtin.command:
+        argv: >-
+          {{
+            [
+              keyboard_toshy_setup_python,
+              keyboard_toshy_automation_dir ~ '/setup.py',
+              keyboard_toshy_source_dir ~ '/setup_toshy.py'
+            ] + keyboard_toshy_installer_args
+          }}
+      environment:
+        PATH: >-
+          {{
+            keyboard_toshy_automation_dir
+            ~ ':/run/wrappers/bin:/usr/sbin:/usr/bin:/sbin:/bin:'
+            ~ '/usr/local/sbin:/usr/local/bin:' ~ dotfiles_path
+          }}
+        TOSHY_RUNTIME_DIR: >-
+          {{ keyboard_toshy_runtime_dir if platform_is_nixos else '' }}
+        TOSHY_SUDO: >-
+          {{ keyboard_toshy_sudo.stdout | default('') | trim }}
+        TOSHY_SUDO_SHIM_DIR: "{{ keyboard_toshy_automation_dir }}"
+      changed_when: true
+
+  always:
+    - name: Remove the temporary Toshy installer authorization
+      ansible.builtin.file:
+        path: /etc/sudoers.d/dotfiles-toshy-installer
+        state: absent
+      become: true
+      when: not platform_is_nixos
 
 - name: Check Toshy configuration after installation
   ansible.builtin.stat:
     path: "{{ keyboard_toshy_config }}"
   register: keyboard_toshy_config_after_install
-  tags:
-    - host
-    - toshy
 
 - name: Require Toshy configuration
   ansible.builtin.assert:
@@ -288,9 +250,6 @@
       Toshy {{ keyboard_toshy_version }} did not create the expected
       configuration at {{ keyboard_toshy_config }}.
   when: not ansible_check_mode
-  tags:
-    - host
-    - toshy
 
 - name: Merge dotfiles slices into the pinned upstream configuration
   ansible.builtin.command:
@@ -308,9 +267,6 @@
   when:
     - not ansible_check_mode
     - keyboard_toshy_config_after_install.stat.exists | default(false)
-  tags:
-    - host
-    - toshy
 
 - name: Validate merged Toshy configuration syntax
   ansible.builtin.command:
@@ -323,9 +279,6 @@
   when:
     - not ansible_check_mode
     - keyboard_toshy_config_after_install.stat.exists | default(false)
-  tags:
-    - host
-    - toshy
 
 - name: Install merged Toshy configuration
   ansible.builtin.copy:
@@ -337,9 +290,6 @@
   when:
     - not ansible_check_mode
     - keyboard_toshy_config_after_install.stat.exists | default(false)
-  tags:
-    - host
-    - toshy
 
 - name: Record installed Toshy source revision
   ansible.builtin.copy:
@@ -349,9 +299,6 @@
   when:
     - not ansible_check_mode
     - keyboard_toshy_config_after_install.stat.exists | default(false)
-  tags:
-    - host
-    - toshy
 
 - name: Install Toshy Kanata user units
   ansible.builtin.copy:
@@ -369,9 +316,6 @@
         toshy-kanata-device.service
       dest: "{{ dotfiles_config_home }}/systemd/user/toshy-kanata-device.service"
   notify: Restart Toshy services
-  tags:
-    - host
-    - toshy
 
 - name: Enable Toshy Kanata device watcher
   ansible.builtin.systemd_service:
@@ -380,9 +324,6 @@
     state: started
     scope: user
     daemon_reload: true
-  tags:
-    - host
-    - toshy
 
 - name: Refresh Toshy for the current Kanata device
   ansible.builtin.systemd_service:
@@ -391,9 +332,6 @@
     scope: user
   changed_when: false
   failed_when: false
-  tags:
-    - host
-    - toshy
 
 - name: Check Toshy desktop surfaces
   ansible.builtin.stat:
@@ -404,9 +342,6 @@
     - "{{ dotfiles_config_home }}/autostart/Toshy_Tray.desktop"
     - "{{ dotfiles_config_home }}/autostart/app.toshy.preferences.desktop"
   register: keyboard_toshy_desktop_surfaces
-  tags:
-    - host
-    - toshy
 
 - name: Hide Toshy desktop surfaces
   community.general.ini_file:
@@ -420,9 +355,6 @@
   loop_control:
     label: "{{ item.item | basename }}"
   when: item.stat.exists
-  tags:
-    - host
-    - toshy
 
 - name: Disable Toshy tray user service
   ansible.builtin.systemd_service:
@@ -431,6 +363,3 @@
     state: stopped
     scope: user
   failed_when: false
-  tags:
-    - host
-    - toshy

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -40,3 +41,49 @@ def test_rewrites_nested_sudo_non_interactively(
         SETUP.rewrite_sudo_shell("sudo -k; sudo tee /etc/example")
         == "true; /trusted/sudo -n tee /etc/example"
     )
+
+
+def test_splits_rpm_ostree_live_install_into_supported_commands(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[list[str]] = []
+
+    def record_run(
+        argv: list[str], *_args: object, **_kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        calls.append(argv)
+        return subprocess.CompletedProcess(argv, 0, "", "")
+
+    monkeypatch.setattr(SETUP, "SUDO", "/trusted/sudo")
+    monkeypatch.setattr(SETUP, "ORIGINAL_RUN", record_run)
+
+    result = SETUP.automated_run(
+        [
+            "/usr/bin/sudo",
+            "rpm-ostree",
+            "install",
+            "--idempotent",
+            "--apply-live",
+            "dbus-devel",
+        ],
+        check=True,
+    )
+
+    assert result.returncode == 0
+    assert calls == [
+        [
+            "/trusted/sudo",
+            "-n",
+            "rpm-ostree",
+            "install",
+            "--idempotent",
+            "dbus-devel",
+        ],
+        [
+            "/trusted/sudo",
+            "-n",
+            "rpm-ostree",
+            "apply-live",
+            "--allow-replacement",
+        ],
+    ]

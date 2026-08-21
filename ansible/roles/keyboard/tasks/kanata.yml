@@ -7,17 +7,11 @@
     depth: 1
     force: true
   register: keyboard_kanata_source
-  tags:
-    - host
-    - kanata
 
 - name: Check existing staged Kanata binary
   ansible.builtin.stat:
     path: "{{ keyboard_kanata_staged_binary }}"
   register: keyboard_kanata_staged_before_build
-  tags:
-    - host
-    - kanata
 
 - name: Build staged Kanata binary
   ansible.builtin.command:
@@ -38,9 +32,6 @@
   when: >-
     keyboard_kanata_source is changed
     or not keyboard_kanata_staged_before_build.stat.executable | default(false)
-  tags:
-    - host
-    - kanata
 
 - name: Create Kanata system directories
   ansible.builtin.file:
@@ -53,9 +44,6 @@
     - /etc/kanata
     - /etc/udev/rules.d
     - /etc/systemd/system
-  tags:
-    - host
-    - kanata
 
 - name: Install Kanata binary
   ansible.builtin.copy:
@@ -65,9 +53,6 @@
     mode: "0755"
   become: true
   register: keyboard_kanata_binary
-  tags:
-    - host
-    - kanata
 
 - name: Ensure Kanata uinput group exists
   ansible.builtin.group:
@@ -75,9 +60,6 @@
     state: present
     system: true
   become: true
-  tags:
-    - host
-    - kanata
 
 - name: Add host user to Kanata device groups
   ansible.builtin.user:
@@ -87,9 +69,6 @@
       - uinput
     append: true
   become: true
-  tags:
-    - host
-    - kanata
 
 - name: Install Kanata configuration
   ansible.builtin.copy:
@@ -98,9 +77,6 @@
     mode: "0644"
   become: true
   register: keyboard_kanata_config
-  tags:
-    - host
-    - kanata
 
 - name: Install Kanata udev rules
   ansible.builtin.copy:
@@ -109,9 +85,6 @@
     mode: "0644"
   become: true
   notify: Reload Kanata udev rules
-  tags:
-    - host
-    - kanata
 
 - name: Install Kanata systemd service
   ansible.builtin.copy:
@@ -120,9 +93,6 @@
     mode: "0644"
   become: true
   register: keyboard_kanata_unit
-  tags:
-    - host
-    - kanata
 
 - name: Load and persist the uinput kernel module
   community.general.modprobe:
@@ -130,9 +100,6 @@
     state: present
     persistent: present
   become: true
-  tags:
-    - host
-    - kanata
 
 - name: Validate installed Kanata configuration
   ansible.builtin.command:
@@ -143,15 +110,9 @@
       - --check
       - --no-wait
   changed_when: false
-  tags:
-    - host
-    - kanata
 
 - name: Gather service state for Kanata conflicts
   ansible.builtin.service_facts:
-  tags:
-    - host
-    - kanata
 
 - name: Disable conflicting input-remapper service
   ansible.builtin.systemd_service:
@@ -163,9 +124,6 @@
   when:
     - not keyboard_keep_input_remapper | bool
     - "'input-remapper.service' in ansible_facts.services"
-  tags:
-    - host
-    - kanata
 
 - name: Enable Kanata system service
   ansible.builtin.systemd_service:
@@ -181,6 +139,3 @@
         else 'started'
       }}
   become: true
-  tags:
-    - host
-    - kanata

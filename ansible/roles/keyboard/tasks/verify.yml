@@ -1,10 +1,6 @@
 ---
 - name: Gather current system service activity
   ansible.builtin.service_facts:
-  tags:
-    - host
-    - toshy
-    - kanata
 
 - name: Check Toshy user service activity
   ansible.builtin.command:
@@ -18,10 +14,6 @@
   failed_when: false
   check_mode: false
   register: keyboard_toshy_config_service
-  tags:
-    - host
-    - toshy
-    - kanata
 
 - name: Require active Kanata and Toshy services
   ansible.builtin.assert:
@@ -33,20 +25,12 @@
       - keyboard_toshy_config_service.rc == 0
     fail_msg: Kanata or the Toshy configuration service is not active.
     success_msg: Kanata and the Toshy configuration service are active.
-  tags:
-    - host
-    - toshy
-    - kanata
 
 - name: Check Kanata virtual input device
   ansible.builtin.stat:
     path: /run/kanata-main/main
     follow: false
   register: keyboard_toshy_kanata_device
-  tags:
-    - host
-    - toshy
-    - kanata
 
 - name: Require Kanata virtual input device
   ansible.builtin.assert:
@@ -57,19 +41,11 @@
         | default('')
         is match('^/dev/input/event')
     fail_msg: /run/kanata-main/main is missing or targets an unexpected device.
-  tags:
-    - host
-    - toshy
-    - kanata
 
 - name: Read merged Toshy configuration
   ansible.builtin.slurp:
     src: "{{ keyboard_toshy_config }}"
   register: keyboard_toshy_merged_config_file
-  tags:
-    - host
-    - toshy
-    - kanata
 
 - name: Require Kanata integration in Toshy configuration
   ansible.builtin.assert:
@@ -84,10 +60,6 @@
     - DOTFILES_TOSHY_ONLY_DEVICES
     - /run/kanata-main/main
     - dotfiles-kanata-main
-  tags:
-    - host
-    - toshy
-    - kanata
 
 - name: Require inactive input-remapper service
   ansible.builtin.assert:
@@ -98,7 +70,3 @@
         .get('state', 'stopped') != 'running'
     fail_msg: input-remapper.service is active and can compete with Kanata/Toshy.
   when: not keyboard_keep_input_remapper | bool
-  tags:
-    - host
-    - toshy
-    - kanata

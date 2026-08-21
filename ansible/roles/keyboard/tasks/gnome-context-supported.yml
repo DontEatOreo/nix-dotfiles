@@ -1,0 +1,43 @@
+---
+- name: Reconcile compatible Toshy GNOME extensions
+  dotfiles_gnome_extension:
+    uuid: "{{ item.uuid }}"
+    extension_root: "{{ dotfiles_data_home }}/gnome-shell/extensions"
+    shell_version: "{{ keyboard_gnome_shell_major }}"
+    origin: "{{ keyboard_toshy_gnome_extension_origin }}"
+    cache_dir: "{{ keyboard_toshy_gnome_extension_cache }}"
+  loop: "{{ keyboard_toshy_gnome_extensions }}"
+  loop_control:
+    label: "{{ item.label }}"
+  register: keyboard_toshy_gnome_results
+
+- name: Require a compatible Toshy window-context extension
+  ansible.builtin.assert:
+    that:
+      - >-
+        keyboard_toshy_gnome_results.results
+        | default([])
+        | rejectattr('skipped', 'defined')
+        | selectattr('available')
+        | map(attribute='item')
+        | selectattr('window_context', 'equalto', true)
+        | list
+        | length > 0
+    fail_msg: >-
+      No Toshy-compatible window-context extension is available for GNOME Shell
+      {{ keyboard_gnome_shell_major }}.
+
+- name: Read GNOME overlay key
+  community.general.dconf:
+    key: /org/gnome/mutter/overlay-key
+    state: read
+  register: keyboard_gnome_overlay_key
+
+- name: Restore empty GNOME overlay key to Super
+  community.general.dconf:
+    key: /org/gnome/mutter/overlay-key
+    value: "'Super_L'"
+    state: present
+  when:
+    - keyboard_gnome_overlay_key is not skipped
+    - keyboard_gnome_overlay_key.value | default("''") == "''"

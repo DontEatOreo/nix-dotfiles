@@ -66,6 +66,27 @@ def rewrite_sudo_shell(command: str) -> str:
     return SUDO_CMD_RE.sub(rf"\1{shlex.quote(SUDO)} -n ", command)
 
 
+def split_rpm_ostree_live_install(
+    argv: list[str],
+) -> tuple[list[str], list[str]] | None:
+    """Stage and apply rpm-ostree installs with the supported live API."""
+    for index, argument in enumerate(argv[:-1]):
+        if Path(argument).name != "rpm-ostree" or argv[index + 1] != "install":
+            continue
+        if "--apply-live" not in argv[index + 2 :]:
+            return None
+
+        staged_argv = [argument for argument in argv if argument != "--apply-live"]
+        apply_argv = [
+            *argv[: index + 1],
+            "apply-live",
+            "--allow-replacement",
+        ]
+        return staged_argv, apply_argv
+
+    return None
+
+
 def automated_run(
     *popenargs: object, **kwargs: object
 ) -> subprocess.CompletedProcess[str]:
@@ -81,6 +102,12 @@ def automated_run(
         if rewritten is None:
             return subprocess.CompletedProcess(argv, 0, "", "")
         popenargs = (rewritten, *popenargs[1:])
+
+        if live_install := split_rpm_ostree_live_install(rewritten):
+            staged_result = ORIGINAL_RUN(live_install[0], *popenargs[1:], **kwargs)
+            if staged_result.returncode != 0:
+                return staged_result
+            popenargs = (live_install[1], *popenargs[1:])
 
     return ORIGINAL_RUN(*popenargs, **kwargs)
 
