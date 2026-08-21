@@ -1,11 +1,19 @@
 # frozen_string_literal: true
 
+require "json"
+
 class JjPatched < Formula
+  tap_root = Pathname(__dir__).parent
+  pins = JSON.load_file(tap_root/"npins/sources.json").fetch("pins")
+  jj = pins.fetch("jj")
+  archive = pins.fetch("jj_archive")
+  digest = archive.fetch("hash").delete_prefix("sha256-").unpack1("m0").unpack1("H*")
+
   desc "Jujutsu build with native signing, redate, and shallow workflow patches"
   homepage "https://github.com/jj-vcs/jj"
-  url "https://github.com/4evy/jj/archive/f53cd646445cf12eda3f7afebe7073d95fd34ac7.tar.gz"
-  version "0.44.0-head-f53cd646"
-  sha256 "26e71c301547910c6ab12a4f314687fd1e60948e6efb4fd505889ab32b4da64e"
+  url archive.fetch("url")
+  version "0.44.0-head-#{jj.fetch("revision")[0, 8]}"
+  sha256 digest
   license "Apache-2.0"
   depends_on "rust" => :build
 
