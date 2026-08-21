@@ -44,6 +44,7 @@ in
           firefox
           libreoffice
           prismlauncher
+          rsync
           rustdesk-flutter
           ;
         inherit (pkgs.unstable) jq;

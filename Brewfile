@@ -2,6 +2,8 @@
 
 cask_args appdir: "/Applications" if OS.mac?
 
+tap "4evy/dotfiles", trusted: true
+
 # Bootstrap shell and provisioning tools
 brew "bash"
 brew "bash-completion@2"
@@ -169,7 +171,6 @@ brew "ghidra"
 if OS.mac?
   brew "gettext"
   brew "hidapi"
-  brew "mas"
   brew "4evy/dotfiles/terminal-theme-tools"
   brew "zig"
   brew "4evy/dotfiles/kanata-with-cmd"

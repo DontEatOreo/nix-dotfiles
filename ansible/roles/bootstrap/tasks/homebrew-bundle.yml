@@ -1,307 +1,100 @@
-- name: Create minimal local dotfiles Homebrew tap directories
+- name: Ensure local dotfiles Homebrew tap root exists
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ bootstrap_homebrew_local_tap_dir }}"
     state: directory
     mode: "0755"
-  loop:
-    - "{{ bootstrap_homebrew_local_tap_dir }}/Formula"
-    - "{{ bootstrap_homebrew_local_tap_dir }}/packages/ghostty-patched/patches"
-    - "{{ bootstrap_homebrew_local_tap_dir }}/packages/jj-patched/patches"
-    - "{{ bootstrap_homebrew_local_tap_dir }}/packages/kanata-with-cmd/patches"
-    - "{{ bootstrap_homebrew_local_tap_dir }}/npins"
-    - "{{ bootstrap_homebrew_local_tap_dir }}/Sources"
-    - "{{ bootstrap_homebrew_local_tap_dir }}/libexec"
-    - "{{ bootstrap_homebrew_local_tap_dir }}/secrets"
-  when: bootstrap_homebrew_enabled | default(false)
-  tags:
+  tags: &bootstrap_homebrew_tap_tags
     - alt-tab
-    - bootstrap
     - ghostty
-    - homebrew
     - jj
     - kanata
     - raycast
     - shottr
     - terminal-theme-tools
 
-- name: Inspect local dotfiles Homebrew tap root
-  ansible.builtin.find:
-    paths: "{{ bootstrap_homebrew_local_tap_dir }}"
-    file_type: any
-    hidden: true
-    recurse: false
-  register: bootstrap_homebrew_local_tap_entries
-  when: bootstrap_homebrew_enabled | default(false)
-  tags:
-    - alt-tab
-    - bootstrap
-    - homebrew
-    - jj
-    - kanata
-    - raycast
-    - shottr
-    - terminal-theme-tools
+- name: Synchronize repository-owned local Homebrew tap content
+  ansible.posix.synchronize:
+    src: "{{ dotfiles_repo_root }}/"
+    dest: "{{ bootstrap_homebrew_local_tap_dir }}/"
+    archive: true
+    checksum: true
+    delete: true
+    rsync_opts: >-
+      {{
+        bootstrap_homebrew_tap_rsync_common
+        + (bootstrap_homebrew_tap_rsync_macos if platform_is_macos else [])
+        + ['--exclude=*', '--delete-excluded', '--prune-empty-dirs']
+      }}
+  vars:
+    bootstrap_homebrew_tap_rsync_common:
+      - "--filter=protect_/Sources/***"
+      - "--include=/Formula/***"
+      - "--include=/npins/"
+      - "--include=/npins/sources.json"
+      - "--include=/packages/"
+      - "--include=/packages/jj-patched/"
+      - "--include=/packages/jj-patched/patches/***"
+      - "--include=/packages/kanata-with-cmd/"
+      - "--include=/packages/kanata-with-cmd/patches/***"
+    bootstrap_homebrew_tap_rsync_macos:
+      - "--include=/libexec/***"
+      - "--include=/packages/ghostty-patched/"
+      - "--include=/packages/ghostty-patched/patches/***"
+      - "--include=/secrets/"
+      - "--include=/secrets/secrets.yaml"
+  tags: *bootstrap_homebrew_tap_tags
 
-- name: Remove unmanaged local dotfiles Homebrew tap entries
+- name: Restrict encrypted local Homebrew tap data
   ansible.builtin.file:
-    path: "{{ item.path }}"
-    state: absent
-  loop: "{{ bootstrap_homebrew_local_tap_entries.files | default([]) }}"
-  loop_control:
-    label: "{{ item.path | basename }}"
-  when:
-    - bootstrap_homebrew_enabled | default(false)
-    - item.path | basename not in ['Formula', 'Sources', 'libexec', 'npins', 'packages', 'secrets']
-  tags:
-    - alt-tab
-    - bootstrap
-    - ghostty
-    - homebrew
-    - jj
-    - kanata
-    - raycast
-    - shottr
-    - terminal-theme-tools
-
-- name: Ensure local Homebrew source archive directories exist
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    mode: "0755"
-  loop:
-    - "{{ dotfiles_cache_dir }}/homebrew-sources"
-  when: platform_is_macos
-  tags:
-    - bootstrap
-    - homebrew
-    - terminal-theme-tools
-
-- name: Create deterministic terminal theme tools source archive
-  ansible.builtin.command:
-    argv:
-      - /usr/bin/tar
-      - -cf
-      - "{{ dotfiles_cache_dir }}/homebrew-sources/terminal-theme-tools-0.3.0.tar"
-      - -C
-      - "{{ dotfiles_repo_root }}/packages/terminal-theme-tools"
-      - build.zig
-      - build.zig.zon
-      - build_support.zig
-      - README.md
-      - config
-      - include
-      - src
-      - tests
-      - vendor
-      - -C
-      - "{{ dotfiles_repo_root }}"
-      - LICENSE
-  environment:
-    COPYFILE_DISABLE: "1"
-  changed_when: false
-  when: platform_is_macos
-  tags:
-    - bootstrap
-    - homebrew
-    - terminal-theme-tools
-
-- name: Sync terminal theme tools source archive into local tap
-  ansible.builtin.copy:
-    src: "{{ dotfiles_cache_dir }}/homebrew-sources/terminal-theme-tools-0.3.0.tar"
-    dest: "{{ bootstrap_homebrew_local_tap_dir }}/Sources/terminal-theme-tools-0.3.0.tar"
-    mode: "0644"
-    remote_src: true
-  when: platform_is_macos
-  tags:
-    - bootstrap
-    - homebrew
-    - terminal-theme-tools
-
-- name: Sync repository formulae into local Homebrew tap
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "{{ bootstrap_homebrew_local_tap_dir }}/Formula/{{ item | basename }}"
-    mode: "0644"
-  loop: "{{ query('ansible.builtin.fileglob', dotfiles_repo_root ~ '/Formula/*.rb') }}"
-  loop_control:
-    label: "{{ item | basename }}"
-  when: bootstrap_homebrew_enabled | default(false)
-  tags:
-    - alt-tab
-    - bootstrap
-    - ghostty
-    - homebrew
-    - jj
-    - kanata
-    - raycast
-    - shottr
-    - terminal-theme-tools
-
-- name: Sync patched Ghostty patch series into local Homebrew tap
-  ansible.builtin.copy:
-    src: "{{ dotfiles_repo_root }}/packages/ghostty-patched/patches/"
-    dest: "{{ bootstrap_homebrew_local_tap_dir }}/packages/ghostty-patched/patches/"
-    mode: "0644"
-    directory_mode: "0755"
-  when: platform_is_macos
-  tags:
-    - bootstrap
-    - ghostty
-    - homebrew
-
-- name: Sync patched jj patch series into local Homebrew tap
-  ansible.builtin.copy:
-    src: "{{ dotfiles_repo_root }}/packages/jj-patched/patches/"
-    dest: "{{ bootstrap_homebrew_local_tap_dir }}/packages/jj-patched/patches/"
-    mode: "0644"
-    directory_mode: "0755"
-  when: bootstrap_homebrew_enabled | default(false)
-  tags:
-    - bootstrap
-    - homebrew
-    - jj
-
-- name: Sync patched Kanata patch series into local Homebrew tap
-  ansible.builtin.copy:
-    src: "{{ dotfiles_repo_root }}/packages/kanata-with-cmd/patches/"
-    dest: "{{ bootstrap_homebrew_local_tap_dir }}/packages/kanata-with-cmd/patches/"
-    mode: "0644"
-    directory_mode: "0755"
-  when: bootstrap_homebrew_enabled | default(false)
-  tags:
-    - bootstrap
-    - homebrew
-    - kanata
-
-- name: Sync repository helpers into local Homebrew tap
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "{{ bootstrap_homebrew_local_tap_dir }}/libexec/{{ item | basename }}"
-    mode: "0755"
-  loop: "{{ query('ansible.builtin.fileglob', dotfiles_repo_root ~ '/libexec/*') }}"
-  loop_control:
-    label: "{{ item | basename }}"
-  when: platform_is_macos
-  tags:
-    - alt-tab
-    - bootstrap
-    - ghostty
-    - homebrew
-    - raycast
-    - shottr
-
-- name: Sync encrypted Shottr activation data into local Homebrew tap
-  ansible.builtin.copy:
-    src: "{{ dotfiles_repo_root }}/secrets/secrets.yaml"
-    dest: "{{ bootstrap_homebrew_local_tap_dir }}/secrets/secrets.yaml"
+    path: "{{ bootstrap_homebrew_local_tap_dir }}/secrets/secrets.yaml"
+    state: file
     mode: "0600"
   when: platform_is_macos
   tags:
-    - bootstrap
-    - homebrew
     - shottr
 
-- name: Inspect managed files in local dotfiles Homebrew tap
-  ansible.builtin.find:
-    paths: "{{ item.path }}"
-    patterns: "{{ item.pattern }}"
-    file_type: file
-    recurse: false
-  loop:
-    - path: "{{ bootstrap_homebrew_local_tap_dir }}/Formula"
-      pattern: "*.rb"
-      sources: "{{ dotfiles_repo_root }}/Formula/*.rb"
-    - path: "{{ bootstrap_homebrew_local_tap_dir }}/libexec"
-      pattern: "*"
-      sources: "{{ dotfiles_repo_root }}/libexec/*"
-    - path: "{{ bootstrap_homebrew_local_tap_dir }}/Sources"
-      pattern: "*"
-      sources: "{{ dotfiles_cache_dir }}/homebrew-sources/*"
-    - path: "{{ bootstrap_homebrew_local_tap_dir }}/secrets"
-      pattern: "*"
-      sources: "{{ dotfiles_repo_root }}/secrets/secrets.yaml"
-  loop_control:
-    label: "{{ item.path | basename }}"
-  register: bootstrap_homebrew_local_tap_managed_files
+- name: Build terminal theme tools source archive for the local tap
   when: platform_is_macos
   tags:
-    - alt-tab
-    - bootstrap
-    - homebrew
-    - kanata
-    - raycast
-    - shottr
     - terminal-theme-tools
+  block:
+    - name: Ensure local Homebrew source archive cache exists
+      ansible.builtin.file:
+        path: "{{ dotfiles_cache_dir }}/homebrew-sources"
+        state: directory
+        mode: "0755"
 
-- name: Prune unmanaged files from local dotfiles Homebrew tap
-  ansible.builtin.file:
-    path: "{{ item.1.path }}"
-    state: absent
-  vars:
-    bootstrap_homebrew_repository_file_names: >-
-      {{
-        query('ansible.builtin.fileglob', item.0.item.sources)
-        | map('basename')
-        | list
-      }}
-  loop: >-
-    {{
-      bootstrap_homebrew_local_tap_managed_files.results
-      | subelements('files', skip_missing=true)
-    }}
-  loop_control:
-    label: "{{ item.1.path | basename }}"
-  when:
-    - platform_is_macos
-    - item.1.path | basename not in bootstrap_homebrew_repository_file_names
-  tags:
-    - alt-tab
-    - bootstrap
-    - homebrew
-    - kanata
-    - raycast
-    - shottr
-    - terminal-theme-tools
+    - name: Create deterministic terminal theme tools source archive
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/tar
+          - -cf
+          - "{{ dotfiles_cache_dir }}/homebrew-sources/terminal-theme-tools-0.3.0.tar"
+          - -C
+          - "{{ dotfiles_repo_root }}/packages/terminal-theme-tools"
+          - build.zig
+          - build.zig.zon
+          - build_support.zig
+          - README.md
+          - config
+          - include
+          - src
+          - tests
+          - vendor
+          - -C
+          - "{{ dotfiles_repo_root }}"
+          - LICENSE
+      environment:
+        COPYFILE_DISABLE: "1"
+      changed_when: false
 
-- name: Sync npins lock into local Homebrew tap
-  ansible.builtin.copy:
-    src: "{{ dotfiles_repo_root }}/npins/sources.json"
-    dest: "{{ bootstrap_homebrew_local_tap_dir }}/npins/sources.json"
-    mode: "0644"
-  when: platform_is_macos
-  tags:
-    - alt-tab
-    - bootstrap
-    - homebrew
-    - kanata
-    - raycast
-    - shottr
-    - terminal-theme-tools
-
-- name: Trust local dotfiles Homebrew tap
-  ansible.builtin.command:
-    argv:
-      - "{{ bootstrap_homebrew_prefix }}/bin/brew"
-      - trust
-      - --tap
-      - 4evy/dotfiles
-  environment:
-    PATH: "{{ bootstrap_homebrew_path }}"
-  register: bootstrap_homebrew_dotfiles_tap_trust
-  # Homebrew says either "Trusted tap" or "Already trusted tap". Matching the
-  # whole prefix avoids treating the latter (which contains "trusted") as a
-  # change on every bootstrap run.
-  changed_when: bootstrap_homebrew_dotfiles_tap_trust.stdout is match('^Trusted tap:')
-  when: bootstrap_homebrew_enabled | default(false)
-  tags:
-    - alt-tab
-    - bootstrap
-    - homebrew
-    - jj
-    - kanata
-    - raycast
-    - shottr
-    - terminal-theme-tools
+    - name: Synchronize generated local Homebrew source archives
+      ansible.posix.synchronize:
+        src: "{{ dotfiles_cache_dir }}/homebrew-sources/"
+        dest: "{{ bootstrap_homebrew_local_tap_dir }}/Sources/"
+        archive: true
+        checksum: true
+        delete: true
 
 - name: Clear Discord cask ASAR locks before Homebrew changes
   ansible.builtin.command:
@@ -319,9 +112,7 @@
     - /Applications/Discord.app/Contents/Resources/app.asar
     - /Applications/Discord.app/Contents/Resources/_app.asar
   tags:
-    - bootstrap
     - discord
-    - homebrew
 
 - name: Ensure Docker Desktop is installed without upgrading it
   community.general.homebrew_cask:
@@ -335,9 +126,7 @@
     PATH: "{{ bootstrap_homebrew_path }}"
   when: platform_is_macos
   tags:
-    - bootstrap
     - docker
-    - homebrew
 
 - name: Apply Homebrew bundle
   ansible.builtin.command:
@@ -360,20 +149,6 @@
   changed_when: >-
     bootstrap_homebrew_bundle_install.stdout is search('(^|\n)(==> )?(Installing|Upgrading|Uninstalling|Uninstalled|Untapping|Removing) ')
     or bootstrap_homebrew_bundle_install.stderr is search('(^|\n)(==> )?(Installing|Upgrading|Uninstalling|Uninstalled|Untapping|Removing) ')
-  when: bootstrap_homebrew_enabled | default(false)
-  tags:
-    - bootstrap
-    - homebrew
-
-- name: Remove legacy standalone chezmoi binary
-  ansible.builtin.file:
-    path: "{{ dotfiles_bin_dir }}/chezmoi"
-    state: absent
-  when: bootstrap_homebrew_enabled | default(false)
-  tags:
-    - bootstrap
-    - chezmoi
-    - homebrew
 
 - name: Register Homebrew OpenJDK 21 with macOS
   ansible.builtin.file:
@@ -384,67 +159,10 @@
   become: true
   when: platform_is_macos
   tags:
-    - bootstrap
-    - homebrew
     - java
 
-- name: Read terminal theme tools source archive checksum
-  ansible.builtin.stat:
-    path: "{{ bootstrap_homebrew_local_tap_dir }}/Sources/terminal-theme-tools-0.3.0.tar"
-    checksum_algorithm: sha256
-  register: bootstrap_homebrew_terminal_theme_tools_source
+- name: Reconcile the installed terminal theme tools source
+  ansible.builtin.import_tasks: homebrew-terminal-theme-tools.yml
   when: platform_is_macos
   tags:
-    - bootstrap
-    - homebrew
-    - terminal-theme-tools
-
-- name: Check terminal theme tools installed source checksum
-  ansible.builtin.stat:
-    path: "{{ bootstrap_homebrew_prefix }}/opt/terminal-theme-tools/share/terminal-theme-tools/source.sha256"
-  register: bootstrap_homebrew_terminal_theme_tools_installed_checksum_file
-  when: platform_is_macos
-  tags:
-    - bootstrap
-    - homebrew
-    - terminal-theme-tools
-
-- name: Read installed terminal theme tools source checksum
-  ansible.builtin.slurp:
-    path: "{{ bootstrap_homebrew_prefix }}/opt/terminal-theme-tools/share/terminal-theme-tools/source.sha256"
-  register: bootstrap_homebrew_terminal_theme_tools_installed_source
-  when:
-    - platform_is_macos
-    - bootstrap_homebrew_terminal_theme_tools_installed_checksum_file.stat.exists
-      | default(false)
-  tags:
-    - bootstrap
-    - homebrew
-    - terminal-theme-tools
-
-- name: Reinstall terminal theme tools when its local source changes
-  ansible.builtin.command:
-    argv:
-      - "{{ bootstrap_homebrew_prefix }}/bin/brew"
-      - reinstall
-      - 4evy/dotfiles/terminal-theme-tools
-  environment:
-    HOMEBREW_NO_ASK: "1"
-    PATH: "{{ bootstrap_homebrew_path }}"
-  changed_when: true
-  when:
-    - platform_is_macos
-    - bootstrap_homebrew_terminal_theme_tools_source.stat.exists | default(false)
-    - bootstrap_homebrew_terminal_theme_tools_installed_checksum_file.stat.exists
-      | default(false)
-    - >
-      (
-        bootstrap_homebrew_terminal_theme_tools_installed_source.content
-        | default('')
-        | b64decode
-        | trim
-      ) != bootstrap_homebrew_terminal_theme_tools_source.stat.checksum
-  tags:
-    - bootstrap
-    - homebrew
     - terminal-theme-tools

@@ -26,6 +26,3 @@
         if ansible_facts.pkg_mgr in ['dnf', 'dnf5']
         else ansible_facts.pkg_mgr
       }}
-  tags:
-    - bootstrap
-    - packages

@@ -200,6 +200,7 @@ modules:
         - podman-compose
         - procps-ng
         - python3
+        - rsync
         - selinux-policy-devel
         - solaar
         - systemd-oomd-defaults

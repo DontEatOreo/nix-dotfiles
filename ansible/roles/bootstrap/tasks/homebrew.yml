@@ -6,10 +6,7 @@
     bootstrap_homebrew_enabled: true
   when: platform_is_macos
   tags:
-    - bootstrap
-    - bash
     - ghostty
-    - homebrew
 
 - name: Set Homebrew paths on Linux
   ansible.builtin.set_fact:
@@ -17,10 +14,6 @@
     bootstrap_homebrew_path: "{{ platform_homebrew_path }}"
     bootstrap_homebrew_enabled: true
   when: platform_is_linux
-  tags:
-    - bootstrap
-    - bash
-    - homebrew
 
 - name: Require supported macOS architecture
   ansible.builtin.assert:
@@ -28,92 +21,54 @@
       - platform_architecture == 'arm64'
     fail_msg: "This macOS profile supports Apple Silicon only."
   when: platform_is_macos
-  tags:
-    - bootstrap
-    - bash
-    - homebrew
 
 - name: Detect Homebrew
   ansible.builtin.stat:
     path: "{{ bootstrap_homebrew_prefix }}/bin/brew"
   register: bootstrap_homebrew_binary
   when: bootstrap_homebrew_enabled | default(false)
-  tags:
-    - bootstrap
-    - bash
-    - homebrew
 
-- name: Detect sudo credentials for Homebrew install
-  ansible.builtin.command:
-    argv:
-      - sudo
-      - -n
-      - -v
-  changed_when: false
-  failed_when: false
-  register: bootstrap_homebrew_sudo
+- name: Install Homebrew when it is absent
   when:
     - bootstrap_homebrew_enabled | default(false)
     - not bootstrap_homebrew_binary.stat.executable | default(false)
-  tags:
-    - bootstrap
-    - bash
-    - homebrew
+  block:
+    - name: Detect sudo credentials for Homebrew install
+      ansible.builtin.command:
+        argv:
+          - sudo
+          - -n
+          - -v
+      changed_when: false
+      failed_when: false
+      register: bootstrap_homebrew_sudo
 
-- name: Require sudo credentials for Homebrew install
-  ansible.builtin.fail:
-    msg: >-
-      Installing Homebrew at {{ bootstrap_homebrew_prefix }} requires sudo.
-      Run ansible/bootstrap.sh from an interactive terminal, or pre-authenticate
-      sudo with sudo -v before running ansible-playbook directly.
-  when:
-    - bootstrap_homebrew_enabled | default(false)
-    - not bootstrap_homebrew_binary.stat.executable | default(false)
-    - bootstrap_homebrew_sudo.rc != 0
-  tags:
-    - bootstrap
-    - bash
-    - homebrew
+    - name: Require sudo credentials for Homebrew install
+      ansible.builtin.fail:
+        msg: >-
+          Installing Homebrew at {{ bootstrap_homebrew_prefix }} requires sudo.
+          Run ansible/bootstrap.sh from an interactive terminal, or pre-authenticate
+          sudo with sudo -v before running ansible-playbook directly.
+      when: bootstrap_homebrew_sudo.rc != 0
 
-- name: Ensure Homebrew installer cache directory exists
-  ansible.builtin.file:
-    path: "{{ dotfiles_cache_dir }}/installers"
-    state: directory
-    mode: "0755"
-  when:
-    - bootstrap_homebrew_enabled | default(false)
-    - not bootstrap_homebrew_binary.stat.executable | default(false)
-  tags:
-    - bootstrap
-    - bash
-    - homebrew
+    - name: Ensure Homebrew installer cache directory exists
+      ansible.builtin.file:
+        path: "{{ dotfiles_cache_dir }}/installers"
+        state: directory
+        mode: "0755"
 
-- name: Download Homebrew upstream installer
-  ansible.builtin.get_url:
-    url: "{{ bootstrap_homebrew_installer_url }}"
-    dest: "{{ dotfiles_cache_dir }}/installers/homebrew-install.sh"
-    checksum: "{{ bootstrap_homebrew_installer_checksum | default(omit) }}"
-    mode: "0755"
-  when:
-    - bootstrap_homebrew_enabled | default(false)
-    - not bootstrap_homebrew_binary.stat.executable | default(false)
-  tags:
-    - bootstrap
-    - bash
-    - homebrew
+    - name: Download Homebrew upstream installer
+      ansible.builtin.get_url:
+        url: "{{ bootstrap_homebrew_installer_url }}"
+        dest: "{{ dotfiles_cache_dir }}/installers/homebrew-install.sh"
+        checksum: "{{ bootstrap_homebrew_installer_checksum | default(omit) }}"
+        mode: "0755"
 
-- name: Install Homebrew
-  ansible.builtin.command:
-    argv:
-      - /bin/bash
-      - "{{ dotfiles_cache_dir }}/installers/homebrew-install.sh"
-    creates: "{{ bootstrap_homebrew_prefix }}/bin/brew"
-  environment:
-    NONINTERACTIVE: "1"
-  when:
-    - bootstrap_homebrew_enabled | default(false)
-    - not bootstrap_homebrew_binary.stat.executable | default(false)
-  tags:
-    - bootstrap
-    - bash
-    - homebrew
+    - name: Install Homebrew
+      ansible.builtin.command:
+        argv:
+          - /bin/bash
+          - "{{ dotfiles_cache_dir }}/installers/homebrew-install.sh"
+        creates: "{{ bootstrap_homebrew_prefix }}/bin/brew"
+      environment:
+        NONINTERACTIVE: "1"

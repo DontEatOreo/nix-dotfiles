@@ -1,0 +1,41 @@
+---
+- name: Read terminal theme tools source archive checksum
+  ansible.builtin.stat:
+    path: "{{ bootstrap_homebrew_local_tap_dir }}/Sources/terminal-theme-tools-0.3.0.tar"
+    checksum_algorithm: sha256
+  register: bootstrap_homebrew_terminal_theme_tools_source
+
+- name: Check terminal theme tools installed source checksum
+  ansible.builtin.stat:
+    path: "{{ bootstrap_homebrew_prefix }}/opt/terminal-theme-tools/share/terminal-theme-tools/source.sha256"
+  register: bootstrap_homebrew_terminal_theme_tools_installed_checksum_file
+
+- name: Read installed terminal theme tools source checksum
+  ansible.builtin.slurp:
+    path: "{{ bootstrap_homebrew_prefix }}/opt/terminal-theme-tools/share/terminal-theme-tools/source.sha256"
+  register: bootstrap_homebrew_terminal_theme_tools_installed_source
+  when:
+    - bootstrap_homebrew_terminal_theme_tools_installed_checksum_file.stat.exists
+      | default(false)
+
+- name: Reinstall terminal theme tools when its local source changes
+  ansible.builtin.command:
+    argv:
+      - "{{ bootstrap_homebrew_prefix }}/bin/brew"
+      - reinstall
+      - 4evy/dotfiles/terminal-theme-tools
+  environment:
+    HOMEBREW_NO_ASK: "1"
+    PATH: "{{ bootstrap_homebrew_path }}"
+  changed_when: true
+  when:
+    - bootstrap_homebrew_terminal_theme_tools_source.stat.exists | default(false)
+    - bootstrap_homebrew_terminal_theme_tools_installed_checksum_file.stat.exists
+      | default(false)
+    - >
+      (
+        bootstrap_homebrew_terminal_theme_tools_installed_source.content
+        | default('')
+        | b64decode
+        | trim
+      ) != bootstrap_homebrew_terminal_theme_tools_source.stat.checksum

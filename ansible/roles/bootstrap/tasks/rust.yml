@@ -27,6 +27,3 @@
     'installing component' in bootstrap_rustup_toolchain.stderr
   failed_when: bootstrap_rustup_toolchain.rc != 0
   register: bootstrap_rustup_toolchain
-  tags:
-    - bootstrap
-    - rustup
