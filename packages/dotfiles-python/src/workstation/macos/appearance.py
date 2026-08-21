@@ -10,7 +10,7 @@ from pydantic import TypeAdapter
 from workstation.lib.commands import run
 from workstation.lib.paths import asset_path
 
-APPLE_GRAPHITE_ACCENT = -1
+APPLE_PINK_ACCENT = 6
 OTHER_ICON_TINT = 10
 SKYLIGHT = "/System/Library/PrivateFrameworks/SkyLight.framework"
 
@@ -78,7 +78,7 @@ def apply_appearance() -> None:
         "-g",
         "AppleAccentColor",
         "-int",
-        str(APPLE_GRAPHITE_ACCENT),
+        str(APPLE_PINK_ACCENT),
     ))
     run((
         "defaults",
