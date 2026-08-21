@@ -21,14 +21,6 @@
     - bootstrap
     - homebrew
 
-- name: Install Permstrap and apply macOS permissions
-  ansible.builtin.import_tasks: permstrap.yml
-  when: platform_is_macos
-  tags:
-    - bootstrap
-    - permissions
-    - permstrap
-
 - name: Install repository Python commands early
   ansible.builtin.import_tasks: python-tool.yml
   when: platform_system in ['Darwin', 'Linux']
