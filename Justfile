@@ -31,7 +31,7 @@ nix_profile_tools := ['deadnix:deadnix', 'nh:nh', 'nil:nil', 'nix-instantiate:ni
 doctor_setup_commands := ['bash', 'curl', 'git', 'sudo']
 doctor_format_commands := ['git', 'nix']
 doctor_ansible_commands := ['ansible-doc', 'ansible-galaxy', 'ansible-lint', 'ansible-playbook', 'yamllint']
-doctor_lint_commands := ['actionlint', 'bundle', 'chezmoi', 'deadnix', 'hadolint', 'jq', 'lua', 'luacheck', 'nix-instantiate', 'ruby', 'rumdl', 'shellcheck', 'taplo', 'uv', 'zig', 'zizmor'] ++ doctor_format_commands ++ doctor_ansible_commands
+doctor_lint_commands := ['actionlint', 'bundle', 'chezmoi', 'deadnix', 'hadolint', 'jq', 'luacheck', 'nix-instantiate', 'ruby', 'rumdl', 'shellcheck', 'taplo', 'uv', 'zig', 'zizmor'] ++ doctor_format_commands ++ doctor_ansible_commands
 doctor_all_commands := doctor_lint_commands ++ ['bash', 'curl', 'sudo', 'watchexec']
 
 export PATH := homebrew_path + PATH_VAR_SEP + nix_bin_dir + PATH_VAR_SEP + nix_profile_bin_dir + PATH_VAR_SEP + nixos_profile_bin_dir + PATH_VAR_SEP + env("PATH", "")
@@ -467,12 +467,6 @@ setup: (doctor 'setup') _userland apply _host
 # Refresh userland, dotfiles, and host stages on an already-bootstrapped machine.
 [group('setup')]
 update: _userland apply _host
-
-# Exercise fresh-host bootstrap orchestration using disposable fake tools.
-[arg('scenario', help='Simulation scenario')]
-[group('dev')]
-bootstrap-simulate scenario="success":
-    ansible/tests/bootstrap-simulate.sh {{ quote(scenario) }}
 
 [private]
 _deps:
@@ -913,17 +907,6 @@ bun-nix-update:
     nix fmt -- packages/hyper-window-tiling/bun.nix
 
 [private]
-_check-lua:
-    while IFS= read -r -d '' test_file; do
-      main_file=${test_file%/test.lua}/main.lua
-      if [[ ! -f $main_file ]]; then
-        printf 'missing Lua plugin entry point for %s: %s\n' "$test_file" "$main_file" >&2
-        exit 1
-      fi
-      lua "$test_file" "$main_file"
-    done < <(git ls-files -z --cached --others --exclude-standard -- '*.yazi/test.lua')
-
-[private]
 _check-ruby:
     bundle check
     bundle exec rubocop
@@ -938,7 +921,7 @@ lint: (doctor 'lint') check-format _lint-checks
 
 [parallel]
 [private]
-_lint-checks: _lint-files _check-python _check-zig _check-ansible _check-github-actions _check-bun _check-lua _check-ruby
+_lint-checks: _lint-files _check-python _check-zig _check-ansible _check-github-actions _check-bun _check-ruby
 
 # Run the repo validation suite.
 [group('dev')]

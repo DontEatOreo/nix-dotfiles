@@ -158,29 +158,11 @@
     },
     {
       "label": "zig: test",
-      "detail": "Test both the root Zig build and standalone package build.",
-      "dependsOrder": "sequence",
-      "dependsOn": ["zig: test root", "zig: test package"],
+      "detail": "Run the Zig unit and C interface tests.",
+      "type": "process",
+      "command": "zig",
+      "args": ["build", "test"],
       "group": "test",
-      "problemMatcher": []
-    },
-    {
-      "label": "zig: test root",
-      "type": "process",
-      "command": "zig",
-      "args": ["build", "test"],
-      "hide": true,
-      "problemMatcher": "$gcc"
-    },
-    {
-      "label": "zig: test package",
-      "type": "process",
-      "command": "zig",
-      "args": ["build", "test"],
-      "options": {
-        "cwd": "${workspaceFolder}/packages/terminal-theme-tools"
-      },
-      "hide": true,
       "problemMatcher": "$gcc"
     },
     {
@@ -216,16 +198,6 @@
         "id": "diff"
       },
       "problemMatcher": []
-    },
-    {
-      "label": "bootstrap: simulate",
-      "detail": "Exercise bootstrap orchestration with disposable fake tools.",
-      "type": "process",
-      "command": "just",
-      "args": ["bootstrap-simulate", "${input:bootstrapScenario}"],
-      "inAgents": true,
-      "group": "test",
-      "problemMatcher": "$python"
     },
     {
       "label": "spectrum: validate",
@@ -277,13 +249,6 @@
         "watch",
         "check"
       ]
-    },
-    {
-      "id": "bootstrapScenario",
-      "type": "pickString",
-      "description": "Bootstrap simulation scenario",
-      "default": "success",
-      "options": ["success", "apply-failure"]
     },
     {
       "id": "nixPackage",

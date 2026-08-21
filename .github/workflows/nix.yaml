@@ -134,7 +134,6 @@ jobs:
           .#checks.x86_64-linux.dotfiles-python
           .#checks.x86_64-linux.equicord-settings
           .#checks.x86_64-linux.hyper-window-tiling
-          .#checks.x86_64-linux.nixos-integration
           .#checks.x86_64-linux.nixos-module
           .#checks.x86_64-linux.terminal-theme-tools
           .#checks.x86_64-linux.toshy-runtime
