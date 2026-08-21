@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "open3"
+require "optparse"
 require "pathname"
 
 # Installs and inspects the local Shottr activation state.
@@ -22,23 +23,9 @@ module ShottrLicense
 
   module_function
 
-  def execute(*command, allow_failure: false)
-    stdout, stderr, status = Open3.capture3(*command)
-    unless status.success? || allow_failure
-      details = stderr.strip
-      details = stdout.strip if details.empty?
-      message = "command failed (#{status.exitstatus}): #{command.first}"
-      message = "#{message}\n#{details}" unless details.empty?
-      raise Error, message
-    end
-    [stdout, stderr, status.success?]
-  rescue Errno::ENOENT => error
-    raise Error, "command not found: #{command.first} (#{error.message})"
-  end
-
   def secrets_file
-    configured = ENV["SHOTTR_SECRETS_FILE"]
-    return Pathname(configured).expand_path if configured && !configured.empty?
+    configured = ENV.fetch("SHOTTR_SECRETS_FILE", nil)
+    return Pathname(configured).expand_path unless configured.to_s.empty?
 
     bundled = Pathname(__FILE__).realpath.dirname/"secrets.yaml"
     return bundled if bundled.file?
@@ -51,43 +38,49 @@ module ShottrLicense
   end
 
   def license_key
-    stdout, = execute(
+    stdout, stderr, status = Open3.capture3(
       SOPS,
       "--decrypt",
       "--extract",
       '["shottr-license-key"]',
       secrets_file.to_s,
     )
-    key = stdout.strip
-    unless LICENSE_PATTERN.match?(key)
-      raise Error, "Shottr license key in SOPS has an unexpected format"
+    unless status.success?
+      details = stderr.strip
+      details = stdout.strip if details.empty?
+      message = "sops could not decrypt the Shottr license key"
+      message = "#{message}\n#{details}" unless details.empty?
+      raise Error, message
     end
+
+    key = stdout.strip
+    raise Error, "Shottr license key in SOPS has an unexpected format" unless LICENSE_PATTERN.match?(key)
+
     key
   end
 
   def activated?
     %w[kc-license kc-vault].all? do |key|
-      stdout, _, succeeded = execute(
+      system(
         DEFAULTS,
         "read",
         DOMAIN,
         key,
-        allow_failure: true,
+        out: File::NULL,
+        err: File::NULL,
       )
-      succeeded && !stdout.strip.empty?
     end
   end
 
   def activate(key)
     raise Error, "Shottr activation script not found: #{ACTIVATION_SCRIPT}" unless ACTIVATION_SCRIPT.file?
 
-    stdout, stderr, succeeded = execute(
+    stdout, stderr, status = Open3.capture3(
       OSASCRIPT,
       ACTIVATION_SCRIPT.to_s,
       key,
-      allow_failure: true,
     )
-    return if succeeded
+    return if status.success?
 
     details = stderr.strip
     details = stdout.strip if details.empty?
@@ -137,30 +130,47 @@ module ShottrLicense
     command = arguments.shift
     case command
     when "install"
-      force = arguments.delete("--force")
-      raise Error, "unexpected arguments: #{arguments.join(" ")}" unless arguments.empty?
+      force = false
+      parser = OptionParser.new do |options|
+        options.banner = "Usage: shottr-license install [--force]"
+        options.on("--force", "Submit the license even when state exists") do
+          force = true
+        end
+        options.on("-h", "--help", "Show this help") do
+          puts options
+          return 0
+        end
+      end
+      parser.parse!(arguments)
+      reject_arguments(arguments)
 
-      install(force: !force.nil?)
+      install(force:)
     when "status"
-      raise Error, "unexpected arguments: #{arguments.join(" ")}" unless arguments.empty?
-
+      reject_arguments(arguments)
       status
     when "--help", "-h", "help", nil
-      raise Error, "unexpected arguments: #{arguments.join(" ")}" unless arguments.empty?
-
+      reject_arguments(arguments)
       puts usage
     else
       raise Error, "unknown command: #{command}"
     end
     0
   end
+
+  def reject_arguments(arguments)
+    return if arguments.empty?
+
+    raise OptionParser::InvalidArgument, arguments.join(" ")
+  end
 end
 
 if $PROGRAM_NAME == __FILE__
   begin
     exit ShottrLicense.main(ARGV)
-  rescue ShottrLicense::Error => error
-    warn "shottr-license: error: #{error.message}"
+  rescue ShottrLicense::Error,
+         Errno::ENOENT,
+         RuntimeError => e
+    warn "shottr-license: error: #{e.message}"
     exit 1
   end
 end

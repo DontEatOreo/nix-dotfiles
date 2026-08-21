@@ -8,7 +8,7 @@ class AltTabLicense < Formula
   desc "Dotfiles-managed AltTab license activation"
   homepage "https://github.com/lwouis/alt-tab-macos"
   url "file://#{MANAGER_SOURCE}"
-  version "1"
+  version "2"
   sha256 Digest::SHA256.file(MANAGER_SOURCE).hexdigest
   license "MIT"
 
@@ -17,12 +17,17 @@ class AltTabLicense < Formula
 
   def install
     libexec.install "alt-tab-license.rb"
-    chmod 0755, libexec/"alt-tab-license.rb"
+    chmod 0o755, libexec/"alt-tab-license.rb"
     bin.install_symlink (libexec/"alt-tab-license.rb") => "alt-tab-license"
   end
 
   test do
     assert_predicate libexec/"alt-tab-license.rb", :executable?
-    assert_match "Usage:", shell_output("#{bin}/alt-tab-license --help")
+    output = shell_output(
+      "ALT_TAB_SECURITY=/usr/bin/false ALT_TAB_DEFAULTS=/usr/bin/false " \
+      "#{bin}/alt-tab-license status",
+    )
+    assert_match "licenseKey:  none", output
+    assert_match "lastValidation:        none", output
   end
 end

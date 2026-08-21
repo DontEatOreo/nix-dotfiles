@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class JjPatched < Formula
   desc "Jujutsu build with native signing, redate, and shallow workflow patches"
   homepage "https://github.com/jj-vcs/jj"
@@ -12,10 +14,12 @@ class JjPatched < Formula
   def install
     tap_root = Pathname(__dir__).parent
     patch_dir = tap_root/"packages/jj-patched/patches"
-    patches = (patch_dir/"series").readlines(chomp: true)
-              .map(&:strip)
-              .reject { |line| line.empty? || line.start_with?("#") }
-              .map { |name| patch_dir/name }
+    patches = (patch_dir/"series").each_line(chomp: true).filter_map do |line|
+      name = line.strip
+      next if name.empty? || name.start_with?("#")
+
+      patch_dir/name
+    end
     odie "jj patch series is empty: #{patch_dir}" if patches.empty?
     odie "jj patch series contains a missing file" unless patches.all?(&:file?)
 

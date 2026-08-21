@@ -16,7 +16,7 @@ class ShottrLicense < Formula
   desc "Dotfiles-managed Shottr license activation"
   homepage "https://shottr.cc/"
   url "file://#{MANAGER_SOURCE}"
-  version "1"
+  version "2"
   sha256 Digest::SHA256.file(MANAGER_SOURCE).hexdigest
   license "MIT"
 
@@ -42,8 +42,8 @@ class ShottrLicense < Formula
     resource("secrets").stage do
       libexec.install "secrets.yaml"
     end
-    chmod 0755, libexec/"shottr-license.rb"
-    chmod 0600, libexec/"secrets.yaml"
+    chmod 0o755, libexec/"shottr-license.rb"
+    chmod 0o600, libexec/"secrets.yaml"
     bin.install_symlink (libexec/"shottr-license.rb") => "shottr-license"
   end
 
@@ -51,6 +51,9 @@ class ShottrLicense < Formula
     assert_predicate libexec/"shottr-license.rb", :executable?
     assert_predicate libexec/"activate-shottr-license.applescript", :file?
     assert_predicate libexec/"secrets.yaml", :file?
-    assert_match "Usage:", shell_output("#{bin}/shottr-license --help")
+    output = shell_output(
+      "SHOTTR_DEFAULTS=/usr/bin/false #{bin}/shottr-license status",
+    )
+    assert_equal "shottr-license: not installed", output.strip
   end
 end

@@ -3,12 +3,16 @@
 
 require "fileutils"
 require "json"
-require "net/http"
 require "open3"
+require "open-uri"
+require "openssl"
 require "optparse"
 require "pathname"
 require "rubygems/version"
 require "shellwords"
+require "socket"
+require "tempfile"
+require "timeout"
 require "tmpdir"
 require "uri"
 
@@ -16,9 +20,13 @@ require "uri"
 module RaycastBeta
   PROGRAM_NAME = "raycast-beta-manager"
   EXPECTED_BUNDLE_ID = "com.raycast-x.macos"
+  HTTP_OPEN_TIMEOUT = 30
+  HTTP_READ_TIMEOUT = 300
+  USER_AGENT = "#{PROGRAM_NAME}/5".freeze
   RELEASE_URL_PATTERN = %r{
-    https://x-r2\.raycast-releases\.com/
+    \Ahttps://x-r2\.raycast-releases\.com/
     Raycast_Beta_(\d+(?:\.\d+)+)_[a-f0-9]+_arm64\.dmg
+    \z
   }ix
 
   Release = Data.define(:uri, :version).freeze
@@ -41,7 +49,7 @@ module RaycastBeta
                 :keydump_hook,
                 :lock_file,
                 :profile_file,
-                :release_page
+                :release_api
 
     def initialize(environment: ENV, home: Pathname(Dir.home))
       @app = path(environment.fetch("RAYCAST_APP", "/Applications/Raycast Beta.app"))
@@ -72,24 +80,34 @@ module RaycastBeta
           profile_directory/"raycast-db.mjs",
         ),
       )
+      backend_resources = @app/
+                          "Contents/Resources/macos-app_RaycastDesktopApp.bundle/" \
+                          "Contents/Resources/backend"
       @data_addon = path(
         environment.fetch(
           "RAYCAST_DATA_ADDON",
-          @app/"Contents/Resources/macos-app_RaycastDesktopApp.bundle/Contents/Resources/backend/data.darwin-arm64.node",
+          backend_resources/"data.darwin-arm64.node",
         ),
       )
       @avatar_source = optional_path(environment.fetch("RAYCAST_AVATAR_SRC", nil))
-      @release_page = URI(
-        environment.fetch("RAYCAST_RELEASE_PAGE", "https://www.raycast.com/new"),
+      @release_api = URI(
+        environment.fetch(
+          "RAYCAST_RELEASE_API",
+          "https://x.raycast-releases.com/releases/latest",
+        ),
       )
+      unless @release_api.is_a?(URI::HTTP) && @release_api.host
+        raise Error, "Raycast release API must use HTTP(S): #{@release_api}"
+      end
+
       @lock_file = path(
         environment.fetch(
           "RAYCAST_LOCK_FILE",
           Pathname(Dir.tmpdir)/"#{PROGRAM_NAME}-#{Process.uid}.lock",
         ),
       )
-    rescue URI::InvalidURIError => error
-      raise Error, "invalid Raycast release page URL: #{error.message}"
+    rescue URI::InvalidURIError => e
+      raise Error, "invalid Raycast release API URL: #{e.message}"
     end
 
     private
@@ -103,143 +121,37 @@ module RaycastBeta
     end
   end
 
-  # Runs external macOS and Raycast commands with consistent diagnostics.
-  class CommandRunner
-    def run(*command, environment: {}, allow_failure: false, quiet: false)
-      arguments = command.map(&:to_s)
-      options = quiet ? { out: File::NULL, err: File::NULL } : {}
-      success = system(environment, *arguments, **options)
-      return true if success
-      return false if allow_failure
-
-      status = Process.last_status
-      detail = status ? " (exit #{status.exitstatus})" : ""
-      raise Error, "command failed#{detail}: #{arguments.shelljoin}"
-    end
-
-    def capture(*command)
-      arguments = command.map(&:to_s)
-      stdout, stderr, status = Open3.capture3(*arguments)
-      return stdout if status.success?
-
-      detail = stderr.strip
-      detail = "command failed (exit #{status.exitstatus}): #{arguments.shelljoin}" if detail.empty?
-      raise Error, detail
-    end
-  end
-
-  # Streams HTTP(S) responses with bounded redirects and timeouts.
-  class HTTPClient
-    USER_AGENT = "#{PROGRAM_NAME}/3".freeze
-    MAX_REDIRECTS = 5
-
-    def initialize(open_timeout: 30, read_timeout: 300, write_timeout: 30)
-      @open_timeout = open_timeout
-      @read_timeout = read_timeout
-      @write_timeout = write_timeout
-    end
-
-    def read(uri)
-      body = +""
-      request(uri) { |response| response.read_body { |chunk| body << chunk } }
-      body
-    end
-
-    def download(uri, destination)
-      destination = Pathname(destination)
-      temporary = Pathname("#{destination}.part-#{Process.pid}")
-      destination.dirname.mkpath
-      temporary.open("wb", 0o600) do |file|
-        request(uri) do |response|
-          response.read_body { |chunk| file.write(chunk) }
-        end
-        file.flush
-        file.fsync
-      end
-      File.rename(temporary, destination)
-      destination
-    ensure
-      FileUtils.rm_f(temporary) if defined?(temporary)
-    end
-
-    private
-
-    def request(uri, redirects_remaining: MAX_REDIRECTS, &block)
-      uri = URI(uri.to_s)
-      raise Error, "unsupported download URL: #{uri}" if !uri.is_a?(URI::HTTP) || !uri.host
-
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = uri.is_a?(URI::HTTPS)
-      http.open_timeout = @open_timeout
-      http.read_timeout = @read_timeout
-      http.write_timeout = @write_timeout
-      http_request = Net::HTTP::Get.new(
-        uri.request_uri,
-        "Accept" => "*/*",
-        "User-Agent" => USER_AGENT,
-      )
-      http.request(http_request) do |response|
-        case response
-        when Net::HTTPSuccess
-          block.call(response)
-        when Net::HTTPRedirection
-          raise Error, "too many redirects while downloading #{uri}" if redirects_remaining.zero?
-
-          location = response["location"]
-          raise Error, "redirect from #{uri} did not include a location" if location.to_s.empty?
-
-          request(
-            URI.join(uri.to_s, location),
-            redirects_remaining: redirects_remaining - 1,
-            &block
-          )
-        else
-          raise Error, "download failed for #{uri}: HTTP #{response.code} #{response.message}"
-        end
-      end
-    rescue Error
-      raise
-    rescue IOError,
-           Net::HTTPBadResponse,
-           OpenSSL::SSL::SSLError,
-           SocketError,
-           SystemCallError,
-           Timeout::Error => error
-      raise Error, "download failed for #{uri}: #{error.message}"
-    end
-  end
-
   # Owns Raycast installation, local database configuration, and lifecycle.
   class Manager
     WAIT_TIMEOUT = 30
     WAIT_INTERVAL = 1
 
     def initialize(
-      configuration: Configuration.new,
-      commands: CommandRunner.new,
-      http: HTTPClient.new,
-      sleeper: ->(seconds) { sleep(seconds) }
+      configuration: Configuration.new
     )
       @configuration = configuration
-      @commands = commands
-      @http = http
-      @sleeper = sleeper
     end
 
-    def with_lock(&block)
+    def with_lock
       @configuration.lock_file.dirname.mkpath
       @configuration.lock_file.open(
         File::RDWR | File::CREAT,
         0o600,
       ) do |lock|
         lock.flock(File::LOCK_EX)
-        block.call
+        yield
       end
     end
 
     def install_latest(force: false)
-      release = latest_release
       installed_version = app_version(@configuration.app)
+      release = latest_release(current_version: force ? nil : installed_version)
+      unless release
+        raise Error, "Raycast release API reported an absent app as current" unless installed_version
+
+        log "Raycast Beta #{installed_version} is current"
+        return false
+      end
       if !force && installed_version && installed_version >= release.version
         log "Raycast Beta #{installed_version} is current"
         return false
@@ -251,30 +163,39 @@ module RaycastBeta
         mount = root/"mount"
         mount.mkpath
         log "downloading Raycast Beta #{release.version}"
-        @http.download(release.uri, image)
-        @commands.run "/usr/bin/hdiutil", "verify", image, quiet: true
+        download(release.uri, image)
+        system(
+          "/usr/bin/hdiutil",
+          "verify",
+          image.to_s,
+          out:       File::NULL,
+          err:       File::NULL,
+          exception: true,
+        )
         attached = false
         begin
-          @commands.run(
+          system(
             "/usr/bin/hdiutil",
             "attach",
-            image,
+            image.to_s,
             "-nobrowse",
             "-readonly",
             "-mountpoint",
-            mount,
-            quiet: true,
+            mount.to_s,
+            out:       File::NULL,
+            err:       File::NULL,
+            exception: true,
           )
           attached = true
           install_app(mount/"Raycast Beta.app", force:)
         ensure
           if attached
-            @commands.run(
+            system(
               "/usr/bin/hdiutil",
               "detach",
-              mount,
-              allow_failure: true,
-              quiet: true,
+              mount.to_s,
+              out: File::NULL,
+              err: File::NULL,
             )
           end
         end
@@ -299,29 +220,32 @@ module RaycastBeta
       end
       environment = {
         "RAYCAST_APP_SUPPORT" => @configuration.app_support.to_s,
-        "RAYCAST_DATA_ADDON" => @configuration.data_addon.to_s,
-        "RAYCAST_KEY_FILE" => key_file.to_s,
+        "RAYCAST_DATA_ADDON"  => @configuration.data_addon.to_s,
+        "RAYCAST_KEY_FILE"    => key_file.to_s,
       }
-      @commands.run(
-        node,
-        @configuration.database_cli,
+      profile_updated = system(
+        environment,
+        node.to_s,
+        @configuration.database_cli.to_s,
         "profile",
         "apply",
         JSON.generate(current_user),
         JSON.generate(profile.oauth_token),
-        environment:,
       )
+      raise Error, "Raycast profile database update failed" unless profile_updated
+
       unless profile.command_aliases.empty?
-        @commands.run(
-          node,
-          @configuration.database_cli,
+        aliases_updated = system(
+          environment,
+          node.to_s,
+          @configuration.database_cli.to_s,
           "aliases",
           "apply",
           JSON.generate(profile.command_aliases),
-          environment:,
         )
+        raise Error, "Raycast command-alias database update failed" unless aliases_updated
       end
-      @commands.run "/usr/bin/open", @configuration.app
+      system "/usr/bin/open", @configuration.app.to_s, exception: true
       log "Raycast Beta configured and started"
       true
     end
@@ -335,23 +259,46 @@ module RaycastBeta
       app_version(@configuration.app)
     end
 
-    def latest_release
-      page = @http.read(@configuration.release_page)
-      releases = page.to_enum(:scan, RELEASE_URL_PATTERN).map do
-        match = Regexp.last_match
-        Release.new(
-          uri: URI(match[0]),
-          version: parse_version(match[1]),
-        )
+    def latest_release(current_version: nil)
+      endpoint = @configuration.release_api.dup
+      endpoint.query = URI.encode_www_form(
+        "platform"     => "macos",
+        "architecture" => "arm64",
+        "version"      => (current_version || Gem::Version.new("0.0.0.0")).to_s,
+      )
+      response_status = nil
+      response_body = URI.open(
+        endpoint,
+        "Accept" => "application/json",
+        "User-Agent" => USER_AGENT,
+        open_timeout: HTTP_OPEN_TIMEOUT,
+        read_timeout: HTTP_READ_TIMEOUT,
+      ) do |response|
+        response_status = response.status.first
+
+        response.read unless response_status == "204"
       end
-      release = releases.max_by(&:version)
-      unless release
-        raise Error, "Raycast release page did not include an Apple Silicon Beta DMG URL"
+      return if response_status == "204"
+
+      payload = JSON.parse(response_body)
+      version = parse_version(payload.fetch("version"))
+      download_url = payload.fetch("download_url")
+      match = RELEASE_URL_PATTERN.match(download_url)
+      raise Error, "Raycast release API returned an unexpected Apple Silicon Beta DMG URL" unless match
+      unless parse_version(match[1]) == version
+        raise Error, "Raycast release API returned mismatched release and download versions"
       end
 
-      release
-    rescue URI::InvalidURIError => error
-      raise Error, "Raycast release page included an invalid DMG URL: #{error.message}"
+      Release.new(uri: URI(download_url), version:)
+    rescue JSON::ParserError, KeyError, TypeError, URI::InvalidURIError => e
+      raise Error, "invalid response from the Raycast release API: #{e.message}"
+    rescue IOError,
+           OpenURI::HTTPError,
+           OpenSSL::SSL::SSLError,
+           SocketError,
+           SystemCallError,
+           Timeout::Error => e
+      raise Error, "could not read the Raycast release API: #{e.message}"
     end
 
     def file_url(path)
@@ -371,17 +318,22 @@ module RaycastBeta
       end
 
       destination = @configuration.app
-      staging = destination.dirname/".#{destination.basename}.install-#{Process.pid}"
-      backup = destination.dirname/".#{destination.basename}.backup-#{Process.pid}"
-      remove_path(staging)
-      remove_path(backup)
-      @commands.run "/usr/bin/ditto", source, staging
+      destination.dirname.mkpath
+      transaction = Pathname(
+        Dir.mktmpdir(
+          ".#{destination.basename}.install-",
+          destination.dirname.to_s,
+        ),
+      )
+      staging = transaction/"staging.app"
+      backup = transaction/"backup.app"
+      system "/usr/bin/ditto", source.to_s, staging.to_s, exception: true
       validate_app(staging)
-      @commands.run(
+      system(
         "/usr/bin/killall",
         "Raycast Beta",
-        allow_failure: true,
-        quiet: true,
+        out: File::NULL,
+        err: File::NULL,
       )
 
       File.rename(destination, backup) if path_exists?(destination)
@@ -391,13 +343,12 @@ module RaycastBeta
         File.rename(backup, destination) if path_exists?(backup) && !path_exists?(destination)
         raise
       end
-      remove_path(backup)
       log "installed Raycast Beta #{source_version} in #{destination}"
     ensure
-      remove_path(staging) if defined?(staging)
       if defined?(backup) && path_exists?(backup) && !path_exists?(@configuration.app)
         File.rename(backup, @configuration.app)
       end
+      remove_path(transaction) if defined?(transaction)
     end
 
     def validate_app(app)
@@ -407,9 +358,7 @@ module RaycastBeta
       raise Error, "Raycast executable is not executable: #{executable}" unless executable.executable?
 
       bundle_id = plist_value(plist, "CFBundleIdentifier")
-      unless bundle_id == EXPECTED_BUNDLE_ID
-        raise Error, "unexpected Raycast bundle identifier: #{bundle_id.inspect}"
-      end
+      raise Error, "unexpected Raycast bundle identifier: #{bundle_id.inspect}" unless bundle_id == EXPECTED_BUNDLE_ID
 
       app_version(app) || raise(Error, "Raycast app is missing its version")
     end
@@ -422,28 +371,33 @@ module RaycastBeta
     end
 
     def plist_value(plist, key)
-      @commands.capture(
+      stdout, stderr, status = Open3.capture3(
         "/usr/bin/plutil",
         "-extract",
         key,
         "raw",
         "-o",
         "-",
-        plist,
-      ).strip
+        plist.to_s,
+      )
+      return stdout.strip if status.success?
+
+      details = stderr.strip
+      details = "plutil failed with exit #{status.exitstatus}" if details.empty?
+      raise Error, details
     end
 
     def parse_version(value)
       Gem::Version.new(value.to_s)
-    rescue ArgumentError => error
-      raise Error, "invalid Raycast version #{value.inspect}: #{error.message}"
+    rescue ArgumentError => e
+      raise Error, "invalid Raycast version #{value.inspect}: #{e.message}"
     end
 
     def node_directory
       runtime = @configuration.app_support/"node/runtime"
       unless runtime.directory?
         log "starting Raycast Beta once to initialize its Node runtime"
-        @commands.run "/usr/bin/open", @configuration.app
+        system "/usr/bin/open", @configuration.app.to_s, exception: true
         wait_until("Raycast Node runtime", timeout: WAIT_TIMEOUT) { runtime.directory? }
       end
 
@@ -472,25 +426,25 @@ module RaycastBeta
 
       require_file(@configuration.keydump_hook)
       hook.write("require(#{@configuration.keydump_hook.to_s.to_json});\n")
-      @commands.run(
+      system(
         "/usr/bin/killall",
         "Raycast Beta",
-        allow_failure: true,
-        quiet: true,
+        out: File::NULL,
+        err: File::NULL,
       )
       File.rename(node, real)
       begin
         write_node_wrapper(node, real, hook, key_file)
         log "extracting Raycast DB key"
-        @commands.run "/usr/bin/open", @configuration.app
+        system "/usr/bin/open", @configuration.app.to_s, exception: true
         wait_until("Raycast DB key", timeout: WAIT_TIMEOUT) { key_file.file? }
-        @commands.run(
+        system(
           "/usr/bin/killall",
           "Raycast Beta",
-          allow_failure: true,
-          quiet: true,
+          out: File::NULL,
+          err: File::NULL,
         )
-        @sleeper.call(2)
+        sleep 2
         key = read_key(key_file)
         raise Error, "failed to read captured Raycast DB key" unless key
 
@@ -541,25 +495,23 @@ module RaycastBeta
         raise Error, "required file not found: #{path}"
       end
 
-      data = JSON.parse(path.read)
+      data = JSON.load_file(path)
       current_user = require_object(data, "current_user")
       oauth_token = require_object(data, "oauth_token")
       require_nonempty_string(current_user, "id", "current_user")
       require_nonempty_string(current_user, "name", "current_user")
       require_nonempty_string(oauth_token, "access_token", "oauth_token")
       aliases = data.fetch("command_aliases", [])
-      unless aliases.is_a?(Array) && aliases.all?(Hash)
-        raise Error, "command_aliases must be an array of objects"
-      end
+      raise Error, "command_aliases must be an array of objects" unless aliases.is_a?(Array) && aliases.all?(Hash)
 
       Profile.new(
         current_user:,
         oauth_token:,
-        avatar_url: data.fetch("avatar_url", ""),
+        avatar_url:      data.fetch("avatar_url", ""),
         command_aliases: aliases,
       )
-    rescue JSON::ParserError, KeyError => error
-      raise Error, "invalid Raycast profile: #{error.message}"
+    rescue JSON::ParserError, KeyError => e
+      raise Error, "invalid Raycast profile: #{e.message}"
     end
 
     def require_object(object, key)
@@ -595,43 +547,86 @@ module RaycastBeta
 
       Dir.mktmpdir("raycast-avatar-") do |directory|
         source = Pathname(directory)/"avatar"
-        @http.download(URI(profile.avatar_url), source)
+        download(URI(profile.avatar_url), source)
         render_avatar(source, destination)
       end
       log "avatar downloaded and resized from #{profile.avatar_url}"
       destination
-    rescue Error, URI::InvalidURIError => error
-      warning "failed to prepare Raycast avatar: #{error.message}"
+    rescue Error, URI::InvalidURIError => e
+      warning "failed to prepare Raycast avatar: #{e.message}"
       destination if destination&.file?
     end
 
     def render_avatar(source, destination)
-      temporary = Pathname("#{destination}.part-#{Process.pid}")
-      @commands.run(
-        "/usr/bin/sips",
-        "--resampleHeightWidthMax",
-        "256",
-        "--setProperty",
-        "format",
-        "png",
-        source,
-        "--out",
-        temporary,
-        quiet: true,
-      )
-      File.rename(temporary, destination)
-    ensure
-      FileUtils.rm_f(temporary) if defined?(temporary)
+      destination.dirname.mkpath
+      Tempfile.create(
+        [".#{destination.basename}.", ".png"],
+        destination.dirname.to_s,
+      ) do |temporary|
+        temporary.close
+        system(
+          "/usr/bin/sips",
+          "--resampleHeightWidthMax",
+          "256",
+          "--setProperty",
+          "format",
+          "png",
+          source.to_s,
+          "--out",
+          temporary.path,
+          out:       File::NULL,
+          err:       File::NULL,
+          exception: true,
+        )
+        File.rename(temporary.path, destination)
+      end
     end
 
     def wait_until(description, timeout:)
-      attempts = (timeout.to_f/WAIT_INTERVAL).ceil
-      attempts.times do
+      deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+      loop do
         return true if yield
 
-        @sleeper.call(WAIT_INTERVAL)
+        remaining = deadline - Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        break if remaining <= 0
+
+        sleep [WAIT_INTERVAL, remaining].min
       end
       raise Error, "timed out waiting for #{description}"
+    end
+
+    def download(uri, destination)
+      uri = URI(uri.to_s)
+      raise Error, "unsupported download URL: #{uri}" unless uri.is_a?(URI::HTTP) && uri.host
+
+      destination = Pathname(destination)
+      destination.dirname.mkpath
+      Tempfile.create(
+        [".#{destination.basename}.", ".download"],
+        destination.dirname.to_s,
+      ) do |temporary|
+        temporary.binmode
+        URI.open(
+          uri,
+          "Accept" => "*/*",
+          "User-Agent" => USER_AGENT,
+          open_timeout: HTTP_OPEN_TIMEOUT,
+          read_timeout: HTTP_READ_TIMEOUT,
+        ) do |response|
+          IO.copy_stream(response, temporary)
+        end
+        temporary.flush
+        temporary.fsync
+        temporary.close
+        File.rename(temporary.path, destination)
+      end
+      destination
+    rescue IOError,
+           OpenSSL::SSL::SSLError,
+           SocketError,
+           SystemCallError,
+           Timeout::Error => e
+      raise Error, "download failed for #{uri}: #{e.message}"
     end
 
     def require_file(path)
@@ -676,45 +671,67 @@ module RaycastBeta
       command = arguments.shift
       case command
       when "install"
-        options = parse_options(
-          arguments,
-          "Usage: #{PROGRAM_NAME} install [--force]",
-          force: "Replace the installed app even when it is current",
-        )
-        return 0 unless options
+        force = false
+        parser = OptionParser.new do |options|
+          options.banner = "Usage: #{PROGRAM_NAME} install [--force]"
+          options.on("--force", "Replace the app even when it is current") do
+            force = true
+          end
+          options.on("-h", "--help", "Show this help") do
+            @output.puts options
+            return 0
+          end
+        end
+        parser.parse!(arguments)
+        reject_arguments(arguments)
 
-        @manager.with_lock { @manager.install_latest(force: options.fetch(:force, false)) }
+        @manager.with_lock { @manager.install_latest(force:) }
       when "configure"
-        options = parse_options(
-          arguments,
-          "Usage: #{PROGRAM_NAME} configure [--if-present]",
-          if_present: "Skip configuration when the profile is absent",
-        )
-        return 0 unless options
+        if_present = false
+        parser = OptionParser.new do |options|
+          options.banner = "Usage: #{PROGRAM_NAME} configure [--if-present]"
+          options.on("--if-present", "Skip when the profile is absent") do
+            if_present = true
+          end
+          options.on("-h", "--help", "Show this help") do
+            @output.puts options
+            return 0
+          end
+        end
+        parser.parse!(arguments)
+        reject_arguments(arguments)
 
         @manager.with_lock do
-          @manager.configure(if_present: options.fetch(:if_present, false))
+          @manager.configure(if_present:)
         end
       when "refresh"
-        options = parse_options(
-          arguments,
-          "Usage: #{PROGRAM_NAME} refresh [--force]",
-          force: "Replace the installed app even when it is current",
-        )
-        return 0 unless options
+        force = false
+        parser = OptionParser.new do |options|
+          options.banner = "Usage: #{PROGRAM_NAME} refresh [--force]"
+          options.on("--force", "Replace the app even when it is current") do
+            force = true
+          end
+          options.on("-h", "--help", "Show this help") do
+            @output.puts options
+            return 0
+          end
+        end
+        parser.parse!(arguments)
+        reject_arguments(arguments)
 
-        @manager.with_lock { @manager.refresh(force: options.fetch(:force, false)) }
+        @manager.with_lock { @manager.refresh(force:) }
       when "version"
         reject_arguments(arguments)
         @output.puts(@manager.installed_version || "not installed")
       when "help", "--help", "-h", nil
+        reject_arguments(arguments)
         @output.puts help
       else
         raise Error, "unknown command: #{command}"
       end
       0
-    rescue OptionParser::ParseError => error
-      raise Error, error.message
+    rescue OptionParser::ParseError => e
+      raise Error, e.message
     end
 
     def help
@@ -729,29 +746,6 @@ module RaycastBeta
       TEXT
     end
 
-    private
-
-    def parse_options(arguments, banner, definitions)
-      options = {}
-      help_requested = false
-      parser = OptionParser.new do |option_parser|
-        option_parser.banner = banner
-        definitions.each do |name, description|
-          switch = "--#{name.to_s.tr("_", "-")}"
-          option_parser.on(switch, description) { options[name] = true }
-        end
-        option_parser.on("-h", "--help", "Show this help") { help_requested = true }
-      end
-      parser.parse!(arguments)
-      reject_arguments(arguments)
-      if help_requested
-        @output.puts parser
-        return
-      end
-
-      options
-    end
-
     def reject_arguments(arguments)
       return if arguments.empty?
 
@@ -763,8 +757,10 @@ end
 if $PROGRAM_NAME == __FILE__
   begin
     exit RaycastBeta::CLI.new.run(ARGV)
-  rescue RaycastBeta::Error => error
-    warn "#{RaycastBeta::PROGRAM_NAME}: error: #{error.message}"
+  rescue RaycastBeta::Error,
+         SystemCallError,
+         RuntimeError => e
+    warn "#{RaycastBeta::PROGRAM_NAME}: error: #{e.message}"
     exit 1
   end
 end

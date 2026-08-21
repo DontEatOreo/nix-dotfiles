@@ -1,16 +1,19 @@
+# frozen_string_literal: true
+
+require "base64"
 require "json"
 
 class GhosttyPatched < Formula
   tap_root = Pathname(__dir__).parent
-  pins = JSON.parse((tap_root/"npins/sources.json").read).fetch("pins")
+  pins = JSON.load_file(tap_root/"npins/sources.json").fetch("pins")
   ghostty = pins.fetch("ghostty")
   archive = pins.fetch("ghostty_archive")
-  digest = archive.fetch("hash").delete_prefix("sha256-").unpack1("m0").unpack1("H*")
+  digest = Base64.strict_decode64(archive.fetch("hash").delete_prefix("sha256-")).unpack1("H*")
 
   desc "Fast, native terminal emulator with dotfiles scrollback patches"
   homepage "https://ghostty.org"
   url archive.fetch("url")
-  version "1.3.2-dev.#{ghostty.fetch("revision")[0, 7]}"
+  version "1.3.2-dev.#{ghostty.fetch('revision')[0, 7]}"
   sha256 digest
   license "MIT"
 
@@ -21,10 +24,12 @@ class GhosttyPatched < Formula
 
   def install
     patch_dir = Pathname(__dir__).parent/"packages/ghostty-patched/patches"
-    patches = (patch_dir/"series").readlines(chomp: true)
-              .map(&:strip)
-              .reject { |line| line.empty? || line.start_with?("#") }
-              .map { |name| patch_dir/name }
+    patches = (patch_dir/"series").each_line(chomp: true).filter_map do |line|
+      name = line.strip
+      next if name.empty? || name.start_with?("#")
+
+      patch_dir/name
+    end
     odie "Ghostty patch series is empty: #{patch_dir}" if patches.empty?
     odie "Ghostty patch series contains a missing file" unless patches.all?(&:file?)
 
@@ -40,12 +45,12 @@ class GhosttyPatched < Formula
   end
 
   def caveats
-    <<~EOS
+    <<~CAVEATS
       Ghostty.app is installed at:
         #{opt_prefix}/Ghostty.app
 
       The dotfiles Ansible role links it into /Applications.
-    EOS
+    CAVEATS
   end
 
   test do

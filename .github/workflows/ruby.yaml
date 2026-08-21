@@ -1,0 +1,70 @@
+name: Ruby
+
+on:
+  pull_request:
+    paths: &ruby-paths
+      - .tool-versions
+      - .github/workflows/ruby.yaml
+      - .rubocop.yml
+      - Formula/**
+      - Gemfile
+      - Gemfile.lock
+      - libexec/*.rb
+      - test/**/*.rb
+  push:
+    branches:
+      - master
+    paths: *ruby-paths
+  workflow_dispatch: null
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Ruby ${{ matrix.ruby }} (${{ matrix.os }})
+    if: >-
+      github.event_name != 'pull_request' ||
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association) ||
+      (github.event.pull_request.user.type == 'Bot' &&
+      contains(fromJSON('[29139614, 41898282, 49699333]'), github.event.pull_request.user.id))
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ruby: '3.4'
+            os: ubuntu-24.04
+            lint: false
+          - ruby: '4.0'
+            os: ubuntu-24.04
+            lint: true
+          - ruby: '4.0'
+            os: macos-15
+            lint: false
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install Ruby
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Run RuboCop
+        if: matrix.lint
+        run: bundle exec rubocop --format github
+
+      - name: Check Syntax
+        run: find Formula libexec test -name '*.rb' -print0 | xargs -0 -n1 ruby -c
+
+      - name: Test
+        run: bundle exec ruby -Itest test/ruby_tools_test.rb

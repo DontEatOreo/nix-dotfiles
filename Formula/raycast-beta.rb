@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "digest"
 
 class RaycastBeta < Formula
@@ -6,7 +8,7 @@ class RaycastBeta < Formula
   desc "Next-generation Raycast public beta with dotfiles integration"
   homepage "https://www.raycast.com/new"
   url "file://#{MANAGER_SOURCE}"
-  version "3"
+  version "5"
   sha256 Digest::SHA256.file(MANAGER_SOURCE).hexdigest
   license :cannot_represent
 
@@ -15,14 +17,14 @@ class RaycastBeta < Formula
   depends_on "ruby"
 
   allow_network_access! :postinstall
-  deny_network_access! [:build, :test]
+  deny_network_access! %i[build test]
 
   def install
     libexec.install "raycast-beta-manager.rb"
     inreplace libexec/"raycast-beta-manager.rb",
               "#!/usr/bin/env ruby",
-              "#!#{formula_opt_bin("ruby")}/ruby"
-    chmod 0755, libexec/"raycast-beta-manager.rb"
+              "#!#{formula_opt_bin('ruby')}/ruby"
+    chmod 0o755, libexec/"raycast-beta-manager.rb"
     bin.install_symlink (libexec/"raycast-beta-manager.rb") => "raycast-beta-manager"
   end
 
@@ -31,12 +33,19 @@ class RaycastBeta < Formula
   end
 
   def caveats
-    <<~EOS
+    <<~CAVEATS
       Raycast Beta is copied to:
         /Applications/Raycast Beta.app
 
       Refresh the app and apply the chezmoi-managed profile and aliases with:
         raycast-beta-manager refresh
-    EOS
+    CAVEATS
+  end
+
+  test do
+    output = shell_output(
+      "RAYCAST_APP=#{testpath}/missing.app #{bin}/raycast-beta-manager version",
+    )
+    assert_equal "not installed", output.strip
   end
 end

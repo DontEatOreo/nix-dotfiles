@@ -1,0 +1,50 @@
+name: Homebrew
+
+on:
+  pull_request:
+    paths: &homebrew-paths
+      - .github/workflows/homebrew.yaml
+      - Formula/**
+  push:
+    branches:
+      - master
+    paths: *homebrew-paths
+  workflow_dispatch: null
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  style:
+    name: Formula Style
+    if: >-
+      github.event_name != 'pull_request' ||
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association) ||
+      (github.event.pull_request.user.type == 'Bot' &&
+      contains(fromJSON('[29139614, 41898282, 49699333]'), github.event.pull_request.user.id))
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - name: Set Up Homebrew
+        id: homebrew
+        uses: Homebrew/actions/setup-homebrew@fd832223f9f99ebf0244dd20658680e5d4aca049 # 2026.08.03.2
+
+      - name: Restore Homebrew RubyGems
+        id: cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.homebrew.outputs.gems-path }}
+          key: ${{ runner.os }}-${{ runner.arch }}-homebrew-rubygems-${{ steps.homebrew.outputs.gems-hash }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-homebrew-rubygems-
+
+      - name: Install Homebrew RubyGems
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: brew install-bundler-gems
+
+      - name: Check Formula Style
+        run: brew style Formula/*.rb

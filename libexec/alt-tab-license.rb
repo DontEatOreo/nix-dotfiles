@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "open3"
+require "optparse"
 
 # Installs and inspects the local AltTab license state.
 module AltTabLicense
@@ -16,60 +17,53 @@ module AltTabLicense
   KEYCHAIN_VALUES = {
     "licenseKey" => "0000-0000-0000-0000-0000-0000",
     "instanceId" => "evy-instance-0",
-    "variantId" => "pro_lifetime",
+    "variantId"  => "pro_lifetime",
   }.freeze
   DEFAULT_VALUES = {
-    "lastValidation" => ["float", -> { Time.now.to_i.to_s }],
+    "lastValidation"       => ["float", -> { Time.now.to_i.to_s }],
     "lastValidationResult" => ["bool", -> { "true" }],
-    "customerEmail" => ["string", -> { "alt@evy.pink" }],
+    "customerEmail"        => ["string", -> { "alt@evy.pink" }],
   }.freeze
 
   module_function
 
-  def execute(*command, allow_failure: false)
-    stdout, stderr, status = Open3.capture3(*command)
-    unless status.success? || allow_failure
-      details = stderr.strip
-      details = stdout.strip if details.empty?
-      message = "command failed (#{status.exitstatus}): #{command.join(" ")}"
-      message = "#{message}\n#{details}" unless details.empty?
-      raise Error, message
-    end
-    [stdout, status.success?]
-  rescue Errno::ENOENT => error
-    raise Error, "command not found: #{command.first} (#{error.message})"
-  end
-
   def remove_keychain_items
     KEYCHAIN_VALUES.each_key do |account|
-      execute(
+      system(
         SECURITY,
         "delete-generic-password",
         "-s",
         SERVICE,
         "-a",
         account,
-        allow_failure: true,
+        out: File::NULL,
+        err: File::NULL,
       )
     end
   end
 
   def installed?
     keychain_items_present = KEYCHAIN_VALUES.each_key.all? do |account|
-      _, succeeded = execute(
+      system(
         SECURITY,
         "find-generic-password",
         "-s",
         SERVICE,
         "-a",
         account,
-        allow_failure: true,
+        out: File::NULL,
+        err: File::NULL,
       )
-      succeeded
     end
     defaults_present = DEFAULT_VALUES.each_key.all? do |key|
-      _, succeeded = execute(DEFAULTS, "read", SERVICE, key, allow_failure: true)
-      succeeded
+      system(
+        DEFAULTS,
+        "read",
+        SERVICE,
+        key,
+        out: File::NULL,
+        err: File::NULL,
+      )
     end
     keychain_items_present && defaults_present
   end
@@ -81,7 +75,7 @@ module AltTabLicense
     end
     remove_keychain_items
     KEYCHAIN_VALUES.each do |account, value|
-      execute(
+      succeeded = system(
         SECURITY,
         "add-generic-password",
         "-A",
@@ -93,9 +87,18 @@ module AltTabLicense
         "-w",
         value,
       )
+      raise Error, "could not add AltTab keychain item: #{account}" unless succeeded
     end
     DEFAULT_VALUES.each do |key, (kind, value)|
-      execute(DEFAULTS, "write", SERVICE, key, "-#{kind}", value.call)
+      system(
+        DEFAULTS,
+        "write",
+        SERVICE,
+        key,
+        "-#{kind}",
+        value.call,
+        exception: true,
+      )
     end
     warn "alt-tab-license: license installed; restart AltTab to apply"
   end
@@ -103,15 +106,22 @@ module AltTabLicense
   def remove
     remove_keychain_items
     DEFAULT_VALUES.each_key do |key|
-      execute(DEFAULTS, "delete", SERVICE, key, allow_failure: true)
+      system(
+        DEFAULTS,
+        "delete",
+        SERVICE,
+        key,
+        out: File::NULL,
+        err: File::NULL,
+      )
     end
     warn "alt-tab-license: license removed; restart AltTab to revert to trial"
   end
 
   def read(*command)
-    stdout, succeeded = execute(*command, allow_failure: true)
+    stdout, status = Open3.capture2(*command, err: File::NULL)
     value = stdout.strip
-    succeeded && !value.empty? ? value : "none"
+    status.success? && !value.empty? ? value : "none"
   end
 
   def status
@@ -126,12 +136,20 @@ module AltTabLicense
         account,
         "-w",
       )
-      puts format("  %-12s %s", "#{account}:", value)
+      puts format(
+        "  %<label>-12s %<value>s",
+        label: "#{account}:",
+        value:,
+      )
     end
     puts "\ndefaults (#{SERVICE}):"
     DEFAULT_VALUES.each_key do |key|
       value = read(DEFAULTS, "read", SERVICE, key)
-      puts format("  %-22s %s", "#{key}:", value)
+      puts format(
+        "  %<label>-22s %<value>s",
+        label: "#{key}:",
+        value:,
+      )
     end
   end
 
@@ -148,32 +166,51 @@ module AltTabLicense
 
   def main(arguments)
     command = arguments.shift
-    raise Error, "unexpected arguments: #{arguments.join(" ")}" unless arguments.empty?
 
     case command
     when "install"
-      force = arguments.delete("--force")
-      raise Error, "unexpected arguments: #{arguments.join(" ")}" unless arguments.empty?
+      force = false
+      parser = OptionParser.new do |options|
+        options.banner = "Usage: alt-tab-license install [--force]"
+        options.on("--force", "Replace existing license state") { force = true }
+        options.on("-h", "--help", "Show this help") do
+          puts options
+          return 0
+        end
+      end
+      parser.parse!(arguments)
+      reject_arguments(arguments)
 
-      install(force: !force.nil?)
+      install(force:)
     when "remove"
+      reject_arguments(arguments)
       remove
     when "status"
+      reject_arguments(arguments)
       status
     when "--help", "-h", "help", nil
+      reject_arguments(arguments)
       puts usage
     else
       raise Error, "unknown command: #{command}"
     end
     0
   end
+
+  def reject_arguments(arguments)
+    return if arguments.empty?
+
+    raise OptionParser::InvalidArgument, arguments.join(" ")
+  end
 end
 
 if $PROGRAM_NAME == __FILE__
   begin
     exit AltTabLicense.main(ARGV)
-  rescue AltTabLicense::Error => error
-    warn "alt-tab-license: error: #{error.message}"
+  rescue AltTabLicense::Error,
+         Errno::ENOENT,
+         RuntimeError => e
+    warn "alt-tab-license: error: #{e.message}"
     exit 1
   end
 end

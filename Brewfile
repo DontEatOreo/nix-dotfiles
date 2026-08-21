@@ -1,6 +1,6 @@
-if OS.mac?
-  cask_args appdir: "/Applications"
-end
+# frozen_string_literal: true
+
+cask_args appdir: "/Applications" if OS.mac?
 
 # Bootstrap shell and provisioning tools
 brew "bash"
@@ -104,9 +104,7 @@ brew "unicorn"
 brew "upx"
 brew "yara"
 
-if OS.linux?
-  brew "gdb"
-end
+brew "gdb" if OS.linux?
 
 # Editors and terminals
 # Helix tip is built from the pinned source by the applications role.
@@ -222,6 +220,4 @@ if OS.mac?
 end
 
 # Fonts
-if OS.mac?
-  cask "font-jetbrains-mono-nerd-font"
-end
+cask "font-jetbrains-mono-nerd-font" if OS.mac?
