@@ -1,5 +1,5 @@
 name: Publish Spectrum Metadata
-description: Generate an SBOM, sign the image, and publish attestations.
+description: Sign the image and publish build provenance.
 
 inputs:
   image-ref:
@@ -12,25 +12,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Generate Syft SBOM
-      id: sbom
-      continue-on-error: true
-      env:
-        IMAGE_REF: ${{ inputs.image-ref }}
-        GOMEMLIMIT: 2GiB
-        SYFT_FILE_METADATA_SELECTION: none
-        SYFT_PARALLELISM: "1"
-      shell: bash
-      run: |
-        set -euo pipefail
-        syft_path=$(nix build --no-link --print-out-paths nixpkgs#syft)
-        timeout --signal=TERM --kill-after=30s 15m \
-          "$syft_path/bin/syft" scan "registry:$IMAGE_REF" \
-          --override-default-catalogers rpm-db-cataloger \
-          --select-catalogers=-file \
-          --output spdx-json=spectrum.spdx.json
-        echo "generated=true" >>"$GITHUB_OUTPUT"
-
     - name: Sign Image
       env:
         IMAGE_REF: ${{ inputs.image-ref }}
@@ -38,18 +19,6 @@ runs:
       run: |
         set -euo pipefail
         cosign sign --yes "$IMAGE_REF"
-
-    - name: Attach SBOM
-      if: steps.sbom.outputs.generated == 'true'
-      env:
-        IMAGE_REF: ${{ inputs.image-ref }}
-      shell: bash
-      run: |
-        set -euo pipefail
-        cosign attest --yes \
-          --predicate spectrum.spdx.json \
-          --type spdxjson \
-          "$IMAGE_REF"
 
     - name: Attest Build Provenance
       uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
