@@ -1,55 +1,27 @@
 ---
-- name: Install Visual Studio Code on apt systems
-  ansible.builtin.import_tasks: vscode-apt.yml
+- name: Install Visual Studio Code
+  ansible.builtin.import_tasks: vscode.yml
   when:
-    - ansible_facts.pkg_mgr == 'apt'
-    - platform_is_linux
-  tags:
-    - applications
-    - vscode
-
-- name: Install Visual Studio Code on dnf systems
-  ansible.builtin.import_tasks: vscode-rpm.yml
-  when:
-    - ansible_facts.pkg_mgr in ['dnf', 'dnf5']
+    - ansible_facts.pkg_mgr in ['apt', 'dnf', 'dnf5']
     - not platform_has_rpm_ostree
     - platform_is_linux
   tags:
     - applications
     - vscode
 
-- name: Install 1Password on apt systems
-  ansible.builtin.import_tasks: one-password-apt.yml
+- name: Configure and install 1Password
+  ansible.builtin.import_tasks: one-password.yml
   when:
-    - ansible_facts.pkg_mgr == 'apt'
+    - ansible_facts.pkg_mgr in ['apt', 'dnf', 'dnf5']
     - platform_is_linux
   tags:
     - applications
     - 1password
 
-- name: Install 1Password on rpm systems
-  ansible.builtin.import_tasks: one-password-rpm.yml
+- name: Install Discord
+  ansible.builtin.import_tasks: discord.yml
   when:
-    - ansible_facts.pkg_mgr in ['dnf', 'dnf5']
-    - not platform_has_rpm_ostree
-    - platform_is_linux
-  tags:
-    - applications
-    - 1password
-
-- name: Install Discord on apt systems
-  ansible.builtin.import_tasks: discord-apt.yml
-  when:
-    - ansible_facts.pkg_mgr == 'apt'
-    - platform_is_linux
-  tags:
-    - applications
-    - discord
-
-- name: Install Discord on dnf systems
-  ansible.builtin.import_tasks: discord-rpm.yml
-  when:
-    - ansible_facts.pkg_mgr in ['dnf', 'dnf5']
+    - ansible_facts.pkg_mgr in ['apt', 'dnf', 'dnf5']
     - not platform_has_rpm_ostree
     - platform_is_linux
   tags:
@@ -58,8 +30,7 @@
 
 - name: Install Equicord for Discord on Linux
   ansible.builtin.import_tasks: equicord.yml
-  when:
-    - platform_is_linux
+  when: platform_is_linux
   tags:
     - applications
     - discord
@@ -85,15 +56,42 @@
     - helium
 
 - name: Install Helium on Linux
-  ansible.builtin.import_tasks: helium-linux.yml
+  ansible.builtin.import_tasks: helium.yml
   when: platform_is_linux
   tags:
     - applications
     - helium
 
-- name: Install macOS GUI applications
-  ansible.builtin.import_tasks: macos.yml
+- name: Apply managed application licenses on macOS
+  ansible.builtin.import_tasks: licenses.yml
   when: platform_is_macos
   tags:
     - applications
+    - alt-tab
+    - macos
+    - shottr
+
+- name: Configure RustDesk on macOS
+  ansible.builtin.import_tasks: rustdesk.yml
+  when: platform_is_macos
+  tags:
+    - applications
+    - macos
+    - rustdesk
+
+- name: Configure Equicord on macOS
+  ansible.builtin.import_tasks: equicord.yml
+  when: platform_is_macos
+  tags:
+    - applications
+    - discord
+    - equicord
+    - macos
+
+- name: Configure Helium on macOS
+  ansible.builtin.import_tasks: helium.yml
+  when: platform_is_macos
+  tags:
+    - applications
+    - helium
     - macos

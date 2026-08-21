@@ -1,0 +1,40 @@
+---
+- name: Configure Visual Studio Code on apt systems
+  when: ansible_facts.pkg_mgr == 'apt'
+  block:
+    - name: Add Visual Studio Code apt repository
+      ansible.builtin.deb822_repository:
+        name: vscode
+        uris:
+          - https://packages.microsoft.com/repos/code
+        suites:
+          - stable
+        components:
+          - main
+        signed_by: https://packages.microsoft.com/keys/microsoft.asc
+        install_python_debian: true
+      become: true
+      notify: Refresh apt cache
+
+    - name: Apply pending apt repository cache refresh
+      ansible.builtin.meta: flush_handlers
+
+- name: Configure Visual Studio Code on dnf systems
+  when: ansible_facts.pkg_mgr in ['dnf', 'dnf5']
+  block:
+    - name: Add Visual Studio Code rpm repository
+      ansible.builtin.yum_repository:
+        name: code
+        file: vscode
+        description: Visual Studio Code
+        baseurl: https://packages.microsoft.com/yumrepos/vscode
+        enabled: true
+        gpgcheck: true
+        gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+      become: true
+
+- name: Install Visual Studio Code with the detected package manager
+  ansible.builtin.package:
+    name: code
+    state: present
+  become: true

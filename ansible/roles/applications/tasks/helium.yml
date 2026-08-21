@@ -1,0 +1,94 @@
+---
+- name: Install latest Helium Linux x86_64 release archive
+  ansible.builtin.import_tasks: github-release-asset.yml
+  vars:
+    applications_github_repository: imputnet/helium-linux
+    applications_github_asset_name: >-
+      helium-{{ applications_github_release_response.json.tag_name }}-x86_64_linux.tar.xz
+    applications_github_asset_destination: >-
+      {{ dotfiles_cache_dir }}/helium/{{ applications_github_asset_name }}
+    applications_github_asset_mode: "0644"
+    applications_github_asset_require_digest: true
+  when: platform_is_linux
+
+- name: Install the Helium Linux application
+  when: platform_is_linux
+  block:
+    - name: Derive latest Helium Linux release paths
+      ansible.builtin.set_fact:
+        applications_helium_linux_archive: >-
+          {{ dotfiles_cache_dir }}/helium/{{ applications_github_release_asset.name }}
+        applications_helium_linux_install_dir: >-
+          {{ dotfiles_data_dir }}/helium/{{
+            applications_github_release_response.json.tag_name
+          }}
+
+    - name: Create Helium application directory
+      ansible.builtin.file:
+        path: "{{ applications_helium_linux_install_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Extract latest Helium Linux release
+      ansible.builtin.unarchive:
+        src: "{{ applications_helium_linux_archive }}"
+        dest: "{{ applications_helium_linux_install_dir }}"
+        remote_src: true
+        extra_opts:
+          - --strip-components=1
+        creates: "{{ applications_helium_linux_install_dir }}/helium"
+
+    - name: Select latest Helium Linux release
+      ansible.builtin.file:
+        src: "{{ applications_helium_linux_install_dir }}"
+        dest: "{{ applications_helium_linux_current }}"
+        state: link
+        force: true
+
+- name: Detect a running Helium application on macOS
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/pgrep
+      - -f
+      - ^/Applications/Helium[.]app/
+  register: applications_helium_running
+  changed_when: false
+  failed_when: applications_helium_running.rc not in [0, 1]
+  check_mode: false
+  when: platform_is_macos
+
+- name: Report that Helium profile configuration is skipped
+  ansible.builtin.debug:
+    msg: Helium is running; skipping profile configuration.
+  when:
+    - platform_is_macos
+    - applications_helium_running.rc == 0
+
+- name: Configure the Helium profile
+  ansible.builtin.import_tasks: helium-profile.yml
+  vars:
+    applications_helium_platform: "{{ 'macos' if platform_is_macos else 'linux' }}"
+    applications_helium_root: "{{ dotfiles_cache_dir }}/helium"
+    applications_helium_installer_bin: >-
+      {{ dotfiles_cache_dir }}/helium/configurer
+    applications_helium_path: >-
+      {{
+        dotfiles_bin_dir ~ ':'
+        ~ (
+          platform_homebrew_path | default(dotfiles_path)
+          if platform_is_macos
+          else dotfiles_path
+        )
+      }}
+    applications_helium_profile_dir: >-
+      {{
+        applications_helium_config.browser.paths[
+          applications_helium_platform
+        ].profile_dir
+        | replace('${home}', dotfiles_home_dir)
+        | replace('${config_home}', dotfiles_config_home)
+        | replace('${data_home}', dotfiles_data_home)
+      }}
+    applications_helium_runtime_flags: >-
+      --set-user-color={{ applications_helium_accent_rgb }}
+  when: applications_helium_running.rc | default(1) == 1

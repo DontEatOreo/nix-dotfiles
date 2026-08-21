@@ -1,17 +1,4 @@
 ---
-- name: Require the Helium application directory
-  ansible.builtin.stat:
-    path: "{{ applications_helium_app_dir }}"
-    follow: true
-  register: applications_helium_app
-
-- name: Verify the Helium application directory
-  ansible.builtin.assert:
-    that:
-      - applications_helium_app.stat.isdir | default(false)
-    fail_msg: >-
-      Helium application does not exist: {{ applications_helium_app_dir }}
-
 - name: Create Helium profile configuration directories
   ansible.builtin.file:
     path: "{{ item }}"
@@ -19,7 +6,6 @@
     mode: "0755"
   loop:
     - "{{ applications_helium_root }}"
-    - "{{ applications_helium_bin_dir }}"
     - "{{ applications_helium_installer_bin }}"
     - "{{ applications_helium_profile_dir }}"
 
@@ -96,13 +82,11 @@
       - "{{ applications_helium_platform }}"
       - --root
       - "{{ applications_helium_root }}"
-      - --app-dir
-      - "{{ applications_helium_app_dir }}"
       - --bin-dir
-      - "{{ applications_helium_bin_dir }}"
+      - "{{ dotfiles_bin_dir }}"
       - --input
       - "-"
-      - "--flags={{ applications_helium_flags }}"
+      - "--flags={{ applications_helium_runtime_flags }}"
     chdir: "{{ dotfiles_repo_root }}/browser"
     stdin: "{{ applications_helium_apply_input | to_json }}"
   environment:

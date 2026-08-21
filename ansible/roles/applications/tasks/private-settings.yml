@@ -12,6 +12,3 @@
       }}
   no_log: true
   when: platform_is_linux or platform_is_macos
-  tags:
-    - applications
-    - helium

@@ -1,5 +1,19 @@
 ---
-applications_helium_linux_current: "{{ dotfiles_data_dir }}/helium/current"
+applications_helium_config: >-
+  {{
+    lookup(
+      'ansible.builtin.file',
+      dotfiles_repo_root ~ '/browser/helium.toml'
+    )
+    | community.general.from_toml
+  }}
+applications_helium_linux_current: >-
+  {{
+    applications_helium_config.browser.linux.app_dir
+    | replace('${home}', dotfiles_home_dir)
+    | replace('${config_home}', dotfiles_config_home)
+    | replace('${data_home}', dotfiles_data_home)
+  }}
 applications_black_rose_doll_palette: >-
   {{
     lookup(

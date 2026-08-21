@@ -7,8 +7,6 @@
   register: applications_alt_tab_license
   changed_when: >-
     'license installed' in applications_alt_tab_license.stderr
-  tags:
-    - alt-tab
 
 - name: Apply the managed Shottr license state
   ansible.builtin.command:
@@ -22,5 +20,3 @@
   register: applications_shottr_license
   changed_when: >-
     'license state installed' in applications_shottr_license.stderr
-  tags:
-    - shottr

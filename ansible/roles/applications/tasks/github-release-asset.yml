@@ -1,0 +1,55 @@
+---
+- name: Fetch latest GitHub release metadata
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/{{ applications_github_repository }}/releases/latest"
+    headers:
+      Accept: application/vnd.github+json
+      User-Agent: dotfiles-ansible
+    return_content: true
+    status_code: 200
+  check_mode: false
+  register: applications_github_release_response
+
+- name: Select latest GitHub release asset
+  ansible.builtin.set_fact:
+    applications_github_release_asset: >-
+      {{
+        applications_github_release_response.json.assets
+        | selectattr('name', 'equalto', applications_github_asset_name)
+        | first
+        | default({})
+      }}
+
+- name: Require expected GitHub release asset
+  ansible.builtin.assert:
+    that:
+      - applications_github_release_asset.browser_download_url
+        | default('')
+        | length > 0
+      - >-
+        not applications_github_asset_require_digest
+        or applications_github_release_asset.digest
+          | default('')
+          is match('^sha256:[0-9a-f]{64}$')
+    fail_msg: >-
+      Latest {{ applications_github_repository }} release does not include the
+      expected{{ ' checksummed' if applications_github_asset_require_digest else '' }}
+      {{ applications_github_asset_name }} asset.
+
+- name: Ensure GitHub release asset destination exists
+  ansible.builtin.file:
+    path: "{{ applications_github_asset_destination | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Install latest GitHub release asset
+  ansible.builtin.get_url:
+    url: "{{ applications_github_release_asset.browser_download_url }}"
+    dest: "{{ applications_github_asset_destination }}"
+    checksum: >-
+      {{
+        applications_github_release_asset.digest
+        if applications_github_asset_require_digest
+        else omit
+      }}
+    mode: "{{ applications_github_asset_mode }}"

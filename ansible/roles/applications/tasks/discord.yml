@@ -1,0 +1,15 @@
+---
+- name: Install Discord with apt
+  ansible.builtin.apt:
+    deb: https://discord.com/api/download?platform=linux&format=deb
+    state: present
+  become: true
+  when: ansible_facts.pkg_mgr == 'apt'
+
+- name: Install Discord with dnf
+  ansible.builtin.dnf:
+    name: https://discord.com/api/download?platform=linux&format=rpm
+    state: present
+    disable_gpg_check: true
+  become: true
+  when: ansible_facts.pkg_mgr in ['dnf', 'dnf5']
