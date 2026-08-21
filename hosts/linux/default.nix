@@ -16,6 +16,7 @@
           dconf.enable = true;
           nvidia.enable = true;
           amd.enable = true;
+          toshy.enable = true;
         };
       }
       inputs.sops-nix.nixosModules.sops

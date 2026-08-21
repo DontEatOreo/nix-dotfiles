@@ -1,7 +1,9 @@
 ---
 - name: Configure Kanata
   ansible.builtin.import_tasks: kanata.yml
-  when: platform_is_linux
+  when:
+    - platform_is_linux
+    - not platform_is_nixos
   tags:
     - host
     - keyboard
@@ -9,7 +11,9 @@
 
 - name: Configure Toshy GNOME context
   ansible.builtin.import_tasks: gnome-context.yml
-  when: platform_is_linux
+  when:
+    - platform_is_linux
+    - not platform_is_nixos
   tags:
     - host
     - keyboard

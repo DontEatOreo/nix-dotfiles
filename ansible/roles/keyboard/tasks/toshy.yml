@@ -1,5 +1,5 @@
 ---
-- name: Create Toshy render and user unit directories
+- name: Create Toshy state, source, and user unit directories
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
@@ -7,16 +7,276 @@
   loop:
     - path: "{{ keyboard_toshy_render_dir }}"
       mode: "0700"
+    - path: "{{ keyboard_toshy_automation_dir }}"
+      mode: "0700"
+    - path: "{{ keyboard_toshy_source_dir | dirname }}"
+      mode: "0755"
+    - path: "{{ keyboard_toshy_installed_revision | dirname }}"
+      mode: "0755"
     - path: "{{ dotfiles_config_home }}/systemd/user/toshy-config.service.d"
       mode: "0755"
   tags:
     - host
     - toshy
 
-- name: Check Toshy configuration
+- name: Check out pinned Toshy source
+  ansible.builtin.git:
+    repo: "{{ keyboard_toshy_repository }}"
+    dest: "{{ keyboard_toshy_source_dir }}"
+    version: "{{ keyboard_toshy_revision }}"
+    depth: 1
+    force: true
+  register: keyboard_toshy_source
+  tags:
+    - host
+    - toshy
+
+- name: Install Toshy setup automation
+  ansible.builtin.copy:
+    src: "toshy/{{ item.src }}"
+    dest: "{{ keyboard_toshy_automation_dir }}/{{ item.dest }}"
+    mode: "0755"
+  loop:
+    - src: setup.py
+      dest: setup.py
+    - src: sudo-shim.py
+      dest: sudo
+  loop_control:
+    label: "{{ item.dest }}"
+  tags:
+    - host
+    - toshy
+
+- name: Check Toshy installation state
+  ansible.builtin.stat:
+    path: "{{ item.path }}"
+  loop:
+    - label: configuration
+      path: "{{ keyboard_toshy_config }}"
+    - label: installed revision
+      path: "{{ keyboard_toshy_installed_revision }}"
+    - label: Nix runtime revision
+      path: "{{ keyboard_toshy_runtime_revision }}"
+  loop_control:
+    label: "{{ item.label }}"
+  register: keyboard_toshy_state_files
+  tags:
+    - host
+    - toshy
+
+- name: Select Toshy installation state
+  ansible.builtin.set_fact:
+    keyboard_toshy_config_file: "{{ keyboard_toshy_state_files.results[0] }}"
+    keyboard_toshy_installed_revision_file: "{{ keyboard_toshy_state_files.results[1] }}"
+    keyboard_toshy_runtime_revision_file: "{{ keyboard_toshy_state_files.results[2] }}"
+  tags:
+    - host
+    - toshy
+
+- name: Read recorded Toshy revisions
+  ansible.builtin.slurp:
+    src: "{{ item.path }}"
+  loop:
+    - label: installed revision
+      path: "{{ keyboard_toshy_installed_revision }}"
+      exists: "{{ keyboard_toshy_installed_revision_file.stat.exists | default(false) }}"
+    - label: Nix runtime revision
+      path: "{{ keyboard_toshy_runtime_revision }}"
+      exists: "{{ keyboard_toshy_runtime_revision_file.stat.exists | default(false) }}"
+  loop_control:
+    label: "{{ item.label }}"
+  when: item.exists | bool
+  register: keyboard_toshy_revision_files
+  tags:
+    - host
+    - toshy
+
+- name: Select recorded Toshy revisions
+  ansible.builtin.set_fact:
+    keyboard_toshy_installed_revision_value: >-
+      {{
+        keyboard_toshy_revision_files.results[0].content
+        | default('')
+        | b64decode
+        | trim
+      }}
+    keyboard_toshy_runtime_revision_value: >-
+      {{
+        keyboard_toshy_revision_files.results[1].content
+        | default('')
+        | b64decode
+        | trim
+      }}
+  tags:
+    - host
+    - toshy
+
+- name: Require the pinned Toshy Nix runtime
+  ansible.builtin.assert:
+    that:
+      - keyboard_toshy_runtime_revision_file.stat.exists | default(false)
+      - keyboard_toshy_runtime_revision_value == keyboard_toshy_revision
+    fail_msg: >-
+      The active NixOS generation does not provide the pinned
+      {{ keyboard_toshy_version }} runtime ({{ keyboard_toshy_revision }}).
+      Rebuild and switch the NixOS configuration before provisioning Toshy's
+      user files. Found runtime revision:
+      {{ keyboard_toshy_runtime_revision_value | default('missing', true) }}.
+  when: platform_is_nixos
+  tags:
+    - host
+    - toshy
+
+- name: Inspect managed Toshy configuration slices
+  ansible.builtin.command:
+    argv:
+      - grep
+      - -F
+      - -q
+      - "SLICE_MARK_START: {{ item }}"
+      - "{{ keyboard_toshy_config }}"
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  loop:
+    - keymapper_api
+    - kbtype_override
+    - user_custom_functions
+    - barebones_user_cfg
+  register: keyboard_toshy_config_slices
+  tags:
+    - host
+    - toshy
+
+- name: Decide whether Toshy user files need an upstream refresh
+  ansible.builtin.set_fact:
+    keyboard_toshy_install_required: >-
+      {{
+        keyboard_toshy_force_install | bool
+        or keyboard_toshy_source is changed
+        or not (keyboard_toshy_config_file.stat.exists | default(false))
+        or keyboard_toshy_installed_revision_value != keyboard_toshy_revision
+        or (
+          keyboard_toshy_config_slices.results
+          | rejectattr('rc', 'equalto', 0)
+          | list
+          | length > 0
+        )
+      }}
+  tags:
+    - host
+    - toshy
+
+- name: Authorize Toshy's non-interactive sudo calls through Ansible
+  ansible.builtin.command:
+    argv:
+      - "{{ ansible_playbook_python }}"
+      - -c
+      - pass
+  become: true
+  changed_when: false
+  when:
+    - not ansible_check_mode
+    - keyboard_toshy_install_required | bool
+    - not platform_is_nixos
+  tags:
+    - host
+    - toshy
+
+- name: Detect host sudo for the Toshy installer
+  ansible.builtin.command:
+    argv:
+      - sh
+      - -c
+      - command -v sudo
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  register: keyboard_toshy_sudo
+  when:
+    - keyboard_toshy_install_required | bool
+    - not platform_is_nixos
+  tags:
+    - host
+    - toshy
+
+- name: Require non-interactive sudo for the standard Toshy installer
+  ansible.builtin.assert:
+    that:
+      - keyboard_toshy_sudo.rc == 0
+      - keyboard_toshy_sudo.stdout | trim | length > 0
+    fail_msg: Toshy's standard installer requires sudo on non-NixOS hosts.
+  when:
+    - keyboard_toshy_install_required | bool
+    - not platform_is_nixos
+  tags:
+    - host
+    - toshy
+
+- name: Select the platform-specific Toshy installer path
+  ansible.builtin.set_fact:
+    keyboard_toshy_setup_python: >-
+      {{
+        keyboard_toshy_runtime_dir ~ '/bin/python'
+        if platform_is_nixos
+        else ansible_playbook_python
+      }}
+    keyboard_toshy_installer_args: >-
+      {{
+        ['install-user-files', '--barebones-config']
+        if platform_is_nixos
+        else (
+          ['install', '--barebones-config']
+          + (
+              ['--override-distro', keyboard_toshy_distro_override]
+              if keyboard_toshy_distro_override | length > 0
+              else (
+                ['--override-distro', 'silverblue']
+                if platform_has_rpm_ostree
+                else []
+              )
+            )
+          + (['--skip-native'] if keyboard_toshy_skip_native else [])
+          + (['--no-dbus-python'] if keyboard_toshy_no_dbus_python else [])
+        )
+      }}
+  tags:
+    - host
+    - toshy
+
+- name: Run the pinned upstream Toshy installer
+  ansible.builtin.command:
+    argv: >-
+      {{
+        [
+          keyboard_toshy_setup_python,
+          keyboard_toshy_automation_dir ~ '/setup.py',
+          keyboard_toshy_source_dir ~ '/setup_toshy.py'
+        ] + keyboard_toshy_installer_args
+      }}
+  environment:
+    PATH: >-
+      {{
+        keyboard_toshy_automation_dir
+        ~ ':/run/wrappers/bin:/usr/sbin:/usr/bin:/sbin:/bin:'
+        ~ '/usr/local/sbin:/usr/local/bin:' ~ dotfiles_path
+      }}
+    TOSHY_RUNTIME_DIR: "{{ keyboard_toshy_runtime_dir if platform_is_nixos else '' }}"
+    TOSHY_SUDO: >-
+      {{ keyboard_toshy_sudo.stdout | default('') | trim }}
+    TOSHY_SUDO_SHIM_DIR: "{{ keyboard_toshy_automation_dir }}"
+  changed_when: true
+  when:
+    - not ansible_check_mode
+    - keyboard_toshy_install_required | bool
+  tags:
+    - host
+    - toshy
+
+- name: Check Toshy configuration after installation
   ansible.builtin.stat:
     path: "{{ keyboard_toshy_config }}"
-  register: keyboard_toshy_config_file
+  register: keyboard_toshy_config_after_install
   tags:
     - host
     - toshy
@@ -24,16 +284,16 @@
 - name: Require Toshy configuration
   ansible.builtin.assert:
     that:
-      - keyboard_toshy_config_file.stat.exists | default(false)
+      - keyboard_toshy_config_after_install.stat.exists | default(false)
     fail_msg: >-
-      Toshy must be installed before this role can manage
-      {{ keyboard_toshy_config }}.
+      Toshy {{ keyboard_toshy_version }} did not create the expected
+      configuration at {{ keyboard_toshy_config }}.
   when: not ansible_check_mode
   tags:
     - host
     - toshy
 
-- name: Merge dotfiles slices into Toshy configuration
+- name: Merge dotfiles slices into the pinned upstream configuration
   ansible.builtin.command:
     argv:
       - "{{ ansible_playbook_python }}"
@@ -41,10 +301,29 @@
       - "{{ keyboard_toshy_config }}"
       - "{{ keyboard_toshy_slices }}"
       - "{{ keyboard_toshy_merged_config }}"
+      - --upstream-config
+      - "{{ keyboard_toshy_upstream_config }}"
+      - --reset-slice
+      - keymapper_api
   changed_when: false
   when:
     - not ansible_check_mode
-    - keyboard_toshy_config_file.stat.exists | default(false)
+    - keyboard_toshy_config_after_install.stat.exists | default(false)
+  tags:
+    - host
+    - toshy
+
+- name: Validate merged Toshy configuration syntax
+  ansible.builtin.command:
+    argv:
+      - "{{ ansible_playbook_python }}"
+      - -m
+      - py_compile
+      - "{{ keyboard_toshy_merged_config }}"
+  changed_when: false
+  when:
+    - not ansible_check_mode
+    - keyboard_toshy_config_after_install.stat.exists | default(false)
   tags:
     - host
     - toshy
@@ -58,22 +337,19 @@
   notify: Restart Toshy services
   when:
     - not ansible_check_mode
-    - keyboard_toshy_config_file.stat.exists | default(false)
+    - keyboard_toshy_config_after_install.stat.exists | default(false)
   tags:
     - host
     - toshy
 
-- name: Validate merged Toshy configuration syntax
-  ansible.builtin.command:
-    argv:
-      - "{{ ansible_playbook_python }}"
-      - -m
-      - py_compile
-      - "{{ keyboard_toshy_config }}"
-  changed_when: false
+- name: Record installed Toshy source revision
+  ansible.builtin.copy:
+    content: "{{ keyboard_toshy_revision }}\n"
+    dest: "{{ keyboard_toshy_installed_revision }}"
+    mode: "0644"
   when:
     - not ansible_check_mode
-    - keyboard_toshy_config_file.stat.exists | default(false)
+    - keyboard_toshy_config_after_install.stat.exists | default(false)
   tags:
     - host
     - toshy

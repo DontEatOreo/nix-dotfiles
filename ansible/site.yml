@@ -59,7 +59,6 @@
     - name: 60 | Configure keyboard input
       ansible.builtin.import_role:
         name: keyboard
-      when: not (platform_is_nixos | default(false) | bool)
       tags:
         - host
         - keyboard

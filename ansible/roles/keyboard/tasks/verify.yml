@@ -74,6 +74,7 @@
   loop:
     - "SLICE_MARK_START: keymapper_api"
     - "SLICE_MARK_START: kbtype_override"
+    - "SLICE_MARK_START: user_custom_functions"
     - DOTFILES_TOSHY_ONLY_DEVICES
     - /run/kanata-main/main
     - dotfiles-kanata-main

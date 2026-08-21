@@ -22,6 +22,7 @@ in
     ./networking.nix
     ./packages.nix
     ./shell.nix
+    ./toshy.nix
     ./nixcord/settings.nix
     ./services.nix
     ./zed-remote.nix

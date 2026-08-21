@@ -42,6 +42,8 @@ let
 
   copyousExtension = pkgs.gnomeExtensions.copyous;
   copyousExtensionUuid = copyousExtension.extensionUuid;
+  toshyWindowContextExtension = pkgs.gnomeExtensions.focused-window-d-bus;
+  toshyWindowContextExtensionUuid = toshyWindowContextExtension.extensionUuid;
   hyperWindowTilingExtension = dotfilesPackages.hyper-window-tiling-gnome;
   hyperWindowTilingExtensionUuid = hyperWindowTilingExtension.passthru.extensionUuid;
 
@@ -60,6 +62,7 @@ in
       };
       environment.systemPackages = attrValues {
         inherit copyousExtension;
+        inherit toshyWindowContextExtension;
         inherit (pkgs)
           apostrophe # Markdown Editor
           decibels # Audio Player
@@ -170,6 +173,7 @@ in
                 copyousExtensionUuid
                 hyperWindowTilingExtensionUuid
                 "pip-on-top@rafostar.github.com"
+                toshyWindowContextExtensionUuid
               ];
             };
 
