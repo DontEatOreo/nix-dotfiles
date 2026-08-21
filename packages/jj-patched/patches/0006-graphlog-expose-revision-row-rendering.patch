@@ -1,0 +1,194 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: 4evy <git@evy.pink>
+Date: Thu, 1 Jan 1970 00:00:00 +0000
+Subject: [PATCH 6/9] graphlog: expose revision row rendering
+
+Factor the stateful graph renderer from the writer-backed GraphLog
+adapter. Terminal interfaces can now render one topology row at a time
+while jj log continues to use the same renderer and output.
+---
+ cli/src/graphlog.rs |  135 ++++++++++++++++++++++++++++++++++++++--------------
+ 1 file changed, 100 insertions(+), 35 deletions(-)
+
+--- a/cli/src/graphlog.rs
++++ b/cli/src/graphlog.rs
+@@ -21,7 +21,7 @@ use jj_lib::graph::GraphEdge;
+ use jj_lib::graph::GraphEdgeType;
+ use jj_lib::settings::UserSettings;
+ use renderdag::Ancestor;
+-use renderdag::GraphRowRenderer;
++use renderdag::GraphRowRenderer as RenderDagGraphRowRenderer;
+ use renderdag::Renderer;
+ 
+ pub trait GraphLog<K: Clone + Eq + Hash> {
+@@ -36,8 +36,8 @@ pub trait GraphLog<K: Clone + Eq + Hash>
+     fn width(&self, id: &K, edges: &[GraphEdge<K>]) -> usize;
+ }
+ 
+-pub struct SaplingGraphLog<'writer, R> {
+-    renderer: R,
++struct WriterGraphLog<'writer, K: Clone + Eq + Hash> {
++    renderer: Box<dyn GraphRenderer<K> + 'writer>,
+     writer: &'writer mut dyn Write,
+ }
+ 
+@@ -49,48 +49,67 @@ fn convert_graph_edge_into_ancestor<K: C
+     }
+ }
+ 
+-impl<K, R> GraphLog<K> for SaplingGraphLog<'_, R>
++impl<K: Clone + Eq + Hash> GraphLog<K> for WriterGraphLog<'_, K> {
++    fn add_node(
++        &mut self,
++        id: &K,
++        edges: &[GraphEdge<K>],
++        node_symbol: &str,
++        text: &str,
++    ) -> io::Result<()> {
++        let row = self.renderer.render_row(id, edges, node_symbol, text);
++        write!(self.writer, "{row}")
++    }
++
++    fn width(&self, id: &K, edges: &[GraphEdge<K>]) -> usize {
++        self.renderer.width(id, edges)
++    }
++}
++
++/// Stateful renderer for one revision graph row at a time.
++///
++/// This is useful for callers such as terminal UIs which need to retain each
++/// rendered row separately instead of writing the entire graph to one stream.
++pub trait GraphRenderer<K: Clone + Eq + Hash> {
++    fn render_row(
++        &mut self,
++        id: &K,
++        edges: &[GraphEdge<K>],
++        node_symbol: &str,
++        text: &str,
++    ) -> String;
++
++    fn width(&self, id: &K, edges: &[GraphEdge<K>]) -> usize;
++}
++
++struct SaplingGraphRenderer<R> {
++    renderer: R,
++}
++
++impl<K, R> GraphRenderer<K> for SaplingGraphRenderer<R>
+ where
+     K: Clone + Eq + Hash,
+     R: Renderer<K, Output = String>,
+ {
+-    fn add_node(
++    fn render_row(
+         &mut self,
+         id: &K,
+         edges: &[GraphEdge<K>],
+         node_symbol: &str,
+         text: &str,
+-    ) -> io::Result<()> {
+-        let row = self.renderer.next_row(
++    ) -> String {
++        self.renderer.next_row(
+             id.clone(),
+             edges.iter().map(convert_graph_edge_into_ancestor).collect(),
+             node_symbol.into(),
+             text.into(),
+-        );
+-
+-        write!(self.writer, "{row}")
++        )
+     }
+ 
+     fn width(&self, id: &K, edges: &[GraphEdge<K>]) -> usize {
+         let parents = edges.iter().map(convert_graph_edge_into_ancestor).collect();
+-        let w: u64 = self.renderer.width(Some(id), Some(&parents));
+-        w.try_into().unwrap()
+-    }
+-}
+-
+-impl<'writer, R> SaplingGraphLog<'writer, R> {
+-    pub fn create<K>(
+-        renderer: R,
+-        formatter: &'writer mut dyn Write,
+-    ) -> Box<dyn GraphLog<K> + 'writer>
+-    where
+-        K: Clone + Eq + Hash + 'writer,
+-        R: Renderer<K, Output = String> + 'writer,
+-    {
+-        Box::new(SaplingGraphLog {
+-            renderer,
+-            writer: formatter,
+-        })
++        let width: u64 = self.renderer.width(Some(id), Some(&parents));
++        width.try_into().unwrap()
+     }
+ }
+ 
+@@ -113,13 +132,59 @@ pub fn get_graphlog<'a, K: Clone + Eq +
+     style: GraphStyle,
+     formatter: &'a mut dyn Write,
+ ) -> Box<dyn GraphLog<K> + 'a> {
+-    let builder = GraphRowRenderer::new().output().with_min_row_height(0);
++    Box::new(WriterGraphLog {
++        renderer: get_graph_renderer(style),
++        writer: formatter,
++    })
++}
++
++pub fn get_graph_renderer<'a, K: Clone + Eq + Hash + 'a>(
++    style: GraphStyle,
++) -> Box<dyn GraphRenderer<K> + 'a> {
++    let builder = RenderDagGraphRowRenderer::new()
++        .output()
++        .with_min_row_height(0);
+     match style {
+-        GraphStyle::Ascii => SaplingGraphLog::create(builder.build_ascii(), formatter),
+-        GraphStyle::AsciiLarge => SaplingGraphLog::create(builder.build_ascii_large(), formatter),
+-        GraphStyle::Curved => SaplingGraphLog::create(builder.build_box_drawing(), formatter),
+-        GraphStyle::Square => {
+-            SaplingGraphLog::create(builder.build_box_drawing().with_square_glyphs(), formatter)
+-        }
++        GraphStyle::Ascii => Box::new(SaplingGraphRenderer {
++            renderer: builder.build_ascii(),
++        }),
++        GraphStyle::AsciiLarge => Box::new(SaplingGraphRenderer {
++            renderer: builder.build_ascii_large(),
++        }),
++        GraphStyle::Curved => Box::new(SaplingGraphRenderer {
++            renderer: builder.build_box_drawing(),
++        }),
++        GraphStyle::Square => Box::new(SaplingGraphRenderer {
++            renderer: builder.build_box_drawing().with_square_glyphs(),
++        }),
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn test_graph_renderer_renders_revision_topology() {
++        let rows = [
++            (
++                3,
++                vec![GraphEdge::direct(1), GraphEdge::direct(2)],
++                "@",
++                "merge",
++            ),
++            (2, vec![GraphEdge::direct(0)], "o", "right"),
++            (1, vec![GraphEdge::direct(0)], "o", "left"),
++            (0, vec![], "o", "root"),
++        ];
++        let mut graph = get_graph_renderer(GraphStyle::Ascii);
++        let output: String = rows
++            .iter()
++            .map(|(id, edges, node_symbol, text)| graph.render_row(id, edges, node_symbol, text))
++            .collect();
++        assert_eq!(
++            output,
++            "@    merge\n|\\\n| o  right\no |  left\n|/\no  root\n"
++        );
+     }
+ }

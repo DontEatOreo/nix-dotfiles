@@ -1,0 +1,879 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: 4evy <git@evy.pink>
+Date: Thu, 1 Jan 1970 00:00:00 +0000
+Subject: [PATCH 8/9] redate: add an interactive timestamp editor
+
+Add a revision picker that renders jj's topologically grouped graph with
+the configured graph style, log node template, and a command-specific row
+template. Use the same working-copy-oriented default revset as other
+history-editing commands.
+
+Apply exact timestamps through the shared metadata transaction. Preserve
+descendant metadata with jj's standard keep signing behavior, and make
+signing selected revisions opt-in with --sign.
+---
+ CHANGELOG.md                     |    4 
+ cli/src/commands/metaedit.rs     |   19 +
+ cli/src/commands/mod.rs          |    3 
+ cli/src/commands/redate.rs       |  476 +++++++++++++++++++++++++++++++++++++++
+ cli/src/config-schema.json       |    9 
+ cli/src/config/colors.toml       |    7 
+ cli/src/config/revsets.toml      |    1 
+ cli/src/config/templates.toml    |    7 
+ cli/tests/cli-reference@.md.snap |   18 +
+ cli/tests/runner.rs              |    1 
+ cli/tests/test_redate_command.rs |  143 +++++++++++
+ docs/config.md                   |   26 ++
+ 12 files changed, 714 insertions(+)
+ create mode 100644 cli/src/commands/redate.rs
+ create mode 100644 cli/tests/test_redate_command.rs
+
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -51,6 +51,10 @@ to [Semantic Versioning](https://semver.
+   repositories. `jj git ref fetch --shallow-exclude` can fetch a review stack
+   plus one parent generation for a usable diff base.
+ 
++* The new `jj redate` command interactively selects revisions from a graphical
++  commit picker and assigns an exact timestamp. Signing is opt-in with
++  `--sign`.
++
+ ### Fixed bugs
+ 
+ * `jj git push` now warns when `git.sign-on-push` selects immutable commits
+--- a/cli/src/commands/metaedit.rs
++++ b/cli/src/commands/metaedit.rs
+@@ -169,6 +169,15 @@ pub(crate) struct CommitEditArgs {
+     force_rewrite: bool,
+ }
+ 
++impl CommitEditArgs {
++    pub(crate) fn for_redate(timestamp: Timestamp) -> Self {
++        Self {
++            timestamp: Some(timestamp),
++            ..Self::default()
++        }
++    }
++}
++
+ #[derive(Clone, Copy)]
+ pub(crate) struct CommitEditOptions {
+     transaction_action: &'static str,
+@@ -185,6 +194,16 @@ impl Default for CommitEditOptions {
+         }
+     }
+ }
++
++impl CommitEditOptions {
++    pub(crate) fn redate(force_sign: bool) -> Self {
++        Self {
++            transaction_action: "redate",
++            force_sign,
++            preserve_descendant_metadata: true,
++        }
++    }
++}
+ 
+ #[instrument(skip_all)]
+ pub(crate) async fn cmd_metaedit(
+--- a/cli/src/commands/mod.rs
++++ b/cli/src/commands/mod.rs
+@@ -45,6 +45,7 @@ mod operation;
+ mod parallelize;
+ mod prev;
+ mod rebase;
++mod redate;
+ mod redo;
+ mod resolve;
+ mod restore;
+@@ -142,6 +143,7 @@ enum Command {
+     Parallelize(parallelize::ParallelizeArgs),
+     Prev(prev::PrevArgs),
+     Rebase(rebase::RebaseArgs),
++    Redate(redate::RedateArgs),
+     Redo(redo::RedoArgs),
+     Resolve(resolve::ResolveArgs),
+     Restore(restore::RestoreArgs),
+@@ -208,6 +210,7 @@ pub async fn run_command(ui: &mut Ui, co
+         Command::Parallelize(args) => parallelize::cmd_parallelize(ui, command_helper, args).await,
+         Command::Prev(args) => prev::cmd_prev(ui, command_helper, args).await,
+         Command::Rebase(args) => rebase::cmd_rebase(ui, command_helper, args).await,
++        Command::Redate(args) => redate::cmd_redate(ui, command_helper, args).await,
+         Command::Redo(args) => redo::cmd_redo(ui, command_helper, args).await,
+         Command::Resolve(args) => resolve::cmd_resolve(ui, command_helper, args).await,
+         Command::Restore(args) => restore::cmd_restore(ui, command_helper, args).await,
+--- /dev/null
++++ b/cli/src/commands/redate.rs
+@@ -0,0 +1,476 @@
++// Copyright 2026 The Jujutsu Authors
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++// https://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++use std::collections::BTreeSet;
++use std::io;
++use std::io::IsTerminal as _;
++
++use ansi_to_tui::IntoText as _;
++use chrono::Local;
++use chrono::SecondsFormat;
++use clap_complete::ArgValueCompleter;
++use crossterm::event;
++use crossterm::event::Event;
++use crossterm::event::KeyCode;
++use crossterm::event::KeyModifiers;
++use futures::TryStreamExt as _;
++use jj_lib::backend::CommitId;
++use jj_lib::backend::Timestamp;
++use jj_lib::commit::Commit;
++use jj_lib::graph::GraphEdge;
++use jj_lib::graph::TopoGroupedGraph;
++use jj_lib::repo::Repo as _;
++use jj_lib::time_util::parse_datetime;
++use ratatui::Terminal;
++use ratatui::layout::Constraint;
++use ratatui::layout::Layout;
++use ratatui::style::Color;
++use ratatui::style::Style;
++use ratatui::text::Line;
++use ratatui::text::Text;
++use ratatui::widgets::Block;
++use ratatui::widgets::List;
++use ratatui::widgets::ListItem;
++use ratatui::widgets::ListState;
++use ratatui::widgets::Paragraph;
++use tracing::instrument;
++
++use super::metaedit;
++use super::metaedit::CommitEditArgs;
++use super::metaedit::CommitEditOptions;
++use crate::cli_util::CommandHelper;
++use crate::cli_util::RevisionArg;
++use crate::cli_util::WorkspaceCommandHelper;
++use crate::cli_util::format_template;
++use crate::command_error::CommandError;
++use crate::command_error::internal_error;
++use crate::command_error::user_error;
++use crate::complete;
++use crate::formatter::FormatterExt as _;
++use crate::graphlog::GraphStyle;
++use crate::graphlog::get_graph_renderer;
++use crate::templater::TemplateRenderer;
++use crate::tui_util;
++use crate::ui::Ui;
++
++/// Interactively set exact timestamps on revisions
++#[derive(clap::Args, Clone, Debug)]
++pub(crate) struct RedateArgs {
++    /// The revisions to redate
++    #[arg(value_name = "REVSETS")]
++    #[arg(add = ArgValueCompleter::new(complete::revset_expression_mutable))]
++    revisions_pos: Vec<RevisionArg>,
++
++    #[arg(short = 'r', hide = true, value_name = "REVSETS")]
++    #[arg(add = ArgValueCompleter::new(complete::revset_expression_mutable))]
++    revisions_opt: Vec<RevisionArg>,
++
++    /// Sign the rewritten revisions
++    #[arg(long)]
++    sign: bool,
++}
++
++#[instrument(skip_all)]
++pub(crate) async fn cmd_redate(
++    ui: &mut Ui,
++    command: &CommandHelper,
++    args: &RedateArgs,
++) -> Result<(), CommandError> {
++    let mut workspace_command = command.workspace_helper(ui).await?;
++    if args.sign && !workspace_command.repo().store().signer().can_sign() {
++        return Err(user_error("No signing backend configured").hinted(
++            "For configuring a signing backend, see \
++             https://docs.jj-vcs.dev/latest/config/#commit-signing",
++        ));
++    }
++    if !ui.can_prompt() {
++        return Err(user_error("Cannot prompt for a redate timestamp")
++            .hinted("Run from a terminal or set JJ_INTERACTIVE=1"));
++    }
++    let interactive = args.revisions_pos.is_empty()
++        && args.revisions_opt.is_empty()
++        && io::stdin().is_terminal()
++        && io::stdout().is_terminal();
++    let target_expression = if !args.revisions_pos.is_empty() || !args.revisions_opt.is_empty() {
++        workspace_command
++            .parse_union_revsets(ui, &[&*args.revisions_pos, &*args.revisions_opt].concat())?
++    } else if interactive {
++        let revset = workspace_command.settings().get_string("revsets.redate")?;
++        workspace_command.parse_revset(ui, &RevisionArg::from(revset))?
++    } else {
++        workspace_command.parse_revset(ui, &RevisionArg::AT)?
++    }
++    .resolve()?;
++    workspace_command
++        .check_rewritable_expr(&target_expression)
++        .await?;
++    let commits = {
++        let revset = target_expression.evaluate(workspace_command.repo().as_ref())?;
++        let graph_stream = TopoGroupedGraph::new(revset.stream_graph(), |id| id).stream();
++        futures::pin_mut!(graph_stream);
++        let mut commits = vec![];
++        while let Some((commit_id, edges)) = graph_stream.try_next().await? {
++            let commit = workspace_command
++                .repo()
++                .store()
++                .get_commit_async(&commit_id)
++                .await?;
++            commits.push((commit, edges));
++        }
++        commits
++    };
++    if commits.is_empty() {
++        writeln!(ui.status(), "No revisions to redate.")?;
++        return Ok(());
++    }
++    let commit_ids: Vec<CommitId> = if interactive {
++        let graph_style = GraphStyle::from_settings(workspace_command.settings())?;
++        let rows = render_rows(ui, &workspace_command, &commits)?;
++        let Some(indices) = select_revisions(ui, graph_style, &rows)? else {
++            return Ok(());
++        };
++        indices
++            .into_iter()
++            .map(|index| rows[index].commit_id.clone())
++            .collect()
++    } else {
++        commits
++            .iter()
++            .map(|(commit, _)| commit.id().clone())
++            .collect()
++    };
++    let timestamp = prompt_timestamp(ui)?;
++    let display_timestamp = timestamp
++        .to_datetime()
++        .map_err(internal_error)?
++        .to_rfc3339();
++    let revision_label = match commit_ids.as_slice() {
++        [_] => "1 revision".to_owned(),
++        revisions => format!("{} revisions", revisions.len()),
++    };
++    if !ui.prompt_yes_no(
++        &format!("Redate {revision_label} to {display_timestamp}?"),
++        Some(true),
++    )? {
++        return Ok(());
++    }
++    metaedit::edit_commits(
++        ui,
++        &mut workspace_command,
++        &CommitEditArgs::for_redate(timestamp),
++        CommitEditOptions::redate(args.sign),
++        commit_ids,
++    )
++    .await
++}
++
++fn render_rows(
++    ui: &Ui,
++    workspace_command: &WorkspaceCommandHelper,
++    commits: &[(Commit, Vec<GraphEdge<CommitId>>)],
++) -> Result<Vec<RevisionRow>, CommandError> {
++    let template = workspace_command
++        .parse_commit_template(
++            ui,
++            &workspace_command
++                .settings()
++                .get_string("templates.redate")?,
++        )?
++        .labeled(["commit"]);
++    let language = workspace_command.commit_template_language();
++    let node_template: TemplateRenderer<Option<Commit>> = workspace_command
++        .parse_template(
++            ui,
++            &language,
++            &workspace_command
++                .settings()
++                .get_string("templates.log_node")?,
++        )?
++        .labeled(["redate", "commit", "node"]);
++    commits
++        .iter()
++        .map(|(commit, edges)| {
++            let mut output = vec![];
++            let mut formatter = ui.new_formatter(&mut output).into_labeled("redate");
++            template
++                .format(commit, formatter.as_mut())
++                .map_err(|error| internal_error(format!("Failed to format redate row: {error}")))?;
++            drop(formatter);
++            Ok(RevisionRow {
++                commit_id: commit.id().clone(),
++                edges: edges.clone(),
++                node_symbol: format_template(ui, &Some(commit.clone()), &node_template),
++                text: output,
++            })
++        })
++        .collect()
++}
++
++struct RevisionRow {
++    commit_id: CommitId,
++    edges: Vec<GraphEdge<CommitId>>,
++    node_symbol: String,
++    text: Vec<u8>,
++}
++
++fn select_revisions(
++    ui: &Ui,
++    graph_style: GraphStyle,
++    rows: &[RevisionRow],
++) -> Result<Option<Vec<usize>>, CommandError> {
++    tui_util::with_terminal(|terminal| run_selector(ui, terminal, graph_style, rows))
++}
++
++fn run_selector<B: ratatui::backend::Backend>(
++    ui: &Ui,
++    terminal: &mut Terminal<B>,
++    graph_style: GraphStyle,
++    rows: &[RevisionRow],
++) -> Result<Option<Vec<usize>>, CommandError> {
++    let mut list_state = ListState::default().with_selected(Some(0));
++    let mut state = SelectorState::default();
++
++    loop {
++        let rendered_rows = render_graph_rows(ui, graph_style, rows, &state)?;
++        terminal
++            .draw(|frame| {
++                let areas = Layout::vertical([Constraint::Fill(1), Constraint::Length(1)])
++                    .split(frame.area());
++                let items = rendered_rows.iter().cloned().map(ListItem::new);
++                let list = List::new(items)
++                    .block(Block::bordered().title(format!(
++                        " Select revisions ({} selected) ",
++                        state.selected.len()
++                    )))
++                    .scroll_padding(1);
++                frame.render_stateful_widget(list, areas[0], &mut list_state);
++
++                let footer = if state.invalid {
++                    Line::from("Select at least one revision")
++                        .style(Style::default().fg(Color::Red))
++                } else {
++                    Line::from("↑↓/jk move · space toggle · enter confirm · q cancel")
++                        .style(Style::default().fg(Color::DarkGray))
++                };
++                frame.render_widget(Paragraph::new(footer), areas[1]);
++            })
++            .map_err(|error| internal_error(format!("Failed to draw redate TUI: {error}")))?;
++
++        let Event::Key(key) = event::read()
++            .map_err(|error| internal_error(format!("Failed to read redate TUI input: {error}")))?
++        else {
++            continue;
++        };
++        if key.is_release() {
++            continue;
++        }
++        match state.handle_key(key.code, key.modifiers, rows.len()) {
++            SelectorAction::Continue => list_state.select(Some(state.cursor)),
++            SelectorAction::Submit(indices) => return Ok(Some(indices)),
++            SelectorAction::Cancel => return Ok(None),
++        }
++    }
++}
++
++fn render_graph_rows(
++    ui: &Ui,
++    graph_style: GraphStyle,
++    rows: &[RevisionRow],
++    state: &SelectorState,
++) -> Result<Vec<Text<'static>>, CommandError> {
++    let mut graph = get_graph_renderer(graph_style);
++    rows.iter()
++        .enumerate()
++        .map(|(index, row)| {
++            let mut message = vec![];
++            {
++                let mut formatter = ui.new_formatter(&mut message).into_labeled("redate");
++                if state.cursor == index {
++                    write!(formatter.labeled("cursor"), "› ")?;
++                } else {
++                    write!(formatter, "  ")?;
++                }
++                {
++                    let mut selection = formatter.labeled("selection");
++                    if state.selected.contains(&index) {
++                        write!(selection.labeled("selected"), "● ")?;
++                    } else {
++                        write!(selection.labeled("unselected"), "○ ")?;
++                    }
++                }
++            }
++            message.extend_from_slice(&row.text);
++            graph
++                .render_row(
++                    &row.commit_id,
++                    &row.edges,
++                    &row.node_symbol,
++                    &String::from_utf8_lossy(&message),
++                )
++                .into_bytes()
++                .into_text()
++                .map_err(|error| internal_error(format!("Failed to render redate graph: {error}")))
++        })
++        .collect()
++}
++
++#[derive(Default)]
++struct SelectorState {
++    cursor: usize,
++    selected: BTreeSet<usize>,
++    invalid: bool,
++}
++
++#[derive(Debug, PartialEq, Eq)]
++enum SelectorAction {
++    Continue,
++    Submit(Vec<usize>),
++    Cancel,
++}
++
++impl SelectorState {
++    fn handle_key(
++        &mut self,
++        code: KeyCode,
++        modifiers: KeyModifiers,
++        row_count: usize,
++    ) -> SelectorAction {
++        match (code, modifiers) {
++            (KeyCode::Char('q') | KeyCode::Esc, KeyModifiers::NONE)
++            | (KeyCode::Char('c'), KeyModifiers::CONTROL) => SelectorAction::Cancel,
++            (KeyCode::Enter, KeyModifiers::NONE) if !self.selected.is_empty() => {
++                SelectorAction::Submit(self.selected.iter().copied().collect())
++            }
++            (KeyCode::Enter, KeyModifiers::NONE) => {
++                self.invalid = true;
++                SelectorAction::Continue
++            }
++            (KeyCode::Down | KeyCode::Char('j'), KeyModifiers::NONE) => {
++                self.cursor = (self.cursor + 1).min(row_count - 1);
++                SelectorAction::Continue
++            }
++            (KeyCode::Up | KeyCode::Char('k'), KeyModifiers::NONE) => {
++                self.cursor = self.cursor.saturating_sub(1);
++                SelectorAction::Continue
++            }
++            (KeyCode::Char(' '), KeyModifiers::NONE) => {
++                if !self.selected.insert(self.cursor) {
++                    self.selected.remove(&self.cursor);
++                }
++                self.invalid = false;
++                SelectorAction::Continue
++            }
++            _ => SelectorAction::Continue,
++        }
++    }
++}
++
++fn prompt_timestamp(ui: &Ui) -> Result<Timestamp, CommandError> {
++    let now = Local::now();
++    let initial = now.to_rfc3339_opts(SecondsFormat::Secs, false);
++    let prompt = format!("Timestamp (default {initial})");
++    Ok(ui.prompt_choice_with(&prompt, Some(&initial), parse_datetime)?)
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn test_selector_navigation_and_submit() {
++        let mut state = SelectorState::default();
++        assert_eq!(
++            state.handle_key(KeyCode::Down, KeyModifiers::NONE, 3),
++            SelectorAction::Continue
++        );
++        assert_eq!(state.cursor, 1);
++        state.handle_key(KeyCode::Char(' '), KeyModifiers::NONE, 3);
++        state.handle_key(KeyCode::Down, KeyModifiers::NONE, 3);
++        state.handle_key(KeyCode::Char(' '), KeyModifiers::NONE, 3);
++        assert_eq!(
++            state.handle_key(KeyCode::Enter, KeyModifiers::NONE, 3),
++            SelectorAction::Submit(vec![1, 2])
++        );
++    }
++
++    #[test]
++    fn test_selector_requires_selection() {
++        let mut state = SelectorState::default();
++        assert_eq!(
++            state.handle_key(KeyCode::Enter, KeyModifiers::NONE, 1),
++            SelectorAction::Continue
++        );
++        assert!(state.invalid);
++        state.handle_key(KeyCode::Char(' '), KeyModifiers::NONE, 1);
++        assert!(!state.invalid);
++    }
++
++    #[test]
++    fn test_render_revision_graph() -> Result<(), CommandError> {
++        let root_id = CommitId::from_hex("00");
++        let left_id = CommitId::from_hex("11");
++        let right_id = CommitId::from_hex("22");
++        let merge_id = CommitId::from_hex("33");
++        let rows = vec![
++            RevisionRow {
++                commit_id: merge_id,
++                edges: vec![
++                    GraphEdge::direct(left_id.clone()),
++                    GraphEdge::direct(right_id.clone()),
++                ],
++                node_symbol: "@".to_owned(),
++                text: b"merge".to_vec(),
++            },
++            RevisionRow {
++                commit_id: right_id,
++                edges: vec![GraphEdge::direct(root_id.clone())],
++                node_symbol: "o".to_owned(),
++                text: b"right".to_vec(),
++            },
++            RevisionRow {
++                commit_id: left_id,
++                edges: vec![GraphEdge::direct(root_id.clone())],
++                node_symbol: "o".to_owned(),
++                text: b"left".to_vec(),
++            },
++            RevisionRow {
++                commit_id: root_id,
++                edges: vec![],
++                node_symbol: "o".to_owned(),
++                text: b"root".to_vec(),
++            },
++        ];
++        let mut state = SelectorState::default();
++        state.selected.insert(1);
++        let rendered = render_graph_rows(&Ui::null(), GraphStyle::Ascii, &rows, &state)?;
++        let mut output = String::new();
++        for text in rendered {
++            for line in text.lines {
++                for span in line.spans {
++                    output.push_str(&span.content);
++                }
++                output.push('\n');
++            }
++        }
++        insta::assert_snapshot!(output, @r"
++        @    › ○ merge
++        |\
++        | o    ● right
++        o |    ○ left
++        |/
++        o    ○ root
++        ");
++        Ok(())
++    }
++}
+--- a/cli/src/config-schema.json
++++ b/cli/src/config-schema.json
+@@ -741,6 +741,11 @@
+                     "description": "Default set of revisions to run a command on when no explicit revset is given for jj run",
+                     "default": "reachable(@, mutable())"
+                 },
++                "redate": {
++                    "type": "string",
++                    "description": "Default set of revisions to offer in the jj redate TUI",
++                    "default": "reachable(@, mutable())"
++                },
+                 "simplify-parents": {
+                     "type": "string",
+                     "description": "Default set of revisions to simplify when no explicit revset is given for jj simplify-parents",
+@@ -1074,6 +1079,10 @@
+                     "type": "string",
+                     "description": "`jj arrange``'s template for commits in the main view"
+                 },
++                "redate": {
++                    "type": "string",
++                    "description": "`jj redate`'s template for revisions in the interactive picker"
++                },
+                 "bookmark_list": {
+                     "type": "string",
+                     "description": "`jj bookmark list`'s output"
+--- a/cli/src/config/colors.toml
++++ b/cli/src/config/colors.toml
+@@ -118,3 +118,10 @@
+ "signature status invalid" = "red"
+ 
+ "arrange context commit" = { dim = true }
++"redate cursor" = { fg = "magenta", bold = true }
++"redate selection selected" = { fg = "magenta", bold = true }
++"redate selection unselected" = "bright black"
++"redate commit working_copy" = { fg = "magenta", bold = true }
++"redate commit change" = { fg = "cyan", bold = true }
++"redate commit empty" = { fg = "bright black", italic = true }
++"redate commit timestamp" = "bright black"
+--- a/cli/src/config/revsets.toml
++++ b/cli/src/config/revsets.toml
+@@ -7,6 +7,7 @@ converge = "mutable() & divergent()"
+ fix = "reachable(@, mutable())"
+ run = "reachable(@, mutable())"
+ simplify-parents = "reachable(@, mutable())"
++redate = "reachable(@, mutable())"
+ # log revset is also used as the default short-prefixes. If it failed to
+ # evaluate, lengthy warning messages would be printed. Use present(expr) if
+ # symbols in expr might not always exist.
+--- a/cli/src/config/templates.toml
++++ b/cli/src/config/templates.toml
+@@ -3,6 +3,13 @@ bookmark_list = 'format_commit_ref(self,
+ 
+ commit_summary = 'format_commit_summary_with_refs(self, format_commit_ref_names(bookmarks))'
+ arrange = 'builtin_log_compact'
++redate = '''
++separate("  ",
++  label("change", change_id.shortest(8)),
++  coalesce(description.first_line(), label("empty", "(no description set)")),
++  label("timestamp", committer.timestamp().local().format("%Y-%m-%d %H:%M")),
++)
++'''
+ 
+ file_annotate = '''
+ join(" ",
+--- a/cli/tests/cli-reference@.md.snap
++++ b/cli/tests/cli-reference@.md.snap
+@@ -95,6 +95,7 @@ This document contains the help content
+ * [`jj parallelize`↴](#jj-parallelize)
+ * [`jj prev`↴](#jj-prev)
+ * [`jj rebase`↴](#jj-rebase)
++* [`jj redate`↴](#jj-redate)
+ * [`jj redo`↴](#jj-redo)
+ * [`jj resolve`↴](#jj-resolve)
+ * [`jj restore`↴](#jj-restore)
+@@ -182,6 +183,7 @@ To get started, see the tutorial [`jj he
+ * `parallelize` — Parallelize revisions by making them siblings
+ * `prev` — Change the working copy revision relative to the parent revision
+ * `rebase` — Move revisions to different parent(s)
++* `redate` — Interactively set exact timestamps on revisions
+ * `redo` — Redo the most recently undone operation
+ * `resolve` — Resolve conflicted files with an external merge tool
+ * `restore` — Restore paths from another revision
+@@ -3046,6 +3048,22 @@ J           J
+ 
+ 
+ 
++## `jj redate`
++
++Interactively set exact timestamps on revisions
++
++**Usage:** `jj redate [OPTIONS] [REVSETS]...`
++
++###### **Arguments:**
++
++* `<REVSETS>` — The revisions to redate
++
++###### **Options:**
++
++* `--sign` — Sign the rewritten revisions
++
++
++
+ ## `jj redo`
+ 
+ Redo the most recently undone operation
+--- a/cli/tests/runner.rs
++++ b/cli/tests/runner.rs
+@@ -69,6 +69,7 @@ mod test_op_revert_command;
+ mod test_operations;
+ mod test_parallelize_command;
+ mod test_rebase_command;
++mod test_redate_command;
+ mod test_repo_change_report;
+ mod test_resolve_command;
+ mod test_restore_command;
+--- /dev/null
++++ b/cli/tests/test_redate_command.rs
+@@ -0,0 +1,143 @@
++// Copyright 2026 The Jujutsu Authors
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++// https://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++use crate::common::TestEnvironment;
++use crate::common::TestWorkDir;
++
++#[test]
++fn test_redate_sign_requires_signing_backend() {
++    let test_env = TestEnvironment::default();
++    test_env.run_jj_in(".", ["git", "init", "repo"]).success();
++    let work_dir = test_env.work_dir("repo");
++
++    let output = work_dir.run_jj(["redate", "--sign", "-r", "@"]);
++    assert!(!output.status.success());
++    assert!(
++        output
++            .stderr
++            .raw()
++            .contains("No signing backend configured")
++    );
++}
++
++#[test]
++fn test_redate_retries_invalid_timestamp_and_can_cancel() {
++    let test_env = TestEnvironment::default();
++    test_env.run_jj_in(".", ["git", "init", "repo"]).success();
++    let work_dir = test_env.work_dir("repo");
++    let operation_id = work_dir.current_operation_id();
++
++    let output = work_dir
++        .run_jj_with(|cmd| {
++            cmd.env("JJ_INTERACTIVE", "1")
++                .env("TZ", "UTC")
++                .args(["redate", "-r", "@"])
++                .write_stdin("aaaaaa\n2002-03-04T05:06:07+00:00\nn\n")
++        })
++        .success();
++    assert!(
++        output.stderr.raw().contains("premature end of input"),
++        "unexpected prompt output: {output}"
++    );
++    assert_eq!(work_dir.current_operation_id(), operation_id);
++}
++
++#[test]
++fn test_redate_preserves_descendant_metadata_and_signs_on_request() {
++    let test_env = TestEnvironment::default();
++    test_env.add_config(
++        r#"
++        [signing]
++        backend = "test"
++        behavior = "keep"
++        key = "impeccable"
++        "#,
++    );
++    test_env.run_jj_in(".", ["git", "init", "repo"]).success();
++    let work_dir = test_env.work_dir("repo");
++
++    work_dir.run_jj(["describe", "-m", "target"]).success();
++    work_dir.run_jj(["new", "-m", "signed child"]).success();
++    work_dir.run_jj(["sign", "-r", "@"]).success();
++    work_dir.run_jj(["new", "-m", "unsigned child"]).success();
++
++    let expected_descendant_metadata = descendant_metadata(&work_dir);
++
++    redate(&work_dir, "@--", "2002-03-04T05:06:07+00:00", false);
++    assert_eq!(
++        commit_metadata(&work_dir, "@--"),
++        "2002-03-04 05:06:07|2002-03-04 05:06:07|unsigned\n"
++    );
++    assert_eq!(descendant_metadata(&work_dir), expected_descendant_metadata);
++
++    let operation_id = work_dir.current_operation_id();
++    redate(&work_dir, "@--", "2002-03-04T05:06:07+00:00", false);
++    assert_eq!(work_dir.current_operation_id(), operation_id);
++
++    redate(&work_dir, "@--", "2003-04-05T06:07:08+00:00", true);
++    assert_eq!(
++        commit_metadata(&work_dir, "@--"),
++        "2003-04-05 06:07:08|2003-04-05 06:07:08|good\n"
++    );
++    assert_eq!(descendant_metadata(&work_dir), expected_descendant_metadata);
++}
++
++fn redate(work_dir: &TestWorkDir, revision: &str, timestamp: &str, sign: bool) {
++    work_dir
++        .run_jj_with(|cmd| {
++            cmd.env("JJ_INTERACTIVE", "1").env("TZ", "UTC");
++            cmd.arg("redate");
++            if sign {
++                cmd.arg("--sign");
++            }
++            cmd.args(["-r", revision])
++                .write_stdin(format!("{timestamp}\ny\n"))
++        })
++        .success();
++}
++
++fn commit_metadata(work_dir: &TestWorkDir, revision: &str) -> String {
++    work_dir
++        .run_jj([
++            "log",
++            "--no-graph",
++            "-r",
++            revision,
++            "-T",
++            r#"author.timestamp().utc().format("%Y-%m-%d %H:%M:%S")
++              ++ "|" ++ committer.timestamp().utc().format("%Y-%m-%d %H:%M:%S")
++              ++ "|" ++ if(signature, signature.status(), "unsigned") ++ "\n""#,
++        ])
++        .success()
++        .stdout
++        .raw()
++        .to_owned()
++}
++
++fn descendant_metadata(work_dir: &TestWorkDir) -> String {
++    work_dir
++        .run_jj([
++            "log",
++            "--no-graph",
++            "-r",
++            "@|@-",
++            "-T",
++            r#"change_id ++ "|" ++ author ++ "|" ++ committer
++              ++ "|" ++ if(signature, signature.status(), "unsigned") ++ "\n""#,
++        ])
++        .success()
++        .stdout
++        .raw()
++        .to_owned()
++}
+--- a/docs/config.md
++++ b/docs/config.md
+@@ -1594,6 +1594,32 @@ this setting for a single invocation:
+ jj run -j 4 -- cargo fmt
+ ```
+ 
++## `redate`: Assigning exact timestamps {: #redate }
++
++`jj redate` lets you select one or more mutable revisions, enter an exact
++timestamp, and confirm the rewrite. Pass `--sign` to sign the selected
++revisions. Rebased descendants retain their author and committer metadata;
++existing signatures follow jj's standard `keep` signing behavior. Use
++`jj metaedit --timestamp` when interactive selection is not wanted.
++
++When no revisions are specified in a terminal, the picker uses
++`revsets.redate`. Its default is `reachable(@, mutable())`, matching the
++working-copy-oriented defaults used by other history-editing commands. The
++picker renders revision topology with the same `ui.graph.style` and
++`templates.log_node` settings as `jj log`; `templates.redate` controls the
++details shown beside each graph node.
++
++```toml
++[revsets]
++redate = "mine() & mutable()"
++
++[templates]
++redate = 'change_id.shortest(8) ++ " " ++ description.first_line()'
++```
++
++`--sign` requires a configured signing backend. Timestamps accept the same RFC
++2822 and RFC 3339 forms as `jj metaedit --timestamp`.
++
+ ## Commit Signing
+ 
+ `jj` can be configured to sign and verify the commits it creates using either

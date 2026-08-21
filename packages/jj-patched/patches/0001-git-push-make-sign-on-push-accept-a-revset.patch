@@ -1,0 +1,264 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: 4evy <git@evy.pink>
+Date: Thu, 1 Jan 1970 00:00:00 +0000
+Subject: [PATCH 1/9] git push: make sign-on-push accept a revset
+
+Let users define signing policy with the same revset language used by
+other jj configuration. Intersect the configured selector with commits
+outgoing to the pushed references and force-sign exactly the selected
+commits.
+
+Default to none() and migrate boolean values for six releases so
+existing configurations keep their old mutable, unsigned, own-commit
+behavior.
+---
+ CHANGELOG.md                            |    4 +++
+ cli/src/commands/git/push.rs            |   30 +++++++++++-------------
+ cli/src/config-schema.json              |    6 ++--
+ cli/src/config.rs                       |   27 +++++++++++++++++++++-
+ cli/src/config/misc.toml                |    2 -
+ cli/tests/sample-configs/valid/git.toml |    2 -
+ cli/tests/test_config_command.rs        |   39 ++++++++++++++++++++++++++++++++
+ cli/tests/test_git_push.rs              |    2 -
+ docs/config.md                          |   15 +++++-------
+ 9 files changed, 96 insertions(+), 31 deletions(-)
+
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -12,6 +12,10 @@ to [Semantic Versioning](https://semver.
+ 
+ ### Breaking changes
+ 
++* `git.sign-on-push` is now a revset selecting commits to sign instead of a
++  boolean. The default is `none()`. Existing `true` values are migrated to
++  `~signed() & mine()` and `false` values to `none()`.
++
+ ### Deprecations
+ 
+ ### New features
+--- a/cli/src/commands/git/push.rs
++++ b/cli/src/commands/git/push.rs
+@@ -14,7 +14,6 @@
+ 
+ use std::collections::HashMap;
+ use std::collections::HashSet;
+-use std::future;
+ use std::io;
+ use std::io::Write as _;
+ use std::iter;
+@@ -553,9 +552,14 @@ pub async fn cmd_git_push(
+         return Ok(());
+     }
+ 
+-    if !args.dry_run && tx.settings().get_bool("git.sign-on-push")? {
+-        let to_push_expr = ready_to_push_revset_expression(&tx, remote, &ref_updates);
+-        ref_updates = sign_commits_before_push(ui, &mut tx, to_push_expr, ref_updates).await?;
++    let sign_on_push_revset = tx.settings().get_string("git.sign-on-push")?;
++    let mut commits_to_sign = tx
++        .base_workspace_helper()
++        .parse_revset(ui, &RevisionArg::from(sign_on_push_revset))?;
++    commits_to_sign.intersect_with(&ready_to_push_revset_expression(&tx, remote, &ref_updates));
++    let commits_to_sign = commits_to_sign.resolve()?;
++    if !args.dry_run {
++        ref_updates = sign_commits_before_push(ui, &mut tx, commits_to_sign, ref_updates).await?;
+     }
+ 
+     if let Some(mut formatter) = ui.status_formatter() {
+@@ -807,19 +811,13 @@ fn ready_to_push_revset_expression(
+ async fn sign_commits_before_push(
+     ui: &Ui,
+     tx: &mut WorkspaceCommandTransaction<'_>,
+-    commits_to_push: Arc<UserRevsetExpression>,
++    commits_to_sign: Arc<ResolvedRevsetExpression>,
+     ref_updates: GitPushRefTargets,
+ ) -> Result<GitPushRefTargets, CommandError> {
+-    let mut sign_settings = tx.settings().sign_settings();
+-    sign_settings.behavior = SignBehavior::Own;
+-    let commit_ids: IndexSet<CommitId> = tx
+-        .base_workspace_helper()
+-        .attach_revset_evaluator(commits_to_push)
+-        .evaluate_to_commits()?
+-        // TODO: make filter condition configurable by revset?
+-        .try_filter(|commit| {
+-            future::ready(!commit.is_signed() && sign_settings.should_sign(commit.store_commit()))
+-        })
++    let commit_ids: IndexSet<CommitId> = commits_to_sign
++        .evaluate(tx.base_repo().as_ref())?
++        .stream()
++        .commits(tx.base_repo().store())
+         .map_ok(|commit| commit.id().clone())
+         .try_collect()
+         .await?;
+@@ -846,7 +844,7 @@ async fn sign_commits_before_push(
+                     if commit_ids.contains(&old_commit_id) {
+                         let commit = rewriter
+                             .reparent()
+-                            .set_sign_behavior(sign_settings.behavior)
++                            .set_sign_behavior(SignBehavior::Force)
+                             .write()
+                             .await?;
+                         old_to_new_commits_map.insert(old_commit_id, commit.id().clone());
+--- a/cli/src/config-schema.json
++++ b/cli/src/config-schema.json
+@@ -535,9 +535,9 @@
+                     "default": true
+                 },
+                 "sign-on-push": {
+-                    "type": "boolean",
+-                    "description": "Whether jj should sign commits before pushing",
+-                    "default": false
++                    "type": "string",
++                    "description": "Revset of commits to sign before pushing",
++                    "default": "none()"
+                 },
+                 "track-default-bookmark-on-clone": {
+                     "type": "boolean",
+--- a/cli/src/config.rs
++++ b/cli/src/config.rs
+@@ -877,7 +877,32 @@ fn parse_config_arg_item(item_str: &str)
+ 
+ /// List of rules to migrate deprecated config variables.
+ pub fn default_config_migrations() -> Vec<ConfigMigrationRule> {
+-    vec![]
++    vec![
++        // TODO: Delete in jj 0.50.0+
++        ConfigMigrationRule::custom(
++            |layer| {
++                layer
++                    .look_up_item("git.sign-on-push")
++                    .is_ok_and(|value| value.is_some_and(|value| value.as_bool().is_some()))
++            },
++            |layer| match layer.look_up_item("git.sign-on-push") {
++                Ok(Some(value)) => {
++                    let old_value = value.as_bool().unwrap();
++                    let new_value = if old_value {
++                        "~signed() & mine()"
++                    } else {
++                        "none()"
++                    };
++                    layer.set_value("git.sign-on-push", new_value.to_owned())?;
++                    Ok(format!(
++                        "git.sign-on-push = {old_value} is updated to git.sign-on-push = \
++                         '{new_value}'"
++                    ))
++                }
++                _ => unreachable!(),
++            },
++        ),
++    ]
+ }
+ 
+ /// Command name and arguments specified by config.
+--- a/cli/src/config/misc.toml
++++ b/cli/src/config/misc.toml
+@@ -28,7 +28,7 @@ disabled-branches = []
+ colocate = true
+ object-hash = "sha1"
+ private-commits = "none()"
+-sign-on-push = false
++sign-on-push = "none()"
+ track-default-bookmark-on-clone = true
+ 
+ [ui]
+--- a/cli/tests/sample-configs/valid/git.toml
++++ b/cli/tests/sample-configs/valid/git.toml
+@@ -5,7 +5,7 @@ fetch = ["origin", "fork"]
+ fetch-depth = 42
+ push = "fork"
+ record-synthetic-predecessors = false
+-sign-on-push = true
++sign-on-push = "mine()"
+ subprocess = false
+ write-change-id-header = true
+ executable-path = "/home/linus/.local/bin/git"
+--- a/cli/tests/test_config_command.rs
++++ b/cli/tests/test_config_command.rs
+@@ -28,6 +28,45 @@ use crate::common::force_interactive;
+ use crate::common::to_toml_value;
+ 
+ #[test]
++fn test_config_migrate_sign_on_push_boolean() {
++    let test_env = TestEnvironment::default();
++
++    let output = test_env.run_jj_in(
++        ".",
++        [
++            "config",
++            "list",
++            "git.sign-on-push",
++            "--config=git.sign-on-push=true",
++        ],
++    );
++    insta::assert_snapshot!(output, @r#"
++    git.sign-on-push = "~signed() & mine()"
++    [EOF]
++    ------- stderr -------
++    Warning: Deprecated CLI-provided config: git.sign-on-push = true is updated to git.sign-on-push = '~signed() & mine()'
++    [EOF]
++    "#);
++
++    let output = test_env.run_jj_in(
++        ".",
++        [
++            "config",
++            "list",
++            "git.sign-on-push",
++            "--config=git.sign-on-push=false",
++        ],
++    );
++    insta::assert_snapshot!(output, @r#"
++    git.sign-on-push = "none()"
++    [EOF]
++    ------- stderr -------
++    Warning: Deprecated CLI-provided config: git.sign-on-push = false is updated to git.sign-on-push = 'none()'
++    [EOF]
++    "#);
++}
++
++#[test]
+ fn test_config_list_single() {
+     let test_env = TestEnvironment::default();
+     test_env.add_config(
+--- a/cli/tests/test_git_push.rs
++++ b/cli/tests/test_git_push.rs
+@@ -3017,7 +3017,7 @@ fn test_git_push_sign_on_push() {
+         r#"
+     signing.backend = "test"
+     signing.key = "impeccable"
+-    git.sign-on-push = true
++    git.sign-on-push = "~signed() & mine()"
+     "#,
+     );
+     let output = work_dir.run_jj(["git", "push", "--dry-run"]);
+--- a/docs/config.md
++++ b/docs/config.md
+@@ -1727,22 +1727,21 @@ to do with signing commits on modificati
+ - `force`: sign all commits after modification, always, even if you are not the
+   author.
+ 
+-Instead of signing all commits during creation when `signing.behavior` is
+-set to `own`, the `git.sign-on-push` configuration can be used to sign
+-commits only upon running `jj git push`. All mutable unsigned commits
+-being pushed will be signed prior to pushing. This might be preferred if the
+-signing backend requires user interaction or is slow, so that signing is
+-performed in a single batch operation.
++If the signing backend requires user interaction for every signature, or is
++slow, you might not want to sign each commit at creation time. Instead, the
++`git.sign-on-push` configuration can be set to a revset of commits to sign only
++upon running `jj git push`. Matching mutable commits being pushed will be
++signed prior to pushing.
+ 
+ ```toml
+ # Configure signing backend as before, but lazily signing only on push.
+ [signing]
+-behavior = "drop"
++behavior = "drop" # Avoid signing commits when they are created
+ backend = "ssh"
+ key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGj+J6N6SO+4P8dOZqfR1oiay2yxhhHnagH52avUqw5h"
+ 
+ [git]
+-sign-on-push = true
++sign-on-push = "~signed() & mine()"
+ ```
+ 
+ ## Commit Signature Verification

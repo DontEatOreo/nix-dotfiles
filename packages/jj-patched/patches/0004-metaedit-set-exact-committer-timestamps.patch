@@ -1,0 +1,245 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: 4evy <git@evy.pink>
+Date: Thu, 1 Jan 1970 00:00:00 +0000
+Subject: [PATCH 4/9] metaedit: set exact committer timestamps
+
+Add --committer-timestamp for setting the committer timestamp directly
+and --timestamp as shorthand for setting both author and committer
+timestamps. Avoid rewriting when the requested values already match the
+commit.
+---
+ CHANGELOG.md                       |    3 +
+ cli/src/commands/metaedit.rs       |   59 +++++++++++++++++++++--
+ cli/tests/cli-reference@.md.snap   |   10 +++
+ cli/tests/test_metaedit_command.rs |   94 +++++++++++++++++++++++++++++++++++++
+ 4 files changed, 161 insertions(+), 5 deletions(-)
+
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -20,6 +20,9 @@ to [Semantic Versioning](https://semver.
+ 
+ ### New features
+ 
++* `jj metaedit` now supports `--timestamp` to set both commit timestamps and
++  `--committer-timestamp` to set only the committer timestamp.
++
+ * `jj bisect` will now mention when it cannot unambiguously find the first bad
+   revision due to skips in evaluation.
+ 
+--- a/cli/src/commands/metaedit.rs
++++ b/cli/src/commands/metaedit.rs
+@@ -116,11 +116,38 @@ pub(crate) struct CommitEditArgs {
+     /// [RFC3339]: https://datatracker.ietf.org/doc/html/rfc3339
+     #[arg(
+         long,
+-        conflicts_with = "update_author_timestamp",
++        conflicts_with_all = ["update_author_timestamp", "timestamp"],
+         value_parser = parse_datetime
+     )]
+     author_timestamp: Option<Timestamp>,
+ 
++    /// Set both the author and committer dates to the given date
++    ///
++    /// This is equivalent to setting `--author-timestamp` and
++    /// `--committer-timestamp` to the same value.
++    #[arg(
++        long,
++        conflicts_with_all = [
++            "author_timestamp",
++            "update_author_timestamp",
++            "committer_timestamp"
++        ],
++        value_parser = parse_datetime
++    )]
++    timestamp: Option<Timestamp>,
++
++    /// Set the committer date to the given date
++    ///
++    /// The date can either be human readable
++    /// ([RFC2822], eg 'Sun, 23 Jan 2000 01:23:45 PST')
++    /// or a time stamp ([RFC3339], eg '2000-01-23T01:23:45-08:00').
++    ///
++    /// [RFC2822]: https://datatracker.ietf.org/doc/html/rfc2822
++    ///
++    /// [RFC3339]: https://datatracker.ietf.org/doc/html/rfc3339
++    #[arg(long, conflicts_with = "timestamp", value_parser = parse_datetime)]
++    committer_timestamp: Option<Timestamp>,
++
+     /// Rewrite the commit, even if no other metadata changed
+     ///
+     /// This updates the committer timestamp to the current time, as well as the
+@@ -209,6 +236,7 @@ pub(crate) async fn edit_commits(
+                 let mut rewrite = args.force_rewrite || rewriter.parents_changed();
+ 
+                 let old_author = rewriter.old_commit().author().clone();
++                let old_committer = rewriter.old_commit().committer().clone();
+                 let mut commit_builder = rewriter.reparent();
+                 let mut new_author = commit_builder.author().clone();
+                 if let Some((name, email)) = args.author.clone() {
+@@ -224,19 +252,40 @@ pub(crate) async fn edit_commits(
+                 if let Some(author_date) = args.author_timestamp {
+                     new_author.timestamp = author_date;
+                 }
++                if let Some(timestamp) = args.timestamp {
++                    new_author.timestamp = timestamp;
++                }
+                 // If the old commit had an unset author, the commit builder
+                 // may already have the author updated from the current config.
+                 // Thus, compare to the actual old_author to correctly detect
+                 // changes.
+-                if new_author.name != old_author.name
+-                    || new_author.email != old_author.email
++                let author_identity_changed =
++                    new_author.name != old_author.name || new_author.email != old_author.email;
++                let author_timestamp_requested = args.update_author_timestamp
++                    || args.timestamp.is_some()
++                    || args.author_timestamp.is_some();
++                let author_timestamp_changed =
++                    author_timestamp_requested && new_author.timestamp != old_author.timestamp;
++                let should_set_author = author_identity_changed
+                     || (new_author.timestamp != commit_builder.author().timestamp
+-                        && new_author.timestamp != old_author.timestamp)
+-                {
++                        && (author_timestamp_requested
++                            || new_author.timestamp != old_author.timestamp));
++                if should_set_author {
+                     commit_builder = commit_builder.set_author(new_author);
++                }
++                if author_identity_changed || author_timestamp_changed {
+                     rewrite = true;
+                 }
+ 
++                if let Some(timestamp) = args.timestamp.or(args.committer_timestamp) {
++                    let mut committer = commit_builder.committer().clone();
++                    committer.timestamp = timestamp;
++                    commit_builder = commit_builder.set_committer(committer);
++                    if timestamp != old_committer.timestamp {
++                        rewrite = true;
++                    }
++                }
++
+                 if let Some(description) = &new_description
+                     && description != commit_builder.description()
+                 {
+--- a/cli/tests/cli-reference@.md.snap
++++ b/cli/tests/cli-reference@.md.snap
+@@ -2302,6 +2302,16 @@ Whenever any metadata is updated, the co
+    [RFC2822]: https://datatracker.ietf.org/doc/html/rfc2822
+ 
+    [RFC3339]: https://datatracker.ietf.org/doc/html/rfc3339
++* `--timestamp <TIMESTAMP>` — Set both the author and committer dates to the given date
++
++   This is equivalent to setting `--author-timestamp` and `--committer-timestamp` to the same value.
++* `--committer-timestamp <COMMITTER_TIMESTAMP>` — Set the committer date to the given date
++
++   The date can either be human readable ([RFC2822], eg 'Sun, 23 Jan 2000 01:23:45 PST') or a time stamp ([RFC3339], eg '2000-01-23T01:23:45-08:00').
++
++   [RFC2822]: https://datatracker.ietf.org/doc/html/rfc2822
++
++   [RFC3339]: https://datatracker.ietf.org/doc/html/rfc3339
+ * `--force-rewrite` — Rewrite the commit, even if no other metadata changed
+ 
+    This updates the committer timestamp to the current time, as well as the committer name and email.
+--- a/cli/tests/test_metaedit_command.rs
++++ b/cli/tests/test_metaedit_command.rs
+@@ -816,6 +816,100 @@ fn test_metaedit_set_same_timestamp_twic
+     ");
+ }
+ 
++#[test]
++fn test_metaedit_exact_timestamps() {
++    let test_env = TestEnvironment::default();
++    test_env.run_jj_in(".", ["git", "init", "repo"]).success();
++    let work_dir = test_env.work_dir("repo");
++    work_dir.run_jj(["describe", "-m", "target"]).success();
++
++    work_dir
++        .run_jj(["metaedit", "--timestamp", "2002-03-04T05:06:07+00:00"])
++        .success();
++    assert_eq!(
++        exact_timestamps(&work_dir),
++        "2002-03-04 05:06:07|2002-03-04 05:06:07\n"
++    );
++
++    let commit_id = work_dir
++        .run_jj(["log", "--no-graph", "-r", "@", "-T", "commit_id"])
++        .success()
++        .stdout
++        .raw()
++        .to_owned();
++    insta::assert_snapshot!(work_dir.run_jj([
++        "metaedit",
++        "--timestamp",
++        "2002-03-04T05:06:07+00:00",
++    ]), @"
++    ------- stderr -------
++    Nothing changed.
++    [EOF]
++    ");
++    assert_eq!(
++        work_dir
++            .run_jj(["log", "--no-graph", "-r", "@", "-T", "commit_id"])
++            .success()
++            .stdout
++            .raw(),
++        commit_id
++    );
++
++    work_dir
++        .run_jj([
++            "metaedit",
++            "--committer-timestamp",
++            "2003-04-05T06:07:08+00:00",
++        ])
++        .success();
++    assert_eq!(
++        exact_timestamps(&work_dir),
++        "2002-03-04 05:06:07|2003-04-05 06:07:08\n"
++    );
++}
++
++#[test]
++fn test_metaedit_timestamp_option_conflicts() {
++    let test_env = TestEnvironment::default();
++    test_env.run_jj_in(".", ["git", "init", "repo"]).success();
++    let work_dir = test_env.work_dir("repo");
++
++    insta::assert_snapshot!(work_dir.run_jj([
++        "metaedit",
++        "--timestamp",
++        "2002-03-04T05:06:07+00:00",
++        "--author-timestamp",
++        "2002-03-04T05:06:07+00:00",
++    ]), @r"
++    ------- stderr -------
++    error: the argument '--timestamp <TIMESTAMP>' cannot be used with '--author-timestamp <AUTHOR_TIMESTAMP>'
++
++    Usage: jj metaedit --timestamp <TIMESTAMP> [REVSETS]...
++
++    For more information, try '--help'.
++    [EOF]
++    [exit status: 2]
++    ");
++}
++
++fn exact_timestamps(work_dir: &TestWorkDir) -> String {
++    work_dir
++        .run_jj([
++            "log",
++            "--no-graph",
++            "-r",
++            "@",
++            "-T",
++            r#"author.timestamp().utc().format("%Y-%m-%d %H:%M:%S")
++              ++ "|" ++ committer.timestamp().utc().format("%Y-%m-%d %H:%M:%S")
++              ++ "\n""#,
++        ])
++        .success()
++        .stdout
++        .raw()
++        .to_owned()
++}
++
+ #[must_use]
+ fn get_log(work_dir: &TestWorkDir) -> CommandOutput {
+     work_dir.run_jj([

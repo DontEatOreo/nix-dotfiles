@@ -1,6 +1,9 @@
-0001-git-push-include-all-outgoing-commits-in-signing.patch
-0002-git-push-apply-the-local-signing-timestamp-policy.patch
-0003-git-push-move-tags-after-signing-rewrites.patch
-0004-rewrite-share-metadata-preserving-reparenting.patch
-0005-metaedit-share-the-commit-edit-transaction.patch
-0006-redate-add-a-native-interactive-timestamp-rewrite.patch
+0001-git-push-make-sign-on-push-accept-a-revset.patch
+0002-git-push-warn-about-immutable-signing-candidates.patch
+0003-metaedit-share-the-commit-edit-transaction.patch
+0004-metaedit-set-exact-committer-timestamps.patch
+0005-metaedit-parameterize-the-commit-edit-transaction.patch
+0006-graphlog-expose-revision-row-rendering.patch
+0007-tui-share-alternate-screen-setup.patch
+0008-redate-add-an-interactive-timestamp-editor.patch
+0009-redate-align-the-revision-picker-with-native-tuis.patch

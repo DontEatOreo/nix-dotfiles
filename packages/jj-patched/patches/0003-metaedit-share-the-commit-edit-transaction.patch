@@ -1,0 +1,53 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: 4evy <git@evy.pink>
+Date: Thu, 1 Jan 1970 00:00:00 +0000
+Subject: [PATCH 3/9] metaedit: share the commit edit transaction
+
+Separate revision selection from metadata mutation and extract the
+transaction-backed editing path behind a dedicated options type. Sibling
+commands can now reuse descendant transformation and rewrite bookkeeping
+without constructing metaedit's command-line arguments.
+---
+ cli/src/commands/metaedit.rs |   17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+--- a/cli/src/commands/metaedit.rs
++++ b/cli/src/commands/metaedit.rs
+@@ -24,6 +24,7 @@ use tracing::instrument;
+ 
+ use crate::cli_util::CommandHelper;
+ use crate::cli_util::RevisionArg;
++use crate::cli_util::WorkspaceCommandHelper;
+ use crate::cli_util::print_updated_commits;
+ use crate::command_error::CommandError;
+ use crate::complete;
+@@ -48,6 +49,13 @@ pub(crate) struct MetaeditArgs {
+     #[arg(add = ArgValueCompleter::new(complete::revset_expression_mutable))]
+     revisions_opt: Vec<RevisionArg>,
+ 
++    #[command(flatten)]
++    edit_args: CommitEditArgs,
++}
++
++/// Metadata changes applied by the shared commit-edit transaction.
++#[derive(clap::Args, Clone, Debug, Default)]
++pub(crate) struct CommitEditArgs {
+     /// Generate a new change-id
+     ///
+     /// This generates a new change-id for the revision.
+@@ -159,6 +167,15 @@ pub(crate) async fn cmd_metaedit(
+         return Ok(());
+     }
+ 
++    edit_commits(ui, &mut workspace_command, &args.edit_args, commit_ids).await
++}
++
++pub(crate) async fn edit_commits(
++    ui: &mut Ui,
++    workspace_command: &mut WorkspaceCommandHelper,
++    args: &CommitEditArgs,
++    commit_ids: Vec<jj_lib::backend::CommitId>,
++) -> Result<(), CommandError> {
+     let mut tx = workspace_command.start_transaction();
+     let tx_description = match commit_ids.as_slice() {
+         [] => unreachable!(),

@@ -84,16 +84,16 @@
       },
       "branch": "evy/git-ref-fetch-upstream",
       "submodules": false,
-      "revision": "f53cd646445cf12eda3f7afebe7073d95fd34ac7",
-      "url": "https://github.com/4evy/jj/archive/f53cd646445cf12eda3f7afebe7073d95fd34ac7.tar.gz",
-      "hash": "sha256-ou5wjk4nyxeD2O3ut/dl/TzXmqqbbnDoCIPx9gR6WgI=",
+      "revision": "beb39b2fa9abb31fe9341077be49bbef22595def",
+      "url": "https://github.com/4evy/jj/archive/beb39b2fa9abb31fe9341077be49bbef22595def.tar.gz",
+      "hash": "sha256-9RXRcfgJtKl0ipIp4VfsH0weNloxebSo5yrzlbgKQRA=",
       "frozen": true
     },
     "jj_archive": {
       "type": "Url",
-      "url": "https://github.com/4evy/jj/archive/f53cd646445cf12eda3f7afebe7073d95fd34ac7.tar.gz",
+      "url": "https://github.com/4evy/jj/archive/beb39b2fa9abb31fe9341077be49bbef22595def.tar.gz",
       "unpack": false,
-      "hash": "sha256-JuccMBVHkQxqsSpPMUaH/R5glI5u+0/VBYiasytNpk4=",
+      "hash": "sha256-hry6Khi05A5glQiwnPfgdN5GalkUIPuyisVy1G3NjZQ=",
       "frozen": true
     },
     "kanata": {
