@@ -28,19 +28,10 @@ class KanataWithCmd < Formula
   def install
     tap_root = Pathname(__dir__).parent
     patch_dir = tap_root/"packages/kanata-with-cmd/patches"
-    patches = (patch_dir/"series").each_line(chomp: true).filter_map do |line|
-      name = line.strip
-      next if name.empty? || name.start_with?("#")
-
-      patch_dir/name
-    end
+    patches = (patch_dir/"series").readlines(chomp: true).map { |name| patch_dir/name }
     odie "Kanata patch series is empty: #{patch_dir}" if patches.empty?
-    odie "Kanata patch series contains a missing file" unless patches.all?(&:file?)
 
-    patches.each do |patch|
-      system "git", "apply", "--check", patch
-      system "git", "apply", patch
-    end
+    system "git", "apply", *patches
 
     # Cargo install does not build test targets; only compile the managed
     # executable if upstream adds more binaries to the crate.

@@ -26,9 +26,17 @@ let
     final: prev:
     let
       dotfilesSourcePins = (import ../npins) { };
-      kanataPatches = [
-        ../packages/kanata-with-cmd/patches/0001-macos-actually-suppress-mapped-mouse-events.patch
-      ];
+      kanataPatchDirectory = ../packages/kanata-with-cmd/patches;
+      kanataPatchNames = lib.init (
+        lib.splitString "\n" (builtins.readFile (kanataPatchDirectory + /series))
+      );
+      kanataPatches = map (name: kanataPatchDirectory + "/${name}") kanataPatchNames;
+      kanataSourcePin = dotfilesSourcePins.kanata_homebrew;
+      kanataSource = kanataSourcePin.outPath;
+      kanataManifest = fromTOML (builtins.readFile (kanataSource + "/Cargo.toml"));
+      kanataVersion = "${kanataManifest.package.version}-unstable-${
+        lib.substring 0 7 kanataSourcePin.revision
+      }";
       withoutUpstreamTests =
         package:
         package.overrideAttrs {
@@ -88,11 +96,15 @@ let
         };
       };
       kanata-with-cmd = (final.kanata.override { withCmd = true; }).overrideAttrs (previousAttrs: {
-        patches = (previousAttrs.patches or [ ]) ++ kanataPatches;
+        src = kanataSource;
+        version = kanataVersion;
+        patches = kanataPatches;
         cargoDeps = final.rustPlatform.fetchCargoVendor {
-          inherit (previousAttrs) pname src version;
+          inherit (previousAttrs) pname;
+          src = kanataSource;
+          version = kanataVersion;
           patches = kanataPatches;
-          hash = "sha256-bw70qWriIuPmYsfg6IkE2IZwDsEvKz31fqlnu43xyTE=";
+          hash = "sha256-QbxpUX8z1vrgVEiPTLs5ah6+qqMtZGJgbMPSYXACr10=";
         };
         doCheck = false;
         doInstallCheck = false;
