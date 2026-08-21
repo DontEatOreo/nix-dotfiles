@@ -9,7 +9,7 @@ from typing import Protocol, cast
 import pytest
 
 REPOSITORY = Path(__file__).parents[2]
-REFRESH_SCRIPT = REPOSITORY / "ansible/roles/system/files/kmscon/kmscon-refresh.py"
+REFRESH_SCRIPT = REPOSITORY / "bluebuild/files/kmscon/kmscon-refresh.py"
 
 
 class RefreshModule(Protocol):

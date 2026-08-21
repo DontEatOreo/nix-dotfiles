@@ -226,6 +226,14 @@ modules:
         - https://github.com/rustdesk/rustdesk/releases/download/1.4.9/rustdesk-1.4.9-0.x86_64.rpm
         - https://discord.com/api/download?platform=linux&format=rpm
 
+  - type: copy@v1
+    src: bluebuild/files/kmscon
+    dest: /usr/libexec/dotfiles/kmscon
+
+  - type: copy@v1
+    src: dotfiles/.chezmoitemplates/black_rose_doll_palette.json
+    dest: /usr/share/dotfiles/black_rose_doll_palette.json
+
   - type: gnome-extensions@v1
     source: ghcr.io/blue-build/modules@sha256:c5ed99f07b15c8d575a4fa64a77e5cd5602b00da4c84379f5675db2ae4757061
     install:
@@ -245,6 +253,8 @@ modules:
     system:
       enabled:
         - fedora-atomic-desktop-appstream-cache-refresh.timer
+        - kmscon-theme-refresh.timer
+        - kmsconvt@.service
         - pcscd.socket
         - podman.socket
         - rustdesk.service
@@ -285,7 +295,17 @@ modules:
         pathlib.Path("/usr/lib/dotfiles/python/.astral-version").read_text().strip()'
       - rpm -q kmscon kmscon-freetype
       - test -f /usr/lib64/kmscon/mod-freetype.so
+      - test -x /usr/libexec/dotfiles/kmscon/kmscon-theme-config.py
+      - test -x /usr/libexec/dotfiles/kmscon/kmscon-refresh.py
+      - test -f /usr/share/dotfiles/black_rose_doll_palette.json
+      - test "$(systemctl is-enabled kmscon-theme-refresh.timer)" = enabled
+      - test "$(systemctl is-enabled kmsconvt@.service)" = enabled
+      - test "$(readlink /etc/systemd/system/autovt@.service)" = /usr/lib/systemd/system/kmsconvt@.service
+      - test "$(readlink /etc/systemd/system/getty.target.wants/kmsconvt@tty1.service)" = /usr/lib/systemd/system/kmsconvt@.service
       - test "$(grep -Fx 'blacklist pcspkr' /etc/modprobe.d/disable-pc-speaker.conf)" = 'blacklist pcspkr'
+      - test "$(grep -Fx 'Conflicts=kmsconvt@tty1.service' /usr/lib/systemd/system/gdm.service.d/60-spectrum-kmscon.conf)" = 'Conflicts=kmsconvt@tty1.service'
+      - test "$(grep -Fx 'After=kmsconvt@tty1.service' /usr/lib/systemd/system/gdm.service.d/60-spectrum-kmscon.conf)" = 'After=kmsconvt@tty1.service'
+      - systemd-analyze verify gdm.service kmsconvt@tty1.service
       - bluebuild --version
       - bluebuild recipe --help >/dev/null
       - bootc container lint
