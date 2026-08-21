@@ -1,0 +1,81 @@
+name: Prepare Spectrum Build
+description: Provision build tools, verify the locked base, and generate the Containerfile.
+
+outputs:
+  bluebuild:
+    description: Absolute path to the feature-gated BlueBuild executable.
+    value: ${{ steps.tools.outputs.bluebuild }}
+
+runs:
+  using: composite
+  steps:
+    - name: Maximize Build Space
+      uses: ublue-os/remove-unwanted-software@cc0becac701cf642c8f0a6613bbdaf5dc36b259e # v9
+
+    - name: Set Up Cached Nix
+      uses: ./.github/actions/setup-nix
+      with:
+        cache-builds: "true"
+
+    - name: Set Up Docker Buildx
+      uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+      with:
+        cache-binary: true
+
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+    - name: Verify Locked Bluefin Base
+      env:
+        BASE_LOCK: bluebuild/recipes/spectrum.lock
+      shell: bash
+      run: |
+        set -euo pipefail
+        locked_ref=$(tr -d '\n' <"$BASE_LOCK")
+        tagged_ref=${locked_ref%@*}
+        locked_digest=${locked_ref##*@}
+        resolved_digest=$(skopeo inspect "docker://$tagged_ref" | jq -r .Digest)
+        test "$resolved_digest" = "$locked_digest"
+        cosign verify \
+          --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
+          --certificate-identity-regexp='^https://github.com/projectbluefin/(bluefin|actions)/\.github/workflows/.*' \
+          "$locked_ref"
+
+    - name: Build Feature-Gated Tooling
+      id: tools
+      shell: bash
+      run: |
+        set -euo pipefail
+        bluebuild_store=$(nix build --no-link --print-out-paths .#bluebuild-v2)
+        validator_store=$(nix build --no-link --print-out-paths .#check-jsonschema)
+        bluebuild="$bluebuild_store/bin/bluebuild"
+        validator="$validator_store/bin/check-jsonschema"
+        "$bluebuild" --version
+        echo "bluebuild=$bluebuild" >>"$GITHUB_OUTPUT"
+        echo "validator=$validator" >>"$GITHUB_OUTPUT"
+
+    - name: Generate and Validate Containerfile
+      env:
+        BLUEBUILD: ${{ steps.tools.outputs.bluebuild }}
+        CHECK_JSONSCHEMA: ${{ steps.tools.outputs.validator }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        "$CHECK_JSONSCHEMA" \
+          --base-uri https://schema.blue-build.org/ \
+          --schemafile https://schema.blue-build.org/recipe-v2.json \
+          bluebuild/recipes/spectrum.yml
+        # Upstream's feature-gated v2 parser works, but its validate
+        # subcommand still hardcodes the v1 schema.
+        "$BLUEBUILD" generate \
+          --skip-validation \
+          --output /tmp/Containerfile \
+          bluebuild/recipes/spectrum.yml
+        expected=$(tr -d '\n' <bluebuild/recipes/spectrum.lock)
+        tagged=${expected%@*}
+        expected_arg="${tagged%:*}@${expected##*@}"
+        generated=$(sed -n 's/^ARG BASE_IMAGE="\([^"]*\)".*/\1/p' /tmp/Containerfile | head -n1)
+        if [[ "$generated" != "$expected_arg" ]]; then
+          printf 'generated base %s does not match lock %s\n' "$generated" "$expected_arg" >&2
+          exit 1
+        fi

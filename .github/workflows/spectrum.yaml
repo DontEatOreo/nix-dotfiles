@@ -5,7 +5,10 @@ on:
     branches: [master]
     paths: &spectrum-paths
       - .dockerignore
+      - .github/actions/setup-nix/**
       - .github/actions/spectrum-build/**
+      - .github/actions/spectrum-prepare/**
+      - .github/actions/spectrum-publish/**
       - .github/workflows/spectrum.yaml
       - bluebuild/**
       - flake.lock
@@ -50,8 +53,14 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Prepare Build
+        id: prepare
+        uses: ./.github/actions/spectrum-prepare
+
       - name: Build and Validate
         uses: ./.github/actions/spectrum-build
+        with:
+          bluebuild: ${{ steps.prepare.outputs.bluebuild }}
 
   publish:
     name: Build and Publish
@@ -70,5 +79,19 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Build, Publish, and Attest
+      - name: Prepare Build
+        id: prepare
+        uses: ./.github/actions/spectrum-prepare
+
+      - name: Build and Publish
+        id: image
         uses: ./.github/actions/spectrum-build
+        with:
+          bluebuild: ${{ steps.prepare.outputs.bluebuild }}
+          publish: "true"
+
+      - name: Sign and Attest
+        uses: ./.github/actions/spectrum-publish
+        with:
+          image-ref: ${{ steps.image.outputs.image-ref }}
+          image-digest: ${{ steps.image.outputs.image-digest }}
