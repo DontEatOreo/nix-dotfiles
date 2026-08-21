@@ -26,6 +26,11 @@ let
     final: prev:
     let
       dotfilesSourcePins = (import ../npins) { };
+      toshySource = dotfilesSourcePins.toshy.outPath;
+      toshyVersion = lib.removePrefix "Toshy_v" dotfilesSourcePins.toshy.version;
+      upstreamToshyRuntime = final.callPackage "${toshySource}/nix/toshy-runtime.nix" {
+        toshySrc = toshySource;
+      };
     in
     {
       inherit dotfilesSourcePins;
@@ -46,6 +51,28 @@ let
       ghidra-mcp = final.callPackage ../packages/ghidra-mcp/package.nix {
         inherit (final) ghidra-mcp-headless;
       };
+      # Keep the flake formatter and dev shell at the Justfile's version floor
+      # while both pinned nixpkgs package sets still provide 1.57.0.
+      just =
+        let
+          version = "1.58.0";
+          src = final.fetchFromGitHub {
+            owner = "casey";
+            repo = "just";
+            tag = version;
+            hash = "sha256-yAjirHM3/+Pv9AhcaW7Ab992vwQhh20axK42Gl2LNEA=";
+          };
+        in
+        prev.just.overrideAttrs (previousAttrs: {
+          inherit src version;
+          cargoDeps = final.rustPlatform.fetchCargoVendor {
+            inherit src;
+            hash = "sha256-zpP5XLmgQFH4+B97zMhh+iE6kS+PHTh9heH89rXCQo0=";
+          };
+          meta = previousAttrs.meta // {
+            changelog = "https://github.com/casey/just/blob/${version}/CHANGELOG.md";
+          };
+        });
       ghostty-patched = final.callPackage ../packages/ghostty-patched/package.nix {
         ghostty = final.unstable.ghostty.override {
           zig_0_15 = final.unstable.zig;
@@ -83,6 +110,23 @@ let
         version = lib.removePrefix "v" dotfilesSourcePins.uresourced.version;
       };
       terminal-theme-tools = final.callPackage ../packages/terminal-theme-tools/package.nix { };
+      # Toshy's runtime and installer deliberately share one source revision.
+      # The marker lets provisioning reject a mixed-version installation.
+      toshy-runtime = final.symlinkJoin {
+        name = "toshy-runtime-${toshyVersion}";
+        paths = [ upstreamToshyRuntime ];
+        postBuild = ''
+          mkdir -p $out/share/toshy
+          echo '${dotfilesSourcePins.toshy.revision}' > $out/share/toshy/revision
+          echo '${dotfilesSourcePins.toshy.version}' > $out/share/toshy/version
+        '';
+        passthru = (upstreamToshyRuntime.passthru or { }) // {
+          source = toshySource;
+          revision = dotfilesSourcePins.toshy.revision;
+          version = dotfilesSourcePins.toshy.version;
+        };
+        inherit (upstreamToshyRuntime) meta;
+      };
     };
 
   packages = lib.composeManyExtensions [

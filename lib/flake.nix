@@ -13,6 +13,7 @@ let
   ];
 
   overlays = import ../overlays { inherit inputs; };
+  toshySource = (import ../npins { }).toshy.outPath;
 
   equicordParseRules = builtins.fromJSON (
     builtins.readFile "${inputs.nixcord}/modules/plugins/parse-rules.json"
@@ -56,6 +57,7 @@ let
       ghidra-mcp-launcher = ghidraMcpHeadless.launcher;
       ghidra = ghidraMcpHeadless.ghidra;
       kanata-with-cmd = pkgs.kanata-with-cmd;
+      terminal-theme-tools = pkgs.terminal-theme-tools;
     }
     // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
       bluebuild-v2 = pkgs.bluebuild-v2;
@@ -64,7 +66,7 @@ let
       hyper-window-tiling-gnome = pkgs.hyper-window-tiling-gnome;
       hyper-window-tiling-kde = pkgs.hyper-window-tiling-kde;
       kmscon = pkgs.kmscon;
-      terminal-theme-tools = pkgs.terminal-theme-tools;
+      toshy-runtime = pkgs.toshy-runtime;
       uresourced = pkgs.uresourced;
     }
     // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
@@ -120,6 +122,7 @@ in
           {
             imports = [
               ../modules/nixos
+              "${toshySource}/nix/nixos-module.nix"
               inputs.browser.nixosModules.default
               inputs.determinate.nixosModules.default
               inputs.nixcord.nixosModules.nixcord
