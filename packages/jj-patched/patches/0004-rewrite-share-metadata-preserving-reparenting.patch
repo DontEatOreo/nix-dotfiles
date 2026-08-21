@@ -17,10 +17,10 @@ share the same semantics.
  create mode 100644 cli/src/rewrite_util.rs
 
 diff --git a/cli/src/commands/git/push.rs b/cli/src/commands/git/push.rs
-index 86187ec2..83d15460 100644
+index 000000000..000000000 100644
 --- a/cli/src/commands/git/push.rs
 +++ b/cli/src/commands/git/push.rs
-@@ -56,7 +56,6 @@ use jj_lib::revset::RevsetEvaluationError;
+@@ -55,7 +55,6 @@ use jj_lib::revset::RevsetEvaluationError;
  use jj_lib::revset::RevsetExpression;
  use jj_lib::revset::RevsetStreamExt as _;
  use jj_lib::revset::UserRevsetExpression;
@@ -28,7 +28,7 @@ index 86187ec2..83d15460 100644
  use jj_lib::signing::SignBehavior;
  use jj_lib::str_util::StringExpression;
  use jj_lib::view::View;
-@@ -82,6 +81,7 @@ use crate::git_util::print_push_stats;
+@@ -81,6 +80,7 @@ use crate::git_util::print_push_stats;
  use crate::progress::ProgressWriter;
  use crate::revset_util::parse_bookmark_name;
  use crate::revset_util::parse_union_name_patterns;
@@ -36,7 +36,7 @@ index 86187ec2..83d15460 100644
  use crate::ui::Ui;
  
  /// Push to a Git remote
-@@ -842,52 +842,39 @@ async fn sign_commits_before_push(
+@@ -841,52 +841,39 @@ async fn sign_commits_before_push(
          let mut progress_writer = ProgressWriter::new(ui, "Signing");
  
          tx.repo_mut()
@@ -122,7 +122,7 @@ index 86187ec2..83d15460 100644
      }
  
 diff --git a/cli/src/lib.rs b/cli/src/lib.rs
-index eff94476..2ca2057b 100644
+index 000000000..000000000 100644
 --- a/cli/src/lib.rs
 +++ b/cli/src/lib.rs
 @@ -34,6 +34,7 @@ pub mod movement_util;
@@ -135,11 +135,11 @@ index eff94476..2ca2057b 100644
  pub mod templater;
 diff --git a/cli/src/rewrite_util.rs b/cli/src/rewrite_util.rs
 new file mode 100644
-index 000000000..fb8dbafbe
+index 000000000..000000000
 --- /dev/null
 +++ b/cli/src/rewrite_util.rs
 @@ -0,0 +1,40 @@
-+// Copyright 2026 4evy
++// Copyright 2026 The Jujutsu Authors
 +//
 +// Licensed under the Apache License, Version 2.0 (the "License");
 +// you may not use this file except in compliance with the License.

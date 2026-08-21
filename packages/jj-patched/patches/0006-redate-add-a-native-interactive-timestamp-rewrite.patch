@@ -3,22 +3,32 @@ From: 4evy <git@evy.pink>
 Date: Thu, 1 Jan 1970 00:00:00 +0000
 Subject: [PATCH 6/6] redate: add a native interactive timestamp rewrite
 
+Reuse matching commits from evolution history so exact signed
+timestamps remain stable across repeated and away-and-back rewrites.
+Preserve descendant metadata and signature state, and cover the
+collision path with deterministic SSH signing.
+
 ---
- Cargo.lock                    |   1 +
- Cargo.toml                    |   1 +
- cli/Cargo.toml                |   1 +
- cli/src/commands/metaedit.rs  |  57 +++++-
- cli/src/commands/mod.rs       |   3 +
- cli/src/commands/redate.rs    | 348 ++++++++++++++++++++++++++++++++++
- cli/src/config-schema.json    |  20 ++
- cli/src/config/colors.toml    |   4 +
- cli/src/config/revsets.toml   |   1 +
- cli/src/config/templates.toml |   8 +
- 10 files changed, 440 insertions(+), 4 deletions(-)
+ Cargo.lock                       |   1 +
+ Cargo.toml                       |   1 +
+ cli/Cargo.toml                   |   1 +
+ cli/src/commands/metaedit.rs     | 144 ++++++++++++-
+ cli/src/commands/mod.rs          |   3 +
+ cli/src/commands/redate.rs       | 359 +++++++++++++++++++++++++++++++
+ cli/src/config-schema.json       |  20 ++
+ cli/src/config/colors.toml       |   4 +
+ cli/src/config/revsets.toml      |   1 +
+ cli/src/config/templates.toml    |   8 +
+ cli/tests/cli-reference@.md.snap |  14 ++
+ cli/tests/runner.rs              |   1 +
+ cli/tests/test_git_push.rs       |  28 ++-
+ cli/tests/test_redate_command.rs | 153 +++++++++++++
+ 14 files changed, 723 insertions(+), 15 deletions(-)
  create mode 100644 cli/src/commands/redate.rs
+ create mode 100644 cli/tests/test_redate_command.rs
 
 diff --git a/Cargo.lock b/Cargo.lock
-index c639a985..e300e3b1 100644
+index 000000000..000000000 100644
 --- a/Cargo.lock
 +++ b/Cargo.lock
 @@ -2620,6 +2620,7 @@ dependencies = [
@@ -30,7 +40,7 @@ index c639a985..e300e3b1 100644
   "testutils",
   "textwrap",
 diff --git a/Cargo.toml b/Cargo.toml
-index ebbdfbc2..c7d2fa14 100644
+index 000000000..000000000 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
 @@ -117,6 +117,7 @@ smallvec = { version = "1.15.1", features = [
@@ -42,7 +52,7 @@ index ebbdfbc2..c7d2fa14 100644
  textwrap = "0.16.2"
  thiserror = "2.0.17"
 diff --git a/cli/Cargo.toml b/cli/Cargo.toml
-index a825b4f8..9e0cde88 100644
+index 000000000..000000000 100644
 --- a/cli/Cargo.toml
 +++ b/cli/Cargo.toml
 @@ -103,6 +103,7 @@ serde_json = { workspace = true }
@@ -54,18 +64,30 @@ index a825b4f8..9e0cde88 100644
  tokio = { workspace = true }
  thiserror = { workspace = true }
 diff --git a/cli/src/commands/metaedit.rs b/cli/src/commands/metaedit.rs
-index 03edfdbd..58fe9c3d 100644
+index 000000000..000000000 100644
 --- a/cli/src/commands/metaedit.rs
 +++ b/cli/src/commands/metaedit.rs
-@@ -19,6 +19,7 @@ use futures::TryStreamExt as _;
+@@ -12,13 +12,19 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
++use std::collections::HashMap;
+ use std::collections::HashSet;
++use std::slice;
+ 
+ use clap_complete::ArgValueCompleter;
+ use futures::TryStreamExt as _;
++use jj_lib::backend::CommitId;
  use jj_lib::backend::Timestamp;
  use jj_lib::commit::Commit;
++use jj_lib::evolution::walk_predecessors;
  use jj_lib::object_id::ObjectId as _;
++use jj_lib::signing::SigStatus;
 +use jj_lib::signing::SignBehavior;
  use jj_lib::time_util::parse_datetime;
  use tracing::instrument;
  
-@@ -29,6 +30,7 @@ use crate::cli_util::print_updated_commits;
+@@ -29,6 +35,7 @@ use crate::cli_util::print_updated_commits;
  use crate::command_error::CommandError;
  use crate::complete;
  use crate::description_util::join_message_paragraphs;
@@ -73,7 +95,7 @@ index 03edfdbd..58fe9c3d 100644
  use crate::text_util::parse_author;
  use crate::ui::Ui;
  
-@@ -38,7 +40,7 @@ use crate::ui::Ui;
+@@ -38,7 +45,7 @@ use crate::ui::Ui;
  /// are also updated for all rebased commits. The name and email may come from
  /// the `JJ_USER` and `JJ_EMAIL` environment variables, as well as by passing
  /// `--config user.name` and `--config user.email`.
@@ -82,7 +104,7 @@ index 03edfdbd..58fe9c3d 100644
  pub(crate) struct MetaeditArgs {
      /// The revision(s) to modify (default: @) [aliases: -r]
      #[arg(value_name = "REVSETS")]
-@@ -132,6 +134,23 @@ pub(crate) struct MetaeditArgs {
+@@ -132,6 +139,23 @@ pub(crate) struct MetaeditArgs {
      force_rewrite: bool,
  }
  
@@ -106,7 +128,7 @@ index 03edfdbd..58fe9c3d 100644
  #[instrument(skip_all)]
  pub(crate) async fn cmd_metaedit(
      ui: &mut Ui,
-@@ -160,13 +179,21 @@ pub(crate) async fn cmd_metaedit(
+@@ -160,16 +184,39 @@ pub(crate) async fn cmd_metaedit(
          return Ok(());
      }
  
@@ -128,8 +150,76 @@ index 03edfdbd..58fe9c3d 100644
 +    options: CommitEditOptions,
      commit_ids: Vec<jj_lib::backend::CommitId>,
  ) -> Result<(), CommandError> {
++    let historical_commits = if options.timestamp.is_some() {
++        let repo = workspace_command.repo();
++        let mut historical_commits: HashMap<CommitId, Vec<Commit>> = HashMap::new();
++        for commit_id in &commit_ids {
++            let commits = walk_predecessors(repo, slice::from_ref(commit_id))
++                .map_ok(|entry| entry.commit)
++                .try_collect()
++                .await?;
++            historical_commits.insert(commit_id.clone(), commits);
++        }
++        historical_commits
++    } else {
++        HashMap::new()
++    };
      let mut tx = workspace_command.start_transaction();
-@@ -217,6 +244,9 @@ pub(crate) async fn edit_commits(
++    let rewrite_committer = tx.settings().signature();
+     let tx_description = match commit_ids.as_slice() {
+         [] => unreachable!(),
+         [commit] => format!("edit commit metadata for commit {}", commit.hex()),
+@@ -197,8 +244,48 @@ pub(crate) async fn edit_commits(
+     // commit multiple times, and adding additional entries in the predecessor
+     // chain.
+     tx.repo_mut()
+-        .transform_descendants(commit_ids, async |rewriter| {
++        .transform_descendants(commit_ids, async |mut rewriter| {
+             if commit_ids_set.contains(rewriter.old_commit().id()) {
++                if let Some(timestamp) = options.timestamp {
++                    let old_commit = rewriter.old_commit();
++                    let new_parent_ids = rewriter.new_parents();
++                    if commit_matches_redate(
++                        old_commit,
++                        old_commit,
++                        new_parent_ids,
++                        timestamp,
++                        &rewrite_committer,
++                    ) {
++                        return Ok(());
++                    }
++                    if let Some(commit) = historical_commits
++                        .get(old_commit.id())
++                        .and_then(|commits| {
++                            commits.iter().find(|commit| {
++                                commit.id() != old_commit.id()
++                                    && commit_matches_redate(
++                                        commit,
++                                        old_commit,
++                                        new_parent_ids,
++                                        timestamp,
++                                        &rewrite_committer,
++                                    )
++                            })
++                        })
++                        .cloned()
++                    {
++                        // Reuse the historical backend object without writing a new
++                        // predecessor into it. An A -> B -> A redate would otherwise
++                        // create an evolution cycle while trying to resurrect A.
++                        let old_commit_id = old_commit.id().clone();
++                        rewriter.repo_mut().add_head(&commit).await?;
++                        rewriter
++                            .repo_mut()
++                            .set_rewritten_commit(old_commit_id, commit.id().clone());
++                        modified.push(commit);
++                        return Ok(());
++                    }
++                }
+                 let mut rewrite = args.force_rewrite || rewriter.parents_changed();
+ 
+                 let old_author = rewriter.old_commit().author().clone();
+@@ -217,6 +304,9 @@ pub(crate) async fn edit_commits(
                  if let Some(author_date) = args.author_timestamp {
                      new_author.timestamp = author_date;
                  }
@@ -139,7 +229,7 @@ index 03edfdbd..58fe9c3d 100644
                  // If the old commit had an unset author, the commit builder
                  // may already have the author updated from the current config.
                  // Thus, compare to the actual old_author to correctly detect
-@@ -224,12 +254,20 @@ pub(crate) async fn edit_commits(
+@@ -224,12 +314,20 @@ pub(crate) async fn edit_commits(
                  if new_author.name != old_author.name
                      || new_author.email != old_author.email
                      || (new_author.timestamp != commit_builder.author().timestamp
@@ -161,7 +251,7 @@ index 03edfdbd..58fe9c3d 100644
                  if let Some(description) = &new_description
                      && description != commit_builder.description()
                  {
-@@ -242,12 +280,23 @@ pub(crate) async fn edit_commits(
+@@ -242,12 +340,23 @@ pub(crate) async fn edit_commits(
                      rewrite = true;
                  }
  
@@ -177,7 +267,7 @@ index 03edfdbd..58fe9c3d 100644
              } else if rewriter.parents_changed() {
 -                rewriter.reparent().write().await?;
 +                if options.sign || options.preserve_descendant_metadata {
-+                    reparent_preserving_metadata(rewriter, options.sign)
++                    reparent_preserving_metadata(rewriter, false)
 +                        .write()
 +                        .await?;
 +                } else {
@@ -186,8 +276,37 @@ index 03edfdbd..58fe9c3d 100644
                  num_reparented += 1;
              }
              Ok(())
+@@ -265,3 +374,28 @@ pub(crate) async fn edit_commits(
+     tx.finish(ui, tx_description).await?;
+     Ok(())
+ }
++
++fn commit_matches_redate(
++    commit: &Commit,
++    source: &Commit,
++    parent_ids: &[CommitId],
++    timestamp: Timestamp,
++    committer: &jj_lib::backend::Signature,
++) -> bool {
++    let commit_data = commit.store_commit();
++    let source_data = source.store_commit();
++    commit_data.parents == parent_ids
++        && commit_data.root_tree == source_data.root_tree
++        && commit_data.conflict_labels == source_data.conflict_labels
++        && commit_data.change_id == source_data.change_id
++        && commit_data.description == source_data.description
++        && commit_data.author.name == source_data.author.name
++        && commit_data.author.email == source_data.author.email
++        && commit_data.author.timestamp == timestamp
++        && commit_data.committer.name == committer.name
++        && commit_data.committer.email == committer.email
++        && commit_data.committer.timestamp == timestamp
++        && commit.verification().is_ok_and(|verification| {
++            verification.is_some_and(|verification| verification.status != SigStatus::Bad)
++        })
++}
 diff --git a/cli/src/commands/mod.rs b/cli/src/commands/mod.rs
-index db93b771..87fb6141 100644
+index 000000000..000000000 100644
 --- a/cli/src/commands/mod.rs
 +++ b/cli/src/commands/mod.rs
 @@ -44,6 +44,7 @@ mod operation;
@@ -216,12 +335,23 @@ index db93b771..87fb6141 100644
          Command::Restore(args) => restore::cmd_restore(ui, command_helper, args).await,
 diff --git a/cli/src/commands/redate.rs b/cli/src/commands/redate.rs
 new file mode 100644
-index 000000000..4c1b15b07
+index 000000000..000000000
 --- /dev/null
 +++ b/cli/src/commands/redate.rs
-@@ -0,0 +1,348 @@
-+// Copyright 2026 4evy
-+// SPDX-License-Identifier: Apache-2.0
+@@ -0,0 +1,359 @@
++// Copyright 2026 The Jujutsu Authors
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++// https://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
 +
 +use std::collections::HashSet;
 +use std::io;
@@ -569,7 +699,7 @@ index 000000000..4c1b15b07
 +    NaiveTime::parse_from_str(&normalized, "%H:%M:%S").map_err(|error| error.to_string())
 +}
 diff --git a/cli/src/config-schema.json b/cli/src/config-schema.json
-index ce73a05c..f55f03d0 100644
+index 000000000..000000000 100644
 --- a/cli/src/config-schema.json
 +++ b/cli/src/config-schema.json
 @@ -741,6 +741,11 @@
@@ -614,7 +744,7 @@ index ce73a05c..f55f03d0 100644
                      "type": "string",
                      "description": "`jj bookmark list`'s output"
 diff --git a/cli/src/config/colors.toml b/cli/src/config/colors.toml
-index 76e55342..2c549ced 100644
+index 000000000..000000000 100644
 --- a/cli/src/config/colors.toml
 +++ b/cli/src/config/colors.toml
 @@ -118,3 +118,7 @@
@@ -626,7 +756,7 @@ index 76e55342..2c549ced 100644
 +"redate commit empty" = { fg = "bright black", italic = true }
 +"redate commit timestamp" = "bright black"
 diff --git a/cli/src/config/revsets.toml b/cli/src/config/revsets.toml
-index 8dc0f0de..4ded007a 100644
+index 000000000..000000000 100644
 --- a/cli/src/config/revsets.toml
 +++ b/cli/src/config/revsets.toml
 @@ -6,6 +6,7 @@ arrange = "reachable(@, mutable())"
@@ -638,7 +768,7 @@ index 8dc0f0de..4ded007a 100644
  # evaluate, lengthy warning messages would be printed. Use present(expr) if
  # symbols in expr might not always exist.
 diff --git a/cli/src/config/templates.toml b/cli/src/config/templates.toml
-index afdb5082..e994c88f 100644
+index 000000000..000000000 100644
 --- a/cli/src/config/templates.toml
 +++ b/cli/src/config/templates.toml
 @@ -3,6 +3,14 @@ bookmark_list = 'format_commit_ref(self, "bookmark") ++ "\n"'
@@ -656,3 +786,298 @@ index afdb5082..e994c88f 100644
  
  file_annotate = '''
  join(" ",
+diff --git a/cli/tests/cli-reference@.md.snap b/cli/tests/cli-reference@.md.snap
+index 000000000..000000000 100644
+--- a/cli/tests/cli-reference@.md.snap
++++ b/cli/tests/cli-reference@.md.snap
+@@ -94,6 +94,7 @@ This document contains the help content for the `jj` command-line program.
+ * [`jj parallelize`↴](#jj-parallelize)
+ * [`jj prev`↴](#jj-prev)
+ * [`jj rebase`↴](#jj-rebase)
++* [`jj redate`↴](#jj-redate)
+ * [`jj redo`↴](#jj-redo)
+ * [`jj resolve`↴](#jj-resolve)
+ * [`jj restore`↴](#jj-restore)
+@@ -180,6 +181,7 @@ To get started, see the tutorial [`jj help -k tutorial`].
+ * `parallelize` — Parallelize revisions by making them siblings
+ * `prev` — Change the working copy revision relative to the parent revision
+ * `rebase` — Move revisions to different parent(s)
++* `redate` — Interactively set timestamps and sign rewritten revisions
+ * `redo` — Redo the most recently undone operation
+ * `resolve` — Resolve conflicted files with an external merge tool
+ * `restore` — Restore paths from another revision
+@@ -2999,6 +3001,18 @@ J           J
+ 
+ 
+ 
++## `jj redate`
++
++Interactively set timestamps and sign rewritten revisions
++
++**Usage:** `jj redate [REVSETS]...`
++
++###### **Arguments:**
++
++* `<REVSETS>` — The revisions to redate
++
++
++
+ ## `jj redo`
+ 
+ Redo the most recently undone operation
+diff --git a/cli/tests/runner.rs b/cli/tests/runner.rs
+index 000000000..000000000 100644
+--- a/cli/tests/runner.rs
++++ b/cli/tests/runner.rs
+@@ -68,6 +68,7 @@ mod test_op_revert_command;
+ mod test_operations;
+ mod test_parallelize_command;
+ mod test_rebase_command;
++mod test_redate_command;
+ mod test_repo_change_report;
+ mod test_resolve_command;
+ mod test_restore_command;
+diff --git a/cli/tests/test_git_push.rs b/cli/tests/test_git_push.rs
+index 000000000..000000000 100644
+--- a/cli/tests/test_git_push.rs
++++ b/cli/tests/test_git_push.rs
+@@ -3058,9 +3058,9 @@ fn test_git_push_sign_on_push() {
+     Updated signatures of 2 commits.
+     Rebased 2 descendant commits.
+     Changes to push to origin:
+-      bookmark: bookmark2 [move forward from 38a204733702 to d45e2adce0ad]
+-    Working copy  (@) now at: kmkuslsw 3d5a9465 (empty) commit which should not be signed 2
+-    Parent commit (@-)      : kpqxywon 48ea83e9 (empty) commit which should not be signed 1
++      bookmark: bookmark2 [move forward from 38a204733702 to 4368a1bd35cd]
++    Working copy  (@) now at: kmkuslsw 046e1803 (empty) commit which should not be signed 2
++    Parent commit (@-)      : kpqxywon 17c11bbf (empty) commit which should not be signed 1
+     [EOF]
+     ");
+     // Only commits which are being pushed should be signed
+@@ -3083,21 +3083,26 @@ fn test_git_push_sign_on_push() {
+     let output = work_dir.run_jj(["bookmark", "move", "bookmark2", "--to", "@-"]);
+     insta::assert_snapshot!(output, @"
+     ------- stderr -------
+-    Moved 1 bookmarks to kpqxywon 48ea83e9 bookmark2* | (empty) commit which should not be signed 1
++    Moved 1 bookmarks to kpqxywon 17c11bbf bookmark2* | (empty) commit which should not be signed 1
+     [EOF]
+     ");
+     test_env.add_config(r#"revset-aliases."immutable_heads()" = "bookmark2""#);
+     let output = work_dir.run_jj(["git", "push"]);
+     insta::assert_snapshot!(output, @"
+     ------- stderr -------
++    Updated signatures of 1 commits.
++    Rebased 1 descendant commits.
+     Changes to push to origin:
+-      bookmark: bookmark2 [move forward from d45e2adce0ad to 48ea83e9499c]
++      bookmark: bookmark2 [move forward from 4368a1bd35cd to 76905209f7d1]
++    Working copy  (@) now at: kmkuslsw f4b2580f (empty) commit which should not be signed 2
++    Parent commit (@-)      : kpqxywon 76905209 bookmark2 | (empty) commit which should not be signed 1
+     [EOF]
+     ");
+     let output = work_dir.run_jj(["log", "-T", template, "-r", "::"]);
+     insta::assert_snapshot!(output, @"
+     @  commit which should not be signed 2
+     ◆  commit which should not be signed 1
++    │  Signature: test-display, Status: good, Key: impeccable
+     ◆  commit to be signed 2
+     │  Signature: test-display, Status: good, Key: impeccable
+     ◆  commit to be signed 1
+@@ -3134,6 +3139,7 @@ fn test_git_push_sign_on_push() {
+     ○  pre-signed commit
+     │  Signature: test-display, Status: good, Key: impeccable
+     ◆  commit which should not be signed 1
++    │  Signature: test-display, Status: good, Key: impeccable
+     ~  (elided revisions)
+     │ ○  description 1
+     ├─╯
+@@ -3141,13 +3147,13 @@ fn test_git_push_sign_on_push() {
+     [EOF]
+     ");
+     let output = work_dir.run_jj(["git", "push"]);
+-    insta::assert_snapshot!(output, @r"
++    insta::assert_snapshot!(output, @"
+     ------- stderr -------
+-    Updated signatures of 1 commits.
++    Updated signatures of 2 commits.
+     Changes to push to origin:
+-      bookmark: bookmark1 [move sideways from 9b2e76de3920 to 0617b6813c01]
+-    Working copy  (@) now at: pzsxstzt 0617b681 bookmark1 | (empty) commit to be signed 3
+-    Parent commit (@-)      : kmkuslsw 5114df95 (empty) commit which should not be signed 2
++      bookmark: bookmark1 [move sideways from 9b2e76de3920 to b657731fbd46]
++    Working copy  (@) now at: pzsxstzt b657731f bookmark1 | (empty) commit to be signed 3
++    Parent commit (@-)      : kmkuslsw a96ffaab (empty) commit which should not be signed 2
+     [EOF]
+     ");
+     let output = work_dir.run_jj(["log", "-T", template]);
+@@ -3155,9 +3161,11 @@ fn test_git_push_sign_on_push() {
+     @  commit to be signed 3
+     │  Signature: test-display, Status: good, Key: impeccable
+     ○  commit which should not be signed 2
++    │  Signature: test-display, Status: good, Key: impeccable
+     ○  pre-signed commit
+     │  Signature: test-display, Status: good, Key: impeccable
+     ◆  commit which should not be signed 1
++    │  Signature: test-display, Status: good, Key: impeccable
+     ~  (elided revisions)
+     │ ○  description 1
+     ├─╯
+diff --git a/cli/tests/test_redate_command.rs b/cli/tests/test_redate_command.rs
+new file mode 100644
+index 000000000..000000000
+--- /dev/null
++++ b/cli/tests/test_redate_command.rs
+@@ -0,0 +1,153 @@
++// Copyright 2026 The Jujutsu Authors
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++// https://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++use std::process::Command;
++
++use indoc::formatdoc;
++
++use crate::common::TestEnvironment;
++use crate::common::TestWorkDir;
++use crate::common::to_toml_value;
++
++#[test]
++fn test_redate_is_exact_and_reuses_historical_signed_commit() {
++    let test_env = TestEnvironment::default();
++    configure_ssh_signing(&test_env);
++    test_env.run_jj_in(".", ["git", "init", "repo"]).success();
++    let work_dir = test_env.work_dir("repo");
++
++    work_dir.run_jj(["describe", "-m", "target"]).success();
++    work_dir.run_jj(["new", "-m", "signed child"]).success();
++    work_dir.run_jj(["sign", "-r", "@"]).success();
++    work_dir.run_jj(["new", "-m", "unsigned child"]).success();
++
++    let expected_descendant_metadata = descendant_metadata(&work_dir);
++
++    redate(&work_dir, "@--", "2002-03-04", "05:06:07");
++    let first_commit_id = commit_id(&work_dir, "@--");
++    assert_eq!(
++        commit_metadata(&work_dir, "@--"),
++        "2002-03-04 05:06:07|2002-03-04 05:06:07|good\n"
++    );
++    assert_eq!(descendant_metadata(&work_dir), expected_descendant_metadata);
++
++    let operation_id = work_dir.current_operation_id();
++    redate(&work_dir, "@--", "2002-03-04", "05:06:07");
++    assert_eq!(commit_id(&work_dir, "@--"), first_commit_id);
++    assert_eq!(work_dir.current_operation_id(), operation_id);
++    assert_eq!(descendant_metadata(&work_dir), expected_descendant_metadata);
++
++    redate(&work_dir, "@--", "2003-04-05", "06:07:08");
++    assert_ne!(commit_id(&work_dir, "@--"), first_commit_id);
++    assert_eq!(
++        commit_metadata(&work_dir, "@--"),
++        "2003-04-05 06:07:08|2003-04-05 06:07:08|good\n"
++    );
++    assert_eq!(descendant_metadata(&work_dir), expected_descendant_metadata);
++
++    redate(&work_dir, "@--", "2002-03-04", "05:06:07");
++    assert_eq!(commit_id(&work_dir, "@--"), first_commit_id);
++    assert_eq!(
++        commit_metadata(&work_dir, "@--"),
++        "2002-03-04 05:06:07|2002-03-04 05:06:07|good\n"
++    );
++    assert_eq!(descendant_metadata(&work_dir), expected_descendant_metadata);
++
++    work_dir.run_jj(["evolog", "-r", "@--"]).success();
++}
++
++fn configure_ssh_signing(test_env: &TestEnvironment) {
++    let key_path = test_env.env_root().join("signing-key");
++    let output = Command::new("ssh-keygen")
++        .args(["-q", "-t", "ed25519", "-N", "", "-f"])
++        .arg(&key_path)
++        .output()
++        .unwrap();
++    assert!(output.status.success(), "{output:?}");
++    let public_key = std::fs::read_to_string(key_path.with_extension("pub")).unwrap();
++    let allowed_signers_path = test_env.env_root().join("allowed-signers");
++    std::fs::write(
++        &allowed_signers_path,
++        format!("test.user@example.com {public_key}"),
++    )
++    .unwrap();
++    test_env.add_config(formatdoc! {r#"
++        [signing]
++        backend = "ssh"
++        behavior = "keep"
++        key = {key}
++
++        [signing.backends.ssh]
++        allowed-signers = {allowed_signers}
++    "#,
++        key = to_toml_value(key_path.to_string_lossy().into_owned()),
++        allowed_signers =
++            to_toml_value(allowed_signers_path.to_string_lossy().into_owned()),
++    });
++}
++
++fn redate(work_dir: &TestWorkDir, revision: &str, date: &str, time: &str) {
++    work_dir
++        .run_jj_with(|cmd| {
++            cmd.env("JJ_INTERACTIVE", "1")
++                .env("TZ", "UTC")
++                .args(["redate", "-r", revision])
++                .write_stdin(format!("{date}\n{time}\ny\n"))
++        })
++        .success();
++}
++
++fn commit_id(work_dir: &TestWorkDir, revision: &str) -> String {
++    work_dir
++        .run_jj(["log", "--no-graph", "-r", revision, "-T", "commit_id"])
++        .success()
++        .stdout
++        .raw()
++        .to_owned()
++}
++
++fn commit_metadata(work_dir: &TestWorkDir, revision: &str) -> String {
++    work_dir
++        .run_jj([
++            "log",
++            "--no-graph",
++            "-r",
++            revision,
++            "-T",
++            r#"author.timestamp().utc().format("%Y-%m-%d %H:%M:%S")
++              ++ "|" ++ committer.timestamp().utc().format("%Y-%m-%d %H:%M:%S")
++              ++ "|" ++ signature.status() ++ "\n""#,
++        ])
++        .success()
++        .stdout
++        .raw()
++        .to_owned()
++}
++
++fn descendant_metadata(work_dir: &TestWorkDir) -> String {
++    work_dir
++        .run_jj([
++            "log",
++            "--no-graph",
++            "-r",
++            "@|@-",
++            "-T",
++            r#"change_id ++ "|" ++ author ++ "|" ++ committer
++              ++ "|" ++ if(signature, signature.status(), "unsigned") ++ "\n""#,
++        ])
++        .success()
++        .stdout
++        .raw()
++        .to_owned()
++}

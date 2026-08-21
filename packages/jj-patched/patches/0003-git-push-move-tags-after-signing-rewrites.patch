@@ -7,22 +7,14 @@ Remap every local tag that points into the rewritten commit graph. This
 keeps explicitly pushed tags and tags on rebased descendants attached to
 the signed replacement instead of the obsolete unsigned commit.
 ---
- cli/src/commands/git/push.rs | 21 +++++++++++++++++++++
- 1 file changed, 21 insertions(+)
+ cli/src/commands/git/push.rs | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
 
 diff --git a/cli/src/commands/git/push.rs b/cli/src/commands/git/push.rs
-index da4b35a1..86187ec2 100644
+index 000000000..000000000 100644
 --- a/cli/src/commands/git/push.rs
 +++ b/cli/src/commands/git/push.rs
-@@ -37,6 +37,7 @@ use jj_lib::git::GitPushRefTargets;
- use jj_lib::git::GitSettings;
- use jj_lib::index::IndexResult;
- use jj_lib::merge::Diff;
-+use jj_lib::merge::Merge;
- use jj_lib::op_store::RefTarget;
- use jj_lib::operation::Operation;
- use jj_lib::ref_name::RefName;
-@@ -903,6 +904,26 @@ async fn sign_commits_before_push(
+@@ -903,6 +903,21 @@ async fn sign_commits_before_push(
          bookmarks: map_to_new_commits(ref_updates.bookmarks),
          tags: map_to_new_commits(ref_updates.tags),
      };
@@ -31,15 +23,10 @@ index da4b35a1..86187ec2 100644
 +        .view()
 +        .local_tags()
 +        .filter_map(|(name, target)| {
-+            let terms = target
-+                .as_merge()
-+                .into_iter()
-+                .map(|term| {
-+                    term.as_ref()
-+                        .map(|id| old_to_new_commits_map.get(id).unwrap_or(id).clone())
-+                })
-+                .collect_vec();
-+            let new_target = RefTarget::from_merge(Merge::from_vec(terms));
++            let new_target = RefTarget::from_merge(target.as_merge().map(|term| {
++                term.as_ref()
++                    .map(|id| old_to_new_commits_map.get(id).unwrap_or(id).clone())
++            }));
 +            (new_target != *target).then(|| (name.to_owned(), new_target))
 +        })
 +        .collect_vec();

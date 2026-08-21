@@ -3,9 +3,9 @@
 class JjPatched < Formula
   desc "Jujutsu build with native signing, redate, and shallow workflow patches"
   homepage "https://github.com/jj-vcs/jj"
-  url "https://github.com/4evy/jj/archive/09339986bac59ef81e7d0bb511e504d329277d63.tar.gz"
-  version "0.43.0-head-09339986"
-  sha256 "6b1aed823aadf2d6a8f35ef2a64bba8a3d68a9e6f837c419b3e44aaa1d86b14d"
+  url "https://github.com/4evy/jj/archive/f53cd646445cf12eda3f7afebe7073d95fd34ac7.tar.gz"
+  version "0.44.0-head-f53cd646"
+  sha256 "26e71c301547910c6ab12a4f314687fd1e60948e6efb4fd505889ab32b4da64e"
   license "Apache-2.0"
   depends_on "rust" => :build
 

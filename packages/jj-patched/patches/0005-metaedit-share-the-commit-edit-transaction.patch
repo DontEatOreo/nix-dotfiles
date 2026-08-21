@@ -3,12 +3,16 @@ From: 4evy <git@evy.pink>
 Date: Thu, 1 Jan 1970 00:00:00 +0000
 Subject: [PATCH 5/6] metaedit: share the commit edit transaction
 
+Extract the transaction-backed editing path so sibling commands can
+reuse jj's descendant transformation and rewrite bookkeeping. Keep the
+existing metaedit command behavior unchanged.
+
 ---
  cli/src/commands/metaedit.rs | 10 ++++++++++
  1 file changed, 10 insertions(+)
 
 diff --git a/cli/src/commands/metaedit.rs b/cli/src/commands/metaedit.rs
-index 3ac3b2d5..03edfdbd 100644
+index 000000000..000000000 100644
 --- a/cli/src/commands/metaedit.rs
 +++ b/cli/src/commands/metaedit.rs
 @@ -24,6 +24,7 @@ use tracing::instrument;

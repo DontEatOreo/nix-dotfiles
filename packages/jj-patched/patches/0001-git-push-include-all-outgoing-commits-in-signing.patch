@@ -11,7 +11,7 @@ immutable commits, including tag targets, can be rewritten and signed.
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/cli/src/commands/git/push.rs b/cli/src/commands/git/push.rs
-index 676cf0c4..8b599716 100644
+index 000000000..000000000 100644
 --- a/cli/src/commands/git/push.rs
 +++ b/cli/src/commands/git/push.rs
 @@ -786,11 +786,12 @@ fn ready_to_push_revset_expression(
