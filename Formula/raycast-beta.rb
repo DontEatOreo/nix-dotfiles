@@ -8,7 +8,7 @@ class RaycastBeta < Formula
   desc "Next-generation Raycast public beta with dotfiles integration"
   homepage "https://www.raycast.com/new"
   url "file://#{MANAGER_SOURCE}"
-  version "5"
+  version "1"
   sha256 Digest::SHA256.file(MANAGER_SOURCE).hexdigest
   license :cannot_represent
 

@@ -16,7 +16,7 @@ class KanataWithCmd < Formula
   version "git-#{homebrew.fetch("revision")[0, 7]}"
   sha256 digest
   license "LGPL-3.0-only"
-  revision 4
+  revision 1
   head "https://github.com/#{homebrew.dig("repository", "owner")}/" \
        "#{homebrew.dig("repository", "repo")}.git",
        branch: homebrew.fetch("branch")

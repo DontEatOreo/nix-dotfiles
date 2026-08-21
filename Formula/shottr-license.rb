@@ -11,7 +11,7 @@ class ShottrLicense < Formula
   desc "Dotfiles-managed Shottr license activation"
   homepage "https://shottr.cc/"
   url "file://#{MANAGER_SOURCE}"
-  version "4"
+  version "1"
   sha256 MANAGER_SOURCE.sha256
   license "MIT"
 

@@ -8,7 +8,7 @@ class AltTabLicense < Formula
   desc "Dotfiles-managed AltTab license activation"
   homepage "https://github.com/lwouis/alt-tab-macos"
   url "file://#{MANAGER_SOURCE}"
-  version "2"
+  version "1"
   sha256 Digest::SHA256.file(MANAGER_SOURCE).hexdigest
   license "MIT"
 
