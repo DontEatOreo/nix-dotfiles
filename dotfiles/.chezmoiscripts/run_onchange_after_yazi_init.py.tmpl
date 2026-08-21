@@ -13,7 +13,7 @@ if ya is None:
     print("Yazi plugin install skipped: ya not found")
     raise SystemExit(0)
 
-home = Path.home()
+home = Path(os.environ["CHEZMOI_HOME_DIR"])
 config = Path(os.environ.get("XDG_CONFIG_HOME", home / ".config")) / "yazi"
 package = config / "package.toml"
 if not package.is_file():

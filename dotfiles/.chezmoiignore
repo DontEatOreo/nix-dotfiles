@@ -15,6 +15,8 @@ node_modules/**
 .chezmoiexternal.toml.tmpl
 .chezmoiscripts/
 .chezmoiscripts/**
+.cache/
+.cache/**
 .bashrc
 .zshrc
 .oh-my-bash/
@@ -35,6 +37,7 @@ Library/
 {{ if ne .chezmoi.os "darwin" }}
 Library/
 .config/raycast/
+.local/bin/codex-node-repl-browser-trust
 .local/bin/hide-display-audio
 {{ end }}
 

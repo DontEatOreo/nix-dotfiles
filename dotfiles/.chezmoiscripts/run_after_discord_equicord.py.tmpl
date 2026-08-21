@@ -7,7 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-command = Path.home() / ".local/bin/discord-equicord"
+home = Path(os.environ["CHEZMOI_HOME_DIR"])
+command = home / ".local/bin/discord-equicord"
 if not command.is_file():
     command = Path(shutil.which("discord-equicord") or command)
 if command.is_file() and os.access(command, os.X_OK):
@@ -19,7 +20,7 @@ if sys.platform == "darwin":
         print("Equicord settings install skipped: nix is not available")
         raise SystemExit(0)
 
-    repository = Path({{ joinPath .chezmoi.sourceDir ".." | quote }})
+    repository = Path(os.environ["CHEZMOI_WORKING_TREE"])
     result = subprocess.run(
         (
             nix,
@@ -40,7 +41,7 @@ if sys.platform == "darwin":
         )
 
     package = Path(outputs[0])
-    settings = Path.home() / "Library/Application Support/Equicord/settings"
+    settings = home / "Library/Application Support/Equicord/settings"
     settings.mkdir(parents=True, exist_ok=True)
     for name in ("settings.json", "quickCss.css"):
         source = package / name

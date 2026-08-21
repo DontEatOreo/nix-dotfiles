@@ -3,6 +3,7 @@
 # code fingerprint: {{ template "executable_fingerprint" (lookPath "code") }}
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -11,8 +12,9 @@ code = shutil.which("code")
 if code is None:
     raise SystemExit(0)
 
-configured = Path(
-    {{ joinPath .chezmoi.sourceDir "dot_config/Code/User/vscode-extensions.txt" | quote }}
+configured = (
+    Path(os.environ["CHEZMOI_SOURCE_DIR"])
+    / "dot_config/Code/User/vscode-extensions.txt"
 )
 installed = {
     line.casefold()

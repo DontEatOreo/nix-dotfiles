@@ -1,10 +1,16 @@
-sourceDir = {{ quote .chezmoi.sourceDir }}
+sourceDir = {{ .chezmoi.sourceDir | toToml }}
+umask = 0o022
+
+[add]
+secrets = "error"
+templateSymlinks = true
 
 [diff]
 exclude = ["scripts"]
 
 [edit]
-hardlink = false
+hardlink = true
+watch = true
 
 [status]
 exclude = ["scripts"]

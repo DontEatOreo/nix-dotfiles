@@ -8,7 +8,7 @@ require "pathname"
 brew = "/opt/homebrew/bin/brew"
 formula = "4evy/dotfiles/raycast"
 manager = "/opt/homebrew/bin/raycast-manager"
-repository = Pathname({{ joinPath .chezmoi.sourceDir ".." | quote }})
+repository = Pathname(ENV.fetch("CHEZMOI_WORKING_TREE"))
 tap = Pathname("/opt/homebrew/Library/Taps/4evy/homebrew-dotfiles")
 brew_environment = {
   "HOMEBREW_NO_AUTO_UPDATE" => "1",

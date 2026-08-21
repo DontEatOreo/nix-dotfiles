@@ -1,11 +1,12 @@
 #!/usr/bin/env python3.14
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
 
-repository = Path({{ joinPath .chezmoi.sourceDir ".." | quote }})
+repository = Path(os.environ["CHEZMOI_WORKING_TREE"])
 ansible = shutil.which("ansible-playbook")
 uvx = shutil.which("uvx")
 if ansible is not None:

@@ -1,5 +1,5 @@
 {{- if eq .chezmoi.os "darwin" -}}
-{{- $repo := joinPath .chezmoi.sourceDir ".." -}}
+{{- $repo := .chezmoi.workingTree -}}
 #!/usr/bin/env python3.14
 # Source fingerprint: {{ output "git" "-C" $repo "hash-object" (joinPath $repo "packages/hide-display-audio/Package.swift") (joinPath $repo "packages/hide-display-audio/Sources/EDIDKit/EDID.swift") (joinPath $repo "packages/hide-display-audio/Sources/HideDisplayAudio/main.swift") (joinPath $repo "packages/hide-display-audio/Sources/PrivateIOKit/PrivateIOKit.c") (joinPath $repo "packages/hide-display-audio/Sources/PrivateIOKit/include/PrivateIOKit.h") (joinPath $repo "packages/hide-display-audio/Tests/EDIDKitTests/EDIDTests.swift") | sha256sum }}
 from __future__ import annotations
@@ -9,7 +9,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
-package = Path({{ $repo | quote }}) / "packages/hide-display-audio"
+home = Path(os.environ["CHEZMOI_HOME_DIR"])
+package = Path(os.environ["CHEZMOI_WORKING_TREE"]) / "packages/hide-display-audio"
 swift = shutil.which("swift")
 if swift is None:
     raise SystemExit("hide-display-audio build failed: swift is not available")
@@ -32,7 +33,7 @@ bin_path = subprocess.run(
     text=True,
 ).stdout.strip()
 
-destination = Path.home() / ".local/libexec/hide-display-audio"
+destination = home / ".local/libexec/hide-display-audio"
 destination.parent.mkdir(parents=True, exist_ok=True)
 subprocess.run(
     ("/usr/bin/install", "-m", "0755", str(Path(bin_path) / destination.name), str(destination)),
@@ -41,7 +42,7 @@ subprocess.run(
 
 domain = f"gui/{os.getuid()}"
 label = "dev.4evy.hide-display-audio"
-plist = Path.home() / "Library/LaunchAgents" / f"{label}.plist"
+plist = home / "Library/LaunchAgents" / f"{label}.plist"
 subprocess.run(
     ("/bin/launchctl", "bootout", domain, str(plist)),
     check=False,

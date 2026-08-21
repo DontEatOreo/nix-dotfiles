@@ -2,7 +2,7 @@
 # shellcheck shell=bash
 set -euo pipefail
 
-generator={{ joinPath .chezmoi.homeDir ".local/bin/ghostty-dreamy-swirl.ts" | quote }}
+generator="${CHEZMOI_HOME_DIR}/.local/bin/ghostty-dreamy-swirl.ts"
 if [[ -x "$generator" ]]; then
   "$generator"
 fi
