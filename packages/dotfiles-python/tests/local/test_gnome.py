@@ -4,8 +4,8 @@ from workstation.local.gnome import _accent_colors, _gtk_accent_css
 def test_black_rose_doll_gtk_accents_include_contrasting_foregrounds() -> None:
     light, dark = _accent_colors()
 
-    assert light == ("#935f6e", "#f7efef")
-    assert dark == ("#ce98a5", "#110e17")
+    assert light == ("#914669", "#f8f1f2")
+    assert dark == ("#cf829a", "#100d14")
 
     for gtk_version in (3, 4):
         for accent, foreground in (light, dark):

@@ -19,6 +19,7 @@ python314Packages.buildPythonApplication {
       ../ansible/roles/system/files/kmscon/kmscon-theme-config.py
       ../ansible/roles/system/files/rustdesk-selinux/rustdesk.fc
       ../ansible/roles/system/files/rustdesk-selinux/rustdesk.te
+      ../ansible/roles/system/tasks/rustdesk.yml
       ../bluebuild/recipes/spectrum.yml
       ../pyproject.toml
       ../ansible/tests

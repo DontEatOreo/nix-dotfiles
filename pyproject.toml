@@ -24,6 +24,7 @@ desktop-perf-audit = "workstation.local.desktop_audit:desktop_perf_audit_entrypo
 discord-equicord = "workstation.apps.discord:entrypoint"
 gnome-black-rose-doll-accent = "workstation.local.gnome:gnome_black_rose_doll_accent_entrypoint"
 jj-get = "workstation.local.jj:jj_get_entrypoint"
+macos-black-rose-doll-appearance = "workstation.macos.appearance:apply_appearance"
 phone-mirror = "workstation.local.phone_mirror:entrypoint"
 terminal-black-rose-doll = "workstation.macos.terminal:terminal_profile"
 

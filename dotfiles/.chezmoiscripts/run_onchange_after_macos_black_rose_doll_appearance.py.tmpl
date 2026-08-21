@@ -1,0 +1,17 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/usr/bin/env python3.14
+# command fingerprint: {{ template "executable_fingerprint" (joinPath .chezmoi.homeDir ".local/bin/macos-black-rose-doll-appearance") }}
+# palette fingerprint: {{ include ".chezmoitemplates/black_rose_doll_palette.json" | sha256sum }}
+from __future__ import annotations
+
+import os
+import shutil
+import subprocess
+from pathlib import Path
+
+command = Path.home() / ".local/bin/macos-black-rose-doll-appearance"
+if not command.is_file():
+    command = Path(shutil.which("macos-black-rose-doll-appearance") or command)
+if command.is_file() and os.access(command, os.X_OK):
+    subprocess.run((command,), check=True)
+{{ end -}}
