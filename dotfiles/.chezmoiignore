@@ -1,8 +1,14 @@
-.chezmoi-lib/
 .chezmoiscripts/__pycache__/
 .chezmoiscripts/__pycache__/**
 .oh-my-zsh/cache/
 .oh-my-zsh/cache/**
+
+# Bun workspace metadata and dependencies live in the chezmoi source tree for
+# development only; they are not targets in the home directory.
+package.json
+tsconfig.json
+node_modules/
+node_modules/**
 
 {{ if eq .chezmoi.os "windows" }}
 .chezmoiexternal.toml.tmpl
@@ -28,18 +34,7 @@ Library/
 {{ if ne .chezmoi.os "darwin" }}
 Library/
 .config/raycast/
-.config/fido-phone/
-.local/bin/fido-phone
-.local/bin/fido-phone-install-android
-.local/libexec/fido-phone/
-.local/share/fido-phone/
-.local/bin/raycast-beta-write-user.ts
 {{ end }}
-
-.local/bin/package.json
-.local/bin/package-lock.json
-.local/bin/tsconfig.json
-.local/bin/biome.jsonc
 
 {{ if eq .chezmoi.os "darwin" }}
 .config/Code/
