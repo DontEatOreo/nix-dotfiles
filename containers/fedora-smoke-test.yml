@@ -13,6 +13,9 @@
       ansible.builtin.include_role:
         name: bootstrap
         tasks_from: python-tool
+        apply:
+          tags:
+            - python
       tags:
         - python
 
@@ -20,6 +23,9 @@
       ansible.builtin.include_role:
         name: tools
         tasks_from: python
+        apply:
+          tags:
+            - python
       tags:
         - python
 
@@ -27,6 +33,9 @@
       ansible.builtin.include_role:
         name: tools
         tasks_from: zig
+        apply:
+          tags:
+            - zig
       tags:
         - zig
 
@@ -34,6 +43,9 @@
       ansible.builtin.include_role:
         name: tools
         tasks_from: upstream
+        apply:
+          tags:
+            - upstream
       tags:
         - upstream
 
@@ -41,5 +53,8 @@
       ansible.builtin.include_role:
         name: tools
         tasks_from: verify
+        apply:
+          tags:
+            - verify
       tags:
         - verify
