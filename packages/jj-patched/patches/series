@@ -7,3 +7,4 @@
 0007-tui-share-alternate-screen-setup.patch
 0008-redate-add-an-interactive-timestamp-editor.patch
 0009-redate-align-the-revision-picker-with-native-tuis.patch
+0010-git-push-preserve-redated-metadata-while-signing.patch

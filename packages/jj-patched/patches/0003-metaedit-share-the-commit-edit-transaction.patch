@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: 4evy <git@evy.pink>
 Date: Thu, 1 Jan 1970 00:00:00 +0000
-Subject: [PATCH 3/9] metaedit: share the commit edit transaction
+Subject: [PATCH 3/10] metaedit: share the commit edit transaction
 
 Separate revision selection from metadata mutation and extract the
 transaction-backed editing path behind a dedicated options type. Sibling

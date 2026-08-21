@@ -10,8 +10,8 @@ diff-formatter = ":git"
 default-command = "log"
 
 [git]
-# The local jj patch signs every unsigned outgoing commit and applies the
-# configured-author committer timestamp policy inside the push transaction.
+# Sign unsigned outgoing commits authored by me. The local jj patch preserves
+# explicitly redated author and committer timestamps while adding signatures.
 sign-on-push = "~signed() & mine()"
 # Preserve the custom branch's shallow-fetch behavior: one requested commit
 # plus its parent, so the requested commit retains a real diff base.

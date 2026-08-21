@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: 4evy <git@evy.pink>
 Date: Thu, 1 Jan 1970 00:00:00 +0000
-Subject: [PATCH 7/9] tui: share alternate-screen setup
+Subject: [PATCH 7/10] tui: share alternate-screen setup
 
 Centralize crossterm raw-mode and alternate-screen setup for ratatui
 commands. Restore the terminal through a cleanup guard on success,

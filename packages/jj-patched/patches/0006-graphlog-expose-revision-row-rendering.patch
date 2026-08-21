@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: 4evy <git@evy.pink>
 Date: Thu, 1 Jan 1970 00:00:00 +0000
-Subject: [PATCH 6/9] graphlog: expose revision row rendering
+Subject: [PATCH 6/10] graphlog: expose revision row rendering
 
 Factor the stateful graph renderer from the writer-backed GraphLog
 adapter. Terminal interfaces can now render one topology row at a time

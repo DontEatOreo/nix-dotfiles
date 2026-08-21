@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: 4evy <git@evy.pink>
 Date: Thu, 1 Jan 1970 00:00:00 +0000
-Subject: [PATCH 8/9] redate: add an interactive timestamp editor
+Subject: [PATCH 8/10] redate: add an interactive timestamp editor
 
 Add a revision picker that renders jj's topologically grouped graph with
 the configured graph style, log node template, and a command-specific row

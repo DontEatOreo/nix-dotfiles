@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: 4evy <git@evy.pink>
 Date: Thu, 1 Jan 1970 00:00:00 +0000
-Subject: [PATCH 1/9] git push: make sign-on-push accept a revset
+Subject: [PATCH 1/10] git push: make sign-on-push accept a revset
 
 Let users define signing policy with the same revset language used by
 other jj configuration. Intersect the configured selector with commits

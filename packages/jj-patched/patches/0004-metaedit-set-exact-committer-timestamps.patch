@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: 4evy <git@evy.pink>
 Date: Thu, 1 Jan 1970 00:00:00 +0000
-Subject: [PATCH 4/9] metaedit: set exact committer timestamps
+Subject: [PATCH 4/10] metaedit: set exact committer timestamps
 
 Add --committer-timestamp for setting the committer timestamp directly
 and --timestamp as shorthand for setting both author and committer
