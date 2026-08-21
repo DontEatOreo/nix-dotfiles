@@ -17,14 +17,17 @@ runs:
       continue-on-error: true
       env:
         IMAGE_REF: ${{ inputs.image-ref }}
-        GOMEMLIMIT: 8GiB
+        GOMEMLIMIT: 2GiB
+        SYFT_FILE_METADATA_SELECTION: none
         SYFT_PARALLELISM: "1"
       shell: bash
       run: |
         set -euo pipefail
         syft_path=$(nix build --no-link --print-out-paths nixpkgs#syft)
         timeout --signal=TERM --kill-after=30s 15m \
-          "$syft_path/bin/syft" scan "$IMAGE_REF" \
+          "$syft_path/bin/syft" scan "registry:$IMAGE_REF" \
+          --override-default-catalogers rpm-db-cataloger \
+          --select-catalogers=-file \
           --output spdx-json=spectrum.spdx.json
         echo "generated=true" >>"$GITHUB_OUTPUT"
 
