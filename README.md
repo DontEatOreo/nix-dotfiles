@@ -68,6 +68,12 @@ sudo nixos-rebuild \
 just setup
 ```
 
+Toshy uses one pinned upstream release on both system families. On NixOS the
+rebuild installs Toshy's native system module and Nix runtime, then `just setup`
+installs the matching user files. On other Linux systems `just setup` runs the
+matching upstream installer directly. Keep that order after a Toshy pin update;
+provisioning rejects a Nix runtime and user-files revision mismatch.
+
 The extra cache options are only needed for the first rebuild. Later rebuilds
 can use:
 
@@ -102,6 +108,7 @@ Run `just` or `just --list` for the complete recipe list.
 ```bash
 just setup          # Bootstrap and apply everything
 just update         # Update userland, dotfiles, and host setup
+just dotfiles-diff  # Preview pending chezmoi changes
 just apply          # Apply chezmoi dotfiles only
 just status         # Show Spectrum image status
 
