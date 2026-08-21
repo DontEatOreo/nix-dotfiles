@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 require "minitest/autorun"
+require "json"
 require "open3"
 require "pathname"
 require "rbconfig"
-require "socket"
-require "stringio"
 require "tmpdir"
+require "webmock/minitest"
 
 REPOSITORY_ROOT = Pathname(__dir__).parent.freeze
 
@@ -136,85 +136,60 @@ class RubyToolsTest < Minitest::Test
   end
 
   def test_raycast_latest_release_uses_release_api
-    responses = {
-      "/releases/latest?platform=macos&architecture=arm64&version=0.0.0.0" => [
-        200,
-        { "Content-Type" => "application/json" },
-        JSON.generate(
-          "version"      => "1.10.0.0",
-          "download_url" =>
-                            "https://x-r2.raycast-releases.com/" \
-                            "Raycast_Beta_1.10.0.0_bbbb_arm64.dmg",
-        ),
-      ],
-    }
+    request = stub_request(:get, "https://example.com/releases/latest").with(
+      query:   {
+        "architecture" => "arm64",
+        "platform"     => "macos",
+        "version"      => "0.0.0.0",
+      },
+      headers: {
+        "Accept"     => "application/json",
+        "User-Agent" => RaycastBeta::USER_AGENT,
+      },
+    ).to_return(
+      status:  200,
+      headers: { "Content-Type" => "application/json" },
+      body:    JSON.generate(
+        "version"      => "1.10.0.0",
+        "download_url" =>
+                          "https://x-r2.raycast-releases.com/" \
+                          "Raycast_Beta_1.10.0.0_bbbb_arm64.dmg",
+      ),
+    )
+    configuration = RaycastBeta::Configuration.new(
+      environment: { "RAYCAST_RELEASE_API" => "https://example.com/releases/latest" },
+    )
 
-    with_http_server(responses) do |base_url|
-      configuration = RaycastBeta::Configuration.new(
-        environment: { "RAYCAST_RELEASE_API" => "#{base_url}/releases/latest" },
-      )
-      release = RaycastBeta::Manager.new(configuration:).latest_release
+    release = RaycastBeta::Manager.new(configuration:).latest_release
 
-      assert_equal Gem::Version.new("1.10.0.0"), release.version
-      assert_equal "/Raycast_Beta_1.10.0.0_bbbb_arm64.dmg", release.uri.path
-    end
+    assert_equal Gem::Version.new("1.10.0.0"), release.version
+    assert_equal "/Raycast_Beta_1.10.0.0_bbbb_arm64.dmg", release.uri.path
+    assert_requested request
   end
 
   def test_raycast_latest_release_returns_nil_when_current
-    responses = {
-      "/releases/latest?platform=macos&architecture=arm64&version=1.10.0.0" => [
-        204,
-        {},
-        "",
-      ],
-    }
+    request = stub_request(:get, "https://example.com/releases/latest").with(
+      query: {
+        "architecture" => "arm64",
+        "platform"     => "macos",
+        "version"      => "1.10.0.0",
+      },
+    ).to_return(status: 204)
+    configuration = RaycastBeta::Configuration.new(
+      environment: { "RAYCAST_RELEASE_API" => "https://example.com/releases/latest" },
+    )
 
-    with_http_server(responses) do |base_url|
-      configuration = RaycastBeta::Configuration.new(
-        environment: { "RAYCAST_RELEASE_API" => "#{base_url}/releases/latest" },
-      )
-      release = RaycastBeta::Manager.new(configuration:).latest_release(
-        current_version: Gem::Version.new("1.10.0.0"),
-      )
+    release = RaycastBeta::Manager.new(configuration:).latest_release(
+      current_version: Gem::Version.new("1.10.0.0"),
+    )
 
-      assert_nil release
-    end
+    assert_nil release
+    assert_requested request
   end
 
   def test_raycast_file_url_escapes_filesystem_characters
     url = RaycastBeta::Manager.new.file_url("/tmp/avatar #1.png")
 
     assert_equal "file:///tmp/avatar%20%231.png", url
-  end
-
-  private
-
-  def with_http_server(responses)
-    server = TCPServer.new("127.0.0.1", 0)
-    thread = Thread.new do
-      responses.length.times do
-        client = server.accept
-        request = +""
-        request << client.readpartial(1024) until request.include?("\r\n\r\n")
-        path = request.lines.first.split.fetch(1)
-        status, headers, body = responses.fetch(path)
-        reason = { 200 => "OK", 204 => "No Content", 302 => "Found" }.fetch(status)
-        response_headers = {
-          "Content-Length" => body.bytesize,
-          "Connection"     => "close",
-        }.merge(headers)
-        client.write "HTTP/1.1 #{status} #{reason}\r\n"
-        response_headers.each { |name, value| client.write "#{name}: #{value}\r\n" }
-        client.write "\r\n#{body}"
-        client.close
-      end
-    end
-
-    yield "http://127.0.0.1:#{server.local_address.ip_port}"
-    thread.value
-  ensure
-    server&.close
-    thread&.kill
-    thread&.join
   end
 end
