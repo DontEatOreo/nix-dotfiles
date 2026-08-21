@@ -200,6 +200,26 @@
       "problemMatcher": []
     },
     {
+      "label": "dotfiles: render current template",
+      "detail": "Render the active standalone template with this repository's chezmoi data.",
+      "type": "process",
+      "command": "chezmoi",
+      "args": [
+        "--source",
+        "${workspaceFolder}/dotfiles",
+        "--working-tree",
+        "${workspaceFolder}",
+        "--refresh-externals=never",
+        "execute-template",
+        "--file",
+        "${file}"
+      ],
+      "icon": {
+        "id": "preview"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "spectrum: validate",
       "detail": "Validate the BlueBuild recipe and its pinned base image.",
       "type": "process",

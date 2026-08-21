@@ -37,4 +37,5 @@ tamasfe.even-better-toml
 timonwong.shellcheck
 tomoki1207.pdf
 usernamehw.errorlens
+xembly.gomplate
 yoavbls.pretty-ts-errors
