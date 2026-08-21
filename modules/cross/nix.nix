@@ -32,6 +32,7 @@ in
         experimental-features = [
           "flakes"
           "nix-command"
+          "parallel-eval"
         ];
         builders-use-substitutes = true;
         # Append public caches without replacing Determinate's and Nix's
