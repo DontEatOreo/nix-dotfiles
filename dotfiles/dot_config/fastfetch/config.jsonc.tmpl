@@ -1,46 +1,41 @@
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   "logo": {
-    {{- if eq .chezmoi.os "linux" }}
     "type": "file",
-    "source": "~/.config/fastfetch/coreos.txt",
+    "source": "~/.config/fastfetch/emblem.txt",
     "color": {
-      "1": "blue",
-      "2": "white",
-      "3": "red"
+      "1": "#D60270",
+      "2": "#9B4F96",
+      "3": "#315FC3",
+      "4": "#5BCEFA",
+      "5": "#F5A9B8",
+      "6": "#F7F7F7",
+      "7": "#FCF434",
+      "8": "#555555"
     },
-    {{- else if eq .chezmoi.os "darwin" }}
-    "type": "file",
-    "source": "~/.config/fastfetch/apple.txt",
-    "color": {
-      "1": "green",
-      "2": "yellow",
-      "3": "light_red",
-      "4": "red",
-      "5": "magenta",
-      "6": "blue"
-    },
-    {{- else }}
-    "type": "small",
-    {{- end }}
     "padding": {
       "top": 1,
       "right": 4
     }
   },
   "display": {
-    "separator": "  ",
+    "separator": "  ›  ",
     "color": {
-      "keys": "magenta",
-      "title": "magenta"
+      "keys": "#F5A9B8",
+      "title": "#D60270",
+      "separator": "#9B4F96"
     },
     "key": {
-      "width": 15
+      "width": 0
     },
     "bar": {
       "char": {
         "elapsed": "━",
         "total": "─"
+      },
+      "color": {
+        "elapsed": "#5BCEFA",
+        "total": "#9B4F96"
       },
       "width": 10
     },
@@ -52,92 +47,98 @@
     "break",
     {
       "type": "title",
-      "format": "{#magenta}{user-name}{#}@{#blue}{host-name}{#}"
+      "format": "{#38;2;214;2;112}{user-name}{#}@{#38;2;91;206;250}{host-name}{#}  {#38;2;252;244;52}✦{#}"
     },
+    "break",
     {
       "type": "custom",
-      {{- if and (eq .chezmoi.os "linux") (eq (get .chezmoi.osRelease "id") "bluefin") }}
-      "format": "{#blue}atomic workstation{#}  {#cyan}◆{#}  {#magenta}built to roam{#}"
-      {{- else if eq .chezmoi.os "darwin" }}
-      "format": "{#blue}darwin workstation{#}  {#cyan}◆{#}  {#magenta}built to create{#}"
-      {{- else }}
-      "format": "{#blue}declarative workstation{#}  {#cyan}◆{#}  {#magenta}built to roam{#}"
-      {{- end }}
-    },
-    {
-      "type": "custom",
-      "format": "{#bright_black}────────────────────────────{#}"
+      "format": "{#38;2;214;2;112}━━━━{#}{#38;2;155;79;150}━━━━{#}{#38;2;49;95;195}━━━━{#}{#38;2;91;206;250}━━━━{#}{#38;2;245;169;184}━━━━{#}{#38;2;252;244;52}━━━━{#}"
     },
     {
       "type": "os",
       {{- if eq .chezmoi.os "darwin" }}
-      "key": "  macOS",
+      "key": "  macOS   ",
       {{- else }}
-      "key": "󰣛  os",
+      "key": "󰣛  os      ",
       {{- end }}
+      "keyColor": "#D60270",
       "format": "{name}{?version-id} {version-id}{?}{?variant} · {variant}{?}"
     },
     {
       "type": "host",
-      "key": "󰌢  host",
+      "key": "󰌢  host    ",
+      "keyColor": "#9B4F96",
       "format": "{vendor} {family}"
     },
     {
       "type": "kernel",
-      "key": "  kernel",
+      "key": "  kernel  ",
+      "keyColor": "#315FC3",
       "format": "{release}"
     },
     {
       "type": "uptime",
-      "key": "󰅐  uptime",
+      "key": "󰅐  uptime  ",
+      "keyColor": "#5BCEFA",
       "format": "{?days}{days}d {?}{hours}h {minutes}m"
     },
     {
       "type": "packages",
       "key": "󰏖  packages",
+      "keyColor": "#F5A9B8",
       "format": "{all}{?rpm} · rpm {rpm}{?}{?brew-all} · brew {brew-all}{?}{?nix-all} · nix {nix-all}{?}{?flatpak-all} · flatpak {flatpak-all}{?}"
     },
     {{- if eq .chezmoi.os "darwin" }}
     {
       "type": "shell",
-      "key": "  shell",
+      "key": "  shell   ",
+      "keyColor": "#F7F7F7",
       "format": "{pretty-name}{?version} {version}{?}"
     },
     {{- else }}
     {
       "type": "de",
-      "key": "  desktop",
+      "key": "  desktop ",
+      "keyColor": "#F7F7F7",
       "format": "{pretty-name}{?version} {version}{?}"
     },
     {{- end }}
     {
       "type": "terminal",
       "key": "  terminal",
+      "keyColor": "#FCF434",
       "format": "{pretty-name}{?version} {version}{?}"
     },
     {
       "type": "cpu",
-      "key": "󰍛  cpu",
+      "key": "󰍛  cpu     ",
+      "keyColor": "#9B4F96",
       "format": "{name} · {cores-logical} threads"
     },
     {
       "type": "gpu",
-      "key": "󰢮  gpu",
+      "key": "󰢮  gpu     ",
+      "keyColor": "#5BCEFA",
       "format": "{name}{?type} [{type}]{?}"
     },
     {
       "type": "memory",
-      "key": "󰘚  memory",
+      "key": "󰘚  memory  ",
+      "keyColor": "#F5A9B8",
       "format": "{percentage-bar}  {used} / {total}"
     },
     {
-      "type": "battery",
-      "key": "󰁹  battery",
-      "format": "{capacity-bar}  {capacity} [{status}]"
+      "type": "disk",
+      "key": "󰋊  disk    ",
+      "keyColor": "#315FC3",
+      "folders": "/",
+      "format": "{size-used} / {size-total} ({size-percentage}) · {filesystem}"
     },
     {
-      "type": "custom",
-      "format": "{#blue}●{#}  {#cyan}●{#}  {#magenta}●{#}  {#bright_black}●{#}"
+      "type": "battery",
+      "key": "󰁹  battery ",
+      "keyColor": "#FCF434",
+      "format": "{capacity-bar}  {capacity} [{status}]"
     },
     "break"
   ]
