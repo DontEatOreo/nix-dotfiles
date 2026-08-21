@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require "digest"
 require "fileutils"
 require "json"
 require "open3"
@@ -16,20 +17,22 @@ require "timeout"
 require "tmpdir"
 require "uri"
 
-# Installs and configures the public Raycast Beta using dotfiles-managed data.
-module RaycastBeta
-  PROGRAM_NAME = "raycast-beta-manager"
-  EXPECTED_BUNDLE_ID = "com.raycast-x.macos"
+# Installs and configures Raycast using dotfiles-managed data.
+module Raycast
+  PROGRAM_NAME = "raycast-manager"
+  APP_NAME = "Raycast"
+  EXPECTED_BUNDLE_ID = "com.raycast.macos"
   HTTP_OPEN_TIMEOUT = 30
   HTTP_READ_TIMEOUT = 300
-  USER_AGENT = "#{PROGRAM_NAME}/5".freeze
+  USER_AGENT = "#{PROGRAM_NAME}/6".freeze
+  DMG_CHECKSUM_PATTERN = /\A[a-f0-9]{32}\z/i
   RELEASE_URL_PATTERN = %r{
     \Ahttps://x-r2\.raycast-releases\.com/
-    Raycast_Beta_(\d+(?:\.\d+)+)_[a-f0-9]+_arm64\.dmg
+    Raycast_(\d+(?:\.\d+)+)_[a-f0-9]+_arm64\.dmg
     \z
   }ix
 
-  Release = Data.define(:uri, :version).freeze
+  Release = Data.define(:uri, :version, :checksum).freeze
   Profile = Data.define(
     :current_user,
     :oauth_token,
@@ -46,17 +49,18 @@ module RaycastBeta
                 :avatar_source,
                 :data_addon,
                 :database_cli,
+                :disable_ai_cli,
                 :keydump_hook,
                 :lock_file,
                 :profile_file,
                 :release_api
 
     def initialize(environment: ENV, home: Pathname(Dir.home))
-      @app = path(environment.fetch("RAYCAST_APP", "/Applications/Raycast Beta.app"))
+      @app = path(environment.fetch("RAYCAST_APP", "/Applications/Raycast.app"))
       @app_support = path(
         environment.fetch(
           "RAYCAST_APP_SUPPORT",
-          home/"Library/Application Support/com.raycast-x.macos",
+          home/"Library/Application Support/com.raycast.macos",
         ),
       )
       profile_directory = path(
@@ -71,13 +75,19 @@ module RaycastBeta
       @keydump_hook = path(
         environment.fetch(
           "RAYCAST_KEYDUMP_HOOK",
-          profile_directory/"keydump.cjs",
+          profile_directory/"keydump.cts",
         ),
       )
       @database_cli = path(
         environment.fetch(
           "RAYCAST_DB_CLI",
-          profile_directory/"raycast-db.mjs",
+          profile_directory/"raycast-db.mts",
+        ),
+      )
+      @disable_ai_cli = path(
+        environment.fetch(
+          "RAYCAST_DISABLE_AI_CLI",
+          profile_directory/"disable-ai.mts",
         ),
       )
       backend_resources = @app/
@@ -149,21 +159,22 @@ module RaycastBeta
       unless release
         raise Error, "Raycast release API reported an absent app as current" unless installed_version
 
-        log "Raycast Beta #{installed_version} is current"
+        log "Raycast #{installed_version} is current"
         return false
       end
       if !force && installed_version && installed_version >= release.version
-        log "Raycast Beta #{installed_version} is current"
+        log "Raycast #{installed_version} is current"
         return false
       end
 
-      Dir.mktmpdir("raycast-beta-") do |directory|
+      Dir.mktmpdir("raycast-") do |directory|
         root = Pathname(directory)
-        image = root/"Raycast_Beta.dmg"
+        image = root/"Raycast.dmg"
         mount = root/"mount"
         mount.mkpath
-        log "downloading Raycast Beta #{release.version}"
+        log "downloading Raycast #{release.version}"
         download(release.uri, image)
+        verify_dmg_checksum(image, release.checksum)
         system(
           "/usr/bin/hdiutil",
           "verify",
@@ -187,7 +198,7 @@ module RaycastBeta
             exception: true,
           )
           attached = true
-          install_app(mount/"Raycast Beta.app", force:)
+          install_app(mount/"#{APP_NAME}.app", force:)
         ensure
           if attached
             system(
@@ -211,6 +222,7 @@ module RaycastBeta
 
       require_file(@configuration.keydump_hook)
       require_file(@configuration.database_cli)
+      require_file(@configuration.disable_ai_cli)
       node, key_file = extract_key
       avatar = ensure_avatar(profile)
       current_user = profile.current_user.dup
@@ -245,8 +257,16 @@ module RaycastBeta
         )
         raise Error, "Raycast command-alias database update failed" unless aliases_updated
       end
+
+      ai_disabled = system(
+        environment,
+        node.to_s,
+        @configuration.disable_ai_cli.to_s,
+      )
+      raise Error, "Raycast AI disable failed" unless ai_disabled
+
       system "/usr/bin/open", @configuration.app.to_s, exception: true
-      log "Raycast Beta configured and started"
+      log "Raycast configured and started"
       true
     end
 
@@ -284,12 +304,16 @@ module RaycastBeta
       version = parse_version(payload.fetch("version"))
       download_url = payload.fetch("download_url")
       match = RELEASE_URL_PATTERN.match(download_url)
-      raise Error, "Raycast release API returned an unexpected Apple Silicon Beta DMG URL" unless match
+      raise Error, "Raycast release API returned an unexpected Apple Silicon DMG URL" unless match
       unless parse_version(match[1]) == version
         raise Error, "Raycast release API returned mismatched release and download versions"
       end
 
-      Release.new(uri: URI(download_url), version:)
+      Release.new(
+        uri:      URI(download_url),
+        version:,
+        checksum: parse_dmg_checksum(payload["checksum"]),
+      )
     rescue JSON::ParserError, KeyError, TypeError, URI::InvalidURIError => e
       raise Error, "invalid response from the Raycast release API: #{e.message}"
     rescue IOError,
@@ -313,7 +337,7 @@ module RaycastBeta
       source_version = validate_app(source)
       installed_version = app_version(@configuration.app)
       if !force && installed_version && installed_version >= source_version
-        log "keeping Raycast Beta #{installed_version} in #{@configuration.app}"
+        log "keeping Raycast #{installed_version} in #{@configuration.app}"
         return
       end
 
@@ -331,7 +355,7 @@ module RaycastBeta
       validate_app(staging)
       system(
         "/usr/bin/killall",
-        "Raycast Beta",
+        APP_NAME,
         out: File::NULL,
         err: File::NULL,
       )
@@ -343,7 +367,7 @@ module RaycastBeta
         File.rename(backup, destination) if path_exists?(backup) && !path_exists?(destination)
         raise
       end
-      log "installed Raycast Beta #{source_version} in #{destination}"
+      log "installed Raycast #{source_version} in #{destination}"
     ensure
       if defined?(backup) && path_exists?(backup) && !path_exists?(@configuration.app)
         File.rename(backup, @configuration.app)
@@ -354,7 +378,7 @@ module RaycastBeta
     def validate_app(app)
       require_directory(app)
       plist = require_file(app/"Contents/Info.plist")
-      executable = require_file(app/"Contents/MacOS/Raycast Beta")
+      executable = require_file(app/"Contents/MacOS/#{APP_NAME}")
       raise Error, "Raycast executable is not executable: #{executable}" unless executable.executable?
 
       bundle_id = plist_value(plist, "CFBundleIdentifier")
@@ -393,10 +417,28 @@ module RaycastBeta
       raise Error, "invalid Raycast version #{value.inspect}: #{e.message}"
     end
 
+    def parse_dmg_checksum(value)
+      return if value.nil?
+
+      checksum = value.to_s
+      raise Error, "Raycast release API returned an unexpected checksum" unless checksum.match?(DMG_CHECKSUM_PATTERN)
+
+      checksum.downcase
+    end
+
+    def verify_dmg_checksum(image, checksum)
+      return unless checksum
+
+      actual = Digest::MD5.file(image).hexdigest
+      return if actual.casecmp?(checksum)
+
+      raise Error, "downloaded Raycast DMG checksum mismatch"
+    end
+
     def node_directory
       runtime = @configuration.app_support/"node/runtime"
       unless runtime.directory?
-        log "starting Raycast Beta once to initialize its Node runtime"
+        log "starting Raycast once to initialize its Node runtime"
         system "/usr/bin/open", @configuration.app.to_s, exception: true
         wait_until("Raycast Node runtime", timeout: WAIT_TIMEOUT) { runtime.directory? }
       end
@@ -428,7 +470,7 @@ module RaycastBeta
       hook.write("require(#{@configuration.keydump_hook.to_s.to_json});\n")
       system(
         "/usr/bin/killall",
-        "Raycast Beta",
+        APP_NAME,
         out: File::NULL,
         err: File::NULL,
       )
@@ -440,7 +482,7 @@ module RaycastBeta
         wait_until("Raycast DB key", timeout: WAIT_TIMEOUT) { key_file.file? }
         system(
           "/usr/bin/killall",
-          "Raycast Beta",
+          APP_NAME,
           out: File::NULL,
           err: File::NULL,
         )
@@ -739,10 +781,10 @@ module RaycastBeta
         Usage: #{PROGRAM_NAME} <command> [options]
 
         Commands:
-          install [--force]      Download and install the latest Beta
-          configure             Apply the local profile and command aliases
+          install [--force]      Download and install the latest Raycast release
+          configure             Apply the local profile, aliases, and AI-disable policy
           refresh [--force]      Install latest, then apply local configuration
-          version               Print the installed Raycast Beta version
+          version               Print the installed Raycast version
       TEXT
     end
 
@@ -756,11 +798,11 @@ end
 
 if $PROGRAM_NAME == __FILE__
   begin
-    exit RaycastBeta::CLI.new.run(ARGV)
-  rescue RaycastBeta::Error,
+    exit Raycast::CLI.new.run(ARGV)
+  rescue Raycast::Error,
          SystemCallError,
          RuntimeError => e
-    warn "#{RaycastBeta::PROGRAM_NAME}: error: #{e.message}"
+    warn "#{Raycast::PROGRAM_NAME}: error: #{e.message}"
     exit 1
   end
 end

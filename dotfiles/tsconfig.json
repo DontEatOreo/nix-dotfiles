@@ -11,11 +11,17 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
     "types": ["bun"],
     "verbatimModuleSyntax": true
   },
-  "files": ["dot_local/bin/executable_ghostty-dreamy-swirl.ts"]
+  "include": [
+    "dot_local/bin/executable_ghostty-dreamy-swirl.ts",
+    "dot_config/raycast/**/*.cts",
+    "dot_config/raycast/**/*.json",
+    "dot_config/raycast/**/*.mts"
+  ]
 }

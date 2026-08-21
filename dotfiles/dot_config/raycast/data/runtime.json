@@ -1,0 +1,30 @@
+{
+  "checkedAgainst": {
+    "raycastVersion": "0.71.7.0",
+    "commit": "a467a146eb1ba035b7beefdf92fff8f31fa4c042",
+    "date": "2026-08-19"
+  },
+  "node": {
+    "bundled": "22.22.2",
+    "minimum": "22.18.0",
+    "moduleAbi": 127,
+    "typescriptMode": "strip",
+    "amaro": "1.1.5"
+  },
+  "typescript": {
+    "compiler": "7.0.2",
+    "runtime": "node-strip-only",
+    "erasableSyntaxOnly": true,
+    "unsupportedSyntax": ["enum", "namespace", "parameterProperties", "importEquals"],
+    "modules": {
+      "esm": ".mts",
+      "cjs": ".cts",
+      "requireHook": ".cts"
+    }
+  },
+  "addon": {
+    "package": "@raycast/data-darwin-arm64",
+    "version": "4.3.0",
+    "constructor": ["appSupportPath", "encryptionKey", "logger"]
+  }
+}
