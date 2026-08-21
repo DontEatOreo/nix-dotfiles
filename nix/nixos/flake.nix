@@ -2,6 +2,10 @@
   description = "NixOS-only inputs for the dotfiles flake partition";
 
   inputs = {
+    # This partition only consumes browser's NixOS module. Keep its other
+    # module-system inputs out of the partition lock graph.
+    browser.inputs.home-manager.follows = "";
+    browser.inputs.nix-darwin.follows = "";
     browser.inputs.nixpkgs.follows = "";
     browser.url = "github:4evy/browser";
 

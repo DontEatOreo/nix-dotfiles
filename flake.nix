@@ -1,5 +1,5 @@
 {
-  description = "My NixOS system flake";
+  description = "Cross-platform dotfiles packages and NixOS configuration";
 
   inputs = {
     bun2nix.inputs.flake-parts.follows = "flake-parts";
@@ -15,6 +15,7 @@
 
     nixcord.inputs.flake-parts.follows = "flake-parts";
     nixcord.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    nixcord.inputs.treefmt-nix.follows = "treefmt-nix";
     nixcord.url = "github:4evy/nixcord";
 
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable-small";
