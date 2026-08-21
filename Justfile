@@ -31,7 +31,7 @@ nix_profile_tools := ['deadnix:deadnix', 'nh:nh', 'nil:nil', 'nix-instantiate:ni
 doctor_setup_commands := ['bash', 'curl', 'git', 'sudo']
 doctor_format_commands := ['git', 'nix']
 doctor_ansible_commands := ['ansible-doc', 'ansible-galaxy', 'ansible-lint', 'ansible-playbook', 'yamllint']
-doctor_lint_commands := ['actionlint', 'bundle', 'chezmoi', 'deadnix', 'hadolint', 'jq', 'luacheck', 'nix-instantiate', 'ruby', 'rumdl', 'shellcheck', 'taplo', 'uv', 'zig', 'zizmor'] ++ doctor_format_commands ++ doctor_ansible_commands
+doctor_lint_commands := ['actionlint', 'bundle', 'chezmoi', 'deadnix', 'hadolint', 'jq', 'luacheck', 'nix-instantiate', 'quilt', 'ruby', 'rumdl', 'shellcheck', 'taplo', 'uv', 'zig', 'zizmor'] ++ doctor_format_commands ++ doctor_ansible_commands
 doctor_all_commands := doctor_lint_commands ++ ['bash', 'curl', 'sudo', 'watchexec']
 
 export PATH := homebrew_path + PATH_VAR_SEP + nix_bin_dir + PATH_VAR_SEP + nix_profile_bin_dir + PATH_VAR_SEP + nixos_profile_bin_dir + PATH_VAR_SEP + env("PATH", "")
@@ -846,6 +846,20 @@ source-update:
 npins-check:
     bash .github/renovate/check-npins.sh
 
+# Refresh each patch in temporary copies and compare it with the checked-in
+# queue at the exact source revision used by package builds.
+[arg('package', pattern=['all', 'ghostty-patched', 'jj-patched', 'kanata-with-cmd'])]
+[group('dev')]
+quilt-check package='all':
+    packages/quilt.sh check {{ quote(package) }}
+
+# Open a disposable, writable copy of a package's pinned source with its whole
+# Quilt queue applied. Patch refreshes are written directly to this repository.
+[arg('package', pattern=['ghostty-patched', 'jj-patched', 'kanata-with-cmd'])]
+[group('dev')]
+quilt-shell package:
+    packages/quilt.sh shell {{ quote(package) }}
+
 # Check declared dependencies against first-party imports.
 [group('dev')]
 python-dependencies:
@@ -921,7 +935,7 @@ lint: (doctor 'lint') check-format _lint-checks
 
 [parallel]
 [private]
-_lint-checks: _lint-files _check-python _check-zig _check-ansible _check-github-actions _check-bun _check-ruby
+_lint-checks: _lint-files _check-python _check-zig _check-ansible _check-github-actions _check-bun _check-ruby (quilt-check 'all')
 
 # Run the repo validation suite.
 [group('dev')]

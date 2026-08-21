@@ -28,11 +28,12 @@ on:
       - dotfiles/dot_config/fontconfig/conf.d/**
       - dotfiles/dot_config/kanata/kanata.kbd
       - dotfiles/dot_local/bin/executable_*
+      - dotfiles/dot_quiltrc
       - packages/dotfiles-python/assets/**
       - packages/fido-phone/**
-      - packages/ghostty-patched/patches/**
       - packages/hyper-window-tiling/bun.lock
       - packages/hyper-window-tiling/gnome/schemas/**
+      - packages/*/patches/**
       - packages/terminal-theme-tools/**
 
       # `nix flake check` includes treefmt and pre-commit checks, so changes to
@@ -108,6 +109,9 @@ jobs:
           --keep-going --no-link --print-build-logs
           .#checks.x86_64-linux.pre-commit
           .#checks.x86_64-linux.treefmt
+
+      - name: Check Quilt Queues
+        run: nix develop --command just quilt-check
 
       - name: Detect Native Check Inputs
         id: native-inputs

@@ -1,0 +1,8 @@
+# Keep checked-in patch queues reproducible, readable, and portable across
+# Quilt, GNU patch, Git, Homebrew, and Nix.
+QUILT_DIFF_OPTS="--show-c-function"
+QUILT_NO_DIFF_INDEX=1
+QUILT_NO_DIFF_TIMESTAMPS=1
+
+QUILT_DIFF_ARGS="--color=auto --sort -p ab"
+QUILT_REFRESH_ARGS="--diffstat --sort -p ab"
