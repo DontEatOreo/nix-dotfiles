@@ -473,10 +473,6 @@ nix: (doctor 'nix') _ensure-nix
       printf '%s\n' 'Nix profile tools already installed; checking for upgrades.'
     fi
 
-    if [[ {{ quote(host_os) }} == macos && ! -x "$nix_profile_bin_dir/fido-phone" ]]; then
-      "$nix_bin" profile install {{ quote("path:" + repo_dir + "#fido-phone") }}
-    fi
-
     "$nix_bin" profile upgrade --all
 
 # Apply chezmoi-managed dotfiles.

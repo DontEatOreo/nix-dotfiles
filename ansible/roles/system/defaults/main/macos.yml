@@ -144,7 +144,6 @@ system_macos_kanata:
   app_bin: /Applications/Kanata.app/Contents/MacOS/kanata
   config: /Library/Application Support/dotfiles/kanata.kbd
   config_source: "{{ dotfiles_repo_root }}/dotfiles/dot_config/kanata/kanata-macos.kbd"
-  fido_phone_helper: /usr/local/libexec/dotfiles/fido-phone-console-user
   log_path: /var/log/kanata.log
 
 system_macos_logitech_keyboard:

@@ -82,9 +82,6 @@ let
         toshy-runtime
         uresourced
         ;
-    }
-    // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
-      inherit (pkgs) fido-phone;
     };
 
   mkApps =
@@ -188,7 +185,6 @@ in
         localSystem = system;
         config = {
           allowUnfree = true;
-          android_sdk.accept_license = true;
         };
         overlays = [ overlays.default ];
       };

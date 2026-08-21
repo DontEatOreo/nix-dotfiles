@@ -150,7 +150,6 @@
   "js/ts.tsdk.path": "dotfiles/node_modules/typescript/lib",
   "js/ts.tsdk.promptToUseWorkspaceVersion": true,
   "js/ts.updateImportsOnFileMove.enabled": "always",
-  "gradle.nestedProjects": ["packages/fido-phone/src/android"],
   "python.languageServer": "None",
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
   "python.testing.pytestEnabled": true,

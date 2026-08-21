@@ -82,30 +82,6 @@
 - name: Apply Determinate Nix configuration changes
   ansible.builtin.meta: flush_handlers
 
-- name: Check packaged Fido Phone command
-  ansible.builtin.stat:
-    path: "{{ dotfiles_home_dir }}/.nix-profile/bin/fido-phone"
-  register: tools_nix_fido_phone_command
-  when: platform_is_macos
-  tags:
-    - fido-phone
-
-- name: Install packaged Fido Phone command
-  ansible.builtin.command:
-    argv:
-      - "{{ tools_nix_command_bin }}"
-      - profile
-      - add
-      - "path:{{ dotfiles_repo_root }}#fido-phone"
-  environment:
-    PATH: "{{ tools_nix_path }}"
-  changed_when: true
-  when:
-    - platform_is_macos
-    - not tools_nix_fido_phone_command.stat.executable | default(false)
-  tags:
-    - fido-phone
-
 - name: Reconcile the repository-owned Nix tool profile
   environment:
     PATH: "{{ tools_nix_path }}"

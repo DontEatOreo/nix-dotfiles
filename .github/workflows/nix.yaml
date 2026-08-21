@@ -30,7 +30,6 @@ on:
       - dotfiles/dot_local/bin/executable_*
       - dotfiles/dot_quiltrc
       - packages/dotfiles-python/assets/**
-      - packages/fido-phone/**
       - packages/hyper-window-tiling/bun.lock
       - packages/hyper-window-tiling/gnome/schemas/**
       - packages/*/patches/**

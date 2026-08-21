@@ -6,7 +6,6 @@
     "christian-kohler.path-intellisense",
     "davidanson.vscode-markdownlint",
     "editorconfig.editorconfig",
-    "fwcd.kotlin",
     "github.vscode-github-actions",
     "hangxingliu.vscode-systemd-support",
     "hongquan.dragon-jinja",
@@ -36,7 +35,6 @@
     "swiftlang.swift-vscode",
     "tamasfe.even-better-toml",
     "timonwong.shellcheck",
-    "vscjava.vscode-gradle",
     "xembly.gomplate",
     "ziglang.vscode-zig"
   ],

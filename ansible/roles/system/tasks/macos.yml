@@ -296,29 +296,6 @@
   tags:
     - kanata
 
-- name: Ensure the macOS dotfiles helper directory exists
-  ansible.builtin.file:
-    path: "{{ system_macos_kanata.fido_phone_helper | dirname }}"
-    state: directory
-    owner: root
-    group: wheel
-    mode: "0755"
-  become: true
-  tags:
-    - kanata
-
-- name: Install the console-user Fido Phone helper
-  ansible.builtin.copy:
-    src: macos/fido-phone-console-user
-    dest: "{{ system_macos_kanata.fido_phone_helper }}"
-    owner: root
-    group: wheel
-    mode: "0755"
-  become: true
-  register: system_kanata_fido_phone_helper
-  tags:
-    - kanata
-
 - name: Configure Logitech keyboard for Kanata
   ansible.builtin.command:
     argv:
@@ -359,7 +336,6 @@
         'restarted'
         if system_kanata_application is changed
         or system_kanata_config is changed
-        or system_kanata_fido_phone_helper is changed
         or system_kanata_plist is changed
         else 'started'
       }}

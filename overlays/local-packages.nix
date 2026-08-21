@@ -4,7 +4,6 @@ let
   packageFiles = {
     bluebuild-v2 = ../packages/bluebuild-v2/package.nix;
     dotfiles-python = ../packages/dotfiles-python/package.nix;
-    fido-phone = ../packages/fido-phone/package.nix;
     ghidra-mcp = ../packages/ghidra-mcp/package.nix;
     ghostty-patched = ../packages/ghostty-patched/package.nix;
     hyper-window-tiling = ../packages/hyper-window-tiling/package.nix;

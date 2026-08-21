@@ -262,7 +262,6 @@
         "check-jsonschema",
         "dotfiles-python",
         "equicord-settings",
-        "fido-phone",
         "ghidra",
         "ghidra-mcp",
         "ghidra-mcp-bridge",

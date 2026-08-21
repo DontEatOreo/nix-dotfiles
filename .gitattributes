@@ -6,7 +6,6 @@
 # Include data/config languages in GitHub language statistics. Linguist omits
 # these from the language breakdown by default, but this repo treats them as
 # first-class source for editor, OS, provisioning, and application behavior.
-*.gradle linguist-detectable
 *.json linguist-detectable
 *.jsonc linguist-detectable
 *.ini linguist-detectable
@@ -132,7 +131,6 @@ pnpm-lock.yaml linguist-generated
 pnpm-lock.yml linguist-generated
 hosts/**/hardware-configuration.nix linguist-generated
 npins/** linguist-generated
-packages/fido-phone/deps.json linguist-generated
 packages/hyper-window-tiling/bun.nix linguist-generated
 packages/**/dist/** linguist-generated
 secrets/*.yaml linguist-generated
