@@ -1,8 +1,17 @@
 # frozen_string_literal: true
 
 require "digest"
+require "json"
 
 class TerminalThemeTools < Formula
+  tap_root = Pathname(__dir__).parent
+  pins = JSON.load_file(tap_root/"npins/sources.json").fetch("pins")
+  ghostty = pins.fetch("terminal_theme_tools_ghostty_archive")
+  uucode = pins.fetch("terminal_theme_tools_uucode")
+  pin_digest = lambda do |pin|
+    pin.fetch("hash").delete_prefix("sha256-").unpack1("m0").unpack1("H*")
+  end
+
   SOURCE_ARCHIVE = (Pathname(__dir__).parent/"Sources/terminal-theme-tools-0.3.0.tar").freeze
   SOURCE_SHA256 = Digest::SHA256.file(SOURCE_ARCHIVE).hexdigest.freeze
 
@@ -16,13 +25,13 @@ class TerminalThemeTools < Formula
   depends_on :macos
 
   resource "ghostty" do
-    url "https://github.com/ghostty-org/ghostty/archive/f64f4aca2c29b554d111b36c3d946a9bddd159ff.tar.gz"
-    sha256 "c336c7d6c050c05c941b34a308a8f75b5d61bb8b0cfea1d8a5212e5cefbd2bf9"
+    url ghostty.fetch("url")
+    sha256 pin_digest.call(ghostty)
   end
 
   resource "uucode" do
-    url "https://deps.files.ghostty.org/uucode-2826a37a4562284fdacd8fa029d49509cc9bffcd.tar.gz"
-    sha256 "7e76fc7fab1e7ac728c52b35bbb3e5b8c639841abfc7fe1a4bcb13050594bc9e"
+    url uucode.fetch("url")
+    sha256 pin_digest.call(uucode)
   end
 
   def install

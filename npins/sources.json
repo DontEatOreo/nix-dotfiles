@@ -206,6 +206,34 @@
       "url": "https://github.com/GNOME/sushi/archive/058a6417f60c66de1d7c8905d18856c082e25665.tar.gz",
       "hash": "sha256-uRH6T10H4SQUnPcuTyT9CAdzPjlJQ6ozYdqdCUsz7dg="
     },
+    "terminal_theme_tools_ghostty": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "ghostty-org",
+        "repo": "ghostty"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "f64f4aca2c29b554d111b36c3d946a9bddd159ff",
+      "url": "https://github.com/ghostty-org/ghostty/archive/f64f4aca2c29b554d111b36c3d946a9bddd159ff.tar.gz",
+      "hash": "sha256-tzt9C99wsV0lriI6LtLDYMhnNbWNwIzmcWfRJStGhMs=",
+      "frozen": true
+    },
+    "terminal_theme_tools_ghostty_archive": {
+      "type": "Url",
+      "url": "https://github.com/ghostty-org/ghostty/archive/f64f4aca2c29b554d111b36c3d946a9bddd159ff.tar.gz",
+      "unpack": false,
+      "hash": "sha256-wzbH1sBQwFyUGzSjCKj3W11hu4sM/qHYpSEuXO+9K/k=",
+      "frozen": true
+    },
+    "terminal_theme_tools_uucode": {
+      "type": "Url",
+      "url": "https://deps.files.ghostty.org/uucode-2826a37a4562284fdacd8fa029d49509cc9bffcd.tar.gz",
+      "unpack": false,
+      "hash": "sha256-fnb8f6seescoxSs1u7PluMY5hBq/x/4aS8sTBQWUvJ4=",
+      "frozen": true
+    },
     "toshy": {
       "type": "GitRelease",
       "repository": {
