@@ -35,7 +35,7 @@ jobs:
       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association) ||
       (github.event.pull_request.user.type == 'Bot' &&
       contains(fromJSON('[29139614, 41898282, 49699333]'), github.event.pull_request.user.id))
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout Repository
