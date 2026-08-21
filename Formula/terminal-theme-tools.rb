@@ -14,8 +14,8 @@ class TerminalThemeTools < Formula
   depends_on :macos
 
   resource "ghostty" do
-    url "https://github.com/ghostty-org/ghostty/archive/7e567c3f03e914140f0b6beb8b03c20efcc03188.tar.gz"
-    sha256 "bff102623a759b453879c6432c1aa4731c035c6be543884e802bbbebac05f1c1"
+    url "https://github.com/ghostty-org/ghostty/archive/f64f4aca2c29b554d111b36c3d946a9bddd159ff.tar.gz"
+    sha256 "c336c7d6c050c05c941b34a308a8f75b5d61bb8b0cfea1d8a5212e5cefbd2bf9"
   end
 
   resource "uucode" do

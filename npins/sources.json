@@ -36,16 +36,16 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "7e567c3f03e914140f0b6beb8b03c20efcc03188",
-      "url": "https://github.com/ghostty-org/ghostty/archive/7e567c3f03e914140f0b6beb8b03c20efcc03188.tar.gz",
-      "hash": "sha256-d8gLXkrgtAqgPr3jzyKLhPCJo4sloWX50WoGPjnRA7o=",
+      "revision": "f64f4aca2c29b554d111b36c3d946a9bddd159ff",
+      "url": "https://github.com/ghostty-org/ghostty/archive/f64f4aca2c29b554d111b36c3d946a9bddd159ff.tar.gz",
+      "hash": "sha256-tzt9C99wsV0lriI6LtLDYMhnNbWNwIzmcWfRJStGhMs=",
       "frozen": true
     },
     "ghostty_archive": {
       "type": "Url",
-      "url": "https://github.com/ghostty-org/ghostty/archive/7e567c3f03e914140f0b6beb8b03c20efcc03188.tar.gz",
+      "url": "https://github.com/ghostty-org/ghostty/archive/f64f4aca2c29b554d111b36c3d946a9bddd159ff.tar.gz",
       "unpack": false,
-      "hash": "sha256-v/ECYjp1m0U4ecZDLBqkcxwDXGvlQ4hOgCu766wF8cE=",
+      "hash": "sha256-wzbH1sBQwFyUGzSjCKj3W11hu4sM/qHYpSEuXO+9K/k=",
       "frozen": true
     },
     "ghostty_zig_aarch64_linux": {

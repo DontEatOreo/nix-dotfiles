@@ -9,7 +9,7 @@ environment, and child-process handling
 ## Build
 
 Zig 0.16.0 is required. Ghostty is pinned to commit
-`7e567c3f03e914140f0b6beb8b03c20efcc03188`
+`f64f4aca2c29b554d111b36c3d946a9bddd159ff`
 
 From the repository root (the same entry point used by CI and `just`):
 
