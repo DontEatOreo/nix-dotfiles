@@ -27,7 +27,9 @@ class JjPatched < Formula
       system "git", "apply", "--check", patch
       system "git", "apply", patch
     end
-    system "cargo", "install", *std_cargo_args(path: "cli")
+    # Cargo install does not build test targets; select the one shipped binary
+    # so future auxiliary binaries do not lengthen this patched source build.
+    system "cargo", "install", "--bin", "jj", *std_cargo_args(path: "cli")
 
     generate_completions_from_executable(bin/"jj", shell_parameter_format: :clap)
     system bin/"jj", "util", "install-man-pages", man

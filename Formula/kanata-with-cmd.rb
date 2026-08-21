@@ -25,7 +25,9 @@ class KanataWithCmd < Formula
   conflicts_with "kanata", because: "both install a kanata binary"
 
   def install
-    system "cargo", "install", "--features", "cmd", *std_cargo_args
+    # Cargo install does not build test targets; only compile the managed
+    # executable if upstream adds more binaries to the crate.
+    system "cargo", "install", "--bin", "kanata", "--features", "cmd", *std_cargo_args
   end
 
   test do
