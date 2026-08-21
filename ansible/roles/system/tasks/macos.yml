@@ -10,9 +10,6 @@
   loop_control:
     label: "{{ item.domain }}:{{ item.key }}"
   notify: Restart applications affected by macOS defaults
-  tags:
-    - host
-    - macos
 
 - name: Register Homebrew shells as macOS login shells
   ansible.builtin.lineinfile:
@@ -23,9 +20,6 @@
     - bash
     - zsh
   become: true
-  tags:
-    - host
-    - macos
 
 - name: Configure the macOS account login shell
   ansible.builtin.user:
@@ -37,9 +31,6 @@
          )) }}
     shell: "{{ platform_homebrew_prefix }}/bin/zsh"
   become: true
-  tags:
-    - host
-    - macos
 
 - name: Ensure macOS dotfiles application support directory exists
   ansible.builtin.file:
@@ -50,8 +41,6 @@
     mode: "0755"
   become: true
   tags:
-    - host
-    - macos
     - tailscale
 
 - name: Ensure the Homebrew Tailscale system service is running
@@ -61,8 +50,6 @@
     state: present
   become: true
   tags:
-    - host
-    - macos
     - tailscale
 
 - name: Wait for the Tailscale daemon socket
@@ -71,8 +58,6 @@
     state: present
     timeout: 15
   tags:
-    - host
-    - macos
     - tailscale
 
 - name: Install Tailscale SSH launch daemon helper
@@ -90,8 +75,6 @@
   become: true
   register: system_tailscale_ssh_helper_result
   tags:
-    - host
-    - macos
     - tailscale
 
 - name: Install Tailscale SSH launch daemon definition
@@ -110,8 +93,6 @@
   register: system_tailscale_ssh_plist
   become: true
   tags:
-    - host
-    - macos
     - tailscale
 
 - name: Configure Tailscale SSH launch daemon on macOS
@@ -127,8 +108,6 @@
       }}
   become: true
   tags:
-    - host
-    - macos
     - tailscale
 
 - name: Inspect Karabiner VirtualHID
@@ -136,9 +115,7 @@
     path: "{{ system_macos_karabiner.manager }}"
   register: system_karabiner_manager
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Download Karabiner VirtualHID
   ansible.builtin.get_url:
@@ -149,9 +126,7 @@
     mode: "0644"
   when: not system_karabiner_manager.stat.exists
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Install Karabiner VirtualHID
   ansible.builtin.command:
@@ -165,9 +140,7 @@
   become: true
   register: system_karabiner_package
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Activate Karabiner VirtualHID
   ansible.builtin.command:
@@ -178,9 +151,7 @@
   changed_when: system_karabiner_package is changed
   when: not ansible_check_mode
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Ensure Karabiner VirtualHID log directory exists
   ansible.builtin.file:
@@ -191,9 +162,7 @@
     mode: "0755"
   become: true
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Install Karabiner VirtualHID launch daemon definition
   ansible.builtin.template:
@@ -205,9 +174,7 @@
   become: true
   register: system_karabiner_plist
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Ensure Karabiner VirtualHID launch daemon is running
   community.general.launchd:
@@ -222,9 +189,7 @@
       }}
   become: true
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Install and sign Kanata on macOS
   ansible.builtin.file:
@@ -235,9 +200,7 @@
     mode: "0755"
   become: true
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Install the Kanata application executable
   ansible.builtin.copy:
@@ -250,9 +213,7 @@
   become: true
   register: system_kanata_executable
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Install the Kanata application metadata
   ansible.builtin.template:
@@ -264,9 +225,7 @@
   become: true
   register: system_kanata_metadata
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Keep Kanata's macOS signing identity stable
   dotfiles_codesign:
@@ -279,9 +238,7 @@
     PATH: "{{ platform_homebrew_path }}"
   register: system_kanata_application
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Register the Kanata application with Launch Services
   ansible.builtin.command:
@@ -297,9 +254,7 @@
     or system_kanata_metadata is changed
     or system_kanata_application is changed
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Install the macOS Kanata configuration
   ansible.builtin.copy:
@@ -311,9 +266,7 @@
   become: true
   register: system_kanata_config
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Ensure the macOS dotfiles helper directory exists
   ansible.builtin.file:
@@ -324,9 +277,7 @@
     mode: "0755"
   become: true
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Install the console-user Fido Phone helper
   ansible.builtin.copy:
@@ -338,9 +289,7 @@
   become: true
   register: system_kanata_fido_phone_helper
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Configure Logitech keyboard for Kanata
   ansible.builtin.command:
@@ -359,9 +308,7 @@
     'updated current host platform' in system_logitech_platform.stdout
   failed_when: false
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Install Kanata launch daemon definition
   ansible.builtin.template:
@@ -373,9 +320,7 @@
   become: true
   register: system_kanata_plist
   tags:
-    - host
     - kanata
-    - macos
 
 - name: Ensure Kanata launch daemon is running
   community.general.launchd:
@@ -392,6 +337,4 @@
       }}
   become: true
   tags:
-    - host
     - kanata
-    - macos

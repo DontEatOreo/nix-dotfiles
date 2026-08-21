@@ -2,13 +2,22 @@
 - name: Configure Tailscale host integration
   ansible.builtin.import_tasks: tailscale.yml
   tags:
-    - host
-    - scripts
     - tailscale
+
+- name: Detect the native RustDesk installation
+  ansible.builtin.command:
+    argv:
+      - sh
+      - -c
+      - command -v rustdesk
+  changed_when: false
+  failed_when: false
+  register: system_rustdesk_command
+  tags:
+    - rustdesk
 
 - name: Configure RustDesk host integration
   ansible.builtin.import_tasks: rustdesk.yml
+  when: system_rustdesk_command.rc == 0
   tags:
-    - host
-    - scripts
     - rustdesk

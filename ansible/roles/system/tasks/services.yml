@@ -2,10 +2,6 @@
 - name: Gather host service state
   ansible.builtin.service_facts:
   when: ansible_facts.service_mgr == 'systemd'
-  tags:
-    - host
-    - services
-    - slow-boot-services
 
 - name: Disable unused slow-boot services
   ansible.builtin.systemd_service:
@@ -17,7 +13,3 @@
   when:
     - ansible_facts.service_mgr == 'systemd'
     - item in ansible_facts.services
-  tags:
-    - host
-    - services
-    - slow-boot-services

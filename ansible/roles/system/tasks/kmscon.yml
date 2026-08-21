@@ -3,15 +3,9 @@
   ansible.builtin.stat:
     path: /usr/bin/kmscon
   register: system_kmscon_binary
-  tags:
-    - host
-    - kmscon
 
 - name: Configure KMSCON when installed in the host image
   when: system_kmscon_binary.stat.executable | default(false)
-  tags:
-    - host
-    - kmscon
   block:
     - name: Check KMSCON system prerequisites
       ansible.builtin.stat:

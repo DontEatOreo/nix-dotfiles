@@ -21,7 +21,6 @@
   dotfiles_selinux_service:
     policy_module: tailscaled
     policy_directory: "{{ role_path }}/files/tailscale-selinux"
-    hash_file: /var/lib/tailscale/dotfiles-selinux-policy.sha256
     service: tailscaled
     domain: tailscaled_t
     defer_child_pattern: tailscaled be-child ssh
