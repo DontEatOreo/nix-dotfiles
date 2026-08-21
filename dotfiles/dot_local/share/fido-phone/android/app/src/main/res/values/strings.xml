@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FIDO Phone</string>
+    <string name="allow_overlay">Allow display over other apps</string>
+    <string name="start_receiver">Start passkey receiver</string>
+    <string name="status_ready">Ready. The receiver can open passkey prompts sent by your Mac over Tailscale.</string>
+    <string name="status_permission_required">Display-over-apps permission is required for Android to allow a background network request to open the passkey prompt.</string>
+    <string name="notification_channel_name">Passkey bridge</string>
+    <string name="notification_channel_description">Keeps the local Tailscale passkey receiver available</string>
+    <string name="notification_listening">Listening over Tailscale</string>
+    <string name="notification_listener_failed">Listener failed; reopen FIDO Phone</string>
+    <string name="notification_permission_required">Display-over-apps permission is required</string>
+    <string name="notification_prompt_opened">Passkey prompt opened</string>
+</resources>

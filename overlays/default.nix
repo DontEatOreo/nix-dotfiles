@@ -77,6 +77,7 @@ let
       dotfiles-python = final.callPackage ../packages/dotfiles-python.nix {
         inherit (final.unstable) python314Packages;
       };
+      fido-phone = final.callPackage ../packages/fido-phone.nix { };
       uresourced = final.callPackage ../packages/uresourced.nix {
         source = dotfilesSourcePins.uresourced.outPath;
         version = lib.removePrefix "v" dotfilesSourcePins.uresourced.version;

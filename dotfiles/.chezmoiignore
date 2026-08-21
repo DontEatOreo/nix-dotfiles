@@ -28,6 +28,11 @@ Library/
 {{ if ne .chezmoi.os "darwin" }}
 Library/
 .config/raycast/
+.config/fido-phone/
+.local/bin/fido-phone
+.local/bin/fido-phone-install-android
+.local/libexec/fido-phone/
+.local/share/fido-phone/
 .local/bin/raycast-beta-write-user.ts
 {{ end }}
 
@@ -46,3 +51,6 @@ Library/
 .config/systemd/
 .local/share/applications/
 {{ end }}
+
+.local/share/fido-phone/android/.gradle/
+.local/share/fido-phone/android/**/build/

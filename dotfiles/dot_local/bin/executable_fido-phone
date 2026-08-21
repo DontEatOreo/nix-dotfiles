@@ -1,0 +1,114 @@
+#!/bin/bash
+# shellcheck shell=bash
+#
+# Build and run the native macOS-to-Android passkey bridge.
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+readonly APPLICATION_NAME='fido-phone'
+readonly DEFAULT_PHONE_DEVICE='samsung-s25'
+readonly SOURCE_FILE="${HOME}/.local/libexec/fido-phone/FidoPhone.swift"
+readonly CACHE_DIRECTORY="${XDG_CACHE_HOME:-${HOME}/.cache}/fido-phone"
+readonly HELPER_OVERRIDE="${FIDO_PHONE_HELPER:-}"
+readonly HELPER="${HELPER_OVERRIDE:-${CACHE_DIRECTORY}/fido-phone-helper}"
+readonly CONFIG_DIRECTORY="${XDG_CONFIG_HOME:-${HOME}/.config}/fido-phone"
+readonly TOKEN_FILE="${FIDO_PHONE_TOKEN_FILE:-${CONFIG_DIRECTORY}/token}"
+
+temporary_helper=''
+
+err() {
+	echo "${APPLICATION_NAME}: $*" >&2
+}
+
+cleanup() {
+	if [[ -n "${temporary_helper}" ]]; then
+		rm -f -- "${temporary_helper}"
+	fi
+}
+
+compile_helper() {
+	local swift_target
+
+	if [[ -n "${HELPER_OVERRIDE}" ]]; then
+		if [[ ! -x "${HELPER}" ]]; then
+			err "packaged helper is unavailable: ${HELPER}"
+			return 3
+		fi
+		return
+	fi
+
+	if [[ -x "${HELPER}" && "${SOURCE_FILE}" -ot "${HELPER}" ]]; then
+		return
+	fi
+
+	mkdir -p -- "${CACHE_DIRECTORY}"
+	temporary_helper="${CACHE_DIRECTORY}/fido-phone-helper.$$"
+	swift_target="$(uname -m)-apple-macos26.0"
+	/usr/bin/swiftc \
+		-O \
+		-parse-as-library \
+		-swift-version 5 \
+		-target "${swift_target}" \
+		-warnings-as-errors \
+		-framework AppKit \
+		-framework ImageIO \
+		-framework Network \
+		-framework ScreenCaptureKit \
+		-framework Vision \
+		-o "${temporary_helper}" \
+		"${SOURCE_FILE}"
+	chmod 700 "${temporary_helper}"
+	mv -f -- "${temporary_helper}" "${HELPER}"
+	temporary_helper=''
+}
+
+resolve_phone_address() {
+	local phone_device
+	local phone_address
+	local tailscale_command
+
+	tailscale_command="$(command -v tailscale)"
+	phone_device="${FIDO_PHONE_DEVICE:-${DEFAULT_PHONE_DEVICE}}"
+	phone_address="$(
+		"${tailscale_command}" status 2>/dev/null |
+			awk -v device="${phone_device}" '$2 == device { print $1; exit }'
+	)"
+	if [[ -z "${phone_address}" ]]; then
+		err "Tailscale device not found: ${phone_device}"
+		return 1
+	fi
+	echo "${phone_address}"
+}
+
+main() {
+	local phone_address
+
+	if [[ "$(uname -s)" != 'Darwin' ]]; then
+		err 'this command requires macOS 26 or newer'
+		return 3
+	fi
+	if [[ -z "${HELPER_OVERRIDE}" && ! -r "${SOURCE_FILE}" ]]; then
+		err "missing managed source: ${SOURCE_FILE}"
+		return 3
+	fi
+	if ! command -v tailscale >/dev/null 2>&1; then
+		err 'tailscale CLI is not installed'
+		return 3
+	fi
+	if [[ ! -r "${TOKEN_FILE}" ]]; then
+		err "shared token is missing; run fido-phone-install-android: ${TOKEN_FILE}"
+		return 3
+	fi
+
+	phone_address="$(resolve_phone_address)"
+	compile_helper
+
+	export FIDO_PHONE_HOST="${FIDO_PHONE_HOST:-${phone_address}}"
+	export FIDO_PHONE_TOKEN_FILE="${TOKEN_FILE}"
+	exec "${HELPER}" "$@"
+}
+
+trap cleanup EXIT HUP INT TERM
+main "$@"

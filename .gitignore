@@ -16,6 +16,7 @@ Thumbs.db
 .venv/
 .ruby-lsp/
 .cache/
+.gradle/
 .complexipy_cache/
 .pytest_cache/
 .ruff_cache/
@@ -51,6 +52,7 @@ a.out
 build/
 build-*/
 dist/
+local.properties
 *.egg-info/
 result
 tmp/

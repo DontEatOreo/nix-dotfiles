@@ -1,14 +1,16 @@
 (defcfg
   process-unmapped-keys yes
   log-layer-changes yes
+  danger-enable-cmd yes
 )
 
 (defsrc
-  esc caps lctl lalt lmet rmet ralt rctl w    a    s    d         ret             bksl     nubs     nuhs     ro
+  esc caps lctl lalt lmet rmet ralt rctl w    p           a    s    d         ret             bksl     nubs     nuhs     ro
 )
 
 (defalias
   caps-hyper (tap-hold-press 200 200 esc (multi lmet lctl lalt lsft (layer-while-held hyper)))
+  fido-phone (cmd /bin/launchctl asuser 501 /usr/bin/sudo -u evy /usr/bin/env HOME=/Users/evy PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin /Users/evy/.local/bin/fido-phone)
   win-up (macos-window top-half top-two-thirds top-third)
   win-left (macos-window left-half left-two-thirds first-third)
   win-down (macos-window bottom-half bottom-two-thirds bottom-third)
@@ -18,9 +20,9 @@
 )
 
 (deflayer base
-  caps @caps-hyper lmet lalt lctl rctl ralt rmet w       a         s         d         ret             bksl     nubs     nuhs     ro
+  caps @caps-hyper lmet lalt lctl rctl ralt rmet w       p           a         s         d         ret             bksl     nubs     nuhs     ro
 )
 
 (deflayer hyper
-  _    _           _    _    _    _    _    _    @win-up @win-left @win-down @win-right @win-max-almost @win-max @win-max @win-max @win-max
+  _    _           _    _    _    _    _    _    @win-up @fido-phone @win-left @win-down @win-right @win-max-almost @win-max @win-max @win-max @win-max
 )

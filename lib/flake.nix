@@ -181,6 +181,9 @@ let
       kmscon = pkgs.kmscon;
       terminal-theme-tools = pkgs.terminal-theme-tools;
       uresourced = pkgs.uresourced;
+    }
+    // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+      fido-phone = pkgs.fido-phone;
     };
 
   mkApps =
@@ -278,7 +281,10 @@ in
     {
       _module.args.pkgs = import inputs.nixpkgs {
         localSystem = system;
-        config.allowUnfree = true;
+        config = {
+          allowUnfree = true;
+          android_sdk.accept_license = true;
+        };
         overlays = [ overlays.default ];
       };
 
