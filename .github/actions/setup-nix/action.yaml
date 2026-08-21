@@ -1,0 +1,22 @@
+name: Set Up Nix
+description: Install pinned Determinate Nix and optionally cache locally built store paths.
+
+inputs:
+  cache-builds:
+    description: Whether to enable the GitHub-backed Magic Nix binary cache.
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Install Determinate Nix
+      uses: DeterminateSystems/determinate-nix-action@d96678350ffd6a456235832eb11e1c491589b7bb # v3.21.8
+
+    - name: Restore Nix Build Cache
+      if: inputs.cache-builds == 'true'
+      uses: DeterminateSystems/magic-nix-cache-action@908b263ff629f4cc17666315b7fd3ec127c6244d # v14
+      with:
+        diagnostic-endpoint: ""
+        use-flakehub: disabled
+        use-gha-cache: enabled

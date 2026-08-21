@@ -4,6 +4,7 @@ on:
   pull_request:
     paths: &bun-paths
       - .tool-versions
+      - .github/actions/setup-bun/**
       - .github/workflows/bun.yaml
       - .gitignore
       - biome.jsonc
@@ -57,10 +58,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      - name: Set Up Bun
+        uses: ./.github/actions/setup-bun
         with:
-          bun-version-file: .tool-versions
+          cache-dependency-path: |
+            bun.lock
+            packages/hyper-window-tiling/bun.lock
+          cache-scope: workspace
 
       - name: Install Dependencies
         run: |

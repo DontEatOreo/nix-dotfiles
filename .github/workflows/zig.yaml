@@ -31,6 +31,9 @@ defaults:
   run:
     shell: bash
 
+env:
+  ZIG_GLOBAL_CACHE_DIR: ${{ github.workspace }}/.cache/zig
+
 jobs:
   check:
     name: Check
@@ -57,6 +60,16 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
+
+      - name: Restore Zig Dependency Cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.ZIG_GLOBAL_CACHE_DIR }}
+          key: >-
+            ${{ runner.os }}-${{ runner.arch }}-zig-0.16.0-${{
+            hashFiles('**/build.zig.zon') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-zig-0.16.0-
 
       - name: Format
         run: zig fmt --check build.zig packages/terminal-theme-tools/build.zig packages/terminal-theme-tools/build_support.zig packages/terminal-theme-tools/src/*.zig
