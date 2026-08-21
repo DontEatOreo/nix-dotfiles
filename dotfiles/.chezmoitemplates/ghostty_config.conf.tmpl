@@ -81,7 +81,9 @@ keybind = super+f=text:\x06
 keybind = super+h=text:\x08
 keybind = super+i=text:\x09
 keybind = super+j=text:\x0a
-keybind = performable:super+k=clear_screen
+# Let the shell clear and redraw its complete multiline prompt. Ghostty's
+# native clear_screen action preserves only the current prompt line.
+keybind = super+k=text:\x0c
 keybind = super+l=text:\x0c
 keybind = super+m=text:\x0d
 keybind = super+n=text:\x0e
@@ -134,7 +136,7 @@ keybind = super+down=jump_to_prompt:1
 keybind = super+ctrl+f=toggle_fullscreen
 {{- end }}
 # Emit terminal-native Home/End sequences for line navigation.
-keybind = ctrl+k=clear_screen
+keybind = ctrl+k=text:\x0c
 keybind = ctrl+left=text:\x1bOH
 keybind = ctrl+right=text:\x1bOF
 keybind = ctrl+alt+left=previous_tab
