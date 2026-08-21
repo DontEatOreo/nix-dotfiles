@@ -7,6 +7,19 @@
     - macos
     - system
 
+- name: Configure the Linux account login shell
+  ansible.builtin.user:
+    name: "{{ ansible_facts.user_id }}"
+    shell: /bin/zsh
+  become: true
+  when:
+    - platform_is_linux
+    - not platform_is_nixos
+  tags:
+    - host
+    - shell
+    - system
+
 - name: Configure KMSCON virtual terminals
   ansible.builtin.import_tasks: kmscon.yml
   when: platform_is_linux

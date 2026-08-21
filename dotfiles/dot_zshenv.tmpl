@@ -5,6 +5,13 @@
 
 typeset -U path PATH fpath FPATH
 
+# Fedora's /etc/zshrc sources /etc/profile.d for non-login shells. During the
+# SSH Bash-to-Zsh handoff, Bash has already printed Bluefin's MOTD, so shadow
+# only the second startup invocation. .zshrc removes this function afterward.
+if [[ "${DOTFILES_SSH_ZSH_HANDOFF:-}" == 1 ]]; then
+  umotd() { :; }
+fi
+
 if [[ -r "$HOME/.config/shell/environment.sh" ]]; then
   source "$HOME/.config/shell/environment.sh"
 fi

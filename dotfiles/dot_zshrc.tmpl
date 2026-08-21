@@ -17,5 +17,11 @@ unset \
   _dotfiles_zsh_module_dir \
   _dotfiles_zsh_local_dir
 
+# The handoff-only shadow has done its job; expose the real command normally.
+if [[ "${DOTFILES_SSH_ZSH_HANDOFF:-}" == 1 ]]; then
+  unset -f umotd
+  unset DOTFILES_SSH_ZSH_HANDOFF
+fi
+
 # Startup-only helpers are intentionally unavailable after initialization.
 unset -f _dotfiles_wrap_command _dotfiles_wrap_themed_command _dotfiles_command_path
