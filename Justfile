@@ -73,7 +73,8 @@ doctor profile="setup":
       status) linux_commands bootc sudo ;;
       reboot) linux_commands systemctl ;;
       install) linux_commands bootc sudo ;;
-      build | spectrum) commands=(bluebuild check-jsonschema jq "${podman_command[0]}" skopeo) ;;
+      build) commands=("${podman_command[0]}") ;;
+      spectrum) commands=(bluebuild check-jsonschema jq "${podman_command[0]}" skopeo) ;;
       setup) commands=({{ quote(doctor_setup_commands) }}) ;;
       apply) commands=(chezmoi) ;;
       shell) commands=(shellcheck shfmt) ;;
@@ -287,7 +288,13 @@ reboot: (_linux-only recipe_name())
 # Validate the recipe and enforce the Renovate-managed base digest lock.
 [group('spectrum')]
 [linux]
-spectrum-validate: (doctor 'spectrum')
+spectrum-validate: (doctor 'nix')
+    nix develop .#operations --command \
+      {{ quote(just_executable()) }} --justfile {{ quote(justfile()) }} _spectrum-validate
+
+[linux]
+[private]
+_spectrum-validate: (doctor 'spectrum')
     generated=$(mktemp)
     trap 'rm -f "$generated"' EXIT
     check-jsonschema \
@@ -306,6 +313,7 @@ spectrum-validate: (doctor 'spectrum')
     tagged=${locked%@*}
     expected_arg="${tagged%:*}@${locked##*@}"
     grep -Fq "ARG BASE_IMAGE=\"$expected_arg\"" "$generated"
+    grep -Fq -- '-Dcpu=baseline' "$generated"
     ! grep -qw akmods bluebuild/recipes/spectrum.yml "$generated"
 
 [group('spectrum')]
@@ -315,7 +323,13 @@ spectrum-validate: (_linux-only recipe_name())
 # Build the local Spectrum image from the BlueBuild recipe v2 definition.
 [group('spectrum')]
 [linux]
-spectrum-build: spectrum-validate
+spectrum-build: (doctor 'nix')
+    nix develop .#operations --command \
+      {{ quote(just_executable()) }} --justfile {{ quote(justfile()) }} _spectrum-build
+
+[linux]
+[private]
+_spectrum-build: _spectrum-validate
     bluebuild build --skip-validation --no-sign bluebuild/recipes/spectrum.yml
 
 [group('spectrum')]
@@ -328,6 +342,7 @@ spectrum-build: (_linux-only recipe_name())
 [linux]
 spectrum-inspect target=local_ref: (doctor 'build')
     {{ quote(podman) }} run --rm {{ quote(target) }} bootc container lint
+    {{ quote(podman) }} run --rm --entrypoint ghostty {{ quote(target) }} +version
 
 [arg('target', help='Built image reference to inspect')]
 [group('spectrum')]

@@ -123,6 +123,7 @@ stages:
           VERSION_PREFIX: 1.3.2-dev
           BUILD_ARGUMENTS: >-
             -j1
+            -Dcpu=baseline
             -Doptimize=ReleaseFast
             -Demit-test-exe=false
         snippets:

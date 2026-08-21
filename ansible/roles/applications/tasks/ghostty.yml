@@ -2,9 +2,8 @@
 - name: Detect Ghostty
   ansible.builtin.command:
     argv:
-      - /bin/sh
-      - -c
-      - command -v ghostty
+      - ghostty
+      - +version
   changed_when: false
   failed_when: false
   check_mode: false
@@ -16,9 +15,10 @@
     that:
       - applications_ghostty.rc == 0
     fail_msg: >-
-      Ghostty is not installed. Spectrum supplies the patched native build in
-      its BlueBuild image and NixOS supplies packages.ghostty-patched; this
-      role does not install GUI applications through Nix on other Linux hosts.
+      Ghostty is missing or cannot run. Spectrum supplies the patched native
+      build in its BlueBuild image and NixOS supplies packages.ghostty-patched;
+      this role does not install GUI applications through Nix on other Linux
+      hosts.
   when:
     - platform_is_linux
 
