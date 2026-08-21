@@ -34,7 +34,6 @@ fallow/
 # Dependencies
 **/packages/
 !/packages/
-!/packages/**
 __pycache__/
 *.py[cod]
 node_modules/
