@@ -16,6 +16,8 @@ runs:
       uses: ./.github/actions/setup-nix
       with:
         cache-builds: "true"
+        cache-scope: spectrum
+        cache-write: ${{ github.event_name != 'pull_request' }}
 
     - name: Set Up Docker Buildx
       uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
@@ -26,7 +28,7 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        cosign_store=$(nix build --inputs-from . --no-link --print-out-paths nixpkgs#cosign)
+        cosign_store=$(nix build --inputs-from . --out-link /tmp/cosign-result --print-out-paths nixpkgs#cosign)
         sudo ln --symbolic --force "$cosign_store/bin/cosign" /usr/local/bin/cosign
         cosign version
 
@@ -51,8 +53,8 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        bluebuild_store=$(nix build --no-link --print-out-paths .#bluebuild-v2)
-        validator_store=$(nix build --no-link --print-out-paths .#check-jsonschema)
+        bluebuild_store=$(nix build --out-link /tmp/bluebuild-result --print-out-paths .#bluebuild-v2)
+        validator_store=$(nix build --out-link /tmp/validator-result --print-out-paths .#check-jsonschema)
         bluebuild="$bluebuild_store/bin/bluebuild"
         validator="$validator_store/bin/check-jsonschema"
         "$bluebuild" --version

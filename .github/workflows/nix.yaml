@@ -68,6 +68,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
+  actions: write # replace superseded bounded Nix store caches on trusted runs
   contents: read # needed to checkout repository contents
 
 jobs:
@@ -81,6 +82,8 @@ jobs:
       contains(fromJSON('[29139614, 41898282, 49699333]'), github.event.pull_request.user.id))
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    outputs:
+      build-native: ${{ steps.native-inputs.outputs.build }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -92,6 +95,8 @@ jobs:
         uses: ./.github/actions/setup-nix
         with:
           cache-builds: "true"
+          cache-scope: repository-checks
+          cache-write: ${{ github.event_name == 'push' }}
 
       - name: Materialize Flake Partitions
         run: |
@@ -106,7 +111,7 @@ jobs:
       - name: Build Repository Checks
         run: >-
           nix build
-          --keep-going --no-link --print-build-logs
+          --keep-going --print-build-logs
           .#checks.x86_64-linux.pre-commit
           .#checks.x86_64-linux.treefmt
 
@@ -127,17 +132,39 @@ jobs:
             echo "build=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Build package/test checks when non-documentation inputs change while
-      # leaving the full NixOS closure as an evaluation check. Keeping these
-      # separate from repository linters avoids an hour-long build for docs.
-      - name: Build Native Checks
-        if: steps.native-inputs.outputs.build == 'true'
+  native-checks:
+    name: Native check (${{ matrix.check }})
+    needs: checks
+    if: needs.checks.outputs.build-native == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        check:
+          - dotfiles-python
+          - equicord-settings
+          - hyper-window-tiling
+          - nixos-module
+          - terminal-theme-tools
+          - toshy-runtime
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set Up Nix
+        uses: ./.github/actions/setup-nix
+        with:
+          cache-builds: "true"
+          cache-scope: native-${{ matrix.check }}
+          cache-write: ${{ github.event_name == 'push' }}
+
+      # Independent runners prevent one expensive package from consuming the
+      # entire workflow timeout and preserve successful caches for other checks.
+      - name: Build Native Check
         run: >-
           nix build
-          --keep-going --no-link --print-build-logs
-          .#checks.x86_64-linux.dotfiles-python
-          .#checks.x86_64-linux.equicord-settings
-          .#checks.x86_64-linux.hyper-window-tiling
-          .#checks.x86_64-linux.nixos-module
-          .#checks.x86_64-linux.terminal-theme-tools
-          .#checks.x86_64-linux.toshy-runtime
+          --print-build-logs
+          .#checks.x86_64-linux.${{ matrix.check }}
