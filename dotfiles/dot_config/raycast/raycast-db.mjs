@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import process from "node:process";
+import { parseArgs } from "node:util";
 import {
   applyProfileDefaults,
   parseProfilePayload,
@@ -61,20 +62,21 @@ Environment:
 }
 
 /**
+ * Parse the flag shared by mutating subcommands while preserving positionals.
+ *
  * @param {string[]} argv
- * @param {string} flag
- * @returns {boolean}
+ * @returns {{ dryRun: boolean, positionals: string[] }}
  */
-function hasFlag(argv, flag) {
-  return argv.includes(flag);
-}
-
-/**
- * @param {string[]} argv
- * @returns {string[]}
- */
-function withoutFlags(argv) {
-  return argv.filter((arg) => !arg.startsWith("--"));
+function commandArguments(argv) {
+  const { positionals, values } = parseArgs({
+    allowPositionals: true,
+    args: argv,
+    options: {
+      "dry-run": { type: "boolean" },
+    },
+    strict: true,
+  });
+  return { dryRun: values["dry-run"] ?? false, positionals };
 }
 
 /**
@@ -117,12 +119,15 @@ async function withDatabase(action) {
  * @returns {Promise<void>}
  */
 async function runCall(argv) {
-  const [methodPath, jsonArgs] = withoutFlags(argv);
+  const { dryRun, positionals } = commandArguments(argv);
+  const [methodPath, jsonArgs, ...unexpected] = positionals;
   if (!methodPath) {
     throw new Error("usage: call <method.path> [json-args]");
   }
+  if (unexpected.length > 0) {
+    throw new Error(`unexpected arguments: ${unexpected.join(" ")}`);
+  }
 
-  const dryRun = hasFlag(argv, "--dry-run");
   const args = parseJsonArgs(jsonArgs);
   await withDatabase(async ({ db }) => {
     if (dryRun) {
@@ -248,10 +253,10 @@ async function applyCommandAliases(db, aliases, dryRun) {
  * @returns {Promise<void>}
  */
 async function runAliases(argv) {
-  const [action, payload] = withoutFlags(argv);
-  const dryRun = hasFlag(argv, "--dry-run");
+  const { dryRun, positionals } = commandArguments(argv);
+  const [action, payload, ...unexpected] = positionals;
 
-  if (action !== "apply" || !payload) {
+  if (action !== "apply" || !payload || unexpected.length > 0) {
     throw new Error("usage: aliases apply <aliases-json> [--dry-run]");
   }
 
@@ -269,8 +274,8 @@ async function runAliases(argv) {
  * @returns {Promise<void>}
  */
 async function runUserDefault(argv) {
-  const [action, key, ...rest] = withoutFlags(argv);
-  const dryRun = hasFlag(argv, "--dry-run");
+  const { dryRun, positionals } = commandArguments(argv);
+  const [action, key, ...rest] = positionals;
 
   if (!action || !key) {
     throw new Error("usage: user-default <get|set|set-json|delete> <key>");
@@ -323,8 +328,8 @@ async function runUserDefault(argv) {
  * @returns {Promise<void>}
  */
 async function runProfile(argv) {
-  const [action, ...rest] = withoutFlags(argv);
-  const dryRun = hasFlag(argv, "--dry-run");
+  const { dryRun, positionals } = commandArguments(argv);
+  const [action, ...rest] = positionals;
 
   if (!action) {
     await withDatabase(async ({ db }) => {

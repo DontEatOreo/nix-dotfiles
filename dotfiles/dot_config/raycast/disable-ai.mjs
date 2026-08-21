@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import process from "node:process";
+import { parseArgs } from "node:util";
 
 import {
   applyDisabled,
@@ -14,8 +15,6 @@ import {
   DEFAULT_APP_SUPPORT,
   loadDatabase,
 } from "./lib/raycast-database.mjs";
-
-const FLAGS = new Set(["--dry-run", "--help", "-h", "--restore", "--status"]);
 
 function printUsage() {
   console.log(`Usage: node disable-ai.mjs [--status] [--dry-run] [--restore]
@@ -36,28 +35,26 @@ Environment:
   RAYCAST_AI_DISABLE_BACKUP    default: <app-support>/raycast-ai-disable-backup.json`);
 }
 
-function parseArgs(argv) {
-  const unknown = argv.filter((flag) => !FLAGS.has(flag));
-  if (unknown.length > 0) {
-    throw new Error(`unknown option: ${unknown.join(", ")}`);
-  }
+function commandOptions(argv) {
+  const { values } = parseArgs({
+    args: argv,
+    options: {
+      "dry-run": { type: "boolean" },
+      help: { type: "boolean", short: "h" },
+      restore: { type: "boolean" },
+      status: { type: "boolean" },
+    },
+    strict: true,
+  });
 
-  const args = {
-    dryRun: argv.includes("--dry-run"),
-    help: argv.includes("--help") || argv.includes("-h"),
-    restore: argv.includes("--restore"),
-    status: argv.includes("--status"),
-  };
-
-  if ([args.restore, args.status].filter(Boolean).length > 1) {
+  if (values.restore && values.status) {
     throw new Error("--restore and --status cannot be used together");
   }
-
-  return args;
+  return values;
 }
 
 async function run() {
-  const args = parseArgs(process.argv.slice(2));
+  const args = commandOptions(process.argv.slice(2));
   if (args.help) {
     printUsage();
     return;
@@ -71,10 +68,10 @@ async function run() {
   }
 
   if (args.restore) {
-    const changes = await restore(db, appSupport, backupPath, args.dryRun);
+    const changes = await restore(db, appSupport, backupPath, args["dry-run"]);
     console.log(
       JSON.stringify(
-        { dryRun: args.dryRun, restored: changes.length, changes },
+        { dryRun: args["dry-run"], restored: changes.length, changes },
         null,
         2,
       ),
@@ -84,14 +81,14 @@ async function run() {
 
   const backup = backupPath(appSupport);
   const before = await buildSnapshot(db);
-  const backupWritten = await ensureBackup(backup, before, args.dryRun);
-  const changes = await applyDisabled(db, before, args.dryRun);
+  const backupWritten = await ensureBackup(backup, before, args["dry-run"]);
+  const changes = await applyDisabled(db, before, args["dry-run"]);
 
   console.log(
     JSON.stringify(
       {
         mode: "disable",
-        dryRun: args.dryRun,
+        dryRun: args["dry-run"],
         keyFile,
         backup,
         backupWritten,
