@@ -115,7 +115,7 @@ For direct Nix work, drop down a level:
 
 ```bash
 nix develop
-nix flake check
+just nix-check
 ```
 
 </details>

@@ -26,12 +26,12 @@ nix_bin_dir := "/nix/var/nix/profiles/default/bin"
 nix_bin := nix_bin_dir / "nix"
 nix_profile_bin_dir := home_directory() / ".nix-profile/bin"
 nixos_profile_bin_dir := "/run/current-system/sw/bin"
-nix_profile_tools := ['deadnix:deadnix', 'nh:nh', 'nil:nil', 'nix-instantiate:nix', 'nom:nix-output-monitor', 'nix-tree:nix-tree', 'nixd:nixd', 'nixfmt:nixfmt']
+nix_profile_tools := ['deadnix:deadnix', 'nh:nh', 'nil:nil', 'nix-instantiate:nix', 'nom:nix-output-monitor', 'nix-tree:nix-tree', 'nixd:nixd', 'nixfmt:nixfmt', 'statix:statix']
 
 doctor_setup_commands := ['bash', 'curl', 'git', 'sudo']
 doctor_format_commands := ['git', 'nix']
 doctor_ansible_commands := ['ansible-doc', 'ansible-galaxy', 'ansible-lint', 'ansible-playbook', 'yamllint']
-doctor_lint_commands := ['actionlint', 'bundle', 'chezmoi', 'deadnix', 'hadolint', 'jq', 'luacheck', 'nix-instantiate', 'quilt', 'ruby', 'rumdl', 'shellcheck', 'taplo', 'uv', 'zig', 'zizmor'] ++ doctor_format_commands ++ doctor_ansible_commands
+doctor_lint_commands := ['actionlint', 'bundle', 'chezmoi', 'deadnix', 'hadolint', 'jq', 'luacheck', 'nix-instantiate', 'quilt', 'ruby', 'rumdl', 'shellcheck', 'statix', 'taplo', 'uv', 'zig', 'zizmor'] ++ doctor_format_commands ++ doctor_ansible_commands
 doctor_all_commands := doctor_lint_commands ++ ['bash', 'curl', 'sudo', 'watchexec']
 
 export PATH := homebrew_path + PATH_VAR_SEP + nix_bin_dir + PATH_VAR_SEP + nix_profile_bin_dir + PATH_VAR_SEP + nixos_profile_bin_dir + PATH_VAR_SEP + env("PATH", "")
@@ -650,11 +650,12 @@ _lint-nix:
     for file in "${nix_files[@]}"; do
       nix-instantiate --parse "$file" >/dev/null
       case $file in
-        hosts/linux/hardware-configuration.nix | packages/hyper-window-tiling/bun.nix) ;;
+        hosts/linux/hardware-configuration.nix | packages/hyper-window-tiling/bun.nix | packages/terminal-theme-tools/zig-pkg/*) ;;
         *) deadnix_files+=("$file") ;;
       esac
     done
     ((${#deadnix_files[@]} == 0)) || deadnix --fail "${deadnix_files[@]}"
+    statix check .
 
 [private]
 _lint-xml:
@@ -937,6 +938,13 @@ lint: (doctor 'lint') check-format _lint-checks
 [private]
 _lint-checks: _lint-files _check-python _check-zig _check-ansible _check-github-actions _check-bun _check-ruby (quilt-check 'all')
 
+# Evaluate every flake output without building package or test derivations.
+[group('dev')]
+nix-check: (doctor 'fmt')
+    nix store add-path nix/dev >/dev/null
+    nix store add-path nix/nixos >/dev/null
+    nix flake check --all-systems --keep-going --no-build --no-eval-cache
+
 # Run the repo validation suite.
 [group('dev')]
-check: lint
+check: lint nix-check

@@ -1,0 +1,7 @@
+disabled = []
+ignore = [
+  "hosts/linux/hardware-configuration.nix",
+  "npins/default.nix",
+  "packages/hyper-window-tiling/bun.nix",
+  "packages/terminal-theme-tools/zig-pkg",
+]

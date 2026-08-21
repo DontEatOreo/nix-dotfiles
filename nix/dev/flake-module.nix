@@ -79,32 +79,46 @@
           );
       };
 
-      standaloneNixosModule = inputs.nixpkgs.lib.nixosSystem {
-        system = null;
-        modules = [
-          self.nixosModules.default
-          {
-            boot.isContainer = true;
-            nixpkgs.hostPlatform = system;
-            local = {
-              kde.enable = true;
-              user.name = "module-test";
-            };
-            system.stateVersion = "26.05";
-            users = {
-              groups.module-test = { };
-              users.module-test = {
-                group = "module-test";
-                isNormalUser = true;
-              };
-            };
-          }
-        ];
+      mkStandaloneNixosModule =
+        testModule:
+        inputs.nixpkgs.lib.nixosSystem {
+          system = null;
+          modules = [
+            self.nixosModules.default
+            {
+              boot.isContainer = true;
+              nixpkgs.hostPlatform = system;
+              local.kde.enable = true;
+              system.stateVersion = "26.05";
+            }
+            testModule
+          ];
+        };
+
+      standaloneNixosModule = mkStandaloneNixosModule {
+        local.user.name = "module-test";
+        users = {
+          groups.module-test = { };
+          users.module-test = {
+            group = "module-test";
+            isNormalUser = true;
+          };
+        };
       };
 
+      missingUserMessage = "local.user.name must identify an account declared in users.users.";
+      missingUserNixosModule = mkStandaloneNixosModule {
+        local.user.name = "missing-user";
+      };
+      missingUserAssertionPresent = lib.any (
+        assertion: !assertion.assertion && assertion.message == missingUserMessage
+      ) missingUserNixosModule.config.assertions;
+
       standaloneNixosModuleCheck =
-        builtins.deepSeq standaloneNixosModule.config.system.build.toplevel.drvPath
-          (pkgs.runCommandLocal "nixos-module-evaluation" { } "touch $out");
+        assert missingUserAssertionPresent;
+        builtins.deepSeq standaloneNixosModule.config.system.build.toplevel.drvPath (
+          pkgs.runCommandLocal "nixos-module-evaluation" { } "touch $out"
+        );
 
     in
     {
@@ -164,8 +178,10 @@
           excludes = [
             "hosts/linux/hardware-configuration.nix"
             "packages/hyper-window-tiling/bun.nix"
+            "packages/terminal-theme-tools/zig-pkg/.*"
           ];
         };
+        statix.enable = true;
         hadolint = {
           enable = true;
           files = "(Dockerfile|Containerfile)$";
