@@ -12,7 +12,7 @@ brew "go"
 brew "gradle"
 brew "maven"
 brew "node"
-brew "openjdk"
+brew "openjdk@21"
 brew "ruby"
 brew "ruby-lsp"
 brew "rustup"
@@ -151,6 +151,7 @@ end
 brew "wget"
 
 # Android device access and screen mirroring
+cask "android-commandlinetools"
 cask "android-platform-tools"
 brew "scrcpy"
 

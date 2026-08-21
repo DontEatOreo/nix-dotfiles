@@ -349,9 +349,9 @@
     - bootstrap
     - homebrew
 
-- name: Register Homebrew OpenJDK with macOS
+- name: Register Homebrew OpenJDK 21 with macOS
   ansible.builtin.file:
-    src: "{{ bootstrap_homebrew_prefix }}/opt/openjdk/libexec/openjdk.jdk"
+    src: "{{ bootstrap_homebrew_prefix }}/opt/openjdk@21/libexec/openjdk.jdk"
     dest: /Library/Java/JavaVirtualMachines/openjdk.jdk
     state: link
     force: true

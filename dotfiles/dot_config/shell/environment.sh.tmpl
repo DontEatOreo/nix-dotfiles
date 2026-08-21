@@ -60,18 +60,28 @@ if [[ -n "$_dotfiles_homebrew_prefix" ]]; then
 fi
 unset _dotfiles_homebrew_prefix
 
-# Use Homebrew OpenJDK as the default while preserving an explicitly selected
-# JDK. Its bin directory is added from JAVA_HOME below.
+# Use Homebrew OpenJDK 21 as the default while preserving an explicitly selected
+# JDK. Pinning the developer JDK keeps Gradle builds stable across Brew upgrades.
+# Its bin directory is added from JAVA_HOME below.
 if [[ -z "${JAVA_HOME:-}" && -n "${HOMEBREW_PREFIX:-}" ]]; then
 {{- if eq .chezmoi.os "darwin" }}
-	_dotfiles_java_home="$HOMEBREW_PREFIX/opt/openjdk/libexec/openjdk.jdk/Contents/Home"
+	_dotfiles_java_home="$HOMEBREW_PREFIX/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
 {{- else }}
-	_dotfiles_java_home="$HOMEBREW_PREFIX/opt/openjdk/libexec"
+	_dotfiles_java_home="$HOMEBREW_PREFIX/opt/openjdk@21/libexec"
 {{- end }}
 	if [[ -x "$_dotfiles_java_home/bin/java" ]]; then
 		export JAVA_HOME="$_dotfiles_java_home"
 	fi
 	unset _dotfiles_java_home
+fi
+
+# Homebrew's Android command-line tools use this directory as the SDK root.
+if [[ -z "${ANDROID_HOME:-}" && -n "${HOMEBREW_PREFIX:-}" ]]; then
+	_dotfiles_android_home="$HOMEBREW_PREFIX/share/android-commandlinetools"
+	if [[ -d "$_dotfiles_android_home" ]]; then
+		export ANDROID_HOME="$_dotfiles_android_home"
+	fi
+	unset _dotfiles_android_home
 fi
 
 # 02 / PATH
