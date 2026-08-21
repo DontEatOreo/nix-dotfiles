@@ -9,9 +9,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "d123b6173b7cc2b04830aba7278cf2a2f9d8effc",
-      "url": "https://github.com/blue-build/cli/archive/d123b6173b7cc2b04830aba7278cf2a2f9d8effc.tar.gz",
-      "hash": "sha256-ujd78S212mOBCt6sLGMRq6sgMEVsEUbbcp04iJ4unuM="
+      "revision": "f0ab6828bf9a1026be7a00692da27a594934c8e4",
+      "url": "https://github.com/blue-build/cli/archive/f0ab6828bf9a1026be7a00692da27a594934c8e4.tar.gz",
+      "hash": "sha256-XdrZEPu7YjOXaWvvi3cAKm3mNaR+LSbgS1M2u1MRLoc="
     },
     "ghidra_mcp": {
       "type": "Git",
@@ -202,8 +202,8 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "da36e31617101833b64d4fe0654a7815a842a789",
-      "url": "https://github.com/GNOME/sushi/archive/da36e31617101833b64d4fe0654a7815a842a789.tar.gz",
+      "revision": "04f21c32858b3db0de32c4d81467a62c3f21cfe7",
+      "url": "https://github.com/GNOME/sushi/archive/04f21c32858b3db0de32c4d81467a62c3f21cfe7.tar.gz",
       "hash": "sha256-QE16l6jWapRUZAaK6lXtT7Ep7uwC9ndkUoSw9/OFo2U="
     },
     "terminal_theme_tools_ghostty": {
