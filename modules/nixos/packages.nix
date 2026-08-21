@@ -17,15 +17,22 @@ in
   _class = "nixos";
 
   config = {
-    programs.nh = {
-      enable = true;
-      package = pkgs.unstable.nh;
+    programs = {
+      nh = {
+        enable = true;
+        package = pkgs.unstable.nh;
+      };
+
+      # Select the HPN implementation for both the client and the server;
+      # installing it as an extra package leaves the NixOS modules on OpenSSH.
+      ssh.package = pkgs.unstable.openssh_hpn;
     };
 
     environment.systemPackages = attrValues {
       inherit (pkgs)
         ansible
         ansible-lint
+        just
         yamllint
         ;
       inherit (dotfilesPackages) dotfiles-python terminal-theme-tools;
@@ -81,7 +88,6 @@ in
         imagemagick
         jdk
         jj
-        just
         just-lsp
         less
         libtool
@@ -103,7 +109,6 @@ in
         nodejs
         opensc
         openssl
-        openssh_hpn
         pandoc
         pass
         patch

@@ -29,6 +29,9 @@ in
 
     users.users.${config.local.user.name}.shell = pkgs.zsh;
 
+    # Chezmoi and the browser reconciler install user-owned commands here.
+    environment.localBinInPath = true;
+
     environment.systemPackages = with pkgs; [
       atuin
       bash-completion
