@@ -121,6 +121,28 @@
     - flatpak
     - sushi-preview
 
+- name: Check successful Sushi build stamp
+  ansible.builtin.stat:
+    path: "{{ desktop_sushi_build_stamp }}"
+  register: desktop_sushi_build_stamp_file
+  when: desktop_flatpak_command.rc == 0
+  tags:
+    - host
+    - flatpak
+    - sushi-preview
+
+- name: Read successful Sushi build stamp
+  ansible.builtin.slurp:
+    src: "{{ desktop_sushi_build_stamp }}"
+  register: desktop_sushi_previous_build_stamp
+  when:
+    - desktop_flatpak_command.rc == 0
+    - desktop_sushi_build_stamp_file.stat.exists | default(false)
+  tags:
+    - host
+    - flatpak
+    - sushi-preview
+
 - name: Check installed Sushi Flatpak
   ansible.builtin.command:
     argv:
@@ -145,6 +167,7 @@
       - run
       - "--filesystem={{ desktop_sushi_cache_root }}"
       - org.flatpak.Builder
+      - --install-deps-from=flathub-beta
       - --user
       - --install
       - --force-clean
@@ -154,6 +177,7 @@
   changed_when: true
   register: desktop_sushi_build
   notify:
+    - Record successful Sushi build
     - Stop running Sushi Flatpak process
     - Stop Nautilus after Sushi rebuild
   when:
@@ -163,6 +187,12 @@
       desktop_sushi_source is changed
       or desktop_sushi_rendered_manifest is changed
       or desktop_sushi_installed.rc != 0
+      or not (desktop_sushi_build_stamp_file.stat.exists | default(false))
+      or (
+        desktop_sushi_previous_build_stamp.content
+        | default('')
+        | b64decode
+      ) != desktop_sushi_build_stamp_content
   tags:
     - host
     - flatpak

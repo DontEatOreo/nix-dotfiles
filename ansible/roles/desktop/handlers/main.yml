@@ -1,4 +1,10 @@
 ---
+- name: Record successful Sushi build
+  ansible.builtin.copy:
+    content: "{{ desktop_sushi_build_stamp_content }}"
+    dest: "{{ desktop_sushi_build_stamp }}"
+    mode: "0644"
+
 - name: Stop running Sushi Flatpak process
   ansible.builtin.command:
     argv:

@@ -75,20 +75,11 @@
     - sushi-preview
 
 - name: Install exact user Flatpak runtime prerequisites
-  ansible.builtin.command:
-    argv:
-      - flatpak
-      - install
-      - --user
-      - --noninteractive
-      - "{{ item.remote }}"
-      - "{{ item.name }}//{{ item.branch }}"
-    creates: >-
-      {{
-        dotfiles_data_home ~ '/flatpak/runtime/' ~ item.name ~ '/'
-        ~ (desktop_flatpak_architecture.stdout | trim) ~ '/'
-        ~ item.branch ~ '/active'
-      }}
+  community.general.flatpak:
+    name: "{{ item.name }}//{{ item.branch }}"
+    remote: "{{ item.remote }}"
+    method: user
+    state: present
   loop: >-
     {{
       desktop_flatpak_packages
