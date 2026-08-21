@@ -4,8 +4,6 @@
     path: "{{ dotfiles_home_dir }}/.cache/.bun/install/global"
     state: directory
     mode: "0755"
-  tags:
-    - bun
 
 - name: Initialize isolated Bun global package manifest
   ansible.builtin.copy:
@@ -14,8 +12,6 @@
     dest: "{{ dotfiles_home_dir }}/.cache/.bun/install/global/package.json"
     mode: "0644"
     force: false
-  tags:
-    - bun
 
 - name: Inspect Bun global tool commands
   ansible.builtin.stat:
@@ -24,8 +20,6 @@
   loop: "{{ tools_bun_global_packages }}"
   loop_control:
     label: "{{ item.package }}"
-  tags:
-    - bun
 
 - name: Discover outdated Bun global tools
   ansible.builtin.command:
@@ -40,8 +34,6 @@
   changed_when: false
   failed_when: false
   check_mode: false
-  tags:
-    - bun
 
 - name: Install or update managed Bun global tools
   ansible.builtin.command:
@@ -62,5 +54,3 @@
     - >-
       not item.stat.executable | default(false)
       or item.item.package in tools_bun_outdated.stdout | default('')
-  tags:
-    - bun

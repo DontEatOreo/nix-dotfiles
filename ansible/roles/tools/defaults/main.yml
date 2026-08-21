@@ -39,20 +39,3 @@ tools_nix_paths:
   - "{{ platform_homebrew_path | default(dotfiles_path) }}"
 tools_nix_path: "{{ tools_nix_paths | join(':') }}"
 tools_eupkgs_flake: github:euvlok/pkgs
-tools_nix_profile_packages:
-  - package: deadnix
-    bin: deadnix
-  - package: nh
-    bin: nh
-  - package: nil
-    bin: nil
-  - package: nix
-    bin: nix-instantiate
-  - package: nix-output-monitor
-    bin: nom
-  - package: nix-tree
-    bin: nix-tree
-  - package: nixd
-    bin: nixd
-  - package: nixfmt
-    bin: nixfmt

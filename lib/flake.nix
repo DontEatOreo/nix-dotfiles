@@ -45,6 +45,18 @@ let
     {
       bun2nix = pkgs.bun2nix;
       default = ghidraMcp;
+      dotfiles-nix-tools = pkgs.buildEnv {
+        name = "dotfiles-nix-tools";
+        paths = with pkgs; [
+          deadnix
+          nh
+          nil
+          nix-output-monitor
+          nix-tree
+          nixd
+          nixfmt
+        ];
+      };
       dotfiles-python = pkgs.dotfiles-python;
       equicord-settings = pkgs.callPackage ../packages/equicord-settings/package.nix {
         quickCss = equicordQuickCss;

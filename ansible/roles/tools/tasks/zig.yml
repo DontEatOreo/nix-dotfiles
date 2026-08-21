@@ -16,6 +16,3 @@
   loop_control:
     label: "{{ item.name }}"
   when: platform_system in item.platforms
-  tags:
-    - repo-tools
-    - zig
