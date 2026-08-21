@@ -11,18 +11,18 @@ browser_service=$(
 )
 
 case "$browser_service" in
-"$codex_home_dir"/plugins/cache/openai-bundled/browser/*/scripts/browser-service.mjs)
-	browser_scripts_root=${browser_service%/browser-service.mjs}
-	module_roots=${NODE_REPL_NODE_MODULE_DIRS:-}
-	NODE_REPL_NODE_MODULE_DIRS=$browser_scripts_root
-	NODE_REPL_TRUSTED_CODE_PATHS=$browser_scripts_root
-	if [ -n "$module_roots" ]; then
-		NODE_REPL_NODE_MODULE_DIRS=$NODE_REPL_NODE_MODULE_DIRS:$module_roots
-		NODE_REPL_TRUSTED_CODE_PATHS=$NODE_REPL_TRUSTED_CODE_PATHS:$module_roots
-	fi
-	export NODE_REPL_NODE_MODULE_DIRS
-	export NODE_REPL_TRUSTED_CODE_PATHS
-	;;
+	"$codex_home_dir"/plugins/cache/openai-bundled/browser/*/scripts/browser-service.mjs)
+		browser_scripts_root=${browser_service%/browser-service.mjs}
+		module_roots=${NODE_REPL_NODE_MODULE_DIRS:-}
+		NODE_REPL_NODE_MODULE_DIRS=$browser_scripts_root
+		NODE_REPL_TRUSTED_CODE_PATHS=$browser_scripts_root
+		if [ -n "$module_roots" ]; then
+			NODE_REPL_NODE_MODULE_DIRS=$NODE_REPL_NODE_MODULE_DIRS:$module_roots
+			NODE_REPL_TRUSTED_CODE_PATHS=$NODE_REPL_TRUSTED_CODE_PATHS:$module_roots
+		fi
+		export NODE_REPL_NODE_MODULE_DIRS
+		export NODE_REPL_TRUSTED_CODE_PATHS
+		;;
 esac
 
 exec "$node_repl" "$@"

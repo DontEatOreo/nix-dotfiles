@@ -1,0 +1,39 @@
+# Select with `codex --profile review` for inspection-only work.
+approval_policy = "never"
+default_permissions = ":read-only"
+web_search = "cached"
+
+# Connector tools run outside the filesystem sandbox, so disable them here.
+[apps._default]
+enabled = false
+
+[features]
+apps = false
+
+{{- $onePasswordMcp := "" }}
+{{- if eq .chezmoi.os "darwin" }}
+{{- $onePasswordMcp = "/Applications/1Password.app/Contents/MacOS/1password-mcp" }}
+{{- else if lookPath "1password-mcp" }}
+{{- $onePasswordMcp = lookPath "1password-mcp" }}
+{{- end }}
+{{- if and $onePasswordMcp (stat $onePasswordMcp) }}
+
+[mcp_servers.1password]
+enabled = false
+{{- end }}
+
+[mcp_servers.ghidra]
+enabled = false
+
+{{- if lookPath "lldb-mcp-launcher" }}
+
+[mcp_servers.lldb]
+enabled = false
+{{- end }}
+
+{{- $nodeRepl := "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl" }}
+{{- if and (eq .chezmoi.os "darwin") (stat $nodeRepl) }}
+
+[mcp_servers.node_repl]
+enabled = false
+{{ end -}}
