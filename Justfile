@@ -301,6 +301,15 @@ _spectrum-validate: (doctor 'spectrum')
       --base-uri https://schema.blue-build.org/ \
       --schemafile https://schema.blue-build.org/recipe-v2.json \
       bluebuild/recipes/spectrum.yml
+    check-jsonschema \
+      --base-uri https://schema.blue-build.org/ \
+      --schemafile https://schema.blue-build.org/stage-v1.json \
+      bluebuild/recipes/spectrum/stages/*.yml
+    check-jsonschema \
+      --base-uri https://schema.blue-build.org/ \
+      --schemafile https://schema.blue-build.org/module-list-v1.json \
+      bluebuild/recipes/spectrum/modules/*.yml
+    bash bluebuild/recipes/spectrum/sync-sources.sh --check
     # BlueBuild's feature-gated v2 parser is ready, but its validate command
     # still hardcodes the v1 schema. The official v2 schema is checked above.
     bluebuild generate --skip-validation --output "$generated" bluebuild/recipes/spectrum.yml
@@ -310,6 +319,11 @@ _spectrum-validate: (doctor 'spectrum')
     grep -Fq 'cp /tmp/bins/* /usr/bin/' "$generated"
     grep -Fq -- '--mount=type=cache,sharing=locked,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-spectrum-' "$generated"
     grep -Fq -- '--mount=type=cache,sharing=locked,dst=/var/cache/libdnf5,id=dnf-cache-spectrum-' "$generated"
+    grep -Fq 'bluebuild/recipes/spectrum/sources/astral.json /src/sources.json' "$generated"
+    grep -Fq 'bluebuild/recipes/spectrum/sources/ghostty.json /src/sources.json' "$generated"
+    grep -Fq -- '--mount=type=cache,id=spectrum-ghostty-zig-global-v1,sharing=locked,target=/build/zig-cache' "$generated"
+    grep -Fq -- '--mount=type=cache,id=spectrum-ghostty-zig-local-v1,sharing=locked,target=/build/source/.zig-cache' "$generated"
+    ! grep -Fq 'npins/sources.json /src/' "$generated"
     locked=$(< bluebuild/recipes/spectrum.lock)
     resolved=$(skopeo inspect "docker://${locked%@*}" | jq -r .Digest)
     [[ "$locked" == *@$resolved ]] || {
@@ -478,8 +492,11 @@ nix: (doctor 'nix') _ensure-nix
 # Apply chezmoi-managed dotfiles.
 [group('setup')]
 apply: (doctor 'apply')
-    chezmoi init --source {{ quote(repo_dir) }}
-    chezmoi apply --refresh-externals=auto
+    chezmoi init \
+      --apply \
+      --error-on-conflict \
+      --refresh-externals=auto \
+      --source {{ quote(repo_dir) }}
 
 # Preview pending chezmoi-managed dotfile changes without refreshing externals.
 [group('setup')]
@@ -569,7 +586,10 @@ _check-worktree-paths:
 _lint-chezmoi-source:
     temporary_dir=$(mktemp -d)
     trap 'rm -rf "$temporary_dir"' EXIT
+    chezmoi_executable=$(command -v chezmoi)
+    render_path=/usr/bin:/bin
     managed_source_paths="$temporary_dir/managed-source-paths"
+    managed_target_paths="$temporary_dir/managed-target-paths"
     platforms=(
       'darwin|{"chezmoi":{"os":"darwin","arch":"arm64","osRelease":{}}}'
       'fedora|{"chezmoi":{"os":"linux","arch":"amd64","osRelease":{"id":"fedora"}}}'
@@ -577,39 +597,42 @@ _lint-chezmoi-source:
       'windows|{"chezmoi":{"os":"windows","arch":"amd64","osRelease":{}}}'
     )
     : > "$managed_source_paths"
+    : > "$managed_target_paths"
     invalid=0
     for platform in "${platforms[@]}"; do
       platform_name=${platform%%|*}
       platform_override=${platform#*|}
       destination="$temporary_dir/home-$platform_name"
-      managed_target_paths="$temporary_dir/$platform_name-managed-target-paths"
-      remove_paths="$temporary_dir/$platform_name-remove-paths"
+      platform_config_home="$temporary_dir/config-$platform_name"
+      config_file="$platform_config_home/chezmoi/chezmoi.toml"
+      persistent_state="$platform_config_home/chezmoi/chezmoi.boltdb"
       render_stderr="$temporary_dir/$platform_name-render-stderr"
       mkdir -p "$destination"
-      chezmoi \
-        --source {{ quote(repo_dir) }} \
-        --destination "$destination" \
-        --persistent-state "$temporary_dir/$platform_name-chezmoi-state.boltdb" \
-        --override-data "$platform_override" \
-        --no-tty \
-        --refresh-externals=never \
+      chezmoi_for_platform() {
+        HOME="$destination" \
+        PATH="$render_path" \
+        "$chezmoi_executable" \
+          --config "$config_file" \
+          --destination "$destination" \
+          --persistent-state "$persistent_state" \
+          --override-data "$platform_override" \
+          --no-tty \
+          --refresh-externals=never \
+          "$@"
+      }
+      chezmoi_for_platform init --source {{ quote(repo_dir) }}
+      chezmoi_for_platform dump-config --format=json | jq -e \
+        '.umask == 18
+          and .add.secrets == "error"
+          and .add.templateSymlinks == true
+          and .edit.apply == false
+          and .edit.hardlink == true
+          and .edit.watch == true' >/dev/null
+      chezmoi_for_platform \
         managed --path-style=source-relative >> "$managed_source_paths"
-      chezmoi \
-        --source {{ quote(repo_dir) }} \
-        --destination "$destination" \
-        --persistent-state "$temporary_dir/$platform_name-chezmoi-state.boltdb" \
-        --override-data "$platform_override" \
-        --no-tty \
-        --refresh-externals=never \
-        managed > "$managed_target_paths"
-      if ! chezmoi \
-        --source {{ quote(repo_dir) }} \
-        --destination "$destination" \
-        --persistent-state "$temporary_dir/$platform_name-chezmoi-state.boltdb" \
-        --override-data "$platform_override" \
-        --no-tty \
-        --refresh-externals=never \
-        apply --dry-run --force --exclude scripts,externals \
+      chezmoi_for_platform managed >> "$managed_target_paths"
+      if ! chezmoi_for_platform \
+        apply --force --exclude scripts,externals \
         >/dev/null 2> "$render_stderr"; then
         cat "$render_stderr" >&2
         invalid=1
@@ -617,37 +640,19 @@ _lint-chezmoi-source:
         printf 'chezmoi render warning for %s:\n' "$platform_name" >&2
         cat "$render_stderr" >&2
         invalid=1
+      elif ! chezmoi_for_platform \
+        verify --exclude scripts,externals; then
+        printf 'chezmoi verification failed for %s after an isolated apply\n' \
+          "$platform_name" >&2
+        invalid=1
       fi
-      chezmoi \
-        --source {{ quote(repo_dir) }} \
-        --override-data "$platform_override" \
-        execute-template < dotfiles/.chezmoiremove > "$remove_paths"
-
-      while IFS= read -r remove_path || [[ -n $remove_path ]]; do
-        [[ -n $remove_path ]] || continue
-        case "$remove_path" in
-          /* | .. | ../* | */../* | */..)
-            printf 'unsafe chezmoi remove path for %s: %s\n' \
-              "$platform_name" "$remove_path" >&2
-            invalid=1
-            continue
-            ;;
-        esac
-        collision=$(awk -v removed="$remove_path" \
-          '$0 == removed || index($0, removed "/") == 1 { print; exit }' \
-          "$managed_target_paths")
-        if [[ -n $collision ]]; then
-          printf 'chezmoi removes managed path for %s: %s (%s)\n' \
-            "$platform_name" "$remove_path" "$collision" >&2
-          invalid=1
-        fi
-      done < "$remove_paths"
     done
     sort -u -o "$managed_source_paths" "$managed_source_paths"
+    sort -u -o "$managed_target_paths" "$managed_target_paths"
 
-    source_only_entries=(package.json tsconfig.json)
+    source_only_entries=(README.md package.json tsconfig.json)
     for source_entry in "${source_only_entries[@]}"; do
-      if grep -Fqx -- "$source_entry" "$managed_source_paths"; then
+      if grep -Fqx -- "$source_entry" "$managed_target_paths"; then
         printf 'chezmoi manages source-only workspace file: dotfiles/%s\n' \
           "$source_entry" >&2
         invalid=1
@@ -705,6 +710,10 @@ _lint-xml:
 [private]
 _lint-templates:
     python_template_files=()
+    ruby_template_files=()
+    json_template_files=()
+    toml_template_files=()
+    xml_template_files=()
     bash_template_files=()
     zsh_template_files=()
     python_input_template_files=()
@@ -712,10 +721,14 @@ _lint-templates:
     while IFS= read -r -d '' file; do
       [[ -f $file && ! -L $file ]] || continue
       case "$file" in
-        dotfiles/.chezmoitemplates/*.py.tmpl) ;;
+        dotfiles/.chezmoitemplates/*) ;;
         dotfiles/dot_bash*.tmpl | *.bash.tmpl | *.sh.tmpl) bash_template_files+=("$file") ;;
         dotfiles/dot_zsh*.tmpl | *.zsh.tmpl) zsh_template_files+=("$file") ;;
         *.py.tmpl) python_template_files+=("$file") ;;
+        *.rb.tmpl) ruby_template_files+=("$file") ;;
+        *.json.tmpl) json_template_files+=("$file") ;;
+        *.toml.tmpl) toml_template_files+=("$file") ;;
+        *.plist.tmpl | *.xml.tmpl | *.tmTheme.tmpl) xml_template_files+=("$file") ;;
         *.py.in) python_input_template_files+=("$file") ;;
         *.plist.in | *.xml.in) xml_input_template_files+=("$file") ;;
       esac
@@ -732,21 +745,71 @@ _lint-templates:
       --refresh-externals=never >/dev/null
 
     for file in \
-      "${python_template_files[@]}" \
       "${bash_template_files[@]}" \
       "${zsh_template_files[@]}"; do
       rendered_file="$tmp_destination/rendered-templates/${file%.tmpl}"
       mkdir -p "${rendered_file%/*}"
       chezmoi --source {{ quote(repo_dir) }} execute-template < "$file" > "$rendered_file"
     done
-    if ((${#python_template_files[@]} > 0)); then
+    script_platform_overrides=(
+      '{"chezmoi":{"os":"darwin","arch":"arm64","osRelease":{}}}'
+      '{"chezmoi":{"os":"linux","arch":"amd64","osRelease":{"id":"fedora"}}}'
+    )
+    rendered_python_files=()
+    rendered_ruby_files=()
+    rendered_json_files=()
+    rendered_toml_files=()
+    rendered_xml_template_files=()
+    platform_index=0
+    for platform_override in "${script_platform_overrides[@]}"; do
+      platform_index=$((platform_index + 1))
+      for file in \
+        "${python_template_files[@]}" \
+        "${ruby_template_files[@]}" \
+        "${json_template_files[@]}" \
+        "${toml_template_files[@]}" \
+        "${xml_template_files[@]}"; do
+        rendered_file="$tmp_destination/rendered-script-templates/$platform_index/${file%.tmpl}"
+        mkdir -p "${rendered_file%/*}"
+        chezmoi --source {{ quote(repo_dir) }} \
+          --override-data "$platform_override" \
+          execute-template < "$file" > "$rendered_file"
+        [[ -s $rendered_file ]] || continue
+        case "$file" in
+          *.py.tmpl) rendered_python_files+=("$rendered_file|${file%.tmpl}") ;;
+          *.rb.tmpl) rendered_ruby_files+=("$rendered_file") ;;
+          *.json.tmpl) rendered_json_files+=("$rendered_file") ;;
+          *.toml.tmpl) rendered_toml_files+=("$rendered_file") ;;
+          *.plist.tmpl | *.xml.tmpl | *.tmTheme.tmpl)
+            rendered_xml_template_files+=("$rendered_file")
+            ;;
+        esac
+      done
+    done
+    if ((${#rendered_python_files[@]} > 0)); then
       PYTHONPYCACHEPREFIX="$tmp_destination/pycache" \
-        uv run python -m compileall -q "$tmp_destination/rendered-templates"
-      for file in "${python_template_files[@]}"; do
-        rendered_file="$tmp_destination/rendered-templates/${file%.tmpl}"
-        uv run ruff check --stdin-filename "${file%.tmpl}" - < "$rendered_file"
+        uv run python -m compileall -q "$tmp_destination/rendered-script-templates"
+      for rendered_python in "${rendered_python_files[@]}"; do
+        rendered_file=${rendered_python%%|*}
+        source_file=${rendered_python#*|}
+        uv run ruff check --stdin-filename "$source_file" - < "$rendered_file"
       done
     fi
+    for rendered_file in "${rendered_ruby_files[@]}"; do
+      ruby -c "$rendered_file" >/dev/null
+    done
+    for rendered_file in "${rendered_json_files[@]}"; do
+      jq empty "$rendered_file"
+    done
+    for rendered_file in "${rendered_toml_files[@]}"; do
+      if ! taplo_output=$(taplo lint "$rendered_file" 2>&1); then
+        printf 'invalid rendered TOML: %s\n%s\n' "$rendered_file" "$taplo_output" >&2
+        exit 1
+      fi
+    done
+    ((${#rendered_xml_template_files[@]} == 0)) || uv run python -c \
+      'import sys; from defusedxml.ElementTree import parse; [parse(path) for path in sys.argv[1:]]' \
+      "${rendered_xml_template_files[@]}"
     for file in "${bash_template_files[@]}"; do
       rendered_file="$tmp_destination/rendered-templates/${file%.tmpl}"
       bash -n "$rendered_file"
@@ -876,6 +939,7 @@ _check-python: python-complexity python-dead-code python-dependencies python-typ
 [group('dev')]
 source-update:
     nix shell nixpkgs#npins --command npins update
+    bash bluebuild/recipes/spectrum/sync-sources.sh
 
 # Verify that npins metadata and fetch URLs describe the same sources.
 [group('dev')]
