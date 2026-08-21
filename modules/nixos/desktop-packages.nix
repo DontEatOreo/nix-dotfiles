@@ -55,7 +55,7 @@ let
 
   heliumBrowser = pkgs.eupkgs.helium-browser;
   heliumAppDir = pkgs.linkFarm "helium-browser-app" {
-    "helium-wrapper" = "${heliumBrowser}/bin/helium-browser";
+    "helium-wrapper" = getExe heliumBrowser;
     "helium.desktop" = "${heliumBrowser}/share/applications/helium.desktop";
     "product_logo_256.png" = "${heliumBrowser}/share/icons/hicolor/256x256/apps/helium.png";
   };

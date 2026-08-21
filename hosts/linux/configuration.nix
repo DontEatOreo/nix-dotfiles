@@ -38,18 +38,16 @@ in
   };
 
   environment = {
-    systemPackages = (
-      lib.attrsets.attrValues {
-        inherit (pkgs)
-          firefox
-          libreoffice
-          prismlauncher
-          rsync
-          rustdesk-flutter
-          ;
-        inherit (pkgs.unstable) jq;
-      }
-    );
+    systemPackages = lib.attrsets.attrValues {
+      inherit (pkgs)
+        firefox
+        libreoffice
+        prismlauncher
+        rsync
+        rustdesk-flutter
+        ;
+      inherit (pkgs.unstable) jq;
+    };
 
     etc."xdg/autostart/1password.desktop".source =
       ../../dotfiles/dot_config/autostart/1password.desktop;

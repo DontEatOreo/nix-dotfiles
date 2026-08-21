@@ -50,7 +50,7 @@ in
           rocmEnv = pkgs.symlinkJoin {
             name = "rocm-combined";
             paths = attrValues {
-              inherit (pkgs.pkgs.rocmPackages) rocblas hipblas clr;
+              inherit (pkgs.rocmPackages) rocblas hipblas clr;
             };
           };
         in

@@ -8,7 +8,13 @@ let
   inherit (lib.types) nonEmptyStr;
 
   cfg = config.local.user;
-  user = config.users.users.${cfg.name};
+  # Keep invalid user names evaluable long enough for the assertion below to
+  # report the actual configuration error instead of failing at attr lookup.
+  user =
+    config.users.users.${cfg.name} or {
+      home = "/home/${cfg.name}";
+      group = "users";
+    };
 in
 {
   imports = [

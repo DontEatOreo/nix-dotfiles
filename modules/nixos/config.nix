@@ -29,10 +29,7 @@
   };
 
   # Spectrum installs Solaar and its udev support for the shared Logitech
-  # rules and user service. Use the NixOS hardware module for the same
-  # package and device permissions.
-  hardware.logitech.wireless = {
-    enable = true;
-    enableGraphical = true;
-  };
+  # rules and user service. The NixOS program module provides the same package,
+  # user service, and device permissions.
+  programs.solaar.enable = true;
 }
