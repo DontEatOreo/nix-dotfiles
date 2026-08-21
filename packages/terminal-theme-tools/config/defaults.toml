@@ -1,5 +1,10 @@
 [runtime]
-theme_environment = ["COLOR_SCHEME", "LC_TERMINAL_THEME", "TERMINAL_THEME", "THEME"]
+theme_environment = [
+  "COLOR_SCHEME",
+  "LC_TERMINAL_THEME",
+  "TERMINAL_THEME",
+  "THEME",
+]
 theme_dark_aliases = ["dark", "black-rose-doll-dark"]
 theme_light_aliases = ["light", "black-rose-doll-light", "default", "adwaita"]
 theme_terminal_program_environment = "TERM_PROGRAM"
