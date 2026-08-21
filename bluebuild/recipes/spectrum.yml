@@ -20,7 +20,7 @@ spec:
 
 stages:
   - name: python-runtime
-    from: registry.fedoraproject.org/fedora:44@sha256:93f227979b6ef8395cde2a38dee260ef4cbecaab7668ee45d97960aba910e918
+    from: registry.fedoraproject.org/fedora:45@sha256:880a6f885db64973f88e01289baa74e3854506afaafdb8d705d18f408bddaa56
     modules:
       - type: dnf@v1
         source: ghcr.io/blue-build/modules@sha256:c5ed99f07b15c8d575a4fa64a77e5cd5602b00da4c84379f5675db2ae4757061
@@ -45,7 +45,7 @@ stages:
             cp -a "$workdir/unpacked"/. /out/usr/lib/dotfiles/python/
 
   - name: ghostty
-    from: registry.fedoraproject.org/fedora:44@sha256:93f227979b6ef8395cde2a38dee260ef4cbecaab7668ee45d97960aba910e918
+    from: registry.fedoraproject.org/fedora:45@sha256:880a6f885db64973f88e01289baa74e3854506afaafdb8d705d18f408bddaa56
     modules:
       - type: copy@v1
         src: npins/sources.json
