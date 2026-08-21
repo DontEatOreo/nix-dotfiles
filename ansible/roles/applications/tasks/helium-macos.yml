@@ -12,14 +12,11 @@
   tags:
     - helium
 
-- name: Require Helium to be closed before changing its profile
-  ansible.builtin.assert:
-    that:
-      - ansible_check_mode or applications_helium_running.rc == 1
-    fail_msg: >-
-      Helium or one of its helper processes is running. Close it before
-      applying the Helium role so its profile databases and preferences
-      cannot be modified concurrently.
+- name: Report that Helium profile configuration is skipped
+  ansible.builtin.debug:
+    msg: >-
+      Helium is running; skipping profile configuration.
+  when: applications_helium_running.rc == 0
   tags:
     - helium
 
@@ -42,5 +39,6 @@
       --omnibox-autocomplete-filtering=search
       --set-user-color={{ applications_helium_accent_rgb }}
       --set-color-scheme=dark --set-color-variant=tonal_spot
+  when: applications_helium_running.rc == 1
   tags:
     - helium
