@@ -80,7 +80,9 @@ in
 
     meta = {
       description = "Hyper-key window tiling extension for GNOME Shell";
+      homepage = "https://github.com/4evy/dotfiles";
       license = lib.licenses.mit;
+      maintainers = [ lib.maintainers._4evy ];
       platforms = lib.platforms.linux;
     };
   };
@@ -120,7 +122,9 @@ in
 
     meta = {
       description = "Hyper-key window tiling script for KDE Plasma";
+      homepage = "https://github.com/4evy/dotfiles";
       license = lib.licenses.mit;
+      maintainers = [ lib.maintainers._4evy ];
       platforms = lib.platforms.linux;
     };
   };

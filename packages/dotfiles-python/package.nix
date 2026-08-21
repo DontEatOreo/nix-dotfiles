@@ -6,10 +6,11 @@
 let
   repositoryRoot = ../..;
   packageRoot = ./.;
+  pyproject = builtins.fromTOML (builtins.readFile (repositoryRoot + /pyproject.toml));
 in
 python314Packages.buildPythonApplication {
-  pname = "dotfiles-python";
-  version = "0.1.0";
+  pname = pyproject.project.name;
+  inherit (pyproject.project) version;
   pyproject = true;
   strictDeps = true;
 
@@ -44,7 +45,10 @@ python314Packages.buildPythonApplication {
 
   meta = {
     description = "Personal workstation utilities shared across Linux and macOS";
+    homepage = "https://github.com/4evy/dotfiles";
+    license = lib.licenses.mit;
     mainProgram = "phone-mirror";
+    maintainers = [ lib.maintainers._4evy ];
     platforms = lib.platforms.unix;
   };
 }

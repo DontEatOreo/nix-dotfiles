@@ -127,8 +127,10 @@ stdenv.mkDerivation (finalAttrs: {
 
   meta = {
     description = "macOS-to-Android bridge for FIDO hybrid-authentication QR codes";
+    homepage = "https://github.com/4evy/dotfiles";
     license = lib.licenses.mit;
     mainProgram = "fido-phone";
+    maintainers = [ lib.maintainers._4evy ];
     platforms = lib.platforms.darwin;
     sourceProvenance = with lib.sourceTypes; [
       fromSource

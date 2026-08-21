@@ -1,5 +1,6 @@
 {
   jq,
+  lib,
   quickCss,
   runCommand,
   settings,
@@ -11,7 +12,13 @@ let
 in
 runCommand "equicord-settings"
   {
-    meta.description = "Equicord settings shared by NixOS and non-NixOS installations";
+    meta = {
+      description = "Equicord settings shared by NixOS and non-NixOS installations";
+      homepage = "https://github.com/4evy/dotfiles";
+      license = lib.licenses.mit;
+      maintainers = [ lib.maintainers._4evy ];
+      platforms = lib.platforms.all;
+    };
     nativeBuildInputs = [ jq ];
     strictDeps = true;
   }

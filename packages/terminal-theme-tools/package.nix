@@ -130,6 +130,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   meta = {
     description = "Theme-aware launcher for terminal applications";
+    homepage = "https://github.com/4evy/dotfiles";
     license = lib.licenses.mit;
     mainProgram = "terminal-theme-run";
     maintainers = [ lib.maintainers._4evy ];
