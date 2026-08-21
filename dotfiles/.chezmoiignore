@@ -5,6 +5,7 @@
 
 # Bun workspace metadata and dependencies live in the chezmoi source tree for
 # development only; they are not targets in the home directory.
+README.md
 package.json
 tsconfig.json
 node_modules/

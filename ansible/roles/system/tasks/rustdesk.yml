@@ -140,13 +140,13 @@
         value: '""'
 
 - name: Resolve the native RustDesk executable
-  ansible.builtin.command:
-    argv:
-      - readlink
-      - -f
-      - "{{ system_rustdesk_command.stdout }}"
-  register: system_rustdesk_executable
-  changed_when: false
+  ansible.builtin.set_fact:
+    system_rustdesk_executable: >-
+      {{
+        system_rustdesk_command.stdout
+        | trim
+        | ansible.builtin.realpath
+      }}
   when: system_rustdesk_command.rc == 0
 
 - name: Ensure the mutable RustDesk loader directory exists
@@ -164,7 +164,7 @@
 
 - name: Install the mutable RustDesk service loader
   ansible.builtin.copy:
-    src: "{{ system_rustdesk_executable.stdout }}"
+    src: "{{ system_rustdesk_executable }}"
     dest: /var/lib/rustdesk/dotfiles/rustdesk
     remote_src: true
     owner: root
@@ -176,7 +176,7 @@
 
 - name: Link the native RustDesk libraries beside the mutable loader
   ansible.builtin.file:
-    src: "{{ system_rustdesk_executable.stdout | dirname }}/lib"
+    src: "{{ system_rustdesk_executable | dirname }}/lib"
     dest: /var/lib/rustdesk/dotfiles/lib
     state: link
     owner: root
@@ -231,18 +231,12 @@
   when: system_rustdesk_command.rc == 0
 
 - name: Keep the existing RustDesk autostart entry enabled
-  ansible.builtin.copy:
-    content: >-
-      {{
-        (
-          lookup(
-            'ansible.builtin.file',
-            role_path ~ '/files/rustdesk.desktop'
-          ) | trim
-        )
-        ~ '\nX-GNOME-Autostart-enabled=true\n'
-      }}
-    dest: "{{ dotfiles_config_home }}/autostart/rustdesk.desktop"
+  community.general.ini_file:
+    path: "{{ dotfiles_config_home }}/autostart/rustdesk.desktop"
+    section: Desktop Entry
+    option: X-GNOME-Autostart-enabled
+    value: "true"
+    no_extra_spaces: true
     mode: "0644"
   when: system_rustdesk_autostart.stat.exists | default(false)
 
@@ -269,7 +263,9 @@
   become: true
   when:
     - system_rustdesk_command.rc == 0
-    - lookup('env', 'DOTFILES_RUSTDESK_SELINUX') | default('1', true) != '0'
+    - >-
+      lookup('ansible.builtin.env', 'DOTFILES_RUSTDESK_SELINUX')
+      | default('1', true) != '0'
 
 - name: Restore RustDesk mutable loader labels
   ansible.builtin.command:
@@ -284,7 +280,9 @@
   changed_when: system_rustdesk_restorecon.stdout | length > 0
   when:
     - system_rustdesk_command.rc == 0
-    - lookup('env', 'DOTFILES_RUSTDESK_SELINUX') | default('1', true) != '0'
+    - >-
+      lookup('ansible.builtin.env', 'DOTFILES_RUSTDESK_SELINUX')
+      | default('1', true) != '0'
 
 - name: Enable and start the native RustDesk service
   ansible.builtin.systemd_service:
@@ -326,16 +324,17 @@
     - not ansible_check_mode
 
 - name: Start RustDesk Wayland dependencies
-  ansible.builtin.command:
-    argv:
-      - systemctl
-      - --user
-      - start
-      - xdg-desktop-portal.service
-      - pipewire.service
-      - wireplumber.service
-  changed_when: false
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    scope: user
+    state: started
   failed_when: false
+  loop:
+    - xdg-desktop-portal.service
+    - pipewire.service
+    - wireplumber.service
+  loop_control:
+    label: "{{ item }}"
   environment:
     DBUS_SESSION_BUS_ADDRESS: >-
       unix:path={{ system_rustdesk_runtime_dir }}/bus
@@ -343,7 +342,6 @@
   when:
     - system_rustdesk_command.rc == 0
     - system_rustdesk_wayland_session
-    - not ansible_check_mode
 
 - name: Inspect RustDesk portal interfaces
   ansible.builtin.command:
@@ -445,20 +443,13 @@
       or item.item.socket and not item.stat.issock | default(false)
 
 - name: Inspect the active Wayland compositor socket
-  ansible.builtin.command:
-    argv:
-      - find
-      - "{{ system_rustdesk_runtime_dir }}"
-      - -maxdepth
-      - "1"
-      - -type
-      - s
-      - -name
-      - wayland-*
-      - -print
-      - -quit
+  ansible.builtin.find:
+    paths: "{{ system_rustdesk_runtime_dir }}"
+    patterns: wayland-*
+    file_type: any
+    recurse: false
+    hidden: true
   register: system_rustdesk_wayland_socket
-  changed_when: false
   failed_when: false
   when:
     - system_rustdesk_command.rc == 0
@@ -472,7 +463,12 @@
   when:
     - system_rustdesk_command.rc == 0
     - system_rustdesk_wayland_session
-    - system_rustdesk_wayland_socket.stdout | default('') | length == 0
+    - >-
+      system_rustdesk_wayland_socket.files
+      | default([])
+      | selectattr('issock')
+      | list
+      | length == 0
 
 - name: Inspect Tailscale authentication for RustDesk direct access
   ansible.builtin.command:

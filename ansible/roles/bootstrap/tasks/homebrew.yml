@@ -34,14 +34,9 @@
     - homebrew
 
 - name: Detect Homebrew
-  ansible.builtin.command:
-    argv:
-      - /bin/test
-      - -x
-      - "{{ bootstrap_homebrew_prefix }}/bin/brew"
-  changed_when: false
-  failed_when: false
-  register: bootstrap_homebrew_command
+  ansible.builtin.stat:
+    path: "{{ bootstrap_homebrew_prefix }}/bin/brew"
+  register: bootstrap_homebrew_binary
   when: bootstrap_homebrew_enabled | default(false)
   tags:
     - bootstrap
@@ -59,7 +54,7 @@
   register: bootstrap_homebrew_sudo
   when:
     - bootstrap_homebrew_enabled | default(false)
-    - bootstrap_homebrew_command.rc != 0
+    - not bootstrap_homebrew_binary.stat.executable | default(false)
   tags:
     - bootstrap
     - bash
@@ -73,7 +68,7 @@
       sudo with sudo -v before running ansible-playbook directly.
   when:
     - bootstrap_homebrew_enabled | default(false)
-    - bootstrap_homebrew_command.rc != 0
+    - not bootstrap_homebrew_binary.stat.executable | default(false)
     - bootstrap_homebrew_sudo.rc != 0
   tags:
     - bootstrap
@@ -87,7 +82,7 @@
     mode: "0755"
   when:
     - bootstrap_homebrew_enabled | default(false)
-    - bootstrap_homebrew_command.rc != 0
+    - not bootstrap_homebrew_binary.stat.executable | default(false)
   tags:
     - bootstrap
     - bash
@@ -101,7 +96,7 @@
     mode: "0755"
   when:
     - bootstrap_homebrew_enabled | default(false)
-    - bootstrap_homebrew_command.rc != 0
+    - not bootstrap_homebrew_binary.stat.executable | default(false)
   tags:
     - bootstrap
     - bash
@@ -117,7 +112,7 @@
     NONINTERACTIVE: "1"
   when:
     - bootstrap_homebrew_enabled | default(false)
-    - bootstrap_homebrew_command.rc != 0
+    - not bootstrap_homebrew_binary.stat.executable | default(false)
   tags:
     - bootstrap
     - bash

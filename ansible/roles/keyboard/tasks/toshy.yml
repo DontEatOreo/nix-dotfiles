@@ -111,6 +111,15 @@
     - host
     - toshy
 
+- name: Read the existing Toshy configuration
+  ansible.builtin.slurp:
+    src: "{{ keyboard_toshy_config }}"
+  register: keyboard_toshy_existing_config
+  when: keyboard_toshy_config_file.stat.exists | default(false)
+  tags:
+    - host
+    - toshy
+
 - name: Require the pinned Toshy Nix runtime
   ansible.builtin.assert:
     that:
@@ -127,27 +136,6 @@
     - host
     - toshy
 
-- name: Inspect managed Toshy configuration slices
-  ansible.builtin.command:
-    argv:
-      - grep
-      - -F
-      - -q
-      - "SLICE_MARK_START: {{ item }}"
-      - "{{ keyboard_toshy_config }}"
-  changed_when: false
-  failed_when: false
-  check_mode: false
-  loop:
-    - keymapper_api
-    - kbtype_override
-    - user_custom_functions
-    - barebones_user_cfg
-  register: keyboard_toshy_config_slices
-  tags:
-    - host
-    - toshy
-
 - name: Decide whether Toshy user files need an upstream refresh
   ansible.builtin.set_fact:
     keyboard_toshy_install_required: >-
@@ -157,12 +145,23 @@
         or not (keyboard_toshy_config_file.stat.exists | default(false))
         or keyboard_toshy_installed_revision_value != keyboard_toshy_revision
         or (
-          keyboard_toshy_config_slices.results
-          | rejectattr('rc', 'equalto', 0)
+          keyboard_toshy_required_slice_markers
+          | reject(
+              'in',
+              keyboard_toshy_existing_config.content
+              | default('')
+              | b64decode
+            )
           | list
           | length > 0
         )
       }}
+  vars:
+    keyboard_toshy_required_slice_markers:
+      - "SLICE_MARK_START: keymapper_api"
+      - "SLICE_MARK_START: kbtype_override"
+      - "SLICE_MARK_START: user_custom_functions"
+      - "SLICE_MARK_START: barebones_user_cfg"
   tags:
     - host
     - toshy
@@ -410,11 +409,13 @@
     - toshy
 
 - name: Hide Toshy desktop surfaces
-  ansible.builtin.lineinfile:
+  community.general.ini_file:
     path: "{{ item.item }}"
-    regexp: "^[ \\t]*NoDisplay="
-    line: NoDisplay=true
-    insertafter: EOF
+    section: Desktop Entry
+    option: NoDisplay
+    value: "true"
+    no_extra_spaces: true
+    mode: "0644"
   loop: "{{ keyboard_toshy_desktop_surfaces.results }}"
   loop_control:
     label: "{{ item.item | basename }}"

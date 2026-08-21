@@ -31,7 +31,10 @@
   ansible.builtin.user:
     name: >-
       {{ ansible_facts.get('user_id',
-         ansible_facts.get('ansible_user_id', lookup('env', 'USER'))) }}
+         ansible_facts.get(
+           'ansible_user_id',
+           lookup('ansible.builtin.env', 'USER')
+         )) }}
     shell: "{{ platform_homebrew_prefix }}/bin/zsh"
   become: true
   tags:
@@ -51,39 +54,11 @@
     - macos
     - tailscale
 
-- name: Detect system Tailscale service definition
-  ansible.builtin.stat:
-    path: /Library/LaunchDaemons/homebrew.mxcl.tailscale.plist
-  register: system_tailscale_system_service
-  tags:
-    - host
-    - macos
-    - tailscale
-
-- name: Install Tailscale as a system launch daemon
-  ansible.builtin.command:
-    argv:
-      - "{{ platform_homebrew_prefix }}/bin/brew"
-      - services
-      - start
-      - tailscale
-  environment:
-    PATH: "{{ platform_homebrew_path }}"
-  become: true
-  register: system_tailscale_system_service_install
-  changed_when: >-
-    'Successfully started' in system_tailscale_system_service_install.stdout
-  when: not system_tailscale_system_service.stat.exists
-  tags:
-    - host
-    - macos
-    - tailscale
-
-- name: Ensure the Tailscale system launch daemon is running
-  community.general.launchd:
-    name: homebrew.mxcl.tailscale
-    enabled: true
-    state: started
+- name: Ensure the Homebrew Tailscale system service is running
+  community.general.homebrew_services:
+    name: tailscale
+    path: "{{ platform_homebrew_prefix }}/bin"
+    state: present
   become: true
   tags:
     - host

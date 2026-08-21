@@ -1,13 +1,9 @@
 ---
 - name: Restart Determinate Nix daemon on macOS
-  ansible.builtin.command:
-    argv:
-      - launchctl
-      - kickstart
-      - -k
-      - system/systems.determinate.nix-daemon
+  community.general.launchd:
+    name: systems.determinate.nix-daemon
+    state: restarted
   become: true
-  changed_when: true
   listen: Restart Determinate Nix daemon
   when: platform_is_macos
 

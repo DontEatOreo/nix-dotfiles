@@ -227,13 +227,22 @@
   ansible.builtin.set_fact:
     keyboard_toshy_enabled_extensions: >-
       {{
-        keyboard_toshy_enabled_extensions
-        | default(
-            keyboard_persisted_gnome_extensions.value
-            | default('@as []', true),
-            true
+        (
+          (
+            keyboard_toshy_enabled_extensions
+            | default(
+                keyboard_persisted_gnome_extensions.value
+                | default('@as []', true)
+                | ansible.builtin.regex_replace('^@as\\s+', '')
+                | ansible.builtin.from_yaml,
+                true
+              )
           )
-        | merge_gvariant_string_list(item.uuid)
+          + [item.uuid]
+        )
+        | ansible.builtin.unique
+        | ansible.builtin.list
+        | ansible.builtin.to_json
       }}
   loop: "{{ keyboard_toshy_compatible_extensions | default([]) }}"
   loop_control:

@@ -1,18 +1,23 @@
 ---
-- name: Check Kanata and Toshy service activity
+- name: Gather current system service activity
+  ansible.builtin.service_facts:
+  tags:
+    - host
+    - toshy
+    - kanata
+
+- name: Check Toshy user service activity
   ansible.builtin.command:
-    argv: "{{ item.argv }}"
+    argv:
+      - systemctl
+      - --user
+      - is-active
+      - --quiet
+      - toshy-config.service
   changed_when: false
   failed_when: false
   check_mode: false
-  loop:
-    - label: kanata-main.service
-      argv: [systemctl, is-active, --quiet, kanata-main.service]
-    - label: toshy-config.service
-      argv: [systemctl, --user, is-active, --quiet, toshy-config.service]
-  loop_control:
-    label: "{{ item.label }}"
-  register: keyboard_toshy_active_services
+  register: keyboard_toshy_config_service
   tags:
     - host
     - toshy
@@ -21,12 +26,13 @@
 - name: Require active Kanata and Toshy services
   ansible.builtin.assert:
     that:
-      - item.rc == 0
-    fail_msg: "{{ item.item.label }} is not active."
-    success_msg: "{{ item.item.label }} is active."
-  loop: "{{ keyboard_toshy_active_services.results }}"
-  loop_control:
-    label: "{{ item.item.label }}"
+      - >-
+        ansible_facts.services
+        .get('kanata-main.service', {})
+        .get('state', '') == 'running'
+      - keyboard_toshy_config_service.rc == 0
+    fail_msg: Kanata or the Toshy configuration service is not active.
+    success_msg: Kanata and the Toshy configuration service are active.
   tags:
     - host
     - toshy
@@ -83,23 +89,13 @@
     - toshy
     - kanata
 
-- name: Check conflicting input-remapper activity
-  ansible.builtin.command:
-    argv: [systemctl, is-active, --quiet, input-remapper.service]
-  changed_when: false
-  failed_when: false
-  check_mode: false
-  register: keyboard_toshy_input_remapper
-  when: not keyboard_keep_input_remapper | bool
-  tags:
-    - host
-    - toshy
-    - kanata
-
 - name: Require inactive input-remapper service
   ansible.builtin.assert:
     that:
-      - keyboard_toshy_input_remapper.rc != 0
+      - >-
+        ansible_facts.services
+        .get('input-remapper.service', {})
+        .get('state', 'stopped') != 'running'
     fail_msg: input-remapper.service is active and can compete with Kanata/Toshy.
   when: not keyboard_keep_input_remapper | bool
   tags:

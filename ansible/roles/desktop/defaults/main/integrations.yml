@@ -35,19 +35,22 @@ desktop_hyper_window_tiling_kwin_dirs:
 
 desktop_sushi_app_id: >-
   {{
-    lookup('env', 'SUSHI_PREVIEW_APP_ID')
+    lookup('ansible.builtin.env', 'SUSHI_PREVIEW_APP_ID')
     | default('org.gnome.NautilusPreviewer', true)
   }}
 desktop_sushi_profile: >-
-  {{ lookup('env', 'SUSHI_PREVIEW_PROFILE') | default('default', true) }}
+  {{
+    lookup('ansible.builtin.env', 'SUSHI_PREVIEW_PROFILE')
+    | default('default', true)
+  }}
 desktop_sushi_revision: >-
   {{
-    lookup('env', 'SUSHI_PREVIEW_REV')
+    lookup('ansible.builtin.env', 'SUSHI_PREVIEW_REV')
     | default(dotfiles_pins.sushi.revision, true)
   }}
 desktop_sushi_repository: >-
   {{
-    lookup('env', 'SUSHI_PREVIEW_REPO')
+    lookup('ansible.builtin.env', 'SUSHI_PREVIEW_REPO')
     | default(
         'https://github.com/'
         ~ dotfiles_pins.sushi.repository.owner

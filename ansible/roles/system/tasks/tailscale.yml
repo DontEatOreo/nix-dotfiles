@@ -26,7 +26,12 @@
     domain: tailscaled_t
     defer_child_pattern: tailscaled be-child ssh
     allow_reload: >-
-      {{ lookup('env', 'DOTFILES_TAILSCALE_ALLOW_LIVE_RELOAD') == '1' }}
+      {{
+        lookup(
+          'ansible.builtin.env',
+          'DOTFILES_TAILSCALE_ALLOW_LIVE_RELOAD'
+        ) == '1'
+      }}
     restore_targets:
       - path: /usr/bin/tailscaled
       - path: /usr/sbin/tailscaled

@@ -165,9 +165,18 @@
     key: /org/gnome/shell/enabled-extensions
     value: >-
       {{
-        desktop_hyper_gnome_extensions.value
-        | default('@as []', true)
-        | merge_gvariant_string_list(desktop_hyper_window_tiling_uuid)
+        (
+          (
+            desktop_hyper_gnome_extensions.value
+            | default('@as []', true)
+            | ansible.builtin.regex_replace('^@as\\s+', '')
+            | ansible.builtin.from_yaml
+          )
+          + [desktop_hyper_window_tiling_uuid]
+        )
+        | ansible.builtin.unique
+        | ansible.builtin.list
+        | ansible.builtin.to_json
       }}
     state: present
   when: desktop_hyper_has_gnome

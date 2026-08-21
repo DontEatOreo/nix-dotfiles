@@ -7,7 +7,6 @@
       User-Agent: dotfiles-ansible
     return_content: true
     status_code: 200
-    timeout: 30
   register: applications_helium_linux_release
 
 - name: Select latest Helium Linux x86_64 tarball

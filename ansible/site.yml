@@ -2,6 +2,9 @@
 - name: Configure the dotfiles workstation
   hosts: localhost
   gather_facts: true
+  module_defaults:
+    ansible.builtin.uri:
+      timeout: 30
   tasks:
     - name: 00 | Detect the platform and define shared paths
       ansible.builtin.import_role:

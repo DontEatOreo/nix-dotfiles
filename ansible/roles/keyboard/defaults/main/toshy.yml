@@ -20,9 +20,10 @@ keyboard_toshy_repository: >-
 keyboard_toshy_revision: "{{ dotfiles_pins.toshy.revision }}"
 keyboard_toshy_version: "{{ dotfiles_pins.toshy.version }}"
 keyboard_toshy_force_install: >-
-  {{ lookup('env', 'TOSHY_RUN_INSTALLER') == '1' }}
-keyboard_toshy_distro_override: "{{ lookup('env', 'TOSHY_DISTRO_OVERRIDE') }}"
+  {{ lookup('ansible.builtin.env', 'TOSHY_RUN_INSTALLER') == '1' }}
+keyboard_toshy_distro_override: >-
+  {{ lookup('ansible.builtin.env', 'TOSHY_DISTRO_OVERRIDE') }}
 keyboard_toshy_skip_native: >-
-  {{ lookup('env', 'TOSHY_SKIP_NATIVE') == '1' }}
+  {{ lookup('ansible.builtin.env', 'TOSHY_SKIP_NATIVE') == '1' }}
 keyboard_toshy_no_dbus_python: >-
-  {{ lookup('env', 'TOSHY_NO_DBUS_PYTHON') == '1' }}
+  {{ lookup('ansible.builtin.env', 'TOSHY_NO_DBUS_PYTHON') == '1' }}

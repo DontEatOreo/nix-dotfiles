@@ -7,7 +7,6 @@
       User-Agent: dotfiles-ansible
     return_content: true
     status_code: 200
-    timeout: 30
   register: applications_equilotl_release
 
 - name: Select Equilotl Linux CLI asset

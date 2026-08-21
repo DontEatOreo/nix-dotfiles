@@ -180,10 +180,8 @@
       become: true
 
     - name: Render the current KMSCON theme
-      ansible.builtin.command:
-        argv:
-          - systemctl
-          - start
-          - kmscon-theme-refresh.service
+      ansible.builtin.systemd_service:
+        name: kmscon-theme-refresh.service
+        state: started
       become: true
       changed_when: false

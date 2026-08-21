@@ -58,19 +58,19 @@
     applications_helium_profile_avatar_download.changed
     or not applications_helium_profile_avatar.stat.exists
 
-- name: Read the Refined GitHub token for the Helium profile
-  ansible.builtin.command:
-    argv:
-      - op
-      - read
-      - op://Private/Refined GitHub/token
-  register: applications_helium_refined_github_token
-  changed_when: false
-  failed_when: false
+- name: Read the Refined GitHub token through the 1Password lookup
+  ansible.builtin.set_fact:
+    applications_helium_refined_github_token: >-
+      {{
+        lookup(
+          'community.general.onepassword',
+          'op://Private/Refined GitHub/token',
+          errors='ignore'
+        )
+        | default('', true)
+      }}
   no_log: true
-  environment:
-    PATH: "{{ applications_helium_path }}"
-  when: lookup('env', 'OP_ACCOUNT') | length > 0
+  when: lookup('ansible.builtin.env', 'OP_ACCOUNT') | length > 0
 
 - name: Install the pinned Helium profile configurer
   ansible.builtin.command:
@@ -119,10 +119,9 @@
       {{
         {
           'refined-github-personal-token':
-            applications_helium_refined_github_token.stdout | trim
+            applications_helium_refined_github_token | trim
         }
-        if applications_helium_refined_github_token.rc | default(1) == 0
-        and applications_helium_refined_github_token.stdout | default('') | trim
+        if applications_helium_refined_github_token | default('') | trim
         else {}
       }}
     applications_helium_apply_input: >-

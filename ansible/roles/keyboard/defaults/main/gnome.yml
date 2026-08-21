@@ -9,7 +9,9 @@ keyboard_kanata_repository: >-
 keyboard_kanata_install_root: >-
   {{ dotfiles_data_dir }}/host/bin-staging/kanata/root
 keyboard_keep_input_remapper: >-
-  {{ lookup('env', 'DOTFILES_KEEP_INPUT_REMAPPER') == '1' }}
+  {{
+    lookup('ansible.builtin.env', 'DOTFILES_KEEP_INPUT_REMAPPER') == '1'
+  }}
 
 keyboard_toshy_gnome_extension_origin: https://extensions.gnome.org
 keyboard_toshy_gnome_extension_cache: >-

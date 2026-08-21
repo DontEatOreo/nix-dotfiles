@@ -1,46 +1,21 @@
 # Packages
 
-Each child directory owns one package unit and the inputs that change with it:
-source, tests, build metadata, patches, and generated dependency descriptions.
-Nix-backed units expose their derivation at the predictable `package.nix`
-entry point.
+This directory contains the software artifacts maintained by this repository.
+Each child directory represents one package and keeps the source, patches, build
+definitions, tests, and generated inputs that evolve with it in one place.
 
-Deployment adapters remain in the conventional roots that consume these
-artifacts:
+## Design intent
 
-- `overlays/default.nix` registers Nix packages;
-- `Formula/` exposes Homebrew formulae;
-- `ansible/roles/` installs and configures packages on a host;
-- `modules/nixos/` integrates packages into NixOS; and
-- `dotfiles/` contains only chezmoi source state destined for the home
-  directory.
+- One clear home for each software artifact.
+- Package content organized by artifact rather than delivery system.
+- The same package available to Nix, Homebrew, BlueBuild, and Ansible.
+- Product code and build logic kept separate from machine and user configuration.
 
-Configuration that does not produce an artifact belongs to its owning Ansible
-role, NixOS module, or chezmoi source tree rather than this directory.
+## Boundaries
 
-The boundary is deliberately artifact-based rather than tool-based. Do not add
-`nix/`, `homebrew/`, or `bluebuild/` subgroups here: one artifact can have more
-than one delivery adapter, and those adapters should point back to the same
-package unit. Package-specific code belongs here; host policy and home-directory
-state do not.
+A package produces something installable or runnable. The surrounding delivery
+layers decide how that artifact reaches a machine.
 
-Upstream projects built from pinned or patched source must disable their Nix
-build and install check phases (`doCheck = false` and
-`doInstallCheck = false`). Homebrew source formulae must likewise keep tests
-out of their install steps; a `test do` block is acceptable because Homebrew
-only runs it through an explicit `brew test`. First-party packages such as
-`dotfiles-python`, `terminal-theme-tools`, and `hyper-window-tiling` retain
-their tests.
-
-## Units
-
-- `bluebuild-v2`: feature-gated BlueBuild CLI package
-- `dotfiles-python`: shared workstation commands
-- `equicord-settings`: generated Equicord settings and Black Rose Doll CSS
-- `fido-phone`: packaged macOS helper and private Android receiver
-- `ghidra-mcp`: combined Ghidra MCP service package
-- `ghostty-patched`: patched Ghostty build and shared patch series
-- `hyper-window-tiling`: GNOME and KDE window-tiling extensions
-- `jj-patched`: patch series consumed by the Homebrew formula
-- `terminal-theme-tools`: theme-aware launcher and C API
-- `uresourced`: pinned uresourced package
+Host policy belongs to Ansible, NixOS, or BlueBuild. User configuration belongs
+to chezmoi. This directory owns the software those systems consume, not the
+configuration of the workstation itself.

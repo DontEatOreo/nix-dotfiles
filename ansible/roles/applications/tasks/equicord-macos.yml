@@ -25,7 +25,6 @@
       User-Agent: dotfiles-ansible
     return_content: true
     status_code: 200
-    timeout: 30
   register: applications_equilotl_release_macos
   tags:
     - discord
@@ -73,7 +72,6 @@
       User-Agent: dotfiles-ansible
     return_content: true
     status_code: 200
-    timeout: 30
   register: applications_equicord_release_macos
   tags:
     - discord
