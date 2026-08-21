@@ -1,5 +1,7 @@
 import os
+from collections.abc import Iterator
 from pathlib import Path
+from shutil import which
 from subprocess import CompletedProcess, run
 
 import pytest
@@ -7,19 +9,6 @@ import pytest
 SIMULATOR = Path(__file__).with_name("bootstrap-simulate.sh")
 BOOTSTRAP = SIMULATOR.parents[1] / "bootstrap.sh"
 REPOSITORY_ROOT = SIMULATOR.parents[2]
-GENERATED_DIRECTORIES = frozenset({
-    ".ansible",
-    ".direnv",
-    ".git",
-    ".pytest_cache",
-    ".ruff_cache",
-    ".venv",
-    "__pycache__",
-    "build",
-    "dist",
-    "node_modules",
-    "zig-pkg",
-})
 
 
 def simulate(
@@ -39,6 +28,37 @@ def assert_in_order(output: str, expected: tuple[str, ...]) -> None:
     position = 0
     for value in expected:
         position = output.index(value, position) + len(value)
+
+
+def repository_files() -> Iterator[Path]:
+    git = which("git")
+    if git is None:
+        raise RuntimeError("git is required to enumerate repository files")
+
+    result = run(
+        [git, "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+        check=True,
+        capture_output=True,
+        cwd=REPOSITORY_ROOT,
+        text=True,
+    )
+    yield from (
+        REPOSITORY_ROOT / relative_path
+        for relative_path in result.stdout.split("\0")
+        if relative_path
+    )
+
+
+def is_bash_script_without_shellcheck_directive(path: Path) -> bool:
+    if not path.is_file():
+        return False
+
+    with path.open("rb") as source_file:
+        shebang = source_file.readline()
+        shellcheck_directive = source_file.readline().rstrip(b"\r\n")
+
+    is_bash_script = shebang.startswith(b"#!") and b"bash" in shebang
+    return is_bash_script and shellcheck_directive != b"# shellcheck shell=bash"
 
 
 def test_setup_simulation_runs_every_phase_once_in_order() -> None:
@@ -272,22 +292,10 @@ def test_rosetta_is_rejected_before_bootstrap() -> None:
 
 
 def test_every_bash_script_declares_its_shellcheck_dialect() -> None:
-    missing_directive: list[str] = []
-
-    for directory, child_directories, filenames in os.walk(REPOSITORY_ROOT):
-        child_directories[:] = [
-            name for name in child_directories if name not in GENERATED_DIRECTORIES
-        ]
-        for filename in filenames:
-            path = Path(directory, filename)
-            if not path.is_file():
-                continue
-            with path.open("rb") as source_file:
-                shebang = source_file.readline()
-                shellcheck_directive = source_file.readline().rstrip(b"\r\n")
-            if not shebang.startswith(b"#!") or b"bash" not in shebang:
-                continue
-            if shellcheck_directive != b"# shellcheck shell=bash":
-                missing_directive.append(str(path.relative_to(REPOSITORY_ROOT)))
+    missing_directive = [
+        str(path.relative_to(REPOSITORY_ROOT))
+        for path in repository_files()
+        if is_bash_script_without_shellcheck_directive(path)
+    ]
 
     assert not missing_directive

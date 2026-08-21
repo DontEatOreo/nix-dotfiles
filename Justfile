@@ -1,33 +1,36 @@
 #!/usr/bin/env -S just --justfile
 
+set minimum-version := "1.58.0"
+set unstable
+set lists
 set default-list
 set default-script
 set script-interpreter := ['bash', '-euo', 'pipefail']
 
 image_name := env("SPECTRUM_IMAGE_NAME", "spectrum")
 local_ref := "localhost/" + image_name + ":latest_linux_amd64"
-compose := env("COMPOSE", "podman-compose")
-podman := env("PODMAN", "podman")
+compose := split(env("COMPOSE", "podman-compose"))
+podman := split(env("PODMAN", "podman"))
 determinate_nix_installer_url := "https://install.determinate.systems/nix"
 
 host_os := os()
 repo_dir := justfile_directory()
 
 homebrew_prefix := env("HOMEBREW_PREFIX", if host_os == "macos" { "/opt/homebrew" } else { "/home/linuxbrew/.linuxbrew" })
-homebrew_gnu_formulae := "coreutils findutils gnu-sed grep gawk gnu-tar gnu-which diffutils make"
-homebrew_gnu_path := if host_os == "macos" { replace(append("/libexec/gnubin", prepend(homebrew_prefix / "opt/", homebrew_gnu_formulae)), " ", PATH_VAR_SEP) + PATH_VAR_SEP } else { "" }
+homebrew_gnu_formulae := ['coreutils', 'findutils', 'gnu-sed', 'grep', 'gawk', 'gnu-tar', 'gnu-which', 'diffutils', 'make']
+homebrew_gnu_path := if host_os == "macos" { join_list(append("/libexec/gnubin", prepend(homebrew_prefix / "opt/", homebrew_gnu_formulae)), PATH_VAR_SEP) + PATH_VAR_SEP } else { "" }
 homebrew_path := homebrew_gnu_path + homebrew_prefix / "bin" + PATH_VAR_SEP + homebrew_prefix / "sbin"
 nix_bin_dir := "/nix/var/nix/profiles/default/bin"
 nix_bin := nix_bin_dir / "nix"
 nix_profile_bin_dir := home_directory() / ".nix-profile/bin"
 nixos_profile_bin_dir := "/run/current-system/sw/bin"
-nix_profile_tools := "deadnix:deadnix nh:nh nil:nil nix-instantiate:nix nom:nix-output-monitor nix-tree:nix-tree nixd:nixd nixfmt:nixfmt"
+nix_profile_tools := ['deadnix:deadnix', 'nh:nh', 'nil:nil', 'nix-instantiate:nix', 'nom:nix-output-monitor', 'nix-tree:nix-tree', 'nixd:nixd', 'nixfmt:nixfmt']
 
-doctor_setup_commands := "bash curl git sudo"
-doctor_format_commands := "git nix"
-doctor_ansible_commands := "ansible-doc ansible-galaxy ansible-lint ansible-playbook yamllint"
-doctor_lint_commands := "actionlint chezmoi deadnix hadolint jq lua luacheck nix-instantiate rumdl shellcheck taplo uv zig zizmor " + doctor_format_commands + " " + doctor_ansible_commands
-doctor_all_commands := doctor_lint_commands + " bash curl sudo watchexec"
+doctor_setup_commands := ['bash', 'curl', 'git', 'sudo']
+doctor_format_commands := ['git', 'nix']
+doctor_ansible_commands := ['ansible-doc', 'ansible-galaxy', 'ansible-lint', 'ansible-playbook', 'yamllint']
+doctor_lint_commands := ['actionlint', 'bundle', 'chezmoi', 'deadnix', 'hadolint', 'jq', 'lua', 'luacheck', 'nix-instantiate', 'ruby', 'rumdl', 'shellcheck', 'taplo', 'uv', 'zig', 'zizmor'] ++ doctor_format_commands ++ doctor_ansible_commands
+doctor_all_commands := doctor_lint_commands ++ ['bash', 'curl', 'sudo', 'watchexec']
 
 export PATH := homebrew_path + PATH_VAR_SEP + nix_bin_dir + PATH_VAR_SEP + nix_profile_bin_dir + PATH_VAR_SEP + nixos_profile_bin_dir + PATH_VAR_SEP + env("PATH", "")
 # Development recipes are reproducible by default; dependency changes must be
@@ -47,14 +50,14 @@ alias up := update
 alias w := watch
 
 # Check commands required for a workflow profile.
-[arg('profile', pattern='status|reboot|install|build|setup|apply|shell|spectrum|fmt|lint|zig|ansible|bun|smoke|nix|watch|check|all', help='status, reboot, install, build, setup, apply, shell, spectrum, fmt, lint, zig, ansible, bun, smoke, nix, watch, check, or all')]
+[arg('profile', pattern=['status', 'reboot', 'install', 'build', 'setup', 'apply', 'shell', 'spectrum', 'fmt', 'lint', 'zig', 'ansible', 'bun', 'smoke', 'nix', 'watch', 'check', 'all'], help='status, reboot, install, build, setup, apply, shell, spectrum, fmt, lint, zig, ansible, bun, smoke, nix, watch, check, or all')]
 [group('system')]
 doctor profile="setup":
     profile={{ quote(profile) }}
     host_os={{ quote(host_os) }}
     commands=()
-    podman_command={{ quote(podman) }}
-    compose_command={{ quote(compose) }}
+    podman_command=({{ quote(podman) }})
+    compose_command=({{ quote(compose) }})
 
     linux_commands() {
       if [[ $host_os == linux ]]; then
@@ -68,20 +71,20 @@ doctor profile="setup":
       status) linux_commands bootc ;;
       reboot) linux_commands systemctl ;;
       install) linux_commands bootc sudo ;;
-      build | spectrum) commands=(bluebuild check-jsonschema jq "${podman_command%% *}" skopeo) ;;
-      setup) commands=({{ doctor_setup_commands }}) ;;
+      build | spectrum) commands=(bluebuild check-jsonschema jq "${podman_command[0]}" skopeo) ;;
+      setup) commands=({{ quote(doctor_setup_commands) }}) ;;
       apply) commands=(chezmoi) ;;
       shell) commands=(shellcheck shfmt) ;;
-      fmt) commands=({{ doctor_format_commands }}) ;;
-      lint | check) commands=({{ doctor_lint_commands }}) ;;
+      fmt) commands=({{ quote(doctor_format_commands) }}) ;;
+      lint | check) commands=({{ quote(doctor_lint_commands) }}) ;;
       zig) commands=(zig) ;;
-      ansible) commands=({{ doctor_ansible_commands }}) ;;
+      ansible) commands=({{ quote(doctor_ansible_commands) }}) ;;
       bun) commands=(bun) ;;
-      smoke) commands=("${compose_command%% *}") ;;
+      smoke) commands=("${compose_command[0]}") ;;
       nix) commands=(bash curl sudo) ;;
       watch) commands=(watchexec) ;;
       all)
-        commands=({{ doctor_all_commands }} "${podman_command%% *}" "${compose_command%% *}")
+        commands=({{ quote(doctor_all_commands) }} "${podman_command[0]}" "${compose_command[0]}")
         if [[ $host_os == linux ]]; then
           commands+=(bootc systemctl)
         fi
@@ -177,7 +180,7 @@ clean:
     }
 
     clean_podman() {
-      {{ podman }} system prune --all --force |
+      {{ quote(podman) }} system prune --all --force |
         sed 's/^Total reclaimed space:/Podman logical reclaimed total (not physical disk usage):/'
     }
 
@@ -185,7 +188,7 @@ clean:
       # Rootful Podman performs Spectrum builds. Failed commits can leave
       # Buildah working containers behind, and ordinary system prune does not
       # remove them without --build.
-      sudo {{ podman }} system prune --force --build |
+      sudo {{ quote(podman) }} system prune --force --build |
         sed 's/^Total reclaimed space:/Podman logical reclaimed total (not physical disk usage):/'
     }
 
@@ -322,8 +325,7 @@ spectrum-build: (_linux-only recipe_name())
 [group('spectrum')]
 [linux]
 spectrum-inspect target=local_ref: (doctor 'build')
-    read -r -a podman_command <<< {{ quote(podman) }}
-    "${podman_command[@]}" run --rm {{ quote(target) }} bootc container lint
+    {{ quote(podman) }} run --rm {{ quote(target) }} bootc container lint
 
 [arg('target', help='Built image reference to inspect')]
 [group('spectrum')]
@@ -333,15 +335,13 @@ spectrum-inspect target=local_ref: (_linux-only recipe_name())
 # Build the Fedora smoke-test image and run its default validation command.
 [group('containers')]
 smoke: (doctor 'smoke')
-    read -r -a compose_command <<< {{ quote(compose) }}
-    "${compose_command[@]}" build
-    "${compose_command[@]}" run --rm fedora
+    {{ quote(compose) }} build
+    {{ quote(compose) }} run --rm -T fedora
 
 # Open an interactive shell in the Fedora smoke-test image.
 [group('containers')]
 smoke-shell: (doctor 'smoke')
-    read -r -a compose_command <<< {{ quote(compose) }}
-    "${compose_command[@]}" run --rm fedora-shell
+    {{ quote(compose) }} --profile shell run --rm fedora-shell
 
 # Install Nix on Linux, accounting for immutable composefs hosts.
 [linux]
@@ -381,7 +381,7 @@ nix: (doctor 'nix') _ensure-nix
     fi
 
     missing=()
-    for spec in {{ nix_profile_tools }}; do
+    for spec in {{ quote(nix_profile_tools) }}; do
       bin=${spec%%:*}
       source=${spec#*:}
       if ! command -v "$bin" >/dev/null 2>&1 &&
@@ -410,7 +410,15 @@ nix: (doctor 'nix') _ensure-nix
 [group('setup')]
 apply: (doctor 'apply')
     chezmoi init --source {{ quote(repo_dir) }}
-    chezmoi apply --refresh-externals=auto --force
+    chezmoi apply --refresh-externals=auto
+
+# Preview pending chezmoi-managed dotfile changes without refreshing externals.
+[group('setup')]
+dotfiles-diff: (doctor 'apply')
+    chezmoi \
+      --source {{ quote(repo_dir) }} \
+      --refresh-externals=never \
+      diff
 
 [doc('Bootstrap userland, apply dotfiles, then apply host stages.')]
 [group('setup')]
@@ -469,7 +477,7 @@ _format mode:
 
 [parallel]
 [private]
-_lint-files: _check-worktree-paths (_run-files 'jq' 'empty' '*.json flake.lock :(exclude).vscode/settings.json') (_run-files 'hadolint' '' 'Dockerfile Containerfile') (_run-files 'luacheck' '--globals Command cx ya --' '*.lua') (_run-files 'rumdl' 'check --respect-gitignore --exclude packages/terminal-theme-tools/vendor/** .' '') _lint-nix (_run-files 'uv' 'run ruff check .' '') _lint-shell-files _lint-shell-templates-portable _lint-templates (_run-files 'taplo' 'lint' '*.toml') _lint-xml
+_lint-files: _check-worktree-paths _lint-chezmoi-source (_run-files 'jq' ['*.json', 'flake.lock', ':(exclude).vscode/settings.json'] ['empty']) (_run-files 'hadolint' ['Dockerfile', 'Containerfile']) (_run-files 'luacheck' ['*.lua'] ['--globals', 'Command', 'cx', 'ya', '--']) (_run 'rumdl' ['check', '--respect-gitignore', '--exclude', 'packages/terminal-theme-tools/vendor/**', '.']) _lint-nix (_run 'uv' ['run', 'ruff', 'check', '.']) _lint-shell-files _lint-shell-templates-portable _lint-templates (_run-files 'taplo' ['*.toml'] ['lint']) _lint-xml
 
 [private]
 _check-worktree-paths:
@@ -487,6 +495,116 @@ _check-worktree-paths:
       fi
     done < <(git ls-files -z --cached --others --exclude-standard --)
     exit "$broken"
+
+[private]
+_lint-chezmoi-source:
+    temporary_dir=$(mktemp -d)
+    trap 'rm -rf "$temporary_dir"' EXIT
+    managed_source_paths="$temporary_dir/managed-source-paths"
+    platforms=(
+      'darwin|{"chezmoi":{"os":"darwin","arch":"arm64","osRelease":{}}}'
+      'fedora|{"chezmoi":{"os":"linux","arch":"amd64","osRelease":{"id":"fedora"}}}'
+      'nixos|{"chezmoi":{"os":"linux","arch":"amd64","osRelease":{"id":"nixos"}}}'
+      'windows|{"chezmoi":{"os":"windows","arch":"amd64","osRelease":{}}}'
+    )
+    : > "$managed_source_paths"
+    invalid=0
+    for platform in "${platforms[@]}"; do
+      platform_name=${platform%%|*}
+      platform_override=${platform#*|}
+      destination="$temporary_dir/home-$platform_name"
+      managed_target_paths="$temporary_dir/$platform_name-managed-target-paths"
+      remove_paths="$temporary_dir/$platform_name-remove-paths"
+      render_stderr="$temporary_dir/$platform_name-render-stderr"
+      mkdir -p "$destination"
+      chezmoi \
+        --source {{ quote(repo_dir) }} \
+        --destination "$destination" \
+        --persistent-state "$temporary_dir/$platform_name-chezmoi-state.boltdb" \
+        --override-data "$platform_override" \
+        --no-tty \
+        --refresh-externals=never \
+        managed --path-style=source-relative >> "$managed_source_paths"
+      chezmoi \
+        --source {{ quote(repo_dir) }} \
+        --destination "$destination" \
+        --persistent-state "$temporary_dir/$platform_name-chezmoi-state.boltdb" \
+        --override-data "$platform_override" \
+        --no-tty \
+        --refresh-externals=never \
+        managed > "$managed_target_paths"
+      if ! chezmoi \
+        --source {{ quote(repo_dir) }} \
+        --destination "$destination" \
+        --persistent-state "$temporary_dir/$platform_name-chezmoi-state.boltdb" \
+        --override-data "$platform_override" \
+        --no-tty \
+        --refresh-externals=never \
+        apply --dry-run --force --exclude scripts,externals \
+        >/dev/null 2> "$render_stderr"; then
+        cat "$render_stderr" >&2
+        invalid=1
+      elif [[ -s $render_stderr ]]; then
+        printf 'chezmoi render warning for %s:\n' "$platform_name" >&2
+        cat "$render_stderr" >&2
+        invalid=1
+      fi
+      chezmoi \
+        --source {{ quote(repo_dir) }} \
+        --override-data "$platform_override" \
+        execute-template < dotfiles/.chezmoiremove > "$remove_paths"
+
+      while IFS= read -r remove_path || [[ -n $remove_path ]]; do
+        [[ -n $remove_path ]] || continue
+        case "$remove_path" in
+          /* | .. | ../* | */../* | */..)
+            printf 'unsafe chezmoi remove path for %s: %s\n' \
+              "$platform_name" "$remove_path" >&2
+            invalid=1
+            continue
+            ;;
+        esac
+        collision=$(awk -v removed="$remove_path" \
+          '$0 == removed || index($0, removed "/") == 1 { print; exit }' \
+          "$managed_target_paths")
+        if [[ -n $collision ]]; then
+          printf 'chezmoi removes managed path for %s: %s (%s)\n' \
+            "$platform_name" "$remove_path" "$collision" >&2
+          invalid=1
+        fi
+      done < "$remove_paths"
+    done
+    sort -u -o "$managed_source_paths" "$managed_source_paths"
+
+    source_only_entries=(package.json tsconfig.json)
+    for source_entry in "${source_only_entries[@]}"; do
+      if grep -Fqx -- "$source_entry" "$managed_source_paths"; then
+        printf 'chezmoi manages source-only workspace file: dotfiles/%s\n' \
+          "$source_entry" >&2
+        invalid=1
+      fi
+    done
+
+    while IFS= read -r -d '' ignored_source_path; do
+      source_entry=${ignored_source_path#dotfiles/}
+      source_entry=${source_entry%/}
+      if grep -Fqx -- "$source_entry" "$managed_source_paths"; then
+        printf 'chezmoi manages Git-ignored source artifact: %s\n' \
+          "$ignored_source_path" >&2
+        invalid=1
+      fi
+    done < <(
+      git ls-files \
+        --others \
+        --ignored \
+        --exclude-standard \
+        --directory \
+        --no-empty-directory \
+        -z \
+        -- dotfiles
+    )
+
+    exit "$invalid"
 
 [private]
 _lint-nix:
@@ -657,21 +775,22 @@ _lint-shell-files:
     shellcheck -x "${shell_files[@]}"
 
 [private]
-_run-files executable arguments patterns:
-    printf '==> %s %s\n' {{ quote(executable) }} {{ quote(arguments) }}
-    argument_array=()
-    [[ -z {{ quote(arguments) }} ]] || read -r -a argument_array <<< {{ quote(arguments) }}
-    if [[ -z {{ quote(patterns) }} ]]; then
-      {{ quote(executable) }} "${argument_array[@]}"
+_run executable +arguments:
+    printf '==> %s\n' {{ quote(join_list([executable, arguments])) }}
+    {{ quote(require(executable)) }} {{ quote(arguments) }}
+
+[private]
+_run-files executable patterns arguments=[]:
+    printf '==> %s\n' {{ quote(join_list([executable, arguments])) }}
+    if (({{ len(patterns) }} == 0)); then
+      {{ quote(require(executable)) }} {{ quote(arguments) }}
       exit
     fi
-    pattern_array=()
-    read -r -a pattern_array <<< {{ quote(patterns) }}
     files=()
     while IFS= read -r -d '' file; do
       [[ -f $file && ! -L $file ]] && files+=("$file")
-    done < <(git ls-files -z --cached --others --exclude-standard -- "${pattern_array[@]}")
-    ((${#files[@]} == 0)) || {{ quote(executable) }} "${argument_array[@]}" "${files[@]}"
+    done < <(git ls-files -z --cached --others --exclude-standard -- {{ quote(patterns) }})
+    ((${#files[@]} == 0)) || {{ quote(require(executable)) }} {{ quote(arguments) }} "${files[@]}"
 
 [private]
 _check-python: python-complexity python-dead-code python-dependencies python-typecheck python-test
@@ -730,7 +849,7 @@ _check-ansible: (doctor 'ansible') _deps
 [private]
 _check-github-actions:
     actionlint
-    zizmor --persona=pedantic .
+    zizmor --persona=pedantic .github/workflows .github/actions
 
 [private]
 _check-bun: (doctor 'bun')
@@ -759,13 +878,22 @@ _check-lua:
       lua "$test_file" "$main_file"
     done < <(git ls-files -z --cached --others --exclude-standard -- '*.yazi/test.lua')
 
+[private]
+_check-ruby:
+    bundle check
+    bundle exec rubocop
+    while IFS= read -r -d '' file; do
+      ruby -c "$file" >/dev/null
+    done < <(git ls-files -z --cached --others --exclude-standard -- '*.rb' Brewfile Gemfile)
+    bundle exec ruby -Itest test/ruby_tools_test.rb
+
 # Lint repository source files and run project validation.
 [group('dev')]
 lint: (doctor 'lint') check-format _lint-checks
 
 [parallel]
 [private]
-_lint-checks: _lint-files _check-python _check-zig _check-ansible _check-github-actions _check-bun _check-lua
+_lint-checks: _lint-files _check-python _check-zig _check-ansible _check-github-actions _check-bun _check-lua _check-ruby
 
 # Run the repo validation suite.
 [group('dev')]
