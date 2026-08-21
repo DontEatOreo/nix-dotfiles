@@ -78,21 +78,19 @@ RUN --mount=type=cache,id=dotfiles-uv-${TARGETPLATFORM},sharing=shared,target=/t
 
 FROM tool-build-base AS zig-tool-build
 
-COPY --chown=${TEST_UID}:${TEST_GID} ansible/roles/tools/defaults/ ansible/roles/tools/defaults/
-COPY --chown=${TEST_UID}:${TEST_GID} ansible/roles/tools/tasks/zig.yml ansible/roles/tools/tasks/zig.yml
 COPY --chown=${TEST_UID}:${TEST_GID} packages/terminal-theme-tools/ packages/terminal-theme-tools/
+WORKDIR /workspace/dotfiles/packages/terminal-theme-tools
 
 # Zig's caches provide their own inter-process locking. Keep its global,
 # project-local, and package caches distinct so they can be reused independently.
-RUN mkdir -p packages/terminal-theme-tools/.zig-cache packages/terminal-theme-tools/zig-pkg
+RUN mkdir -p .zig-cache zig-pkg
 
 RUN --mount=type=cache,id=dotfiles-zig-global-${TARGETPLATFORM},sharing=shared,target=/tmp/dotfiles-zig-cache,uid=${TEST_UID},gid=${TEST_GID} \
     --mount=type=cache,id=dotfiles-zig-local-${TARGETPLATFORM},sharing=shared,target=/workspace/dotfiles/packages/terminal-theme-tools/.zig-cache,uid=${TEST_UID},gid=${TEST_GID} \
     --mount=type=cache,id=dotfiles-zig-packages-${TARGETPLATFORM},sharing=shared,target=/workspace/dotfiles/packages/terminal-theme-tools/zig-pkg,uid=${TEST_UID},gid=${TEST_GID} \
     set -eu; \
-    export ANSIBLE_BECOME_ASK_PASS=false; \
     export ZIG_GLOBAL_CACHE_DIR=/tmp/dotfiles-zig-cache; \
-    ansible-playbook containers/fedora-smoke-test.yml --tags zig
+    zig build --release=small --prefix "${HOME}/.local"
 
 FROM tool-build-base AS upstream-tool-build
 

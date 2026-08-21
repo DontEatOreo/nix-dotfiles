@@ -22,7 +22,6 @@ class TerminalThemeTools < Formula
   license "MIT"
 
   depends_on "zig" => :build
-  depends_on :macos
 
   resource "ghostty" do
     url ghostty.fetch("url")

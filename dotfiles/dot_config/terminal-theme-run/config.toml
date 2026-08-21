@@ -181,4 +181,4 @@ integration = "starship"
 [[runner]]
 name = "helix"
 aliases = ["hx"]
-programs = ["~/.local/share/dotfiles/helix-tip/bin/hx", "hx", "helix"]
+programs = ["hx", "helix"]

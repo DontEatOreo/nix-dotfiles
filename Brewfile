@@ -14,6 +14,7 @@ brew "go"
 brew "gradle"
 brew "maven"
 brew "node"
+brew "opencode"
 brew "openjdk@21"
 brew "ruby"
 brew "ruby-lsp"
@@ -111,7 +112,7 @@ brew "yara"
 brew "gdb" if OS.linux?
 
 # Editors and terminals
-# Helix tip is built from the pinned source by the applications role.
+brew "4evy/dotfiles/helix-tip"
 brew "yazi"
 
 # File management and archives
@@ -167,14 +168,15 @@ brew "btop"
 brew "fastfetch"
 brew "fzf"
 brew "ghidra"
-# Linux Kanata is installed by the keyboard role with uinput/systemd setup.
-# macOS uses the local Ansible-installed Kanata formula with command actions.
+brew "4evy/dotfiles/kanata-with-cmd"
+brew "4evy/dotfiles/terminal-theme-tools"
+
+# The host integration for Kanata remains in Ansible: Linux needs uinput,
+# udev, and systemd setup, while macOS needs its signed launch daemon.
 if OS.mac?
   brew "gettext"
   brew "hidapi"
-  brew "4evy/dotfiles/terminal-theme-tools"
   brew "zig"
-  brew "4evy/dotfiles/kanata-with-cmd"
 end
 brew "lsof"
 brew "ncdu"

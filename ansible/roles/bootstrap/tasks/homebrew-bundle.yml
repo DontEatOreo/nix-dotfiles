@@ -6,6 +6,7 @@
   tags: &bootstrap_homebrew_tap_tags
     - alt-tab
     - ghostty
+    - helix
     - jj
     - kanata
     - raycast
@@ -54,7 +55,6 @@
     - shottr
 
 - name: Build terminal theme tools source archive for the local tap
-  when: platform_is_macos
   tags:
     - terminal-theme-tools
   block:
@@ -163,6 +163,5 @@
 
 - name: Reconcile the installed terminal theme tools source
   ansible.builtin.import_tasks: homebrew-terminal-theme-tools.yml
-  when: platform_is_macos
   tags:
     - terminal-theme-tools

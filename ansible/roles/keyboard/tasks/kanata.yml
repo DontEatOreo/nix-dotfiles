@@ -1,37 +1,16 @@
 ---
-- name: Check out Kanata source # noqa: latest[git]
-  ansible.builtin.git:
-    repo: "{{ keyboard_kanata_repository }}"
-    dest: "{{ keyboard_kanata_source_dir }}"
-    version: HEAD
-    depth: 1
-    force: true
-  register: keyboard_kanata_source
-
-- name: Check existing staged Kanata binary
+- name: Check the Homebrew-managed Kanata binary
   ansible.builtin.stat:
-    path: "{{ keyboard_kanata_staged_binary }}"
-  register: keyboard_kanata_staged_before_build
+    path: "{{ platform_homebrew_prefix }}/bin/kanata"
+  register: keyboard_kanata_homebrew_binary
 
-- name: Build staged Kanata binary
-  ansible.builtin.command:
-    argv:
-      - cargo
-      - install
-      - --path
-      - "{{ keyboard_kanata_source_dir }}"
-      - --features
-      - cmd
-      - --root
-      - "{{ keyboard_kanata_install_root }}"
-      - --force
-      - --locked
-  environment:
-    PATH: "{{ dotfiles_home_dir }}/.cargo/bin:{{ dotfiles_bin_dir }}:{{ dotfiles_path }}"
-  changed_when: true
-  when: >-
-    keyboard_kanata_source is changed
-    or not keyboard_kanata_staged_before_build.stat.executable | default(false)
+- name: Require Homebrew-managed Kanata
+  ansible.builtin.assert:
+    that:
+      - keyboard_kanata_homebrew_binary.stat.executable | default(false)
+    fail_msg: >-
+      Kanata is missing from Homebrew. Apply the Brewfile before configuring
+      the Linux keyboard service.
 
 - name: Create Kanata system directories
   ansible.builtin.file:
@@ -47,7 +26,7 @@
 
 - name: Install Kanata binary
   ansible.builtin.copy:
-    src: "{{ keyboard_kanata_staged_binary }}"
+    src: "{{ platform_homebrew_prefix }}/bin/kanata"
     dest: /usr/local/bin/kanata
     remote_src: true
     mode: "0755"

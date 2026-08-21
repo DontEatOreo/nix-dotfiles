@@ -110,8 +110,7 @@ fi
 {{- end }}
 {{- if not $isNixOS }}
 _dotfiles_path_append_once \
-	"$HOME/.local/bin" \
-	"$HOME/.local/share/dotfiles/helix-tip/bin"
+	"$HOME/.local/bin"
 if [[ -n "${JAVA_HOME:-}" && -x "$JAVA_HOME/bin/java" ]]; then
 	_dotfiles_path_append_once "$JAVA_HOME/bin"
 fi

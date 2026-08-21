@@ -1,10 +1,4 @@
 ---
-- name: Build repo-local Zig commands
-  ansible.builtin.import_tasks: zig.yml
-  tags:
-    - repo-tools
-    - zig
-
 - name: Link uv-installed Python command aliases
   ansible.builtin.import_tasks: python.yml
   tags:

@@ -1,13 +1,4 @@
 ---
-keyboard_kanata_staged_binary: >-
-  {{ dotfiles_data_dir }}/host/bin-staging/kanata/root/bin/kanata
-keyboard_kanata_source_dir: "{{ dotfiles_cache_dir }}/sources/kanata"
-keyboard_kanata_repository: >-
-  https://github.com/{{ dotfiles_pins.kanata.repository.owner }}/{{
-    dotfiles_pins.kanata.repository.repo
-  }}.git
-keyboard_kanata_install_root: >-
-  {{ dotfiles_data_dir }}/host/bin-staging/kanata/root
 keyboard_keep_input_remapper: >-
   {{
     lookup('ansible.builtin.env', 'DOTFILES_KEEP_INPUT_REMAPPER') == '1'

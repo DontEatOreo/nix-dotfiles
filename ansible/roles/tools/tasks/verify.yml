@@ -1,21 +1,12 @@
 ---
-- name: Verify repo-local Zig command binaries
-  ansible.builtin.command:
-    argv:
-      - "{{ dotfiles_bin_dir }}/{{ item.1 }}"
-      - "--version"
-  changed_when: false
-  loop: "{{ tools_zig_tools | subelements('bins') }}"
-  when: platform_system in item.0.platforms
-
 - name: Verify Homebrew-managed command binaries
   ansible.builtin.command:
     argv:
-      - "{{ platform_homebrew_prefix }}/bin/{{ item }}"
+      - >-
+        {{ tools_homebrew_prefix | default(platform_homebrew_prefix) }}/bin/{{ item }}
       - "--version"
   changed_when: false
   loop: "{{ tools_homebrew_commands }}"
-  when: platform_is_macos
 
 - name: Verify uv-installed Python command binaries
   ansible.builtin.command:

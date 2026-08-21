@@ -17,18 +17,3 @@ applications_helium_linux_current: >-
 # renovate: datasource=git-refs depName=https://github.com/4evy/browser currentValue=HEAD
 applications_helium_browser_go_package: >-
   github.com/4evy/browser/cmd/browser@b4f39de39c1d2cf516e78cc2a52803777f6fb02c
-applications_helix_revision: >-
-  {{
-    lookup('ansible.builtin.env', 'HELIX_TIP_REVISION')
-    | default(dotfiles_pins.helix.revision, true)
-  }}
-applications_helix_repository: >-
-  https://github.com/{{ dotfiles_pins.helix.repository.owner }}/{{
-    dotfiles_pins.helix.repository.repo
-  }}.git
-applications_helix_cache_dir: "{{ dotfiles_cache_dir }}/helix"
-applications_helix_source_dir: "{{ applications_helix_cache_dir }}/source"
-applications_helix_install_prefix: "{{ dotfiles_data_dir }}/helix-tip"
-applications_helix_runtime_dir: >-
-  {{ applications_helix_install_prefix }}/libexec/runtime
-applications_helix_executable: "{{ applications_helix_install_prefix }}/bin/hx"

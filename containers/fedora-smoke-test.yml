@@ -29,16 +29,6 @@
       tags:
         - python
 
-    - name: Build the repository Zig tools
-      ansible.builtin.include_role:
-        name: tools
-        tasks_from: zig
-        apply:
-          tags:
-            - zig
-      tags:
-        - zig
-
     - name: Install upstream script tools
       ansible.builtin.include_role:
         name: tools
@@ -49,12 +39,14 @@
       tags:
         - upstream
 
-    - name: Verify every installed repo-local tool
+    - name: Verify every installed smoke-test tool
       ansible.builtin.include_role:
         name: tools
         tasks_from: verify
         apply:
           tags:
             - verify
+      vars:
+        tools_homebrew_prefix: "{{ dotfiles_home_dir }}/.local"
       tags:
         - verify

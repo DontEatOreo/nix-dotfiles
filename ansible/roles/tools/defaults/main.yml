@@ -1,12 +1,4 @@
 ---
-tools_zig_tools:
-  - name: terminal-theme-tools
-    source_dir: packages/terminal-theme-tools
-    bins:
-      - terminal-theme-run
-    platforms:
-      - Linux
-
 tools_homebrew_commands:
   - terminal-theme-run
 
@@ -24,8 +16,6 @@ tools_upstream_script_tools:
 tools_bun_global_packages:
   - package: "@openai/codex"
     bin: codex
-  - package: opencode-ai
-    bin: opencode
 
 tools_determinate_nix_installer_url: https://install.determinate.systems/nix
 tools_determinate_nix_pkg_url: https://install.determinate.systems/determinate-pkg/stable/Universal
