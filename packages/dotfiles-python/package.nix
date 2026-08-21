@@ -20,7 +20,6 @@ python314Packages.buildPythonApplication {
       (repositoryRoot + /ansible/bootstrap.sh)
       (repositoryRoot + /ansible/requirements.yml)
       (repositoryRoot + /ansible/site.yml)
-      (repositoryRoot + /ansible/plugins/filter/dotfiles.py)
       (repositoryRoot + /ansible/library/dotfiles_codesign.py)
       (repositoryRoot + /ansible/library/dotfiles_selinux_service.py)
       (repositoryRoot + /ansible/roles/keyboard/files/toshy/merge-slices.py)
