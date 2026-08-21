@@ -2,7 +2,7 @@ name: Renovate
 
 on:
   schedule:
-    - cron: "37 */6 * * *"
+    - cron: "37 0 */2 * *"
   push:
     branches:
       - master
@@ -42,7 +42,7 @@ jobs:
     timeout-minutes: 45
     permissions:
       contents: write # needed to create and update dependency branches
-      pull-requests: read # needed to inspect existing dependency pull requests
+      pull-requests: write # needed to inspect and create fallback dependency PRs
       statuses: write # needed to report Renovate branch status
     steps:
       - name: Checkout Repository
@@ -77,8 +77,6 @@ jobs:
         env:
           LOG_LEVEL: info
           RENOVATE_TOKEN: ${{ github.token }}
-          RENOVATE_GIT_AUTHOR: "4evy <git@evy.pink>"
-          RENOVATE_GIT_PRIVATE_KEY: ${{ secrets.RENOVATE_GIT_PRIVATE_KEY }}
           RENOVATE_ONBOARDING: "false"
           RENOVATE_REPOSITORIES: '["${{ github.repository }}"]'
           RENOVATE_ALLOWED_COMMANDS: >-

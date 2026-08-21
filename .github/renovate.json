@@ -1,24 +1,25 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:best-practices"],
-  "gitAuthor": "4evy <git@evy.pink>",
-  "gitIgnoredAuthors": ["41898282+github-actions[bot]@users.noreply.github.com"],
+  "extends": ["config:best-practices", "group:all"],
+  "timezone": "Europe/Sofia",
   "dependencyDashboard": false,
   "automerge": true,
   "automergeType": "branch",
   "ignoreTests": true,
-  "rebaseWhen": "auto",
-  "prConcurrentLimit": 0,
-  "prHourlyLimit": 0,
+  "commitBodyTable": true,
   "vulnerabilityAlerts": {
     "enabled": false
+  },
+  "nix": {
+    "enabled": true
   },
   "pep621": {
     "enabled": true
   },
   "lockFileMaintenance": {
     "enabled": true,
-    "automerge": true
+    "automerge": true,
+    "schedule": ["* 0-5 1 * *"]
   },
   "customManagers": [
     {
@@ -106,17 +107,6 @@
     }
   ],
   "packageRules": [
-    {
-      "description": "Keep pyproject.toml and uv.lock Python updates together.",
-      "matchManagers": ["pep621"],
-      "groupName": "python dependencies"
-    },
-    {
-      "description": "Keep the Spectrum Bluefin base image on the selected stream",
-      "matchDepNames": ["ghcr.io/projectbluefin/bluefin-nvidia"],
-      "matchUpdateTypes": ["digest", "pin", "pinDigest"],
-      "schedule": ["at any time"]
-    },
     {
       "description": "Let npins own grouped lock updates and hash regeneration",
       "matchManagers": ["custom.jsonata"],
