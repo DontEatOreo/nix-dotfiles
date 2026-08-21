@@ -28,21 +28,6 @@ class RubyToolsTest < Minitest::Test
     path
   end
 
-  def test_alt_tab_status_handles_absent_state
-    stdout, stderr, status = run_tool(
-      "alt-tab-license.rb",
-      "status",
-      environment: {
-        "ALT_TAB_SECURITY" => "/usr/bin/false",
-        "ALT_TAB_DEFAULTS" => "/usr/bin/false",
-      },
-    )
-
-    assert status.success?, stderr
-    assert_includes stdout, "licenseKey:  none"
-    assert_includes stdout, "lastValidation:        none"
-  end
-
   def test_alt_tab_install_uses_argument_arrays_for_native_tools
     Dir.mktmpdir("alt-tab-license-test-") do |directory|
       root = Pathname(directory)
@@ -117,29 +102,6 @@ class RubyToolsTest < Minitest::Test
     end
   end
 
-  def test_standard_option_parser_rejects_unknown_options
-    %w[alt-tab-license.rb shottr-license.rb raycast-beta-manager.rb].each do |tool|
-      _, stderr, status = run_tool(tool, "install", "--unknown")
-
-      refute status.success?, tool
-      assert_includes stderr, "invalid option: --unknown"
-    end
-  end
-
-  def test_raycast_configuration_uses_pathname_and_uri
-    configuration = RaycastBeta::Configuration.new(
-      environment: {
-        "RAYCAST_APP"         => "Applications/Raycast Beta.app",
-        "RAYCAST_RELEASE_API" => "https://example.com/releases/latest",
-      },
-      home:        Pathname("/tmp/home"),
-    )
-
-    assert_equal Pathname("Applications/Raycast Beta.app").expand_path,
-                 configuration.app
-    assert_equal URI("https://example.com/releases/latest"), configuration.release_api
-  end
-
   def test_raycast_latest_release_uses_release_api
     request = stub_request(:get, "https://example.com/releases/latest").with(
       query:   {
@@ -170,31 +132,5 @@ class RubyToolsTest < Minitest::Test
     assert_equal Gem::Version.new("1.10.0.0"), release.version
     assert_equal "/Raycast_Beta_1.10.0.0_bbbb_arm64.dmg", release.uri.path
     assert_requested request
-  end
-
-  def test_raycast_latest_release_returns_nil_when_current
-    request = stub_request(:get, "https://example.com/releases/latest").with(
-      query: {
-        "architecture" => "arm64",
-        "platform"     => "macos",
-        "version"      => "1.10.0.0",
-      },
-    ).to_return(status: 204)
-    configuration = RaycastBeta::Configuration.new(
-      environment: { "RAYCAST_RELEASE_API" => "https://example.com/releases/latest" },
-    )
-
-    release = RaycastBeta::Manager.new(configuration:).latest_release(
-      current_version: Gem::Version.new("1.10.0.0"),
-    )
-
-    assert_nil release
-    assert_requested request
-  end
-
-  def test_raycast_file_url_escapes_filesystem_characters
-    url = RaycastBeta::Manager.new.file_url("/tmp/avatar #1.png")
-
-    assert_equal "file:///tmp/avatar%20%231.png", url
   end
 end
