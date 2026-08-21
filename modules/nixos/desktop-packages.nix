@@ -31,7 +31,6 @@ let
     "--enable-features=${concatStringsSep "," chromiumFeatures}"
     "--disable-features=${concatStringsSep "," chromiumDisabledFeatures}"
     "--omnibox-autocomplete-filtering=search"
-    "--set-user-color=244,184,228"
     "--set-color-scheme=dark"
     "--set-color-variant=tonal_spot"
     "--ignore-gpu-blocklist"

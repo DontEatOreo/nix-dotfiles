@@ -14,24 +14,6 @@ applications_helium_linux_current: >-
     | replace('${config_home}', dotfiles_config_home)
     | replace('${data_home}', dotfiles_data_home)
   }}
-applications_black_rose_doll_palette: >-
-  {{
-    lookup(
-      'file',
-      dotfiles_repo_root
-      ~ '/dotfiles/.chezmoitemplates/black_rose_doll_palette.json'
-    )
-    | from_json
-  }}
-applications_helium_accent_rgb: >-
-  {{
-    [
-      applications_black_rose_doll_palette.dark.rose[1:3] | int(base=16),
-      applications_black_rose_doll_palette.dark.rose[3:5] | int(base=16),
-      applications_black_rose_doll_palette.dark.rose[5:7] | int(base=16),
-    ]
-    | join(',')
-  }}
 # renovate: datasource=git-refs depName=https://github.com/4evy/browser currentValue=HEAD
 applications_helium_browser_go_package: >-
   github.com/4evy/browser/cmd/browser@b4f39de39c1d2cf516e78cc2a52803777f6fb02c

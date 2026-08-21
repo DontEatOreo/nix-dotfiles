@@ -86,7 +86,6 @@
       - "{{ dotfiles_bin_dir }}"
       - --input
       - "-"
-      - "--flags={{ applications_helium_runtime_flags }}"
     chdir: "{{ dotfiles_repo_root }}/browser"
     stdin: "{{ applications_helium_apply_input | to_json }}"
   environment:

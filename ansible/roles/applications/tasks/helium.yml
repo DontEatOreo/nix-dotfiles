@@ -45,23 +45,26 @@
         state: link
         force: true
 
-- name: Detect a running Helium application on macOS
+- name: Detect a running Helium application
   ansible.builtin.command:
     argv:
       - /usr/bin/pgrep
       - -f
-      - ^/Applications/Helium[.]app/
+      - >-
+        {{
+          '^/Applications/Helium[.]app/'
+          if platform_is_macos
+          else '^' ~ dotfiles_data_dir ~ '/helium/.*/helium([[:space:]]|$)'
+        }}
   register: applications_helium_running
   changed_when: false
   failed_when: applications_helium_running.rc not in [0, 1]
   check_mode: false
-  when: platform_is_macos
 
 - name: Report that Helium profile configuration is skipped
   ansible.builtin.debug:
     msg: Helium is running; skipping profile configuration.
   when:
-    - platform_is_macos
     - applications_helium_running.rc == 0
 
 - name: Configure the Helium profile
@@ -89,6 +92,4 @@
         | replace('${config_home}', dotfiles_config_home)
         | replace('${data_home}', dotfiles_data_home)
       }}
-    applications_helium_runtime_flags: >-
-      --set-user-color={{ applications_helium_accent_rgb }}
-  when: applications_helium_running.rc | default(1) == 1
+  when: applications_helium_running.rc == 1
