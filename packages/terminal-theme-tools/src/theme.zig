@@ -92,48 +92,30 @@ pub fn terminalQuery(runtime: *const config.Runtime, env: *const std.process.Env
     return if (std.mem.eql(u8, selected, constants.protocol.color_scheme)) constants.protocol.color_scheme_query else constants.protocol.background_query;
 }
 
-fn monotonicMilliseconds() i64 {
-    var ts: c.struct_timespec = undefined;
-    if (c.clock_gettime(c.CLOCK_MONOTONIC, &ts) != 0) return 0;
-    return @as(i64, @intCast(ts.tv_sec)) * constants.protocol.milliseconds_per_second + @divTrunc(@as(i64, @intCast(ts.tv_nsec)), constants.protocol.nanoseconds_per_millisecond);
-}
-
-fn writeAll(fd: c_int, bytes: []const u8) bool {
-    var written: usize = 0;
-    while (written < bytes.len) {
-        const count = c.write(fd, bytes[written..].ptr, bytes.len - written);
-        if (count < 0 and std.c.errno(count) == .INTR) continue;
-        if (count <= 0) return false;
-        written += @intCast(count);
-    }
-    return true;
-}
-
-fn probeTerminal(allocator: std.mem.Allocator, fd: c_int, query: []const u8, timeout_ms: u32) ?config.Theme {
-    if (!writeAll(fd, query)) return null;
+fn probeTerminal(allocator: std.mem.Allocator, io: std.Io, fd: c_int, query: []const u8, timeout_ms: u32) ?config.Theme {
+    const terminal: std.Io.File = .{ .handle = fd, .flags = .{ .nonblocking = false } };
+    terminal.writeStreamingAll(io, query) catch return null;
     var parser = ReportParser.init(allocator);
     defer parser.deinit();
     var buffer: [constants.protocol.terminal_buffer_bytes]u8 = undefined;
     var used: usize = 0;
-    const deadline = monotonicMilliseconds() + timeout_ms;
+    const deadline = std.Io.Clock.awake.now(io).toMilliseconds() + timeout_ms;
     while (used < buffer.len) {
-        const remaining = deadline - monotonicMilliseconds();
+        const remaining = deadline - std.Io.Clock.awake.now(io).toMilliseconds();
         if (remaining <= 0) break;
         var event = c.struct_pollfd{ .fd = fd, .events = c.POLLIN, .revents = 0 };
         const ready = c.poll(&event, 1, @intCast(@min(remaining, std.math.maxInt(c_int))));
         if (ready < 0 and std.c.errno(ready) == .INTR) continue;
         if (ready <= 0 or event.revents & c.POLLIN == 0) break;
-        const count = c.read(fd, buffer[used..].ptr, buffer.len - used);
-        if (count < 0 and std.c.errno(count) == .INTR) continue;
-        if (count <= 0) break;
+        const count = terminal.readStreaming(io, &.{buffer[used..]}) catch break;
         const start = used;
-        used += @intCast(count);
+        used += count;
         if (parser.feed(buffer[start..used])) |mode| return mode;
     }
     return parser.mode;
 }
 
-fn detectTerminal(allocator: std.mem.Allocator, runtime: *const config.Runtime, env: *const std.process.Environ.Map) ?config.Theme {
+fn detectTerminal(allocator: std.mem.Allocator, io: std.Io, runtime: *const config.Runtime, env: *const std.process.Environ.Map) ?config.Theme {
     const fd = c.open(constants.filesystem.controlling_terminal, c.O_RDWR | c.O_CLOEXEC);
     if (fd < 0) return null;
     defer _ = c.close(fd);
@@ -145,7 +127,7 @@ fn detectTerminal(allocator: std.mem.Allocator, runtime: *const config.Runtime, 
     defer _ = c.tcsetattr(fd, c.TCSADRAIN, &saved);
 
     const query = terminalQuery(runtime, env);
-    if (probeTerminal(allocator, fd, query, runtime.theme_probe_timeout_ms)) |mode| return mode;
+    if (probeTerminal(allocator, io, fd, query, runtime.theme_probe_timeout_ms)) |mode| return mode;
 
     // Kitty's color-scheme query reports the user's appearance preference and
     // is therefore preferable to inferring it from a background color. Some
@@ -153,7 +135,7 @@ fn detectTerminal(allocator: std.mem.Allocator, runtime: *const config.Runtime, 
     // identify Kitty or Ghostty, so retry with the
     // widely supported OSC 11 query before falling back to the desktop.
     if (std.mem.eql(u8, query, constants.protocol.color_scheme_query)) {
-        return probeTerminal(allocator, fd, constants.protocol.background_query, runtime.theme_probe_timeout_ms);
+        return probeTerminal(allocator, io, fd, constants.protocol.background_query, runtime.theme_probe_timeout_ms);
     }
     return null;
 }
@@ -193,7 +175,7 @@ pub fn detectWithoutTerminal(allocator: std.mem.Allocator, io: std.Io, runtime: 
 
 pub fn detect(allocator: std.mem.Allocator, io: std.Io, runtime: *const config.Runtime, env: *const std.process.Environ.Map) config.Theme {
     if (detectConfiguredEnvironment(runtime, env)) |mode| return mode;
-    if (detectTerminal(allocator, runtime, env)) |mode| return mode;
+    if (detectTerminal(allocator, io, runtime, env)) |mode| return mode;
     return detectWithoutTerminal(allocator, io, runtime, env);
 }
 

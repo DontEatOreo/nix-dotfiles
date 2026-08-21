@@ -70,8 +70,6 @@ pub const protocol = struct {
     pub const color_channel_maximum = 255.0;
     pub const light_luminance_threshold = 0.5;
     pub const terminal_buffer_bytes: usize = 128;
-    pub const milliseconds_per_second: i64 = 1000;
-    pub const nanoseconds_per_millisecond: i64 = 1_000_000;
 };
 
 pub const text = struct {

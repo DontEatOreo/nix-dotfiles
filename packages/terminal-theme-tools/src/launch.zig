@@ -93,26 +93,14 @@ pub fn resolve(allocator: std.mem.Allocator, io: std.Io, env: *const std.process
     return error.FileNotFound;
 }
 
-fn replaceAll(allocator: std.mem.Allocator, input: []const u8, needle: []const u8, replacement: []const u8) ![]const u8 {
-    var output: std.ArrayList(u8) = .empty;
-    var rest = input;
-    while (std.mem.indexOf(u8, rest, needle)) |index| {
-        try output.appendSlice(allocator, rest[0..index]);
-        try output.appendSlice(allocator, replacement);
-        rest = rest[index + needle.len ..];
-    }
-    try output.appendSlice(allocator, rest);
-    return output.toOwnedSlice(allocator);
-}
-
 fn render(allocator: std.mem.Allocator, template: []const u8, theme_name: []const u8, context: []const u8) ![]const u8 {
-    const themed = try replaceAll(allocator, template, constants.template.theme, theme_name);
-    return replaceAll(allocator, themed, constants.template.context, context);
+    const themed = try std.mem.replaceOwned(u8, allocator, template, constants.template.theme, theme_name);
+    return std.mem.replaceOwned(u8, allocator, themed, constants.template.context, context);
 }
 
 fn renderEnvironment(allocator: std.mem.Allocator, env: *const std.process.Environ.Map, template: []const u8, theme_name: []const u8) ![]const u8 {
     const themed = try render(allocator, template, theme_name, "");
-    return replaceAll(allocator, themed, constants.template.home, env.get(constants.environment.home) orelse "");
+    return std.mem.replaceOwned(u8, allocator, themed, constants.template.home, env.get(constants.environment.home) orelse "");
 }
 
 fn argumentValue(arguments: []const []const u8, flags: []const []const u8, prefixes: []const []const u8, separator: ?[]const u8) ?[]const u8 {
@@ -163,7 +151,7 @@ fn directoryContext(allocator: std.mem.Allocator, io: std.Io, env: *const std.pr
     for (integration.context_directory_commands) |command| {
         var argv: std.ArrayList([]const u8) = .empty;
         defer argv.deinit(allocator);
-        for (command) |arg| try argv.append(allocator, try replaceAll(allocator, arg, constants.template.directory, directory));
+        for (command) |arg| try argv.append(allocator, try std.mem.replaceOwned(u8, allocator, arg, constants.template.directory, directory));
         const result = std.process.run(allocator, io, .{
             .argv = argv.items,
             .environ_map = env,
