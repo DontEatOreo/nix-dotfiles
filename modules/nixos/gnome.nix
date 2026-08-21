@@ -166,6 +166,18 @@ in
               current-workspace-only = mkBoolean false;
             };
 
+            "org/gnome/settings-daemon/plugins/media-keys" = {
+              custom-keybindings = mkArray [
+                "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vicinae/"
+              ];
+            };
+
+            "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vicinae" = {
+              name = mkString "Vicinae";
+              command = mkString "vicinae toggle";
+              binding = mkString "<Super><Control><Alt><Shift>F24";
+            };
+
             "org/gnome/shell" = {
               enabled-extensions = mkArray [
                 "appindicatorsupport@rgcjonas.gmail.com"

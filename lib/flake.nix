@@ -140,6 +140,7 @@ in
               inputs.browser.nixosModules.default
               inputs.determinate.nixosModules.default
               inputs.nixcord.nixosModules.nixcord
+              inputs.vicinae.nixosModules.default
             ];
 
             # Keep every locally packaged program used by NixOS identical to

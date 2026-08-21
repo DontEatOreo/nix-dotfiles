@@ -44,6 +44,7 @@ in
           "https://eupkgs.cachix.org"
           "https://nix-community.cachix.org"
           "https://cache.flox.dev"
+          "https://vicinae.cachix.org"
         ];
         extra-trusted-public-keys = [
           "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
@@ -51,6 +52,7 @@ in
           "eupkgs.cachix.org-1:V9Y0HdASNNSU9U6EkXhR1j85bZGRtNgW7wSyTiQrwGU="
           "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
           "flox-cache-public-1:7F4OyH7ZCnFhcze3fJdfyXYLQw/aV7GEed86nQ7IsOs="
+          "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
         ];
         nix-path = nixPathEntries;
       }

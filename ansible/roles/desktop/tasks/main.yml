@@ -24,8 +24,8 @@
   when: platform_is_linux
   tags:
     - desktop
-    - emoji-shortcut
     - host
+    - vicinae
 
 - name: Configure window tiling
   ansible.builtin.import_tasks: window-tiling.yml

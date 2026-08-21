@@ -16,19 +16,22 @@
 )
 
 (defsrc
-  esc caps my_side_button my_extra_button w a s d ret \
+  esc caps lsft rsft my_side_button my_extra_button w a s d ret \
 )
 
 (defalias
   caps-hyper (tap-hold-press 200 200 esc (multi lmet lctl lalt lsft (layer-while-held hyper)))
+  vicinae-toggle (multi lmet lctl lalt lsft f24)
+  left-shift (tap-dance 240 (lsft @vicinae-toggle))
+  right-shift (tap-dance 240 (rsft @vicinae-toggle))
   volume-down-mute (tap-hold 200 1000 vold mute)
   volume-up-mute (tap-hold 200 1000 volu mute)
 )
 
 (deflayer base
-  caps @caps-hyper @volume-down-mute @volume-up-mute w a s d ret \
+  caps @caps-hyper @left-shift @right-shift @volume-down-mute @volume-up-mute w a s d ret \
 )
 
 (deflayer hyper
-  _    _           _    _    w a s d ret \
+  _    _           _           _            _    _    w a s d ret \
 )

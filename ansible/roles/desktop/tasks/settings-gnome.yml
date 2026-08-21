@@ -54,30 +54,23 @@
   tags:
     - workspace-shortcuts
 
-- name: Check emoji picker command
+- name: Check the Vicinae launcher command
   ansible.builtin.stat:
-    path: "{{ desktop_emoji_command }}"
-  register: desktop_emoji_command_file
+    path: "{{ desktop_vicinae_command }}"
+  register: desktop_vicinae_command_file
 
-- name: Check writable emoji shortcut settings
+- name: Check writable launcher shortcut settings
   ansible.builtin.command:
     argv:
       - gsettings
       - writable
-      - "{{ item.schema }}"
-      - "{{ item.key }}"
+      - org.gnome.settings-daemon.plugins.media-keys
+      - custom-keybindings
   changed_when: false
   failed_when: false
   check_mode: false
-  loop:
-    - schema: org.gnome.settings-daemon.plugins.media-keys
-      key: custom-keybindings
-    - schema: org.freedesktop.ibus.panel.emoji
-      key: hotkey
-  loop_control:
-    label: "{{ item.schema }}:{{ item.key }}"
-  register: desktop_emoji_writable_settings
-  when: desktop_emoji_command_file.stat.executable | default(false)
+  register: desktop_vicinae_shortcuts_writable
+  when: desktop_vicinae_command_file.stat.executable | default(false)
 
 - name: Read existing GNOME custom keybindings
   community.general.dconf:
@@ -85,11 +78,9 @@
     state: read
   register: desktop_custom_keybindings
   when:
-    - desktop_emoji_writable_settings.results | default([]) | length == 2
-    - desktop_emoji_writable_settings.results[0].stdout | trim == 'true'
-    - desktop_emoji_writable_settings.results[1].stdout | trim == 'true'
+    - desktop_vicinae_shortcuts_writable.stdout | default('false') | trim == 'true'
 
-- name: Register the emoji picker custom keybinding
+- name: Register the Vicinae launcher keybinding
   community.general.dconf:
     key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings
     value: >-
@@ -101,7 +92,7 @@
             | ansible.builtin.regex_replace('^@as\\s+', '')
             | ansible.builtin.from_yaml
           )
-          + [desktop_emoji_binding_path]
+          + [desktop_vicinae_binding_path]
         )
         | ansible.builtin.unique
         | ansible.builtin.list
@@ -110,41 +101,18 @@
     state: present
   when: desktop_custom_keybindings is not skipped
 
-- name: Configure the emoji picker custom keybinding
+- name: Configure the Vicinae launcher keybinding
   community.general.dconf:
-    key: "{{ desktop_emoji_binding_path }}{{ item.key }}"
+    key: "{{ desktop_vicinae_binding_path }}{{ item.key }}"
     value: "{{ item.value }}"
     state: present
   loop:
     - key: name
-      value: "'Emoji Picker'"
+      value: "'Vicinae'"
     - key: command
-      value: "'{{ desktop_emoji_command }}'"
+      value: "'{{ desktop_vicinae_command }} toggle'"
     - key: binding
-      value: "'<Control>period'"
+      value: "'<Super><Control><Alt><Shift>F24'"
   loop_control:
     label: "{{ item.key }}"
   when: desktop_custom_keybindings is not skipped
-
-- name: Move the IBus emoji shortcuts to Super
-  community.general.dconf:
-    key: /desktop/ibus/panel/emoji/hotkey
-    value: "['<Super>period', '<Super>semicolon']"
-    state: present
-  when: desktop_custom_keybindings is not skipped
-
-- name: Check Carmenta prewarm user service
-  ansible.builtin.stat:
-    path: "{{ dotfiles_home_dir }}/.config/systemd/user/carmenta-prewarm.service"
-  register: desktop_carmenta_prewarm_service
-  when: desktop_custom_keybindings is not skipped
-
-- name: Enable Carmenta prewarm user service
-  ansible.builtin.systemd_service:
-    name: carmenta-prewarm.service
-    enabled: true
-    scope: user
-    daemon_reload: true
-  when:
-    - ansible_facts.service_mgr == 'systemd'
-    - desktop_carmenta_prewarm_service.stat.exists | default(false)

@@ -1,0 +1,21 @@
+[copr:copr.fedorainfracloud.org:quadratech188:vicinae]
+name=Copr repo for Vicinae owned by quadratech188
+baseurl=https://download.copr.fedorainfracloud.org/results/quadratech188/vicinae/fedora-$releasever-$basearch/
+type=rpm-md
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://download.copr.fedorainfracloud.org/results/quadratech188/vicinae/pubkey.gpg
+repo_gpgcheck=0
+enabled=1
+enabled_metadata=1
+
+[coprdep:copr.fedorainfracloud.org:quadratech188:cmark-gfm]
+name=Copr Vicinae runtime dependency: cmark-gfm
+baseurl=https://download.copr.fedorainfracloud.org/results/quadratech188/cmark-gfm/fedora-$releasever-$basearch/
+type=rpm-md
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://download.copr.fedorainfracloud.org/results/quadratech188/vicinae/pubkey.gpg
+repo_gpgcheck=0
+enabled=1
+enabled_metadata=1

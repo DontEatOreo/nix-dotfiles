@@ -17,6 +17,8 @@
 
     sops-nix.inputs.nixpkgs.follows = "";
     sops-nix.url = "github:Mic92/sops-nix";
+
+    vicinae.url = "github:vicinaehq/vicinae";
   };
 
   outputs = _: { };

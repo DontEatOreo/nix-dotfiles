@@ -153,6 +153,10 @@ modules:
     src: bluebuild/files/dnf/vscode.repo
     dest: /etc/yum.repos.d/vscode.repo
 
+  - type: copy@v1
+    src: bluebuild/files/dnf/vicinae.repo
+    dest: /etc/yum.repos.d/vicinae.repo
+
   - type: dnf@v1
     source: ghcr.io/blue-build/modules@sha256:c5ed99f07b15c8d575a4fa64a77e5cd5602b00da4c84379f5675db2ae4757061
     repos:
@@ -209,6 +213,7 @@ modules:
         - telegram-desktop
         - uresourced
         - vim-enhanced
+        - vicinae
         - vulkan-tools
         - xdg-desktop-portal
         - xdg-desktop-portal-gnome
