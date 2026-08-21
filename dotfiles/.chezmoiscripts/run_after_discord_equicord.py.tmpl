@@ -16,7 +16,8 @@ if command.is_file() and os.access(command, os.X_OK):
 if sys.platform == "darwin":
     nix = shutil.which("nix")
     if nix is None:
-        raise SystemExit("Equicord settings install failed: nix is not available")
+        print("Equicord settings install skipped: nix is not available")
+        raise SystemExit(0)
 
     repository = Path({{ joinPath .chezmoi.sourceDir ".." | quote }})
     result = subprocess.run(

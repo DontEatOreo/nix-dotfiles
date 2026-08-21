@@ -12,5 +12,8 @@ from pathlib import Path
 command = Path.home() / ".local/bin/terminal-black-rose-doll"
 if not command.is_file():
     command = Path(shutil.which("terminal-black-rose-doll") or command)
+if not command.is_file() or not os.access(command, os.X_OK):
+    print("Terminal theme install skipped: terminal-black-rose-doll not found")
+    raise SystemExit(0)
 os.execv(command, (os.fspath(command),))
 {{ end -}}
