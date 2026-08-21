@@ -43,11 +43,39 @@
   tags:
     - tailscale
 
+- name: Resolve the user Homebrew cache
+  ansible.builtin.command:
+    argv:
+      - "{{ platform_homebrew_prefix }}/bin/brew"
+      - --cache
+  register: system_homebrew_user_cache
+  changed_when: false
+  check_mode: false
+  tags:
+    - tailscale
+
+- name: Prime Homebrew Tailscale service metadata as the user
+  ansible.builtin.command:
+    argv:
+      - "{{ platform_homebrew_prefix }}/bin/brew"
+      - services
+      - info
+      - tailscale
+      - --json
+  environment:
+    HOMEBREW_CACHE: "{{ system_homebrew_user_cache.stdout }}"
+  changed_when: false
+  check_mode: false
+  tags:
+    - tailscale
+
 - name: Ensure the Homebrew Tailscale system service is running
   community.general.homebrew_services:
     name: tailscale
     path: "{{ platform_homebrew_prefix }}/bin"
     state: present
+  environment:
+    HOMEBREW_CACHE: "{{ system_homebrew_user_cache.stdout }}"
   become: true
   tags:
     - tailscale
