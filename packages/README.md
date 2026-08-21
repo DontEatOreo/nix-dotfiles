@@ -24,6 +24,14 @@ than one delivery adapter, and those adapters should point back to the same
 package unit. Package-specific code belongs here; host policy and home-directory
 state do not.
 
+Upstream projects built from pinned or patched source must disable their Nix
+build and install check phases (`doCheck = false` and
+`doInstallCheck = false`). Homebrew source formulae must likewise keep tests
+out of their install steps; a `test do` block is acceptable because Homebrew
+only runs it through an explicit `brew test`. First-party packages such as
+`dotfiles-python`, `terminal-theme-tools`, and `hyper-window-tiling` retain
+their tests.
+
 ## Units
 
 - `bluebuild-v2`: feature-gated BlueBuild CLI package
