@@ -2,7 +2,7 @@
 
 import { spawnSync } from "node:child_process";
 import { chmodSync, mkdirSync, mkdtempSync, renameSync, rmSync } from "node:fs";
-import { homedir, tmpdir } from "node:os";
+import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
 // Keep the composition in its original 1080p design space while rendering a
@@ -272,8 +272,8 @@ const runMagick = (args: readonly string[]): void => runCommand("magick", args);
 
 const signed = (value: number): string => (value >= 0 ? `+${value}` : `${value}`);
 mkdirSync(dirname(OUTPUT), { recursive: true });
-const temporary = join(dirname(OUTPUT), `.dreamy-swirl.${process.pid}.png`);
-const work = mkdtempSync(join(tmpdir(), "ghostty-dreamy-swirl."));
+const work = mkdtempSync(join(dirname(OUTPUT), ".dreamy-swirl."));
+const temporary = join(work, "output.png");
 let canvas = join(work, "canvas.png");
 
 try {
