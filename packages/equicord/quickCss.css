@@ -1,119 +1,546 @@
 /*
- * Black Rose Doll additions applied after the mechanically recolored
- * Catppuccin Discord stylesheet. The upstream structure is pinned as the
- * catppuccin-discord-css flake input; all Mocha and Latte palette literals are
- * replaced from black_rose_doll_palette.json in lib/flake.nix.
+ * Semantic overrides and narrowly scoped exceptions for Black Rose Doll.
+ * The generated native color ramps live in lib/equicord-theme.nix; keep this
+ * file free of Discord component selectors unless a semantic token cannot
+ * express the fix.
  */
 
-:root {
-  /* Keep Catppuccin's rainbow-thread selectors, but use normal channel color. */
-  --ctp-rainbow-thread-disabled: ;
+:is(
+  .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
+  .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
+) {
+  --brand-experiment: var(--brd-brand);
+  --brand-experiment-500: var(--brd-brand);
+  --control-brand-foreground: var(--brd-brand);
+  --control-brand-foreground-new: var(--brd-brand);
+  --control-secondary-background-default: color-mix(
+    in srgb,
+    var(--brd-overlay1) 12%,
+    transparent
+  );
+  --control-secondary-background-hover: color-mix(
+    in srgb,
+    var(--brd-overlay1) 16%,
+    transparent
+  );
+  --control-secondary-background-active: color-mix(
+    in srgb,
+    var(--brd-overlay1) 24%,
+    transparent
+  );
+  --control-secondary-border-default: var(--border-muted);
+  --control-secondary-border-hover: var(--border-muted);
+  --control-secondary-border-active: var(--border-muted);
+  --text-brand: var(--brd-brand);
+  --text-link: var(--brd-pine);
+  --text-link-low-saturation: var(--brd-pine);
+  --mention-foreground: var(--brd-brand);
+
+  --header-primary: var(--brd-text);
+  --header-secondary: var(--brd-subtext0);
+  --text-normal: var(--brd-text);
+  --text-default: var(--brd-text);
+  --text-muted: var(--brd-muted);
+  --text-subtle: var(--brd-subtext0);
+  --interactive-normal: var(--brd-subtext0);
+  --interactive-hover: var(--brd-text);
+  --interactive-active: var(--brd-text);
+  --interactive-muted: var(--brd-overlay1);
+  --channels-default: var(--brd-muted);
+  --channel-icon: var(--brd-muted);
+  --icon-muted: var(--brd-muted);
+  --channel-text-area-placeholder: color-mix(
+    in srgb,
+    var(--brd-text) 50%,
+    transparent
+  );
+
+  --background-accent: var(--brd-surface1);
+  --background-mod-muted: color-mix(
+    in srgb,
+    var(--brd-surface2) 5%,
+    transparent
+  );
+  --background-mod-normal: color-mix(
+    in srgb,
+    var(--brd-surface2) 15%,
+    transparent
+  );
+  --background-mod-subtle: color-mix(
+    in srgb,
+    var(--brd-surface2) 25%,
+    transparent
+  );
+  --background-mod-strong: color-mix(
+    in srgb,
+    var(--brd-surface2) 45%,
+    transparent
+  );
+  --interactive-background-hover: color-mix(
+    in srgb,
+    var(--brd-overlay2) 15%,
+    transparent
+  );
+  --interactive-background-selected: color-mix(
+    in srgb,
+    var(--brd-overlay0) 20%,
+    transparent
+  );
+  --interactive-background-active: color-mix(
+    in srgb,
+    var(--brd-text) 17%,
+    transparent
+  );
+
+  /* Preserve Discord's border contrast ladder using the theme palette. */
+  --border-muted: color-mix(
+    in srgb,
+    var(--brd-overlay1) 20%,
+    transparent
+  );
+  --border-subtle: color-mix(
+    in srgb,
+    var(--brd-overlay1) 28%,
+    transparent
+  );
+  --border-normal: color-mix(
+    in srgb,
+    var(--brd-overlay1) 40%,
+    transparent
+  );
+  --border-strong: color-mix(
+    in srgb,
+    var(--brd-overlay1) 52%,
+    transparent
+  );
+  --border-focus: var(--brd-brand);
+  --border-feedback-positive: var(--brd-positive);
+  --border-feedback-warning: var(--brd-warning);
+  --border-feedback-critical: var(--brd-critical);
+  --border-feedback-info: var(--brd-info);
+  --app-frame-border: var(--border-normal);
+  --input-border-default: var(--border-normal);
+  --input-border-hover: var(--border-normal);
+  --input-border-active: var(--border-focus);
+  --input-border-error-default: var(--border-feedback-critical);
+  --input-border-readonly: var(--border-muted);
+  --border-voice-muted: color-mix(
+    in srgb,
+    var(--brd-critical) 12%,
+    transparent
+  );
+
+  --background-feedback-positive: color-mix(
+    in srgb,
+    var(--brd-positive) 15%,
+    transparent
+  );
+  --background-feedback-warning: color-mix(
+    in srgb,
+    var(--brd-warning) 15%,
+    transparent
+  );
+  --background-feedback-critical: color-mix(
+    in srgb,
+    var(--brd-critical) 15%,
+    transparent
+  );
+  --background-feedback-info: color-mix(
+    in srgb,
+    var(--brd-info) 15%,
+    transparent
+  );
+  --status-positive: var(--brd-positive);
+  --status-warning: var(--brd-warning);
+  --status-danger: var(--brd-critical);
+  --status-positive-background: var(--brd-positive);
+  --status-warning-background: var(--brd-warning);
+  --status-danger-background: var(--brd-critical);
+  --info-positive-foreground: var(--brd-positive);
+  --info-warning-foreground: var(--brd-warning);
+  --info-danger-foreground: var(--brd-critical);
+  --info-help-foreground: var(--brd-info);
+
+  --message-reacted-background-default: color-mix(
+    in srgb,
+    var(--brd-brand) 30%,
+    transparent
+  );
+  --mention-background: color-mix(
+    in srgb,
+    var(--brd-brand) 30%,
+    transparent
+  );
+  --message-mentioned-background-default: color-mix(
+    in srgb,
+    var(--brd-warning) 10%,
+    transparent
+  );
+  --message-mentioned-background-hover: color-mix(
+    in srgb,
+    var(--brd-warning) 8%,
+    transparent
+  );
+  --message-highlight-background-default: color-mix(
+    in srgb,
+    var(--brd-brand) 8%,
+    transparent
+  );
+  --message-highlight-background-hover: color-mix(
+    in srgb,
+    var(--brd-brand) 6%,
+    transparent
+  );
+  --message-automod-background-default: color-mix(
+    in srgb,
+    var(--brd-critical) 10%,
+    transparent
+  );
+  --message-automod-background-hover: color-mix(
+    in srgb,
+    var(--brd-critical) 15%,
+    transparent
+  );
+
+  /* Native rules build these from HSL channel-only foundations. */
+  --content-inventory-media-seekbar-container: color-mix(
+    in srgb,
+    var(--brd-overlay2) 30%,
+    transparent
+  );
+  --creator-revenue-info-box-background: color-mix(
+    in srgb,
+    var(--brd-teal) 15%,
+    transparent
+  );
+  --polls-victor-fill: var(--brd-positive);
+  --polls-voted-fill: var(--brd-brand);
+
+  /* Profile widgets use a separate overlay palette from the base ramps. */
+  --user-profile-overlay-background: var(--background-base-low);
+  --user-profile-overlay-background-hover: var(--background-mod-subtle);
+  --user-profile-background-hover: var(--background-mod-subtle);
+  --user-profile-toolbar-background: var(--background-base-low);
+  --user-profile-activity-toolbar-background: var(--background-base-low);
+  --user-profile-border: color-mix(
+    in srgb,
+    var(--brd-overlay1) 28%,
+    transparent
+  );
+  --user-profile-toolbar-border: color-mix(
+    in srgb,
+    var(--brd-overlay1) 20%,
+    transparent
+  );
+
+  --profile-gradient-role-pill-background: color-mix(
+    in srgb,
+    var(--brd-overlay1) 50%,
+    transparent
+  );
+  --profile-gradient-role-pill-border: var(--brd-overlay1);
+  --quest-home-tab-gradient-blurple-inner: color-mix(
+    in srgb,
+    var(--brd-brand) 30%,
+    transparent
+  );
+  --quest-home-tab-gradient-blurple-outer: color-mix(
+    in srgb,
+    var(--brd-brand) 10%,
+    transparent
+  );
+  --expressive-gradient-tenure-badge-gold-end: var(--brd-yellow);
+  --expressive-gradient-tenure-badge-opal-start: var(--brd-teal);
+  --expressive-gradient-tenure-badge-opal-end: var(--brd-blue);
+  --expressive-gradient-tenure-badge-platinum-start: var(--brd-foam);
+  --expressive-gradient-tenure-badge-platinum-end: var(--brd-sky);
+  --expressive-gradient-tenure-badge-ruby-start: var(--brd-red);
+  --expressive-gradient-tenure-badge-ruby-end: var(--brd-love);
+  --expressive-gradient-tenure-badge-silver-start: var(--brd-overlay0);
+  --expressive-gradient-tenure-badge-silver-end: var(--brd-overlay2);
+
+  --scrollbar-thin-thumb: var(--brd-overlay0);
+  --scrollbar-thin-track: transparent;
+  --scrollbar-auto-thumb: var(--brd-overlay0);
+  --scrollbar-auto-track: var(--brd-mantle);
+  --scrollbar-auto-scrollbar-color-thumb: var(--brd-overlay0);
+  --scrollbar-auto-scrollbar-color-track: var(--brd-mantle);
+  --opacity-blurple-8: color-mix(
+    in srgb,
+    var(--brd-brand) 8%,
+    transparent
+  );
+  --opacity-blurple-16: color-mix(
+    in srgb,
+    var(--brd-brand) 16%,
+    transparent
+  );
+  --opacity-blurple-24: color-mix(
+    in srgb,
+    var(--brd-brand) 24%,
+    transparent
+  );
+  --opacity-blurple-32: color-mix(
+    in srgb,
+    var(--brd-brand) 32%,
+    transparent
+  );
+  --opacity-blurple-60: color-mix(
+    in srgb,
+    var(--brd-brand) 60%,
+    transparent
+  );
 }
 
-.visual-refresh.theme-dark,
-.visual-refresh .theme-dark {
-  --brd-brand: __BRD_dark_rose__;
-  --brd-composer: __BRD_dark_surface0__;
-  --brd-composer-border: __BRD_dark_surface2__;
-}
-
-.visual-refresh.theme-light,
-.visual-refresh .theme-light {
-  --brd-brand: __BRD_light_rose__;
-  --brd-composer: __BRD_light_surface0__;
-  --brd-composer-border: __BRD_light_surface2__;
-}
-
-/*
- * Catppuccin generates these shades with Sass, so replacing its 26 palette
- * literals alone cannot recolor them. Rebuild the interactive scale from the
- * selected Black Rose Doll rose instead of leaving bright Catppuccin pinks in
- * hover, pressed, reaction, and opacity states.
- */
-.visual-refresh.theme-dark,
-.visual-refresh .theme-dark,
-.visual-refresh.theme-light,
-.visual-refresh .theme-light {
-  --brand-100: color-mix(in srgb, var(--brd-brand) 10%, white);
-  --brand-130: color-mix(in srgb, var(--brd-brand) 15%, white);
-  --brand-160: color-mix(in srgb, var(--brd-brand) 20%, white);
-  --brand-200: color-mix(in srgb, var(--brd-brand) 25%, white);
-  --brand-230: color-mix(in srgb, var(--brd-brand) 30%, white);
-  --brand-260: color-mix(in srgb, var(--brd-brand) 35%, white);
-  --brand-300: color-mix(in srgb, var(--brd-brand) 40%, white);
-  --brand-330: color-mix(in srgb, var(--brd-brand) 50%, white);
-  --brand-360: color-mix(in srgb, var(--brd-brand) 60%, white);
-  --brand-400: color-mix(in srgb, var(--brd-brand) 70%, white);
-  --brand-430: color-mix(in srgb, var(--brd-brand) 80%, white);
-  --brand-460: color-mix(in srgb, var(--brd-brand) 90%, white);
-  --brand-500: var(--brd-brand) !important;
-  --brand-530: color-mix(in srgb, var(--brd-brand) 95%, black);
-  --brand-560: color-mix(in srgb, var(--brd-brand) 90%, black);
-  --brand-600: color-mix(in srgb, var(--brd-brand) 85%, black);
-  --brand-630: color-mix(in srgb, var(--brd-brand) 80%, black);
-  --brand-660: color-mix(in srgb, var(--brd-brand) 75%, black);
-  --brand-700: color-mix(in srgb, var(--brd-brand) 70%, black);
-  --brand-730: color-mix(in srgb, var(--brd-brand) 67.5%, black);
-  --brand-760: color-mix(in srgb, var(--brd-brand) 65%, black);
-  --brand-800: color-mix(in srgb, var(--brd-brand) 62.5%, black);
-  --brand-830: color-mix(in srgb, var(--brd-brand) 60%, black);
-  --brand-860: color-mix(in srgb, var(--brd-brand) 57.5%, black);
-  --brand-900: color-mix(in srgb, var(--brd-brand) 55%, black);
-  --brand-05a: color-mix(in srgb, var(--brd-brand) 5%, transparent);
-  --brand-10a: color-mix(in srgb, var(--brd-brand) 10%, transparent);
-  --brand-15a: color-mix(in srgb, var(--brd-brand) 15%, transparent);
-  --brand-20a: color-mix(in srgb, var(--brd-brand) 20%, transparent);
-  --brand-25a: color-mix(in srgb, var(--brd-brand) 25%, transparent);
-  --brand-30a: color-mix(in srgb, var(--brd-brand) 30%, transparent);
-  --brand-35a: color-mix(in srgb, var(--brd-brand) 35%, transparent);
-  --brand-40a: color-mix(in srgb, var(--brd-brand) 40%, transparent);
-  --brand-45a: color-mix(in srgb, var(--brd-brand) 45%, transparent);
-  --brand-50a: color-mix(in srgb, var(--brd-brand) 50%, transparent);
-  --brand-55a: color-mix(in srgb, var(--brd-brand) 55%, transparent);
-  --brand-60a: color-mix(in srgb, var(--brd-brand) 60%, transparent);
-  --brand-65a: color-mix(in srgb, var(--brd-brand) 65%, transparent);
-  --brand-70a: color-mix(in srgb, var(--brd-brand) 70%, transparent);
-  --brand-75a: color-mix(in srgb, var(--brd-brand) 75%, transparent);
-  --brand-80a: color-mix(in srgb, var(--brd-brand) 80%, transparent);
-  --brand-85a: color-mix(in srgb, var(--brd-brand) 85%, transparent);
-  --brand-90a: color-mix(in srgb, var(--brd-brand) 90%, transparent);
-  --brand-95a: color-mix(in srgb, var(--brd-brand) 95%, transparent);
-  --blurple-50: var(--brd-brand);
-  --blurple-60: var(--brand-560);
-  --channeltextarea-background: var(--brd-composer);
-  --chat-input-container-background: var(--brd-composer);
-}
-
-/* Discord's composer has a native surface outside these variables. */
-.visual-refresh.theme-dark div[class*="channelTextArea_"],
-.visual-refresh .theme-dark div[class*="channelTextArea_"],
-.visual-refresh.theme-light div[class*="channelTextArea_"],
-.visual-refresh .theme-light div[class*="channelTextArea_"] {
-  --channeltextarea-background: var(--brd-composer);
-  --chat-input-container-background: var(--brd-composer);
-}
-
-.visual-refresh.theme-dark
-  div[class*="channelTextArea_"]
-  div[class*="themedBackground_"],
+/* Lazy profile-theme chunks redeclare these tokens on their theme root. */
 .visual-refresh
-  .theme-dark
-  div[class*="channelTextArea_"]
-  div[class*="themedBackground_"],
-.visual-refresh.theme-light
-  div[class*="channelTextArea_"]
-  div[class*="themedBackground_"],
-.visual-refresh
-  .theme-light
+  :is(
+    .user-profile-modal,
+    .user-profile-modal-v2,
+    .user-profile-popout,
+    .user-profile-sidebar.user-profile-sidebar-redesign
+  ) {
+  --user-profile-overlay-background: var(--brd-base);
+  --user-profile-overlay-background-hover: color-mix(
+    in srgb,
+    var(--brd-surface2) 25%,
+    transparent
+  );
+  --user-profile-background-hover: color-mix(
+    in srgb,
+    var(--brd-surface2) 25%,
+    transparent
+  );
+  --user-profile-note-background-focus: var(--brd-mantle);
+  --user-profile-toolbar-background: var(--brd-base);
+  --user-profile-activity-toolbar-background: var(--brd-base);
+  --user-profile-border: color-mix(
+    in srgb,
+    var(--brd-overlay1) 28%,
+    transparent
+  );
+  --user-profile-toolbar-border: color-mix(
+    in srgb,
+    var(--brd-overlay1) 20%,
+    transparent
+  );
+
+  --border-muted: color-mix(
+    in srgb,
+    var(--brd-overlay1) 20%,
+    transparent
+  );
+  --border-subtle: color-mix(
+    in srgb,
+    var(--brd-overlay1) 28%,
+    transparent
+  );
+  --border-normal: color-mix(
+    in srgb,
+    var(--brd-overlay1) 40%,
+    transparent
+  );
+  --border-strong: color-mix(
+    in srgb,
+    var(--brd-overlay1) 52%,
+    transparent
+  );
+  --border-focus: var(--brd-brand);
+  --border-feedback-critical: var(--brd-critical);
+  --app-frame-border: var(--border-normal);
+  --input-border-default: var(--border-normal);
+  --input-border-hover: var(--border-normal);
+  --input-border-active: var(--brd-brand);
+  --input-border-error-default: var(--brd-critical);
+  --input-border-readonly: var(--border-muted);
+
+  --control-secondary-background-default: color-mix(
+    in srgb,
+    var(--brd-overlay1) 12%,
+    transparent
+  );
+  --control-secondary-background-hover: color-mix(
+    in srgb,
+    var(--brd-overlay1) 16%,
+    transparent
+  );
+  --control-secondary-background-active: color-mix(
+    in srgb,
+    var(--brd-overlay1) 24%,
+    transparent
+  );
+  --control-secondary-border-default: var(--border-muted);
+  --control-secondary-border-hover: var(--border-muted);
+  --control-secondary-border-active: var(--border-muted);
+
+  --profile-gradient-role-pill-background: color-mix(
+    in srgb,
+    var(--brd-overlay1) 50%,
+    transparent
+  );
+  --profile-gradient-role-pill-border: var(--brd-overlay1);
+}
+
+:is(.visual-refresh.theme-light, .visual-refresh .theme-light) {
+  --app-frame-background: var(--brd-crust);
+  --background-primary: var(--brd-base);
+  --background-secondary: var(--brd-mantle);
+  --background-secondary-alt: var(--brd-highlightLow);
+  --background-tertiary: var(--brd-crust);
+  --background-floating: var(--brd-surface);
+  --background-mobile-primary: var(--brd-base);
+  --background-mobile-secondary: var(--brd-mantle);
+  --background-base-low: var(--brd-base);
+  --background-base-lower: var(--brd-mantle);
+  --background-base-lowest: var(--brd-crust);
+  --background-surface-high: var(--brd-highlightLow);
+  --background-surface-higher: var(--brd-highlightMed);
+  --background-surface-highest: var(--brd-highlightHigh);
+  --background-gradient-highest: var(--brd-base);
+  --channeltextarea-background: var(--brd-overlay);
+  --chat-input-container-background: var(--brd-overlay);
+  --brd-composer: var(--brd-overlay);
+  --brd-composer-border: var(--brd-highlightHigh);
+}
+
+:is(
+  .visual-refresh:is(.theme-dark, .theme-darker, .theme-midnight),
+  .visual-refresh :is(.theme-dark, .theme-darker, .theme-midnight)
+) {
+  --app-frame-background: var(--brd-crust);
+  --background-primary: var(--brd-base);
+  --background-secondary: var(--brd-mantle);
+  --background-secondary-alt: var(--brd-surface);
+  --background-tertiary: var(--brd-crust);
+  --background-floating: var(--brd-surface0);
+  --background-mobile-primary: var(--brd-base);
+  --background-mobile-secondary: var(--brd-mantle);
+  --background-base-low: var(--brd-base);
+  --background-base-lower: var(--brd-mantle);
+  --background-base-lowest: var(--brd-crust);
+  --background-surface-high: var(--brd-surface0);
+  --background-surface-higher: var(--brd-surface1);
+  --background-surface-highest: var(--brd-surface2);
+  --background-gradient-highest: var(--brd-base);
+  --channeltextarea-background: var(--brd-surface0);
+  --chat-input-container-background: var(--brd-surface0);
+  --brd-composer: var(--brd-surface0);
+  --brd-composer-border: var(--brd-surface2);
+}
+
+/* Native composer layers do not consistently consume their semantic token. */
+:is(
+    .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
+    .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
+  )
   div[class*="channelTextArea_"]
   div[class*="themedBackground_"] {
   background: var(--brd-composer) !important;
   border-color: var(--brd-composer-border) !important;
 }
 
-.visual-refresh.theme-dark ::selection,
-.visual-refresh .theme-dark ::selection,
-.visual-refresh.theme-light ::selection,
-.visual-refresh .theme-light ::selection {
-  background: color-mix(in srgb, var(--brand-500) 42%, transparent);
+/* Mana switches write Discord's brand color into an inline style. */
+:is(
+    .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
+    .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
+  )
+  label:has(input[role="switch"]:checked)
+  > [data-mana-component="switch"] {
+  background-color: var(--switch-background-selected-default) !important;
+  border-color: var(--switch-border-selected-default) !important;
+}
+
+:is(
+    .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
+    .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
+  )
+  label:hover:has(input[role="switch"]:checked)
+  > [data-mana-component="switch"] {
+  background-color: var(--switch-background-selected-hover) !important;
+  border-color: var(--switch-border-selected-hover) !important;
+}
+
+/* Voice-state glows are emitted from literal RGB channels. */
+:is(
+    .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
+    .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
+  )
+  [class*="greenGlow_"] {
+  background: color-mix(in srgb, var(--brd-positive) 10%, transparent);
+}
+
+:is(
+    .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
+    .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
+  )
+  [class*="greenGlow_"]:hover {
+  background: color-mix(in srgb, var(--brd-positive) 20%, transparent);
+}
+
+:is(
+    .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
+    .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
+  )
+  [class*="redGlow_"] {
+  background: color-mix(in srgb, var(--brd-critical) 10%, transparent);
+}
+
+:is(
+    .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
+    .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
+  )
+  [class*="redGlow_"]:hover {
+  background: color-mix(
+    in srgb,
+    var(--brd-critical) 20%,
+    transparent
+  ) !important;
+}
+
+/* Media and forum-card fades contain literal native neutral colors. */
+:is(
+    .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
+    .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
+  )
+  div[class^="overlay_"][class*="darkThemeGradient_"] {
+  background: linear-gradient(
+    0deg,
+    var(--brd-base) 0,
+    color-mix(in srgb, var(--brd-surface0) 50%, transparent) 50%,
+    transparent
+  );
+}
+
+:is(
+    .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
+    .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
+  )
+  div[class^="textContentFooter_"] {
+  background: linear-gradient(
+    0deg,
+    var(--brd-base),
+    color-mix(in srgb, var(--brd-surface0) 97%, transparent) 36px,
+    color-mix(in srgb, var(--brd-surface1) 40%, transparent)
+  ) !important;
+}
+
+:is(
+    .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
+    .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
+  )
+  div[class^="textContentFooter_"]
+  [class*="tagPill_"] {
+  background-color: color-mix(
+    in srgb,
+    var(--brd-surface1) 90%,
+    transparent
+  );
+}
+
+:is(
+    .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
+    .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
+  )
+  ::selection {
+  background: color-mix(in srgb, var(--brd-brand) 42%, transparent);
 }

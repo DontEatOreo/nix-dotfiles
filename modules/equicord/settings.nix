@@ -41,9 +41,13 @@ let
       fixYoutubeEmbeds.enable = true;
       forceOwnerCrown.enable = true;
       fullSearchContext.enable = true;
+      fullVcpfp.enable = true;
       gifPaste.enable = true;
       greetStickerPicker.enable = true;
+      hideChatButtons.enable = true;
       hideMedia.enable = true;
+      hideServers.enable = true;
+      homeTyping.enable = true;
       ignoreActivities = {
         enable = true;
         ignoreCompeting = true;
@@ -51,14 +55,19 @@ let
         ignorePlaying = true;
         ignoreWatching = true;
       };
+      imageFilename.enable = true;
       implicitRelationships.enable = true;
+      lastActive.enable = true;
+      limitlessScreenshare.enable = true;
       memberCount.enable = true;
+      mentionAvatars.enable = true;
       messageLogger = {
         enable = true;
         collapseDeleted = true;
         ignoreBots = true;
         ignoreSelf = true;
       };
+      messageLoggerEnhanced.enable = true;
       mutualGroupDms.enable = true;
       newGuildSettings.enable = true;
       newPluginsManager.enable = true;
@@ -102,7 +111,9 @@ let
       revealAllSpoilers.enable = true;
       serverInfo.enable = true;
       serverListIndicators.enable = true;
+      showBadgesInChat.enable = true;
       showConnections.enable = true;
+      showHiddenChannels.enable = true;
       showHiddenThings.enable = true;
       showTimeoutDuration.enable = true;
       silentTyping.enable = true;
