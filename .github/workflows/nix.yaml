@@ -4,6 +4,7 @@ on:
   pull_request:
     paths: &nix-paths
       # Workflow and repository-wide check configuration.
+      - .github/actions/setup-nix/**
       - .github/workflows/nix.yaml
       - .ansible-lint
       - .clang-format
@@ -85,8 +86,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Determinate Nix
-        uses: DeterminateSystems/determinate-nix-action@d96678350ffd6a456235832eb11e1c491589b7bb # v3.21.8
+      - name: Set Up Nix
+        uses: ./.github/actions/setup-nix
+        with:
+          cache-builds: "true"
 
       - name: Materialize Flake Partitions
         run: |
@@ -97,3 +100,20 @@ jobs:
         run: >-
           nix flake check
           --keep-going --no-build
+
+      # Build every native package/test check while leaving the full NixOS
+      # closure as an evaluation check. This catches stale fixed-output hashes
+      # and incomplete filtered sources without turning CI into a system build.
+      - name: Build Native Checks
+        run: >-
+          nix build
+          --keep-going --no-link --print-build-logs
+          .#checks.x86_64-linux.dotfiles-python
+          .#checks.x86_64-linux.equicord-settings
+          .#checks.x86_64-linux.hyper-window-tiling
+          .#checks.x86_64-linux.nixos-integration
+          .#checks.x86_64-linux.nixos-module
+          .#checks.x86_64-linux.pre-commit
+          .#checks.x86_64-linux.terminal-theme-tools
+          .#checks.x86_64-linux.toshy-runtime
+          .#checks.x86_64-linux.treefmt

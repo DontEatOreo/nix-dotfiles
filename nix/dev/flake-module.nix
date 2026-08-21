@@ -46,8 +46,8 @@
       };
 
       zigShell = pkgs.mkShell {
-        packages = with pkgs; lib.optionals isLinux [ zig_0_16 ];
-        inputsFrom = lib.optionals isLinux [ self'.packages.terminal-theme-tools ];
+        packages = [ pkgs.zig_0_16 ];
+        inputsFrom = [ self'.packages.terminal-theme-tools ];
       };
 
       operationsShell = pkgs.mkShell {
@@ -105,20 +105,48 @@
       standaloneNixosModuleCheck =
         builtins.deepSeq standaloneNixosModule.config.system.build.toplevel.drvPath
           (pkgs.runCommandLocal "nixos-module-evaluation" { } "touch $out");
+
+      nixosIntegrationCheck =
+        let
+          cfg = self.nixosConfigurations.nixos.config;
+          enabledGnomeExtensions = builtins.toString (
+            (builtins.head cfg.programs.dconf.profiles.user.databases)
+            .settings."org/gnome/shell".enabled-extensions
+          );
+          kanataService = cfg.systemd.services.kanata-main.serviceConfig;
+          systemPackageDrvPaths = map (package: package.drvPath) cfg.environment.systemPackages;
+          toshyUser = cfg.local.user.name;
+          toshyRuntimeRule = "L+ %S/toshy/runtime - - - - ${self'.packages.toshy-runtime}";
+        in
+        assert cfg.environment.localBinInPath;
+        assert builtins.elem pkgs.just.drvPath systemPackageDrvPaths;
+        assert cfg.programs.ssh.package.drvPath == pkgs.unstable.openssh_hpn.drvPath;
+        assert cfg.services.openssh.package.drvPath == cfg.programs.ssh.package.drvPath;
+        assert kanataService.RuntimeDirectory == "kanata-main";
+        assert lib.hasInfix "--symlink-path \${RUNTIME_DIRECTORY}/main" kanataService.ExecStart;
+        assert cfg.services.toshy.enable;
+        assert builtins.elem toshyUser cfg.services.toshy.users;
+        assert builtins.elem "input" cfg.users.users.${toshyUser}.extraGroups;
+        assert builtins.elem "uinput" cfg.boot.kernelModules;
+        assert builtins.elem toshyRuntimeRule cfg.systemd.user.tmpfiles.users.${toshyUser}.rules;
+        assert builtins.elem pkgs.gnomeExtensions.focused-window-d-bus.drvPath systemPackageDrvPaths;
+        assert lib.hasInfix "focused-window-dbus@flexagoon.com" enabledGnomeExtensions;
+        pkgs.runCommandLocal "nixos-integration" { } "touch $out";
     in
     {
       checks = {
-        inherit (self'.packages) dotfiles-python equicord-settings;
+        inherit (self'.packages) dotfiles-python equicord-settings terminal-theme-tools;
       }
       // lib.optionalAttrs isLinux {
-        inherit (self'.packages) terminal-theme-tools;
         hyper-window-tiling = self'.packages.hyper-window-tiling-gnome.tests.workspace;
+        toshy-runtime = self'.packages.toshy-runtime;
       }
       // lib.optionalAttrs isDarwin {
         inherit (self'.packages) fido-phone;
       }
       // lib.optionalAttrs (system == "x86_64-linux") {
         nixos = self.nixosConfigurations.nixos.config.system.build.toplevel;
+        nixos-integration = nixosIntegrationCheck;
         nixos-module = standaloneNixosModuleCheck;
       };
 
