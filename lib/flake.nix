@@ -43,7 +43,7 @@ let
       ghidraMcpHeadless = pkgs.ghidra-mcp-headless;
     in
     {
-      bun2nix = pkgs.bun2nix;
+      inherit (pkgs) bun2nix;
       default = ghidraMcp;
       dotfiles-nix-tools = pkgs.buildEnv {
         name = "dotfiles-nix-tools";
@@ -55,9 +55,10 @@ let
           nix-tree
           nixd
           nixfmt
+          statix
         ];
       };
-      dotfiles-python = pkgs.dotfiles-python;
+      inherit (pkgs) dotfiles-python;
       equicord-settings = pkgs.callPackage ../packages/equicord-settings/package.nix {
         quickCss = equicordQuickCss;
         settings = equicordSettings.jsonConfig;
@@ -67,22 +68,23 @@ let
       ghidra-mcp-headless = ghidraMcpHeadless;
       ghidra-mcp-httpd = ghidraMcpHeadless.httpd;
       ghidra-mcp-launcher = ghidraMcpHeadless.launcher;
-      ghidra = ghidraMcpHeadless.ghidra;
-      kanata-with-cmd = pkgs.kanata-with-cmd;
-      terminal-theme-tools = pkgs.terminal-theme-tools;
+      inherit (ghidraMcpHeadless) ghidra;
+      inherit (pkgs) kanata-with-cmd terminal-theme-tools;
     }
     // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
-      bluebuild-v2 = pkgs.bluebuild-v2;
-      check-jsonschema = pkgs.check-jsonschema;
-      ghostty-patched = pkgs.ghostty-patched;
-      hyper-window-tiling-gnome = pkgs.hyper-window-tiling-gnome;
-      hyper-window-tiling-kde = pkgs.hyper-window-tiling-kde;
-      kmscon = pkgs.kmscon;
-      toshy-runtime = pkgs.toshy-runtime;
-      uresourced = pkgs.uresourced;
+      inherit (pkgs)
+        bluebuild-v2
+        check-jsonschema
+        ghostty-patched
+        hyper-window-tiling-gnome
+        hyper-window-tiling-kde
+        kmscon
+        toshy-runtime
+        uresourced
+        ;
     }
     // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
-      fido-phone = pkgs.fido-phone;
+      inherit (pkgs) fido-phone;
     };
 
   mkApps =
@@ -95,11 +97,11 @@ let
       };
     in
     {
-      ghidra-mcp = appFor "${packages.ghidra-mcp}/bin/ghidra-mcp-serve" "Run the Ghidra MCP service";
-      ghidra-mcp-headless = appFor "${packages.ghidra-mcp-launcher}/bin/ghidra-mcp-headless" "Run the headless Ghidra MCP backend";
-      ghidra-mcp-httpd = appFor "${packages.ghidra-mcp-httpd}/bin/ghidra-mcp-httpd" "Run the Ghidra MCP HTTP server";
-      ghidra-mcp-bridge = appFor "${packages.ghidra-mcp-bridge}/bin/ghidra-mcp-bridge" "Run the Ghidra MCP bridge";
-      default = appFor "${packages.ghidra-mcp}/bin/ghidra-mcp-serve" "Run the Ghidra MCP service";
+      ghidra-mcp = appFor (lib.getExe packages.ghidra-mcp) "Run the Ghidra MCP service";
+      ghidra-mcp-headless = appFor (lib.getExe' packages.ghidra-mcp-launcher "ghidra-mcp-headless") "Run the headless Ghidra MCP backend";
+      ghidra-mcp-httpd = appFor (lib.getExe' packages.ghidra-mcp-httpd "ghidra-mcp-httpd") "Run the Ghidra MCP HTTP server";
+      ghidra-mcp-bridge = appFor (lib.getExe' packages.ghidra-mcp-bridge "ghidra-mcp-bridge") "Run the Ghidra MCP bridge";
+      default = appFor (lib.getExe packages.ghidra-mcp) "Run the Ghidra MCP service";
     };
 
 in
@@ -144,9 +146,11 @@ in
             # the corresponding packages.<system> flake output. Consumers of
             # this module do not have to recreate our overlay or package
             # selection.
-            _module.args.inputs = inputs;
-            _module.args.dotfilesPackages = config.packages;
-            _module.args.dotfilesEquicordSettings = equicordSettings;
+            _module.args = {
+              inherit inputs;
+              dotfilesPackages = config.packages;
+              dotfilesEquicordSettings = equicordSettings;
+            };
           }
         );
       in

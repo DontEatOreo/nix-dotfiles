@@ -2,10 +2,14 @@
   description = "Cross-platform dotfiles packages and NixOS configuration";
 
   inputs = {
-    bun2nix.inputs.flake-parts.follows = "flake-parts";
-    bun2nix.inputs.nixpkgs.follows = "nixpkgs";
-    bun2nix.inputs.treefmt-nix.follows = "treefmt-nix";
-    bun2nix.url = "github:nix-community/bun2nix";
+    bun2nix = {
+      inputs = {
+        flake-parts.follows = "flake-parts";
+        nixpkgs.follows = "nixpkgs";
+        treefmt-nix.follows = "treefmt-nix";
+      };
+      url = "github:nix-community/bun2nix";
+    };
 
     eupkgs.inputs.nixpkgs.follows = "nixpkgs-unstable";
     eupkgs.url = "github:euvlok/pkgs";
@@ -13,10 +17,14 @@
     flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
     flake-parts.url = "github:hercules-ci/flake-parts";
 
-    nixcord.inputs.flake-parts.follows = "flake-parts";
-    nixcord.inputs.nixpkgs.follows = "nixpkgs-unstable";
-    nixcord.inputs.treefmt-nix.follows = "treefmt-nix";
-    nixcord.url = "github:4evy/nixcord";
+    nixcord = {
+      inputs = {
+        flake-parts.follows = "flake-parts";
+        nixpkgs.follows = "nixpkgs-unstable";
+        treefmt-nix.follows = "treefmt-nix";
+      };
+      url = "github:4evy/nixcord";
+    };
 
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable-small";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

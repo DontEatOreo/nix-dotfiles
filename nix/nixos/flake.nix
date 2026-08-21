@@ -4,10 +4,14 @@
   inputs = {
     # This partition only consumes browser's NixOS module. Keep its other
     # module-system inputs out of the partition lock graph.
-    browser.inputs.home-manager.follows = "";
-    browser.inputs.nix-darwin.follows = "";
-    browser.inputs.nixpkgs.follows = "";
-    browser.url = "github:4evy/browser";
+    browser = {
+      inputs = {
+        home-manager.follows = "";
+        nix-darwin.follows = "";
+        nixpkgs.follows = "";
+      };
+      url = "github:4evy/browser";
+    };
 
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
 
@@ -15,5 +19,5 @@
     sops-nix.url = "github:Mic92/sops-nix";
   };
 
-  outputs = { ... }: { };
+  outputs = _: { };
 }
