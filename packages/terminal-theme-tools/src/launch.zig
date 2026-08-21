@@ -2,34 +2,38 @@ const std = @import("std");
 const config = @import("config.zig");
 const constants = @import("constants.zig");
 const theme = @import("theme.zig");
-const c = @import("c");
-
-fn helperTimeout(milliseconds: u32) std.Io.Timeout {
-    return .{ .duration = .{ .raw = .fromMilliseconds(milliseconds), .clock = .awake } };
-}
 
 pub const Prepared = struct {
     argv: std.ArrayList([]const u8) = .empty,
     environment: std.ArrayList(config.Pair) = .empty,
-    temporary_path: ?[:0]u8 = null,
+    owned: std.ArrayList([]u8) = .empty,
+    temporary_path: ?[]u8 = null,
 
-    pub fn deinit(self: *Prepared, allocator: std.mem.Allocator) void {
+    pub fn deinit(self: *Prepared, allocator: std.mem.Allocator, io: std.Io) void {
         self.argv.deinit(allocator);
         self.environment.deinit(allocator);
+        for (self.owned.items) |value| allocator.free(value);
+        self.owned.deinit(allocator);
         if (self.temporary_path) |path| {
-            _ = c.unlink(path.ptr);
+            std.Io.Dir.cwd().deleteFile(io, path) catch {};
             allocator.free(path);
         }
+    }
+
+    fn own(self: *Prepared, allocator: std.mem.Allocator, value: []u8) ![]const u8 {
+        errdefer allocator.free(value);
+        try self.owned.append(allocator, value);
+        return value;
     }
 };
 
 fn isPathLike(value: []const u8) bool {
-    return std.fs.path.isAbsolute(value) or std.mem.indexOfScalar(u8, value, '/') != null;
+    return std.Io.Dir.path.dirname(value) != null;
 }
 
 fn expandPath(allocator: std.mem.Allocator, env: *const std.process.Environ.Map, value: []const u8) ![]const u8 {
     if (std.mem.startsWith(u8, value, "~/")) {
-        if (env.get(constants.environment.home)) |home| return std.fs.path.join(allocator, &.{ home, value[2..] });
+        if (env.get(constants.environment.home)) |home| return std.Io.Dir.path.join(allocator, &.{ home, value[2..] });
     }
     return allocator.dupe(u8, value);
 }
@@ -63,13 +67,16 @@ fn candidate(allocator: std.mem.Allocator, io: std.Io, env: *const std.process.E
     const expanded = try expandPath(allocator, env, name);
     if (isPathLike(expanded)) {
         if (executable(io, expanded) and !skipped(allocator, io, expanded, skip_paths)) return expanded;
+        allocator.free(expanded);
         return null;
     }
+    defer allocator.free(expanded);
     const path = env.get(constants.environment.path) orelse constants.filesystem.default_search_path;
-    var directories = std.mem.splitScalar(u8, path, std.fs.path.delimiter);
+    var directories = std.mem.splitScalar(u8, path, std.Io.Dir.path.delimiter);
     while (directories.next()) |directory| {
-        const joined = if (directory.len == 0) try allocator.dupe(u8, expanded) else try std.fs.path.join(allocator, &.{ directory, expanded });
+        const joined = if (directory.len == 0) try allocator.dupe(u8, expanded) else try std.Io.Dir.path.join(allocator, &.{ directory, expanded });
         if (executable(io, joined) and !skipped(allocator, io, joined, skip_paths)) return joined;
+        allocator.free(joined);
     }
     return null;
 }
@@ -79,10 +86,12 @@ pub fn resolve(allocator: std.mem.Allocator, io: std.Io, env: *const std.process
     var skip_paths: std.ArrayList([]const u8) = .empty;
     defer skip_paths.deinit(allocator);
     for (runner.skip_env) |name| if (env.get(name)) |paths| {
-        var it = std.mem.splitScalar(u8, paths, std.fs.path.delimiter);
+        var it = std.mem.splitScalar(u8, paths, std.Io.Dir.path.delimiter);
         while (it.next()) |path| if (path.len != 0) try skip_paths.append(allocator, path);
     };
-    if (std.process.executablePathAlloc(io, allocator)) |self| try skip_paths.append(allocator, self) else |_| {}
+    const self_path = std.process.executablePathAlloc(io, allocator) catch null;
+    defer if (self_path) |self| allocator.free(self);
+    if (self_path) |self| try skip_paths.append(allocator, self);
 
     if (try candidate(allocator, io, env, requested, skip_paths.items)) |path| return path;
     const programs = if (runner.programs.len == 0) &.{runner.name} else runner.programs;
@@ -93,13 +102,15 @@ pub fn resolve(allocator: std.mem.Allocator, io: std.Io, env: *const std.process
     return error.FileNotFound;
 }
 
-fn render(allocator: std.mem.Allocator, template: []const u8, theme_name: []const u8, context: []const u8) ![]const u8 {
+fn render(allocator: std.mem.Allocator, template: []const u8, theme_name: []const u8, context: []const u8) ![]u8 {
     const themed = try std.mem.replaceOwned(u8, allocator, template, constants.template.theme, theme_name);
+    defer allocator.free(themed);
     return std.mem.replaceOwned(u8, allocator, themed, constants.template.context, context);
 }
 
-fn renderEnvironment(allocator: std.mem.Allocator, env: *const std.process.Environ.Map, template: []const u8, theme_name: []const u8) ![]const u8 {
+fn renderEnvironment(allocator: std.mem.Allocator, env: *const std.process.Environ.Map, template: []const u8, theme_name: []const u8) ![]u8 {
     const themed = try render(allocator, template, theme_name, "");
+    defer allocator.free(themed);
     return std.mem.replaceOwned(u8, allocator, themed, constants.template.home, env.get(constants.environment.home) orelse "");
 }
 
@@ -121,12 +132,15 @@ fn argumentValue(arguments: []const []const u8, flags: []const []const u8, prefi
 }
 
 fn canonicalDirectory(allocator: std.mem.Allocator, io: std.Io, cwd: []const u8, value: []const u8) ![]const u8 {
-    const path = if (std.fs.path.isAbsolute(value)) value else try std.fs.path.join(allocator, &.{ cwd, value });
-    return std.Io.Dir.cwd().realPathFileAlloc(io, path, allocator) catch std.fs.path.resolve(allocator, &.{path});
+    const joined = if (std.Io.Dir.path.isAbsolute(value)) null else try std.Io.Dir.path.join(allocator, &.{ cwd, value });
+    defer if (joined) |path| allocator.free(path);
+    const path = joined orelse value;
+    var buffer: [std.Io.Dir.max_path_bytes]u8 = undefined;
+    const length = std.Io.Dir.cwd().realPathFile(io, path, &buffer) catch return std.Io.Dir.path.resolve(allocator, &.{path});
+    return allocator.dupe(u8, buffer[0..length]);
 }
 
-fn quoteToml(allocator: std.mem.Allocator, value: []const u8) ![]const u8 {
-    var output: std.ArrayList(u8) = .empty;
+fn appendTomlString(output: *std.ArrayList(u8), allocator: std.mem.Allocator, value: []const u8) !void {
     try output.append(allocator, '"');
     for (value) |byte| switch (byte) {
         '\x08' => try output.appendSlice(allocator, "\\b"),
@@ -136,54 +150,66 @@ fn quoteToml(allocator: std.mem.Allocator, value: []const u8) ![]const u8 {
         '"' => try output.appendSlice(allocator, "\\\""),
         '\\' => try output.appendSlice(allocator, "\\\\"),
         else => if (byte < 0x20 or byte == 0x7f) {
-            try output.appendSlice(allocator, &.{ '\\', 'u', '0', '0', constants.text.hex_digits[byte >> 4], constants.text.hex_digits[byte & 0xf] });
+            try output.appendSlice(allocator, "\\u00");
+            try output.appendSlice(allocator, &std.fmt.hex(byte));
         } else try output.append(allocator, byte),
     };
     try output.append(allocator, '"');
-    return output.toOwnedSlice(allocator);
 }
 
 fn directoryContext(allocator: std.mem.Allocator, io: std.Io, env: *const std.process.Environ.Map, runtime: *const config.Runtime, integration: *const config.Integration, arguments: []const []const u8) ![]const u8 {
     const cwd = try std.process.currentPathAlloc(io, allocator);
+    defer allocator.free(cwd);
     const directory = try canonicalDirectory(allocator, io, cwd, argumentValue(arguments, integration.context_path_flags, integration.context_path_prefixes, integration.context_argument_separator) orelse cwd);
-    var directories: std.ArrayList([]const u8) = .empty;
-    try directories.append(allocator, directory);
+    var directories: std.StringArrayHashMapUnmanaged(void) = .empty;
+    defer {
+        for (directories.keys()) |path| allocator.free(path);
+        directories.deinit(allocator);
+    }
+    try directories.put(allocator, directory, {});
     for (integration.context_directory_commands) |command| {
         var argv: std.ArrayList([]const u8) = .empty;
-        defer argv.deinit(allocator);
+        defer {
+            for (argv.items) |arg| allocator.free(arg);
+            argv.deinit(allocator);
+        }
         for (command) |arg| try argv.append(allocator, try std.mem.replaceOwned(u8, allocator, arg, constants.template.directory, directory));
         const result = std.process.run(allocator, io, .{
             .argv = argv.items,
             .environ_map = env,
             .stdout_limit = .limited(runtime.helper_output_limit_bytes),
             .stderr_limit = .limited(runtime.helper_output_limit_bytes),
-            .timeout = helperTimeout(runtime.helper_timeout_ms),
+            .timeout = runtime.helperTimeout(),
         }) catch continue;
         defer allocator.free(result.stdout);
         defer allocator.free(result.stderr);
         if (result.term != .exited or result.term.exited != 0) continue;
         const output = std.mem.trim(u8, result.stdout, constants.text.whitespace);
-        if (output.len == 0 or std.mem.indexOfScalar(u8, output, '\n') != null) continue;
+        if (output.len == 0 or std.mem.findScalar(u8, output, '\n') != null) continue;
         const related = canonicalDirectory(allocator, io, directory, output) catch continue;
-        const related_stat = std.Io.Dir.cwd().statFile(io, related, .{}) catch continue;
-        if (related_stat.kind != .directory) continue;
-        var duplicate = false;
-        for (directories.items) |known| {
-            if (std.mem.eql(u8, related, known)) duplicate = true;
+        const related_stat = std.Io.Dir.cwd().statFile(io, related, .{}) catch {
+            allocator.free(related);
+            continue;
+        };
+        if (related_stat.kind != .directory) {
+            allocator.free(related);
+            continue;
         }
-        if (!duplicate) try directories.append(allocator, related);
+        const entry = try directories.getOrPut(allocator, related);
+        if (entry.found_existing) allocator.free(related) else entry.value_ptr.* = {};
     }
 
     var output: std.ArrayList(u8) = .empty;
+    errdefer output.deinit(allocator);
     try output.appendSlice(allocator, integration.context_table.?);
     try output.appendSlice(allocator, constants.text.table_open);
-    for (directories.items, 0..) |path, index| {
+    for (directories.keys(), 0..) |path, index| {
         if (index != 0) try output.append(allocator, ',');
-        try output.appendSlice(allocator, try quoteToml(allocator, path));
+        try appendTomlString(&output, allocator, path);
         try output.appendSlice(allocator, constants.text.table_open);
         try output.appendSlice(allocator, integration.context_field.?);
         try output.append(allocator, '=');
-        try output.appendSlice(allocator, try quoteToml(allocator, integration.context_value.?));
+        try appendTomlString(&output, allocator, integration.context_value.?);
         try output.append(allocator, '}');
     }
     try output.append(allocator, '}');
@@ -202,42 +228,28 @@ fn configPath(allocator: std.mem.Allocator, env: *const std.process.Environ.Map,
         for (integration.config_flags) |flag| if (std.mem.startsWith(u8, arguments[index], flag) and arguments[index].len > flag.len and arguments[index][flag.len] == '=') return expandPath(allocator, env, arguments[index][flag.len + 1 ..]);
     }
     const home = env.get(constants.environment.home) orelse return allocator.dupe(u8, "");
-    return std.fs.path.join(allocator, &.{ home, integration.default_config.? });
+    return std.Io.Dir.path.join(allocator, &.{ home, integration.default_config.? });
 }
 
 const AssignmentPatch = struct {
     line: ?usize = null,
-    table: bool = false,
+    end_line: ?usize = null,
     prepend_if_missing: bool = false,
 };
 
-fn tableHeaderBelongsToKey(line: []const u8, key: []const u8) bool {
-    var rest = std.mem.trimStart(u8, line, " \t");
-    if (rest.len < 2 or rest[0] != '[' or rest[1] == '[') return false;
-    rest = std.mem.trimStart(u8, rest[1..], " \t");
-    if (!std.mem.startsWith(u8, rest, key)) return false;
-    rest = std.mem.trimStart(u8, rest[key.len..], " \t");
-    return rest.len != 0 and (rest[0] == ']' or rest[0] == '.');
-}
-
 fn patchAssignment(allocator: std.mem.Allocator, contents: []const u8, key: []const u8, quote: u8, value: []const u8, policy: AssignmentPatch) ![]const u8 {
     var output: std.ArrayList(u8) = .empty;
+    errdefer output.deinit(allocator);
     var lines = std.mem.splitScalar(u8, contents, '\n');
     var replaced = false;
-    var skipping_table = false;
     var line_number: usize = 1;
     while (lines.next()) |line| {
         defer line_number += 1;
-        if (skipping_table) {
-            const trimmed = std.mem.trimStart(u8, line, " \t");
-            if (trimmed.len == 0 or trimmed[0] != '[') continue;
-            if (tableHeaderBelongsToKey(line, key)) continue;
-            skipping_table = false;
-        }
         const trimmed = std.mem.trimStart(u8, line, constants.text.horizontal_whitespace);
         var matches = false;
-        if (policy.line) |expected| {
-            matches = line_number == expected;
+        if (policy.line) |start| {
+            if (line_number > start and (policy.end_line == null or line_number < policy.end_line.?)) continue;
+            matches = line_number == start;
         } else if (std.mem.startsWith(u8, trimmed, key)) {
             const rest = std.mem.trimStart(u8, trimmed[key.len..], constants.text.horizontal_whitespace);
             matches = rest.len != 0 and rest[0] == '=';
@@ -249,13 +261,13 @@ fn patchAssignment(allocator: std.mem.Allocator, contents: []const u8, key: []co
             try output.appendSlice(allocator, value);
             try output.append(allocator, quote);
             replaced = true;
-            skipping_table = policy.table and tableHeaderBelongsToKey(line, key);
         } else try output.appendSlice(allocator, line);
         if (lines.index != null) try output.append(allocator, '\n');
     }
     if (!replaced) {
         if (policy.prepend_if_missing) {
             var prefixed: std.ArrayList(u8) = .empty;
+            errdefer prefixed.deinit(allocator);
             try prefixed.appendSlice(allocator, key);
             try prefixed.appendSlice(allocator, constants.text.assignment);
             try prefixed.append(allocator, quote);
@@ -275,29 +287,43 @@ fn patchAssignment(allocator: std.mem.Allocator, contents: []const u8, key: []co
     return output.toOwnedSlice(allocator);
 }
 
-fn makeTemporary(allocator: std.mem.Allocator, io: std.Io, env: *const std.process.Environ.Map, integration: *const config.Integration, contents: []const u8) ![:0]u8 {
+fn makeTemporary(allocator: std.mem.Allocator, io: std.Io, env: *const std.process.Environ.Map, integration: *const config.Integration, contents: []const u8) ![]u8 {
     const directory = switch (integration.temporary_location.?) {
-        .system => env.get(constants.environment.temporary_directory) orelse constants.filesystem.default_temporary_directory,
+        .system => try allocator.dupe(u8, env.get(constants.environment.temporary_directory) orelse constants.filesystem.default_temporary_directory),
         .cache => cache: {
-            const base = env.get(constants.environment.xdg_cache_home) orelse if (env.get(constants.environment.home)) |home| try std.fs.path.join(allocator, &.{ home, constants.filesystem.default_cache_directory }) else constants.filesystem.default_temporary_directory;
-            break :cache try std.fs.path.join(allocator, &.{ base, integration.cache_subdirectory.? });
+            if (env.get(constants.environment.xdg_cache_home)) |base| break :cache try std.Io.Dir.path.join(allocator, &.{ base, integration.cache_subdirectory.? });
+            if (env.get(constants.environment.home)) |home| break :cache try std.Io.Dir.path.join(allocator, &.{ home, constants.filesystem.default_cache_directory, integration.cache_subdirectory.? });
+            break :cache try std.Io.Dir.path.join(allocator, &.{ constants.filesystem.default_temporary_directory, integration.cache_subdirectory.? });
         },
     };
-    try std.Io.Dir.cwd().createDirPath(io, directory);
-    const template = try std.fs.path.join(allocator, &.{ directory, integration.temporary_prefix.? });
-    const path = try allocator.dupeZ(u8, template);
-    errdefer allocator.free(path);
-    const fd = c.mkstemp(path.ptr);
-    if (fd < 0) return error.TemporaryFileFailed;
-    errdefer _ = c.unlink(path.ptr);
-    defer _ = c.close(fd);
-    var written: usize = 0;
-    while (written < contents.len) {
-        const count = c.write(fd, contents[written..].ptr, contents.len - written);
-        if (count <= 0) return error.TemporaryFileFailed;
-        written += @intCast(count);
+    defer allocator.free(directory);
+    const temporary_directory = try std.Io.Dir.cwd().createDirPathOpen(io, directory, .{});
+    defer temporary_directory.close(io);
+    const template = integration.temporary_prefix.?;
+    const stem = template[0 .. template.len - constants.toml.temporary_suffix.len];
+    while (true) {
+        var random_integer: u64 = undefined;
+        io.random(@ptrCast(&random_integer));
+        const suffix = std.fmt.hex(random_integer);
+        const basename = try std.mem.concat(allocator, u8, &.{ stem, &suffix });
+        defer allocator.free(basename);
+        const path = try std.Io.Dir.path.join(allocator, &.{ directory, basename });
+        errdefer allocator.free(path);
+        const file = temporary_directory.createFile(io, basename, .{
+            .exclusive = true,
+            .permissions = .fromMode(0o600),
+        }) catch |err| switch (err) {
+            error.PathAlreadyExists, error.FileBusy, error.DeviceBusy => {
+                allocator.free(path);
+                continue;
+            },
+            else => return err,
+        };
+        errdefer temporary_directory.deleteFile(io, basename) catch {};
+        defer file.close(io);
+        try file.writeStreamingAll(io, contents);
+        return path;
     }
-    return path;
 }
 
 pub fn prepare(allocator: std.mem.Allocator, io: std.Io, env: *const std.process.Environ.Map, runtime: *const config.Runtime, integration: ?*const config.Integration, extra: []const []const u8) !Prepared {
@@ -306,7 +332,7 @@ pub fn prepare(allocator: std.mem.Allocator, io: std.Io, env: *const std.process
 
 pub fn prepareForTheme(allocator: std.mem.Allocator, io: std.Io, env: *const std.process.Environ.Map, runtime: *const config.Runtime, integration: ?*const config.Integration, extra: []const []const u8, mode: config.Theme) !Prepared {
     var result: Prepared = .{};
-    errdefer result.deinit(allocator);
+    errdefer result.deinit(allocator, io);
     const selected = integration orelse {
         try result.argv.appendSlice(allocator, extra);
         return result;
@@ -315,26 +341,31 @@ pub fn prepareForTheme(allocator: std.mem.Allocator, io: std.Io, env: *const std
     switch (selected.strategy) {
         .arguments => {
             const context = if (selected.context_table != null) try directoryContext(allocator, io, env, runtime, selected, extra) else "";
-            for (selected.arguments) |template| try result.argv.append(allocator, try render(allocator, template, theme_name, context));
+            defer if (selected.context_table != null) allocator.free(context);
+            for (selected.arguments) |template| try result.argv.append(allocator, try result.own(allocator, try render(allocator, template, theme_name, context)));
             try result.argv.appendSlice(allocator, extra);
         },
         .config => {
             const path = try configPath(allocator, env, selected, extra);
+            defer allocator.free(path);
             const contents = std.Io.Dir.cwd().readFileAlloc(io, path, allocator, .limited(config.max_file_bytes)) catch |err| switch (err) {
                 error.FileNotFound => try allocator.dupe(u8, ""),
                 else => return err,
             };
+            defer allocator.free(contents);
             var patch_policy: AssignmentPatch = .{};
             if (selected.validation == .toml) {
                 const assignment = try allocator.dupeZ(u8, selected.assignment.?);
+                defer allocator.free(assignment);
                 const inspected = try config.inspectTomlAssignment(allocator, contents, selected.display_name, assignment);
                 patch_policy = .{
                     .line = inspected.line,
-                    .table = inspected.kind == .table,
+                    .end_line = inspected.end_line,
                     .prepend_if_missing = inspected.kind == .missing,
                 };
             }
             const patched = try patchAssignment(allocator, contents, selected.assignment.?, selected.quote.?, theme_name, patch_policy);
+            defer allocator.free(patched);
             if (selected.validation == .toml) try config.validateToml(allocator, patched, selected.display_name);
             result.temporary_path = try makeTemporary(allocator, io, env, selected, patched);
             try result.argv.append(allocator, selected.config_output_flag.?);
@@ -355,7 +386,7 @@ pub fn prepareForTheme(allocator: std.mem.Allocator, io: std.Io, env: *const std
         .environment => {
             for (selected.env) |pair| try result.environment.append(allocator, .{
                 .key = pair.key,
-                .value = try renderEnvironment(allocator, env, pair.value, theme_name),
+                .value = try result.own(allocator, try renderEnvironment(allocator, env, pair.value, theme_name)),
             });
             try result.argv.appendSlice(allocator, extra);
         },
@@ -366,7 +397,7 @@ pub fn prepareForTheme(allocator: std.mem.Allocator, io: std.Io, env: *const std
 fn usesInterpreter(interpreter: *const config.Interpreter, executable_path: []const u8, io: std.Io) bool {
     var buffer: [constants.filesystem.shebang_read_bytes]u8 = undefined;
     const text = std.Io.Dir.cwd().readFile(io, executable_path, &buffer) catch return false;
-    const line = text[0 .. std.mem.indexOfScalar(u8, text, '\n') orelse text.len];
+    const line = text[0 .. std.mem.findScalar(u8, text, '\n') orelse text.len];
     if (!std.mem.startsWith(u8, line, constants.text.shebang)) return false;
     var tokens = std.mem.tokenizeAny(u8, line[constants.text.shebang.len..], constants.text.whitespace);
     const command = tokens.next() orelse return false;
@@ -381,14 +412,18 @@ fn findInterpreter(allocator: std.mem.Allocator, io: std.Io, env: *const std.pro
 
 pub const Invocation = struct {
     allocator: std.mem.Allocator,
+    io: std.Io,
     argv: std.ArrayList([]const u8),
+    owned: std.ArrayList([]const u8),
     environment: std.process.Environ.Map,
     prepared: Prepared,
 
     pub fn deinit(self: *Invocation) void {
         self.environment.deinit();
         self.argv.deinit(self.allocator);
-        self.prepared.deinit(self.allocator);
+        for (self.owned.items) |value| self.allocator.free(value);
+        self.owned.deinit(self.allocator);
+        self.prepared.deinit(self.allocator, self.io);
     }
 
     pub fn replaceOrExecute(self: *Invocation, io: std.Io) !u8 {
@@ -418,12 +453,21 @@ pub const Invocation = struct {
 
 pub fn prepareInvocation(allocator: std.mem.Allocator, io: std.Io, env: *const std.process.Environ.Map, manifest: *const config.Manifest, runner: *const config.Runner, requested: []const u8, extra: []const []const u8, forced_theme: ?config.Theme) !Invocation {
     var executable_path = try resolve(allocator, io, env, runner, requested);
+    var owned: std.ArrayList([]const u8) = .empty;
+    errdefer {
+        for (owned.items) |value| allocator.free(value);
+        owned.deinit(allocator);
+    }
+    owned.append(allocator, executable_path) catch |err| {
+        allocator.free(executable_path);
+        return err;
+    };
     const integration = if (runner.integration) |name| manifest.findIntegration(name) else null;
     var prepared = if (forced_theme) |mode|
         try prepareForTheme(allocator, io, env, &manifest.runtime, integration, extra, mode)
     else
         try prepare(allocator, io, env, &manifest.runtime, integration, extra);
-    errdefer prepared.deinit(allocator);
+    errdefer prepared.deinit(allocator, io);
     var argv: std.ArrayList([]const u8) = .empty;
     errdefer argv.deinit(allocator);
     if (runner.interpreter) |name| {
@@ -431,6 +475,10 @@ pub fn prepareInvocation(allocator: std.mem.Allocator, io: std.Io, env: *const s
         if (usesInterpreter(interpreter, executable_path, io)) {
             const script = executable_path;
             executable_path = try findInterpreter(allocator, io, env, interpreter);
+            owned.append(allocator, executable_path) catch |err| {
+                allocator.free(executable_path);
+                return err;
+            };
             try argv.append(allocator, executable_path);
             try argv.append(allocator, script);
         } else try argv.append(allocator, executable_path);
@@ -446,7 +494,9 @@ pub fn prepareInvocation(allocator: std.mem.Allocator, io: std.Io, env: *const s
     try child_env.put(constants.environment.active, "1");
     return .{
         .allocator = allocator,
+        .io = io,
         .argv = argv,
+        .owned = owned,
         .environment = child_env,
         .prepared = prepared,
     };
@@ -458,12 +508,11 @@ pub fn runMatched(allocator: std.mem.Allocator, io: std.Io, env: *const std.proc
     return invocation.replaceOrExecute(io);
 }
 
-pub fn execUnknown(allocator: std.mem.Allocator, argv: []const [:0]const u8) u8 {
-    const pointers = allocator.alloc(?[*:0]const u8, argv.len + 1) catch return constants.exit.cannot_execute;
-    for (argv, 0..) |arg, index| pointers[index] = arg.ptr;
-    pointers[argv.len] = null;
-    _ = c.execvp(argv[0].ptr, @ptrCast(pointers.ptr));
-    return if (std.c.errno(-1) == .NOENT) constants.exit.not_found else constants.exit.cannot_execute;
+pub fn execUnknown(io: std.Io, argv: []const []const u8) u8 {
+    return switch (std.process.replace(io, .{ .argv = argv })) {
+        error.FileNotFound => constants.exit.not_found,
+        else => constants.exit.cannot_execute,
+    };
 }
 
 fn contains(values: []const []const u8, needle: []const u8) bool {
@@ -477,10 +526,39 @@ test "patches a configured assignment" {
     try std.testing.expectEqualStrings("x = 1\nstyle = \"new\"\n", patched);
 }
 
+test "template rendering owns only its result" {
+    const rendered = try render(std.testing.allocator, "{theme}:{context}", "light", "workspace");
+    defer std.testing.allocator.free(rendered);
+    try std.testing.expectEqualStrings("light:workspace", rendered);
+}
+
+test "TOML strings use TOML control escapes" {
+    var output: std.ArrayList(u8) = .empty;
+    defer output.deinit(std.testing.allocator);
+    try appendTomlString(&output, std.testing.allocator, "quote=\" newline=\n unit=\x1f");
+    try std.testing.expectEqualStrings("\"quote=\\\" newline=\\n unit=\\u001f\"", output.items);
+}
+
+test "directory context is emitted as parser-valid TOML" {
+    var env = std.process.Environ.Map.init(std.testing.allocator);
+    defer env.deinit();
+    const runtime: config.Runtime = undefined;
+    const integration: config.Integration = .{
+        .name = "tool",
+        .strategy = .arguments,
+        .display_name = "tool",
+        .dark_theme = "night",
+        .light_theme = "day",
+        .context_table = "roots",
+        .context_field = "theme",
+        .context_value = "active",
+    };
+    const context = try directoryContext(std.testing.allocator, std.testing.io, &env, &runtime, &integration, &.{});
+    defer std.testing.allocator.free(context);
+    try config.validateToml(std.testing.allocator, context, "directory context");
+}
+
 test "environment integration renders theme and home placeholders" {
-    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
-    defer arena.deinit();
-    const allocator = arena.allocator();
     var env = std.process.Environ.Map.init(std.testing.allocator);
     defer env.deinit();
     try env.put(constants.environment.home, "/Users/tester");
@@ -496,8 +574,8 @@ test "environment integration renders theme and home placeholders" {
             .{ .key = "TOOL_THEME", .value = "{theme}" },
         },
     };
-    var prepared = try prepareForTheme(allocator, std.testing.io, &env, &runtime, &integration, &.{"--version"}, .light);
-    defer prepared.deinit(allocator);
+    var prepared = try prepareForTheme(std.testing.allocator, std.testing.io, &env, &runtime, &integration, &.{"--version"}, .light);
+    defer prepared.deinit(std.testing.allocator, std.testing.io);
     try std.testing.expectEqualSlices([]const u8, &.{"--version"}, prepared.argv.items);
     try std.testing.expectEqual(2, prepared.environment.items.len);
     try std.testing.expectEqualStrings("TOOL_CONFIG", prepared.environment.items[0].key);
@@ -515,7 +593,12 @@ test "validated table assignment is replaced at the root" {
         \\[view]
         \\line_numbers = "relative"
     ;
-    const patched = try patchAssignment(std.testing.allocator, source, "appearance", '\'', "day", .{ .line = 1, .table = true });
+    const inspected = try config.inspectTomlAssignment(std.testing.allocator, source, "test", "appearance");
+    try std.testing.expectEqual(config.TomlAssignment{ .kind = .table, .line = 1, .end_line = 6 }, inspected);
+    const patched = try patchAssignment(std.testing.allocator, source, "appearance", '\'', "day", .{
+        .line = inspected.line,
+        .end_line = inspected.end_line,
+    });
     defer std.testing.allocator.free(patched);
     try std.testing.expectEqualStrings("appearance = 'day'\n[view]\nline_numbers = \"relative\"", patched);
     try config.validateToml(std.testing.allocator, patched, "test");
@@ -549,14 +632,13 @@ test "bare aliases use configured fallback while skipping wrappers" {
         .data = "#!/bin/sh\nexit 0\n",
         .flags = .{ .permissions = .executable_file },
     });
-    var buffer: [std.fs.max_path_bytes]u8 = undefined;
+    var buffer: [std.Io.Dir.max_path_bytes]u8 = undefined;
     const length = try temporary.dir.realPath(std.testing.io, &buffer);
 
-    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
-    defer arena.deinit();
-    const allocator = arena.allocator();
-    const wrapper = try std.fs.path.join(allocator, &.{ buffer[0..length], "alias" });
-    const expected = try std.fs.path.join(allocator, &.{ buffer[0..length], "target" });
+    const wrapper = try std.Io.Dir.path.join(std.testing.allocator, &.{ buffer[0..length], "alias" });
+    defer std.testing.allocator.free(wrapper);
+    const expected = try std.Io.Dir.path.join(std.testing.allocator, &.{ buffer[0..length], "target" });
+    defer std.testing.allocator.free(expected);
     var env = std.process.Environ.Map.init(std.testing.allocator);
     defer env.deinit();
     try env.put(constants.environment.path, buffer[0..length]);
@@ -567,24 +649,33 @@ test "bare aliases use configured fallback while skipping wrappers" {
         .programs = &.{ "alias", "target" },
         .skip_env = &.{"TEST_WRAPPER"},
     };
-    const resolved = try resolve(allocator, std.testing.io, &env, &runner, "alias");
+    const resolved = try resolve(std.testing.allocator, std.testing.io, &env, &runner, "alias");
+    defer std.testing.allocator.free(resolved);
     try std.testing.expectEqualStrings(expected, resolved);
 }
 
+test "invocation deinit releases resolved executable ownership" {
+    var env = std.process.Environ.Map.init(std.testing.allocator);
+    defer env.deinit();
+    const runner: config.Runner = .{ .name = "sh" };
+    var manifest = config.Manifest.init(std.testing.allocator, undefined);
+    defer manifest.deinit();
+    var invocation = try prepareInvocation(std.testing.allocator, std.testing.io, &env, &manifest, &runner, "/bin/sh", &.{ "-c", "exit 0" }, .dark);
+    defer invocation.deinit();
+    try std.testing.expectEqualStrings("/bin/sh", invocation.argv.items[0]);
+}
+
 test "prepared config cleanup removes its private file" {
-    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
-    defer arena.deinit();
-    const allocator = arena.allocator();
     var temporary = std.testing.tmpDir(.{});
     defer temporary.cleanup();
-    var path_buffer: [std.fs.max_path_bytes]u8 = undefined;
+    var path_buffer: [std.Io.Dir.max_path_bytes]u8 = undefined;
     const path_length = try temporary.dir.realPath(std.testing.io, &path_buffer);
     const cache_path = path_buffer[0..path_length];
 
     var env = std.process.Environ.Map.init(std.testing.allocator);
     defer env.deinit();
     try env.put(constants.environment.xdg_cache_home, cache_path);
-    try env.put("TEST_THEME", constants.toml.dark);
+    try env.put("TEST_THEME", @tagName(config.Theme.dark));
     const runtime: config.Runtime = .{
         .theme_environment = &.{"TEST_THEME"},
         .theme_dark_aliases = &.{},
@@ -592,7 +683,7 @@ test "prepared config cleanup removes its private file" {
         .theme_macos_commands = &.{},
         .theme_unix_commands = &.{},
         .theme_terminal_program_environment = "TEST_TERMINAL",
-        .theme_terminal_queries = &.{.{ .key = constants.protocol.wildcard, .value = constants.protocol.background }},
+        .theme_terminal_queries = &.{.{ .key = constants.protocol.wildcard, .value = .background }},
         .theme_macos_fallback = .dark,
         .theme_unix_fallback = .dark,
         .theme_probe_timeout_ms = 1,
@@ -614,9 +705,10 @@ test "prepared config cleanup removes its private file" {
         .cache_subdirectory = "tool",
         .quote = '"',
     };
-    var prepared = try prepare(allocator, std.testing.io, &env, &runtime, &integration, &.{ "--config", "/does/not/exist" });
-    const temporary_path = try allocator.dupe(u8, prepared.temporary_path.?);
+    var prepared = try prepare(std.testing.allocator, std.testing.io, &env, &runtime, &integration, &.{ "--config", "/does/not/exist" });
+    const temporary_path = try std.testing.allocator.dupe(u8, prepared.temporary_path.?);
+    defer std.testing.allocator.free(temporary_path);
     try std.Io.Dir.cwd().access(std.testing.io, temporary_path, .{});
-    prepared.deinit(allocator);
+    prepared.deinit(std.testing.allocator, std.testing.io);
     try std.testing.expectError(error.FileNotFound, std.Io.Dir.cwd().access(std.testing.io, temporary_path, .{}));
 }

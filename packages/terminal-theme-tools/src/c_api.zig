@@ -99,16 +99,19 @@ fn statusMessage(status: Status) []const u8 {
 fn statusForError(err: anyerror) Status {
     return switch (err) {
         error.OutOfMemory => .out_of_memory,
-        error.FileNotFound, error.MissingIntegration, error.MissingInterpreter, error.InterpreterNotFound => .not_found,
+        error.InvalidArgument, error.InvalidEnvironment => .invalid_argument,
+        error.InvalidManifest => .invalid_manifest,
+        error.FileNotFound, error.RunnerNotFound, error.MissingIntegration, error.MissingInterpreter, error.InterpreterNotFound => .not_found,
         error.AccessDenied, error.InputOutput, error.SystemResources, error.Unexpected => .io_error,
         else => .internal_error,
     };
 }
 
 fn putEnvironmentEntry(map: *std.process.Environ.Map, entry: []const u8) !void {
-    const separator = std.mem.indexOfScalar(u8, entry, '=') orelse return error.InvalidEnvironment;
-    if (separator == 0) return error.InvalidEnvironment;
-    try map.put(entry[0..separator], entry[separator + 1 ..]);
+    const separator = std.mem.findScalar(u8, entry, '=') orelse return error.InvalidEnvironment;
+    const name = entry[0..separator];
+    if (!std.process.Environ.Map.validateKeyForPut(name)) return error.InvalidEnvironment;
+    try map.put(name, entry[separator + 1 ..]);
 }
 
 fn loadEnvironment(map: *std.process.Environ.Map, entries: ?[*]const ?[*:0]const u8, count: usize) !void {
@@ -117,26 +120,52 @@ fn loadEnvironment(map: *std.process.Environ.Map, entries: ?[*]const ?[*:0]const
         return;
     }
     if (count != 0) return error.InvalidEnvironment;
-    var index: usize = 0;
-    while (std.c.environ[index]) |entry| : (index += 1) try putEnvironmentEntry(map, std.mem.span(entry));
+    try map.putPosixBlock(.{ .slice = @ptrCast(std.mem.span(std.c.environ)) });
+}
+
+fn createContext(options: ?*const ContextOptions) !*Context {
+    const context = try std.heap.c_allocator.create(Context);
+    errdefer std.heap.c_allocator.destroy(context);
+
+    context.arena = .init(std.heap.c_allocator);
+    errdefer context.arena.deinit();
+
+    context.threaded_io = .init(std.heap.c_allocator, .{});
+    errdefer context.threaded_io.deinit();
+
+    const allocator = context.allocator();
+    context.environment = std.process.Environ.Map.init(allocator);
+    errdefer context.environment.deinit();
+    loadEnvironment(&context.environment, if (options) |value| value.environment else null, if (options) |value| value.environment_count else 0) catch |err| switch (err) {
+        error.OutOfMemory => return error.OutOfMemory,
+        else => return error.InvalidEnvironment,
+    };
+
+    const manifest_text = if (options) |value| input(value.manifest) orelse return error.InvalidArgument else null;
+    context.manifest = library.config.Manifest.loadText(allocator, manifest_text) catch |err| switch (err) {
+        error.OutOfMemory => return error.OutOfMemory,
+        else => return error.InvalidManifest,
+    };
+    context.clearError();
+    return context;
 }
 
 fn runnerAt(context: ?*const Context, index: usize) ?*const library.config.Runner {
     const ctx = context orelse return null;
-    if (index >= ctx.manifest.runners.items.len) return null;
-    return &ctx.manifest.runners.items[index];
+    if (index >= ctx.manifest.runners.count()) return null;
+    return &ctx.manifest.runners.values()[index];
 }
 
 fn integrationAt(context: ?*const Context, index: usize) ?*const library.config.Integration {
     const ctx = context orelse return null;
-    if (index >= ctx.manifest.integrations.items.len) return null;
-    return &ctx.manifest.integrations.items[index];
+    if (index >= ctx.manifest.integrations.count()) return null;
+    return &ctx.manifest.integrations.values()[index];
 }
 
 fn interpreterAt(context: ?*const Context, index: usize) ?*const library.config.Interpreter {
     const ctx = context orelse return null;
-    if (index >= ctx.manifest.interpreters.items.len) return null;
-    return &ctx.manifest.interpreters.items[index];
+    if (index >= ctx.manifest.interpreters.count()) return null;
+    return &ctx.manifest.interpreters.values()[index];
 }
 
 fn internalTheme(theme_value: Theme) ?library.config.Theme {
@@ -152,6 +181,26 @@ fn externalTheme(theme_value: ?library.config.Theme) Theme {
         .dark => .dark,
         .light => .light,
     } else .unknown;
+}
+
+fn createCommand(ctx: *Context, requested: []const u8, arguments: ?[*]const ?[*:0]const u8, argument_count: usize, theme_value: Theme) !*Command {
+    const runner = ctx.manifest.findRunner(requested) orelse return error.RunnerNotFound;
+    const command = try std.heap.c_allocator.create(Command);
+    errdefer std.heap.c_allocator.destroy(command);
+
+    command.arena = .init(std.heap.c_allocator);
+    errdefer command.arena.deinit();
+    const allocator = command.arena.allocator();
+
+    const requested_copy = try allocator.dupe(u8, requested);
+    const extra = try allocator.alloc([]const u8, argument_count);
+    if (arguments) |provided| for (provided[0..argument_count], extra) |argument, *slot| {
+        slot.* = try allocator.dupe(u8, std.mem.span(argument orelse return error.InvalidArgument));
+    };
+
+    command.invocation = try library.launch.prepareInvocation(allocator, ctx.io(), &ctx.environment, &ctx.manifest, runner, requested_copy, extra, internalTheme(theme_value));
+    command.io = ctx.io();
+    return command;
 }
 
 pub export fn terminal_theme_tools_abi_version() callconv(.c) u32 {
@@ -170,33 +219,11 @@ pub export fn terminal_theme_tools_status_message(status_code: c_int) callconv(.
 pub export fn terminal_theme_tools_context_create(options: ?*const ContextOptions, out_context: ?*?*Context) callconv(.c) Status {
     const destination = out_context orelse return .invalid_argument;
     destination.* = null;
-    const context = std.heap.c_allocator.create(Context) catch return .out_of_memory;
-    context.arena = .init(std.heap.c_allocator);
-    context.threaded_io = .init(std.heap.c_allocator, .{});
-    const allocator = context.allocator();
-    context.environment = std.process.Environ.Map.init(allocator);
-    loadEnvironment(&context.environment, if (options) |value| value.environment else null, if (options) |value| value.environment_count else 0) catch |err| {
-        context.environment.deinit();
-        context.threaded_io.deinit();
-        context.arena.deinit();
-        std.heap.c_allocator.destroy(context);
-        return if (err == error.OutOfMemory) .out_of_memory else .invalid_argument;
+    const context = createContext(options) catch |err| return switch (err) {
+        error.OutOfMemory => .out_of_memory,
+        error.InvalidManifest => .invalid_manifest,
+        else => .invalid_argument,
     };
-    const manifest_text = if (options) |value| input(value.manifest) orelse {
-        context.environment.deinit();
-        context.threaded_io.deinit();
-        context.arena.deinit();
-        std.heap.c_allocator.destroy(context);
-        return .invalid_argument;
-    } else null;
-    context.manifest = library.config.Manifest.loadText(allocator, manifest_text) catch |err| {
-        context.environment.deinit();
-        context.threaded_io.deinit();
-        context.arena.deinit();
-        std.heap.c_allocator.destroy(context);
-        return if (err == error.OutOfMemory) .out_of_memory else .invalid_manifest;
-    };
-    context.clearError();
     destination.* = context;
     return .ok;
 }
@@ -216,7 +243,7 @@ pub export fn terminal_theme_tools_context_last_error(context: ?*const Context) 
 }
 
 pub export fn terminal_theme_tools_runner_count(context: ?*const Context) callconv(.c) usize {
-    return if (context) |value| value.manifest.runners.items.len else 0;
+    return if (context) |value| value.manifest.runners.count() else 0;
 }
 
 pub export fn terminal_theme_tools_runner_find(context: ?*Context, name: ?[*:0]const u8, out_index: ?*usize) callconv(.c) Status {
@@ -224,11 +251,11 @@ pub export fn terminal_theme_tools_runner_find(context: ?*Context, name: ?[*:0]c
     const destination = out_index orelse return .invalid_argument;
     const needle = std.mem.span(name orelse return .invalid_argument);
     ctx.clearError();
-    const runner = ctx.manifest.findRunner(needle) orelse {
+    const index = ctx.manifest.findRunnerIndex(needle) orelse {
         ctx.setError(error.RunnerNotFound);
         return .not_found;
     };
-    destination.* = (@intFromPtr(runner) - @intFromPtr(ctx.manifest.runners.items.ptr)) / @sizeOf(library.config.Runner);
+    destination.* = index;
     return .ok;
 }
 
@@ -265,7 +292,7 @@ pub export fn terminal_theme_tools_runner_interpreter(context: ?*const Context, 
 }
 
 pub export fn terminal_theme_tools_integration_count(context: ?*const Context) callconv(.c) usize {
-    return if (context) |value| value.manifest.integrations.items.len else 0;
+    return if (context) |value| value.manifest.integrations.count() else 0;
 }
 
 pub export fn terminal_theme_tools_integration_name(context: ?*const Context, integration_index: usize) callconv(.c) String {
@@ -292,7 +319,7 @@ pub export fn terminal_theme_tools_integration_theme(context: ?*const Context, i
 }
 
 pub export fn terminal_theme_tools_interpreter_count(context: ?*const Context) callconv(.c) usize {
-    return if (context) |value| value.manifest.interpreters.items.len else 0;
+    return if (context) |value| value.manifest.interpreters.count() else 0;
 }
 
 pub export fn terminal_theme_tools_interpreter_name(context: ?*const Context, interpreter_index: usize) callconv(.c) String {
@@ -335,43 +362,10 @@ pub export fn terminal_theme_tools_prepare(context: ?*Context, command_name: ?[*
     const requested = std.mem.span(command_name orelse return .invalid_argument);
     const theme_value = std.enums.fromInt(Theme, theme_code) orelse return .invalid_argument;
     if (requested.len == 0 or (arguments == null and argument_count != 0)) return .invalid_argument;
-    const command = std.heap.c_allocator.create(Command) catch return .out_of_memory;
-    command.arena = .init(std.heap.c_allocator);
-    const allocator = command.arena.allocator();
-    const requested_copy = allocator.dupe(u8, requested) catch {
-        command.arena.deinit();
-        std.heap.c_allocator.destroy(command);
-        return .out_of_memory;
-    };
-    const extra = allocator.alloc([]const u8, argument_count) catch {
-        command.arena.deinit();
-        std.heap.c_allocator.destroy(command);
-        return .out_of_memory;
-    };
-    if (arguments) |provided| for (provided[0..argument_count], extra) |argument, *slot| {
-        slot.* = allocator.dupe(u8, std.mem.span(argument orelse {
-            command.arena.deinit();
-            std.heap.c_allocator.destroy(command);
-            return .invalid_argument;
-        })) catch {
-            command.arena.deinit();
-            std.heap.c_allocator.destroy(command);
-            return .out_of_memory;
-        };
-    };
-    const runner = ctx.manifest.findRunner(requested_copy) orelse {
-        ctx.setError(error.RunnerNotFound);
-        command.arena.deinit();
-        std.heap.c_allocator.destroy(command);
-        return .not_found;
-    };
-    command.invocation = library.launch.prepareInvocation(allocator, ctx.io(), &ctx.environment, &ctx.manifest, runner, requested_copy, extra, internalTheme(theme_value)) catch |err| {
-        ctx.setError(err);
-        command.arena.deinit();
-        std.heap.c_allocator.destroy(command);
+    const command = createCommand(ctx, requested, arguments, argument_count, theme_value) catch |err| {
+        if (err != error.InvalidArgument and err != error.OutOfMemory) ctx.setError(err);
         return statusForError(err);
     };
-    command.io = ctx.io();
     ctx.clearError();
     destination.* = command;
     return .ok;

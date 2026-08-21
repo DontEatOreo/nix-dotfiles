@@ -66,19 +66,16 @@ pub fn parseReport(allocator: std.mem.Allocator, bytes: []const u8) ?config.Them
 
 pub fn modeFromText(runtime: *const config.Runtime, text: ?[]const u8) ?config.Theme {
     const raw = text orelse return null;
-    var buffer: [constants.filesystem.mode_text_bytes]u8 = undefined;
-    if (raw.len > buffer.len) return null;
-    for (raw, 0..) |byte, i| buffer[i] = std.ascii.toLower(byte);
-    var normalized = std.mem.trim(u8, buffer[0..raw.len], constants.text.whitespace);
-    if (std.mem.indexOf(u8, normalized, constants.toml.dark) != null) return .dark;
-    if (std.mem.indexOf(u8, normalized, constants.toml.light) != null) return .light;
+    var normalized = std.mem.trim(u8, raw, constants.text.whitespace);
+    if (std.ascii.findIgnoreCase(normalized, @tagName(config.Theme.dark)) != null) return .dark;
+    if (std.ascii.findIgnoreCase(normalized, @tagName(config.Theme.light)) != null) return .light;
     if (normalized.len >= 2 and ((normalized[0] == '\'' and normalized[normalized.len - 1] == '\'') or (normalized[0] == '"' and normalized[normalized.len - 1] == '"'))) normalized = normalized[1 .. normalized.len - 1];
     for (runtime.theme_dark_aliases) |alias| if (std.ascii.eqlIgnoreCase(normalized, alias)) return .dark;
     for (runtime.theme_light_aliases) |alias| if (std.ascii.eqlIgnoreCase(normalized, alias)) return .light;
     return null;
 }
 
-fn protocol(runtime: *const config.Runtime, identifier: ?[]const u8) ?[]const u8 {
+fn protocol(runtime: *const config.Runtime, identifier: ?[]const u8) ?config.TerminalProtocol {
     const name = identifier orelse return null;
     for (runtime.theme_terminal_queries) |pair| if (std.ascii.eqlIgnoreCase(pair.key, name)) return pair.value;
     return null;
@@ -87,27 +84,28 @@ fn protocol(runtime: *const config.Runtime, identifier: ?[]const u8) ?[]const u8
 pub fn terminalQuery(runtime: *const config.Runtime, env: *const std.process.Environ.Map) []const u8 {
     const selected = protocol(runtime, env.get(runtime.theme_terminal_program_environment)) orelse protocol(runtime, env.get(constants.protocol.terminal_environment)) orelse fallback: {
         for (runtime.theme_terminal_queries) |pair| if (std.mem.eql(u8, pair.key, constants.protocol.wildcard)) break :fallback pair.value;
-        break :fallback constants.protocol.background;
+        break :fallback .background;
     };
-    return if (std.mem.eql(u8, selected, constants.protocol.color_scheme)) constants.protocol.color_scheme_query else constants.protocol.background_query;
+    return switch (selected) {
+        .background => constants.protocol.background_query,
+        .@"color-scheme" => constants.protocol.color_scheme_query,
+    };
 }
 
-fn probeTerminal(allocator: std.mem.Allocator, io: std.Io, fd: c_int, query: []const u8, timeout_ms: u32) ?config.Theme {
-    const terminal: std.Io.File = .{ .handle = fd, .flags = .{ .nonblocking = false } };
+fn probeTerminal(allocator: std.mem.Allocator, io: std.Io, terminal: std.Io.File, query: []const u8, timeout: std.Io.Timeout) ?config.Theme {
     terminal.writeStreamingAll(io, query) catch return null;
     var parser = ReportParser.init(allocator);
     defer parser.deinit();
     var buffer: [constants.protocol.terminal_buffer_bytes]u8 = undefined;
     var used: usize = 0;
-    const deadline = std.Io.Clock.awake.now(io).toMilliseconds() + timeout_ms;
+    const deadline = timeout.toDeadline(io);
     while (used < buffer.len) {
-        const remaining = deadline - std.Io.Clock.awake.now(io).toMilliseconds();
-        if (remaining <= 0) break;
-        var event = c.struct_pollfd{ .fd = fd, .events = c.POLLIN, .revents = 0 };
-        const ready = c.poll(&event, 1, @intCast(@min(remaining, std.math.maxInt(c_int))));
-        if (ready < 0 and std.c.errno(ready) == .INTR) continue;
-        if (ready <= 0 or event.revents & c.POLLIN == 0) break;
-        const count = terminal.readStreaming(io, &.{buffer[used..]}) catch break;
+        const operation = io.operateTimeout(.{ .file_read_streaming = .{
+            .file = terminal,
+            .data = &.{buffer[used..]},
+        } }, deadline) catch break;
+        const count = operation.file_read_streaming catch break;
+        if (count == 0) break;
         const start = used;
         used += count;
         if (parser.feed(buffer[start..used])) |mode| return mode;
@@ -116,18 +114,20 @@ fn probeTerminal(allocator: std.mem.Allocator, io: std.Io, fd: c_int, query: []c
 }
 
 fn detectTerminal(allocator: std.mem.Allocator, io: std.Io, runtime: *const config.Runtime, env: *const std.process.Environ.Map) ?config.Theme {
-    const fd = c.open(constants.filesystem.controlling_terminal, c.O_RDWR | c.O_CLOEXEC);
-    if (fd < 0) return null;
-    defer _ = c.close(fd);
-    var saved: c.struct_termios = undefined;
-    if (c.tcgetattr(fd, &saved) != 0) return null;
+    const terminal = std.Io.Dir.cwd().openFile(io, constants.filesystem.controlling_terminal, .{ .mode = .read_write }) catch return null;
+    defer terminal.close(io);
+    const saved = std.posix.tcgetattr(terminal.handle) catch return null;
     var raw = saved;
-    c.cfmakeraw(&raw);
-    if (c.tcsetattr(fd, c.TCSADRAIN, &raw) != 0) return null;
-    defer _ = c.tcsetattr(fd, c.TCSADRAIN, &saved);
+    comptime {
+        std.debug.assert(@sizeOf(c.struct_termios) == @sizeOf(std.posix.termios));
+        std.debug.assert(@alignOf(c.struct_termios) == @alignOf(std.posix.termios));
+    }
+    c.cfmakeraw(@ptrCast(&raw));
+    std.posix.tcsetattr(terminal.handle, .DRAIN, raw) catch return null;
+    defer std.posix.tcsetattr(terminal.handle, .DRAIN, saved) catch {};
 
     const query = terminalQuery(runtime, env);
-    if (probeTerminal(allocator, io, fd, query, runtime.theme_probe_timeout_ms)) |mode| return mode;
+    if (probeTerminal(allocator, io, terminal, query, runtime.terminalTimeout())) |mode| return mode;
 
     // Kitty's color-scheme query reports the user's appearance preference and
     // is therefore preferable to inferring it from a background color. Some
@@ -135,7 +135,7 @@ fn detectTerminal(allocator: std.mem.Allocator, io: std.Io, runtime: *const conf
     // identify Kitty or Ghostty, so retry with the
     // widely supported OSC 11 query before falling back to the desktop.
     if (std.mem.eql(u8, query, constants.protocol.color_scheme_query)) {
-        return probeTerminal(allocator, io, fd, constants.protocol.background_query, runtime.theme_probe_timeout_ms);
+        return probeTerminal(allocator, io, terminal, constants.protocol.background_query, runtime.terminalTimeout());
     }
     return null;
 }
@@ -146,16 +146,12 @@ fn commandMode(allocator: std.mem.Allocator, io: std.Io, runtime: *const config.
         .environ_map = env,
         .stdout_limit = .limited(runtime.helper_output_limit_bytes),
         .stderr_limit = .limited(runtime.helper_output_limit_bytes),
-        .timeout = helperTimeout(runtime.helper_timeout_ms),
+        .timeout = runtime.helperTimeout(),
     }) catch return null;
     defer allocator.free(result.stdout);
     defer allocator.free(result.stderr);
     if (result.term != .exited or result.term.exited != 0) return null;
     return modeFromText(runtime, result.stdout);
-}
-
-fn helperTimeout(milliseconds: u32) std.Io.Timeout {
-    return .{ .duration = .{ .raw = .fromMilliseconds(milliseconds), .clock = .awake } };
 }
 
 fn detectConfiguredEnvironment(runtime: *const config.Runtime, env: *const std.process.Environ.Map) ?config.Theme {
@@ -216,6 +212,13 @@ test "VT parser rejects malformed terminal reports" {
     for (invalid) |report| try std.testing.expect(parseReport(std.testing.allocator, report) == null);
 }
 
+test "text theme detection has no fixed input limit" {
+    var text: [4096]u8 = @splat('x');
+    @memcpy(text[text.len - 5 ..], "LiGhT");
+    const runtime: config.Runtime = undefined;
+    try std.testing.expectEqual(config.Theme.light, modeFromText(&runtime, &text).?);
+}
+
 test "terminal query selection supports Kitty, Ghostty, and OSC fallback" {
     const runtime: config.Runtime = .{
         .theme_environment = &.{"THEME"},
@@ -225,11 +228,11 @@ test "terminal query selection supports Kitty, Ghostty, and OSC fallback" {
         .theme_unix_commands = &.{},
         .theme_terminal_program_environment = "TERM_PROGRAM",
         .theme_terminal_queries = &.{
-            .{ .key = "ghostty", .value = constants.protocol.color_scheme },
-            .{ .key = "xterm-ghostty", .value = constants.protocol.color_scheme },
-            .{ .key = "kitty", .value = constants.protocol.color_scheme },
-            .{ .key = "xterm-kitty", .value = constants.protocol.color_scheme },
-            .{ .key = constants.protocol.wildcard, .value = constants.protocol.background },
+            .{ .key = "ghostty", .value = .@"color-scheme" },
+            .{ .key = "xterm-ghostty", .value = .@"color-scheme" },
+            .{ .key = "kitty", .value = .@"color-scheme" },
+            .{ .key = "xterm-kitty", .value = .@"color-scheme" },
+            .{ .key = constants.protocol.wildcard, .value = .background },
         },
         .theme_macos_fallback = .dark,
         .theme_unix_fallback = .dark,

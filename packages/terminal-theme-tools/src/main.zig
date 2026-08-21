@@ -4,6 +4,15 @@ const config = library.config;
 const constants = library.constants;
 const launch = library.launch;
 
+const Action = enum { help, version, print_theme, print_theme_no_terminal };
+
+const actions = std.StaticStringMap(Action).initComptime(.{
+    .{ constants.cli.help_option, .help },
+    .{ constants.cli.version_option, .version },
+    .{ constants.cli.print_theme_option, .print_theme },
+    .{ constants.cli.print_theme_no_terminal_option, .print_theme_no_terminal },
+});
+
 const help = std.fmt.comptimePrint(
     \\Usage: {s} [{s}|{s}|{s}|{s}] [{s}] COMMAND [ARG...]
     \\
@@ -50,34 +59,34 @@ fn run(init: std.process.Init) !u8 {
     }
 
     var command_index: usize = constants.cli.first_argument_index;
-    if (std.mem.eql(u8, args[command_index], constants.cli.help_option)) {
-        try printStdout(init.io, help);
-        return constants.exit.success;
-    }
-    if (std.mem.eql(u8, args[command_index], constants.cli.version_option)) {
-        try printStdout(init.io, constants.application.name ++ " version " ++ constants.application.version ++ "\n");
-        return constants.exit.success;
-    }
-    const print_theme = std.mem.eql(u8, args[command_index], constants.cli.print_theme_option);
-    const print_theme_no_terminal = std.mem.eql(u8, args[command_index], constants.cli.print_theme_no_terminal_option);
-    if (print_theme or print_theme_no_terminal) {
-        if (args.len != constants.cli.first_argument_index + 1) {
-            std.debug.print(constants.application.name ++ ": {s} does not accept arguments\n", .{args[command_index]});
-            return constants.exit.usage;
-        }
-        var manifest = config.Manifest.load(allocator, init.io, init.environ_map) catch |err| {
-            std.debug.print(constants.application.name ++ ": failed to load configuration: {s}\n", .{@errorName(err)});
-            return constants.exit.failure;
-        };
-        defer manifest.deinit();
-        const detected = if (print_theme_no_terminal)
-            library.theme.detectWithoutTerminal(allocator, init.io, &manifest.runtime, init.environ_map)
-        else
-            library.theme.detect(allocator, init.io, &manifest.runtime, init.environ_map);
-        try printStdout(init.io, @tagName(detected));
-        try printStdout(init.io, "\n");
-        return constants.exit.success;
-    }
+    if (actions.get(args[command_index])) |action| switch (action) {
+        .help => {
+            try printStdout(init.io, help);
+            return constants.exit.success;
+        },
+        .version => {
+            try printStdout(init.io, constants.application.name ++ " version " ++ constants.application.version ++ "\n");
+            return constants.exit.success;
+        },
+        .print_theme, .print_theme_no_terminal => {
+            if (args.len != constants.cli.first_argument_index + 1) {
+                std.debug.print(constants.application.name ++ ": {s} does not accept arguments\n", .{args[command_index]});
+                return constants.exit.usage;
+            }
+            var manifest = config.Manifest.load(allocator, init.io, init.environ_map) catch |err| {
+                std.debug.print(constants.application.name ++ ": failed to load configuration: {s}\n", .{@errorName(err)});
+                return constants.exit.failure;
+            };
+            defer manifest.deinit();
+            const detected = if (action == .print_theme_no_terminal)
+                library.theme.detectWithoutTerminal(allocator, init.io, &manifest.runtime, init.environ_map)
+            else
+                library.theme.detect(allocator, init.io, &manifest.runtime, init.environ_map);
+            try printStdout(init.io, @tagName(detected));
+            try printStdout(init.io, "\n");
+            return constants.exit.success;
+        },
+    };
     if (std.mem.eql(u8, args[command_index], constants.cli.separator)) {
         command_index += 1;
         if (command_index >= args.len) {
@@ -101,5 +110,5 @@ fn run(init: std.process.Init) !u8 {
             return if (err == error.FileNotFound) constants.exit.not_found else constants.exit.cannot_execute;
         };
     }
-    return launch.execUnknown(allocator, args[command_index..]);
+    return launch.execUnknown(init.io, args[command_index..]);
 }

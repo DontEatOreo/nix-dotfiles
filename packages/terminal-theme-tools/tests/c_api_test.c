@@ -1,5 +1,8 @@
 #include "terminal_theme_tools.h"
 
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include <assert.h>
 #include <string.h>
 
@@ -29,6 +32,7 @@ int main(void) {
                                     "arguments = [\"--theme\", \"{theme}\"]\n"
                                     "[[runner]]\n"
                                     "name = \"c-api-shell\"\n"
+                                    "aliases = [\"c-api-alias\"]\n"
                                     "programs = [\"/bin/sh\"]\n"
                                     "env = { C_API_CHILD = \"configured\" }\n";
   static const char *const environment[] = {
@@ -41,6 +45,20 @@ int main(void) {
       .environment_count = sizeof(environment) / sizeof(environment[0]),
   };
   terminal_theme_tools_context *context = nullptr;
+
+  terminal_theme_tools_context *inherited_context = nullptr;
+  assert(terminal_theme_tools_context_create(nullptr, &inherited_context) ==
+         TERMINAL_THEME_TOOLS_STATUS_OK);
+  terminal_theme_tools_context_destroy(inherited_context);
+
+  static const char *const invalid_environment[] = {"=missing-name"};
+  const terminal_theme_tools_context_options invalid_options = {
+      .environment = invalid_environment,
+      .environment_count = 1u,
+  };
+  assert(terminal_theme_tools_context_create(&invalid_options, &inherited_context) ==
+         TERMINAL_THEME_TOOLS_STATUS_INVALID_ARGUMENT);
+  assert(inherited_context == nullptr);
 
   assert(terminal_theme_tools_abi_version() == TERMINAL_THEME_TOOLS_ABI_VERSION);
   assert(string_equals(terminal_theme_tools_version(), "0.3.0"));
@@ -58,6 +76,10 @@ int main(void) {
                        "c-api-shell"));
   assert(string_equals(terminal_theme_tools_runner_program(context, runner_index, 0u),
                        "/bin/sh"));
+  const size_t primary_runner_index = runner_index;
+  assert(terminal_theme_tools_runner_find(context, "c-api-alias", &runner_index) ==
+         TERMINAL_THEME_TOOLS_STATUS_OK);
+  assert(runner_index == primary_runner_index);
   assert(terminal_theme_tools_runner_find(context, "missing-runner", &runner_index) ==
          TERMINAL_THEME_TOOLS_STATUS_NOT_FOUND);
   assert(terminal_theme_tools_context_last_error(context).length > 0u);
