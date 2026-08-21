@@ -45,7 +45,7 @@ update() {
 		cd "$_dotfiles_repo_path" &&
 			_dotfiles_ansible_playbook ansible/site.yml --tags userland "$@"
 	) || return
-	chezmoi apply --refresh-externals=auto --force || return
+	chezmoi apply --refresh-externals=auto || return
 	(
 		cd "$_dotfiles_repo_path" &&
 			_dotfiles_ansible_playbook ansible/site.yml --tags host "$@"
@@ -76,14 +76,14 @@ update() {
 		cd "$_dotfiles_repo_path" &&
 			_dotfiles_ansible_playbook ansible/site.yml --tags userland
 	) || return
-	chezmoi apply --refresh-externals=auto --force || return
+	chezmoi apply --refresh-externals=auto || return
 	(
 		cd "$_dotfiles_repo_path" &&
 			_dotfiles_ansible_playbook ansible/site.yml --tags host
 	)
 }
 
-{{- if eq .chezmoi.osRelease.id "nixos" }}
+{{- if eq (get .chezmoi.osRelease "id") "nixos" }}
 rebuild() {
 	(
 		cd "$_dotfiles_repo_path" &&

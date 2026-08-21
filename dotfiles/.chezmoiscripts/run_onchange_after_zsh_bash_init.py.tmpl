@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.14
-{{- range $tool := list "atuin" "broot" "chezmoi" "delta" "deno" "fzf" "jj" "rustup" "starship" "zoxide" }}
+{{- range $tool := list "atuin" "chezmoi" "delta" "deno" "fzf" "jj" "op" "rustup" "starship" }}
 # {{ $tool }} fingerprint: {{ template "executable_fingerprint" (lookPath $tool) }}
 {{- end }}
 from __future__ import annotations
@@ -10,7 +10,6 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-SHELL_TOOLS = ("atuin", "broot", "fzf", "starship", "zoxide")
 COMPLETION_COMMANDS = (
     ("chezmoi", ("chezmoi", "completion", "{shell}")),
     ("op", ("op", "completion", "{shell}")),
@@ -74,8 +73,6 @@ def fzf_zsh(target: Path) -> None:
 
 home = Path.home()
 cache = Path(os.environ.get("XDG_CACHE_HOME", home / ".cache"))
-for name in SHELL_TOOLS:
-    (cache / name).mkdir(parents=True, exist_ok=True)
 for shell in ("zsh", "bash"):
     completion_dir = cache / shell / "completions"
     completion_dir.mkdir(parents=True, exist_ok=True)
@@ -83,21 +80,9 @@ for shell in ("zsh", "bash"):
         fzf_zsh(cache / "fzf/init.zsh")
     else:
         capture(("fzf", "--bash"), cache / "fzf/init.bash")
-    capture(("starship", "init", shell), cache / f"starship/init.{shell}")
-    zoxide = (
-        ("zoxide", "init", shell, "--cmd", "cd")
-        if shell == "bash"
-        else ("zoxide", "init", shell)
-    )
-    capture(zoxide, cache / f"zoxide/init.{shell}")
-    capture(
-        ("atuin", "init", shell, "--disable-up-arrow"),
-        cache / f"atuin/init.{shell}",
-    )
-    capture(
-        ("broot", "--print-shell-function", shell),
-        cache / f"broot/init.{shell}",
-    )
+    # Atuin, broot, Starship, and zoxide init files are managed directly by
+    # chezmoi templates. Do not rewrite them here or the target state will
+    # permanently drift from chezmoi's rendered state.
     if (atuin := shutil.which("atuin")) is not None:
         subprocess.run(
             (

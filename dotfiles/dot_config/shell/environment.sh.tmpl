@@ -11,7 +11,7 @@ fi
 
 {{- $isNixOS := false }}
 {{- if eq .chezmoi.os "linux" }}
-{{- $isNixOS = eq .chezmoi.osRelease.id "nixos" }}
+{{- $isNixOS = eq (get .chezmoi.osRelease "id") "nixos" }}
 {{- end }}
 
 # 01 / package-manager environment

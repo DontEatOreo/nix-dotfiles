@@ -56,7 +56,7 @@
     },
     {
       "type": "custom",
-      {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "bluefin") }}
+      {{- if and (eq .chezmoi.os "linux") (eq (get .chezmoi.osRelease "id") "bluefin") }}
       "format": "{#blue}atomic workstation{#}  {#cyan}◆{#}  {#magenta}built to roam{#}"
       {{- else if eq .chezmoi.os "darwin" }}
       "format": "{#blue}darwin workstation{#}  {#cyan}◆{#}  {#magenta}built to create{#}"

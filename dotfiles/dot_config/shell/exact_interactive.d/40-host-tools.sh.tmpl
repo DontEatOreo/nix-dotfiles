@@ -53,14 +53,14 @@ _dotfiles_ghidra_mcp_prune_refs() {
 		if [[ -z "$pid" ]] || ! kill -0 "$pid" >/dev/null 2>&1; then
 			rm -f -- "$ref"
 		fi
-	done < <(find "$refs_dir" -type f -name '*.ref' -print 2>/dev/null)
+	done < <(find "$refs_dir" -type f -print 2>/dev/null)
 }
 
 _dotfiles_ghidra_mcp_has_refs() {
 	local refs_dir=$1
 
 	_dotfiles_ghidra_mcp_prune_refs "$refs_dir"
-	find "$refs_dir" -type f -name '*.ref' -print -quit 2>/dev/null | grep -q .
+	find "$refs_dir" -type f -print -quit 2>/dev/null | grep -q .
 }
 
 _dotfiles_register_ghidra_mcp_for_cxg() {
@@ -72,7 +72,7 @@ _dotfiles_register_ghidra_mcp_for_cxg() {
 	refs_dir="$state_dir/cxg-refs"
 	mkdir -p "$refs_dir" || return
 
-	ref_file="$refs_dir/$$-$RANDOM-$SECONDS.ref"
+	ref_file="$(mktemp "$refs_dir/ref.XXXXXX")" || return
 	printf '%s\n' "$$" >"$ref_file" || return
 
 	_dotfiles_cxg_ghidra_mcp_ref_file="$ref_file"
