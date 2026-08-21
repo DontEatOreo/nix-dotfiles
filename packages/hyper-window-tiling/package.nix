@@ -6,8 +6,8 @@
   glib,
 }:
 let
-  repositoryRoot = ../.;
-  packageRoot = ./hyper-window-tiling;
+  repositoryRoot = ../..;
+  packageRoot = ./.;
   packageMetadata = builtins.fromJSON (builtins.readFile (packageRoot + /package.json));
   gnomeMetadata = builtins.fromJSON (builtins.readFile (packageRoot + /gnome/metadata.json));
   kdeMetadata = builtins.fromJSON (builtins.readFile (packageRoot + /kde/metadata.json));
@@ -29,7 +29,7 @@ let
   };
 
   bunDeps = bun2nix.fetchBunDeps {
-    bunNix = ./hyper-window-tiling/bun.nix;
+    bunNix = ./bun.nix;
   };
 
   buildPhaseFor = script: ''

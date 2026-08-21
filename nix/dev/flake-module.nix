@@ -19,7 +19,7 @@
       ...
     }:
     let
-      inherit (pkgs.stdenv.hostPlatform) isLinux;
+      inherit (pkgs.stdenv.hostPlatform) isDarwin isLinux;
 
       pythonShell = pkgs.mkShell {
         packages =
@@ -113,6 +113,9 @@
       // lib.optionalAttrs isLinux {
         inherit (self'.packages) terminal-theme-tools;
         hyper-window-tiling = self'.packages.hyper-window-tiling-gnome.tests.workspace;
+      }
+      // lib.optionalAttrs isDarwin {
+        inherit (self'.packages) fido-phone;
       }
       // lib.optionalAttrs (system == "x86_64-linux") {
         nixos = self.nixosConfigurations.nixos.config.system.build.toplevel;

@@ -20,7 +20,7 @@ class GhosttyPatched < Formula
   depends_on :macos
 
   def install
-    patch_dir = Pathname(__dir__).parent/"patches/ghostty"
+    patch_dir = Pathname(__dir__).parent/"packages/ghostty-patched/patches"
     patches = (patch_dir/"series").readlines(chomp: true)
               .map(&:strip)
               .reject { |line| line.empty? || line.start_with?("#") }

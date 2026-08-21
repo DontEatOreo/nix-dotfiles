@@ -16,10 +16,6 @@
 !ansible/
 !ansible/**
 
-!patches/
-!patches/ghostty/
-!patches/ghostty/**
-
 !bluebuild/
 !bluebuild/**
 
@@ -35,18 +31,23 @@
 
 !packages/
 packages/*
-!packages/ghostty/
-!packages/ghostty/**
 !packages/dotfiles-python/
 !packages/dotfiles-python/**
+!packages/ghostty-patched/
+!packages/ghostty-patched/**
 !packages/terminal-theme-tools/
 !packages/terminal-theme-tools/**
 
 # Never send local generated state if it appears under an included path.
 **/.DS_Store
+**/.rumdl_cache/
+**/.zig-cache/
 **/__pycache__/
 **/*.pyc
+**/node_modules/
 **/target/
+**/zig-out/
+**/zig-pkg/
 .docker-cache/
 .git/
 *.log

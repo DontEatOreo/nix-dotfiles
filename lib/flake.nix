@@ -20,34 +20,20 @@ let
   blackRoseDollPalette = builtins.fromJSON (
     builtins.readFile ../dotfiles/.chezmoitemplates/black_rose_doll_palette.json
   );
-  equicordExceptionsCss = builtins.readFile ../packages/equicord/quickCss.css;
-  equicordQuickCss = import ./equicord-theme.nix {
+  equicordExceptionsCss = builtins.readFile ../packages/equicord-settings/quick-css.css;
+  equicordQuickCss = import ../packages/equicord-settings/theme.nix {
     inherit lib;
     palette = blackRoseDollPalette;
     exceptions = equicordExceptionsCss;
   };
   equicordSettings =
-    (import ../modules/equicord/settings.nix {
+    (import ../packages/equicord-settings/settings.nix {
       inherit lib;
       parseRules = equicordParseRules;
     })
     // {
       quickCss = equicordQuickCss;
     };
-
-  mkEquicordSettingsPackage =
-    pkgs:
-    pkgs.runCommand "equicord-settings"
-      {
-        meta.description = "Equicord settings shared by NixOS and non-NixOS installations";
-        nativeBuildInputs = [ pkgs.jq ];
-        strictDeps = true;
-      }
-      ''
-        mkdir -p "$out"
-        jq . ${pkgs.writeText "equicord-settings.json" (builtins.toJSON equicordSettings.jsonConfig)} > "$out/settings.json"
-        cp ${pkgs.writeText "equicord-quick-css" equicordQuickCss} "$out/quickCss.css"
-      '';
 
   mkPackages =
     pkgs:
@@ -59,7 +45,10 @@ let
       bun2nix = pkgs.bun2nix;
       default = ghidraMcp;
       dotfiles-python = pkgs.dotfiles-python;
-      equicord-settings = mkEquicordSettingsPackage pkgs;
+      equicord-settings = pkgs.callPackage ../packages/equicord-settings/package.nix {
+        quickCss = equicordQuickCss;
+        settings = equicordSettings.jsonConfig;
+      };
       ghidra-mcp = ghidraMcp;
       ghidra-mcp-bridge = ghidraMcpHeadless.bridge;
       ghidra-mcp-headless = ghidraMcpHeadless;

@@ -14,9 +14,8 @@ on:
       - nix/dev/flake-module.nix
       - npins/sources.json
       - overlays/default.nix
-      - packages/bluebuild-v2.nix
-      - packages/ghostty/**
-      - patches/ghostty/**
+      - packages/bluebuild-v2/**
+      - packages/ghostty-patched/**
   push:
     branches: [master]
     paths: *spectrum-paths

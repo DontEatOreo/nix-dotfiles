@@ -51,6 +51,3 @@ Library/
 .config/systemd/
 .local/share/applications/
 {{ end }}
-
-.local/share/fido-phone/android/.gradle/
-.local/share/fido-phone/android/**/build/

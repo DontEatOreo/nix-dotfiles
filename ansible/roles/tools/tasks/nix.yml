@@ -156,6 +156,32 @@
   tags:
     - nix
 
+- name: Check packaged Fido Phone command
+  ansible.builtin.stat:
+    path: "{{ dotfiles_home_dir }}/.nix-profile/bin/fido-phone"
+  register: tools_nix_fido_phone_command
+  when: platform_is_macos
+  tags:
+    - fido-phone
+    - nix
+
+- name: Install packaged Fido Phone command
+  ansible.builtin.command:
+    argv:
+      - "{{ tools_nix_command_bin }}"
+      - profile
+      - install
+      - "path:{{ dotfiles_repo_root }}#fido-phone"
+  environment:
+    PATH: "{{ tools_nix_path }}"
+  changed_when: true
+  when:
+    - platform_is_macos
+    - not tools_nix_fido_phone_command.stat.executable | default(false)
+  tags:
+    - fido-phone
+    - nix
+
 - name: Detect Nix profile tools
   ansible.builtin.command:
     argv:

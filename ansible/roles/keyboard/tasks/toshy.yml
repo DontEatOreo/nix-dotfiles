@@ -37,7 +37,7 @@
   ansible.builtin.command:
     argv:
       - "{{ ansible_playbook_python }}"
-      - "{{ dotfiles_repo_root }}/packages/toshy/merge-slices.py"
+      - "{{ role_path }}/files/toshy/merge-slices.py"
       - "{{ keyboard_toshy_config }}"
       - "{{ keyboard_toshy_slices }}"
       - "{{ keyboard_toshy_merged_config }}"

@@ -17,4 +17,8 @@
 Library/Application Support/com.mitchellh.ghostty/config
 Library/Application Support/com.mitchellh.ghostty/themes/catppuccin-frappe-pink.conf
 Library/Application Support/com.mitchellh.ghostty/themes/catppuccin-latte-pink.conf
+.local/bin/fido-phone
+.local/bin/fido-phone-install-android
+.local/libexec/fido-phone
+.local/share/fido-phone
 {{- end }}

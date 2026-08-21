@@ -74,7 +74,7 @@ strict = true
 testpaths = ["packages/dotfiles-python/tests", "ansible/tests"]
 
 [tool.ruff]
-extend-exclude = ["packages/toshy/slices"]
+extend-exclude = ["ansible/roles/keyboard/files/toshy/slices"]
 force-exclude = true
 line-length = 88
 preview = true
@@ -179,10 +179,14 @@ docstring-code-format = true
 preview = true
 
 [tool.ty.environment]
-extra-paths = ["./", "./packages/dotfiles-python/src", "./packages/toshy"]
+extra-paths = [
+  "./",
+  "./ansible/roles/keyboard/files/toshy",
+  "./packages/dotfiles-python/src",
+]
 
 [tool.ty.src]
-exclude = ["packages/toshy/slices"]
+exclude = ["ansible/roles/keyboard/files/toshy/slices"]
 include = ["ansible", "dotfiles", "packages"]
 
 [tool.ty.rules]

@@ -11,7 +11,7 @@ class JjPatched < Formula
 
   def install
     tap_root = Pathname(__dir__).parent
-    patch_dir = tap_root/"patches/jj"
+    patch_dir = tap_root/"packages/jj-patched/patches"
     patches = (patch_dir/"series").readlines(chomp: true)
               .map(&:strip)
               .reject { |line| line.empty? || line.start_with?("#") }

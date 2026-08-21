@@ -29,7 +29,7 @@ let
     in
     {
       inherit dotfilesSourcePins;
-      bluebuild-v2 = final.callPackage ../packages/bluebuild-v2.nix {
+      bluebuild-v2 = final.callPackage ../packages/bluebuild-v2/package.nix {
         src = dotfilesSourcePins.bluebuild-cli.outPath;
         version =
           let
@@ -43,10 +43,10 @@ let
       gh = final.unstable.gh;
       lldb-mcp-launcher = final.eupkgs.lldb-mcp-launcher;
       ghidra-mcp-headless = final.eupkgs.ghidra-mcp-headless;
-      ghidra-mcp = final.callPackage ../packages/ghidra-mcp.nix {
+      ghidra-mcp = final.callPackage ../packages/ghidra-mcp/package.nix {
         inherit (final) ghidra-mcp-headless;
       };
-      ghostty-patched = final.callPackage ../packages/ghostty-patched.nix {
+      ghostty-patched = final.callPackage ../packages/ghostty-patched/package.nix {
         ghostty = final.unstable.ghostty.override {
           zig_0_15 = final.unstable.zig;
         };
@@ -71,18 +71,18 @@ let
           '';
         }
       );
-      hyper-window-tiling = final.callPackage ../packages/hyper-window-tiling.nix { };
+      hyper-window-tiling = final.callPackage ../packages/hyper-window-tiling/package.nix { };
       hyper-window-tiling-gnome = final.hyper-window-tiling.gnome;
       hyper-window-tiling-kde = final.hyper-window-tiling.kde;
-      dotfiles-python = final.callPackage ../packages/dotfiles-python.nix {
+      dotfiles-python = final.callPackage ../packages/dotfiles-python/package.nix {
         inherit (final.unstable) python314Packages;
       };
-      fido-phone = final.callPackage ../packages/fido-phone.nix { };
-      uresourced = final.callPackage ../packages/uresourced.nix {
+      fido-phone = final.callPackage ../packages/fido-phone/package.nix { };
+      uresourced = final.callPackage ../packages/uresourced/package.nix {
         source = dotfilesSourcePins.uresourced.outPath;
         version = lib.removePrefix "v" dotfilesSourcePins.uresourced.version;
       };
-      terminal-theme-tools = final.callPackage ../packages/terminal-theme-tools { };
+      terminal-theme-tools = final.callPackage ../packages/terminal-theme-tools/package.nix { };
     };
 
   packages = lib.composeManyExtensions [
