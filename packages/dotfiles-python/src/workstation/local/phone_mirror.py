@@ -2,6 +2,7 @@ import ipaddress
 import os
 import re
 import sys
+import time
 from collections.abc import Sequence
 from pathlib import Path
 from subprocess import CompletedProcess
@@ -34,6 +35,8 @@ _GUI_ENVIRONMENT_KEYS = frozenset({
     "XDG_CURRENT_DESKTOP",
     "XDG_SESSION_TYPE",
 })
+_WIRELESS_DEBUGGING_PORTS = (30000, 49999)
+_OPEN_TCP_PORT = re.compile(r"(?<!\d)(\d{1,5})/open/tcp")
 
 
 def _run_command(
@@ -105,6 +108,59 @@ def _endpoint(host: str, port: int) -> str:
     return f"[{address}]:{port}" if address.version == 6 else f"{address}:{port}"
 
 
+def _serial_host(serial: str) -> str | None:
+    if serial.startswith("["):
+        host, separator, _port = serial[1:].partition("]:")
+    else:
+        host, separator, _port = serial.rpartition(":")
+    if not separator:
+        return None
+    try:
+        return str(ipaddress.ip_address(host))
+    except ValueError:
+        return None
+
+
+def _parse_devices(output: str) -> dict[str, str]:
+    devices: dict[str, str] = {}
+    for line in output.splitlines()[1:]:
+        fields = line.split()
+        if len(fields) >= 2:
+            devices[fields[0]] = fields[1]
+    return devices
+
+
+def _open_ports_from_nmap(output: str) -> tuple[int, ...]:
+    return tuple(dict.fromkeys(int(match) for match in _OPEN_TCP_PORT.findall(output)))
+
+
+def scan_open_ports(
+    host: str,
+    run_command: RunCommand,
+) -> tuple[int, ...]:
+    start, end = _WIRELESS_DEBUGGING_PORTS
+    result = run_command(
+        (
+            "nmap",
+            "-Pn",
+            "-n",
+            "--open",
+            "-T4",
+            "--host-timeout",
+            "45s",
+            "-p",
+            f"{start}-{end}",
+            "-oG",
+            "-",
+            host,
+        ),
+        timeout=50,
+    )
+    if result.returncode != 0:
+        raise DotfilesError(f"nmap port discovery failed: {_detail(result)}")
+    return _open_ports_from_nmap(result.stdout)
+
+
 class PhoneMirror:
     def __init__(
         self,
@@ -118,6 +174,93 @@ class PhoneMirror:
         self.run_command = run_command
         self.environment = environment if environment is not None else os.environ.copy()
         self.cache_path = cache_file or _cache_file(config.name)
+
+    def _adb(self, *arguments: str, timeout: float = 10) -> CompletedProcess[str]:
+        return self.run_command(("adb", *arguments), timeout=timeout)
+
+    def _devices(self) -> dict[str, str]:
+        result = self._adb("devices", "-l")
+        if result.returncode != 0:
+            raise DotfilesError(f"adb devices failed: {_detail(result)}")
+        return _parse_devices(result.stdout)
+
+    def _connect(self, host: str, port: int) -> str | None:
+        serial = _endpoint(host, port)
+        error_console.print(f"phone-mirror: trying {serial}", highlight=False)
+        self._adb("connect", serial)
+        if self._devices().get(serial) == "device":
+            return serial
+        self._adb("disconnect", serial, timeout=5)
+        return None
+
+    def _make_stable(self, serial: str, host: str) -> str:
+        stable = _endpoint(host, self.config.port)
+        if serial == stable:
+            return serial
+        error_console.print(
+            f"phone-mirror: moving ADB from {serial} to {stable}",
+            highlight=False,
+        )
+        result = self._adb(
+            "-s",
+            serial,
+            "tcpip",
+            str(self.config.port),
+            timeout=15,
+        )
+        if result.returncode != 0:
+            raise DotfilesError(f"could not enable stable ADB: {_detail(result)}")
+        for _attempt in range(12):
+            time.sleep(0.25)
+            if connected := self._connect(host, self.config.port):
+                return connected
+        raise DotfilesError(f"could not reconnect to {stable} after enabling ADB")
+
+    def _connect_phone(self, host: str) -> str:
+        started = self._adb("start-server", timeout=15)
+        if started.returncode != 0:
+            raise DotfilesError(f"could not start adb: {_detail(started)}")
+
+        devices = self._devices()
+        target = [
+            serial
+            for serial, state in devices.items()
+            if state == "device" and _serial_host(serial) == host
+        ]
+        if target:
+            stable = _endpoint(host, self.config.port)
+            serial = stable if stable in target else target[0]
+            return self._make_stable(serial, host)
+
+        if connected := self._connect(host, self.config.port):
+            return connected
+
+        # A USB or LAN Wireless Debugging session can bootstrap the stable
+        # Tailscale endpoint without scanning.
+        online = [
+            serial for serial, state in self._devices().items() if state == "device"
+        ]
+        if len(online) == 1:
+            return self._make_stable(online[0], host)
+
+        require_commands("nmap")
+        start, end = _WIRELESS_DEBUGGING_PORTS
+        error_console.print(
+            f"phone-mirror: probing Wireless Debugging ports {start}-{end}",
+            highlight=False,
+        )
+        for port in scan_open_ports(host, self.run_command):
+            if connected := self._connect(host, port):
+                return self._make_stable(connected, host)
+
+        if len(online) > 1:
+            raise DotfilesError(
+                "more than one ADB device is connected and none matches the target"
+            )
+        raise DotfilesError(
+            "could not reach ADB; enable Wireless debugging or connect the phone "
+            "over USB, then retry"
+        )
 
     def _target_ip(self) -> str:
         if self.config.ip is not None:
@@ -181,8 +324,14 @@ class PhoneMirror:
         return tuple(arguments)
 
     def run(self) -> None:
-        require_commands("scrcpy")
+        require_commands("adb")
         host = self._target_ip()
+        serial = self._connect_phone(host)
+        if self.config.connect_only:
+            error_console.print(f"phone-mirror: connected to {serial}", highlight=False)
+            return
+
+        require_commands("scrcpy")
         self._hydrate_gui_environment()
         if sys.platform.startswith("linux") and not (
             self.environment.get("WAYLAND_DISPLAY") or self.environment.get("DISPLAY")
