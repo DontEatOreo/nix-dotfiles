@@ -1,0 +1,148 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: 4evy <git@evy.pink>
+Date: Thu, 1 Jan 1970 00:00:00 +0000
+Subject: [PATCH 1/1] fix(macos): actually suppress mapped mouse events
+
+core-graphics 0.24 treats a None event-tap callback result as
+pass-through, so mapped mouse buttons and wheel events still reach
+applications after Kanata forwards them for remapping.
+
+Upgrade to core-graphics 0.25 and use its explicit
+`CallbackResult::Drop` and `CallbackResult::Keep` API. Retain the
+Session tap location and pass movement events through to avoid the
+Bluetooth cursor regressions in #739 and #1636.
+---
+ Cargo.lock         |  6 +++---
+ Cargo.toml         |  2 +-
+ src/oskbd/macos.rs | 26 ++++++++++++--------------
+ 3 files changed, 16 insertions(+), 18 deletions(-)
+
+diff --git a/Cargo.lock b/Cargo.lock
+index 000000000..000000000 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -330,9 +330,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "core-graphics"
+-version = "0.24.0"
++version = "0.25.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "fa95a34622365fa5bbf40b20b75dba8dfa8c94c734aea8ac9a5ca38af14316f1"
++checksum = "064badf302c3194842cf2c5d61f56cc88e54a759313879cdf03abdd27d0c3b97"
+ dependencies = [
+  "bitflags 2.9.1",
+  "core-foundation 0.10.1",
+@@ -723,7 +723,7 @@ dependencies = [
+  "arboard",
+  "clap",
+  "core-foundation 0.10.1",
+- "core-graphics 0.24.0",
++ "core-graphics 0.25.0",
+  "dirs",
+  "embed-resource",
+  "encode_unicode",
+diff --git a/Cargo.toml b/Cargo.toml
+index 000000000..000000000 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -68,3 +68,3 @@ objc = "0.2.7"
+ objc = "0.2.7"
+-core-graphics = "0.24.0"
++core-graphics = "0.25.0"
+ open = { version = "5", optional = true }
+diff --git a/src/oskbd/macos.rs b/src/oskbd/macos.rs
+index 000000000..000000000 100644
+--- a/src/oskbd/macos.rs
++++ b/src/oskbd/macos.rs
+@@ -20,7 +20,7 @@ use core_graphics::base::CGFloat;
+ use core_graphics::display::{CGDisplay, CGPoint};
+ use core_graphics::event::{
+     CGEvent, CGEventTap, CGEventTapLocation, CGEventTapOptions, CGEventTapPlacement, CGEventType,
+-    CGMouseButton, EventField,
++    CGMouseButton, CallbackResult, EventField,
+ };
+ use core_graphics::event_source::{CGEventSource, CGEventSourceStateID};
+ use kanata_parser::cfg::MappedKeys;
+@@ -1668,8 +1668,6 @@ pub fn start_mouse_listener(
+                 CGEventTapPlacement::HeadInsertEventTap,
+                 CGEventTapOptions::Default,
+                 events_of_interest,
+-                // Callback receives &CGEvent; return Some(clone) to pass through,
+-                // None to suppress the event.
+                 move |_proxy, event_type, event| {
+                     // Cursor movement (incl. drags while a button is held).
+                     // Always pass through — never suppress, or the cursor freezes.
+@@ -1686,7 +1684,7 @@ pub fn start_mouse_listener(
+                         // hot path.
+                         let mmk_slot = match MOUSE_MOVEMENT_KEY.get() {
+                             Some(slot) => slot,
+-                            None => return Some(event.clone()),
++                            None => return CallbackResult::Keep,
+                         };
+                         if let Some(code) = *mmk_slot.lock() {
+                             let fake = KeyEvent::new(code, KeyValue::Tap);
+@@ -1697,33 +1695,33 @@ pub fn start_mouse_listener(
+                                 log::trace!("mouse tap (movement): drop synthetic tap: {e}");
+                             }
+                         }
+-                        return Some(event.clone());
++                        return CallbackResult::Keep;
+                     }
+ 
+                     if matches!(event_type, CGEventType::ScrollWheel) {
+                         let Some(key_event) = scroll_event_to_key_event(event) else {
+-                            return Some(event.clone());
++                            return CallbackResult::Keep;
+                         };
+                         if !crate::kanata::MAPPED_KEYS.lock().contains(&key_event.code) {
+-                            return Some(event.clone());
++                            return CallbackResult::Keep;
+                         }
+                         log::debug!("mouse tap (wheel): {key_event:?}");
+                         if let Err(e) = tx.try_send(key_event) {
+                             log::warn!("mouse tap: failed to send wheel event: {e}");
+-                            return Some(event.clone());
++                            return CallbackResult::Keep;
+                         }
+-                        return None;
++                        return CallbackResult::Drop;
+                     }
+ 
+                     let button_number =
+                         event.get_integer_value_field(EventField::MOUSE_EVENT_BUTTON_NUMBER);
+                     let mut key_event = match KeyEvent::try_from((event_type, button_number)) {
+                         Ok(ev) => ev,
+-                        Err(()) => return Some(event.clone()),
++                        Err(()) => return CallbackResult::Keep,
+                     };
+ 
+                     if !crate::kanata::MAPPED_KEYS.lock().contains(&key_event.code) {
+-                        return Some(event.clone());
++                        return CallbackResult::Keep;
+                     }
+ 
+                     // Track pressed state to convert duplicate presses into repeats,
+@@ -1747,11 +1745,11 @@ pub fn start_mouse_listener(
+ 
+                     if let Err(e) = tx.try_send(key_event) {
+                         log::warn!("mouse tap: failed to send event: {e}");
+-                        return Some(event.clone());
++                        return CallbackResult::Keep;
+                     }
+ 
+                     // Suppress the original event so it doesn't reach the system.
+-                    None
++                    CallbackResult::Drop
+                 },
+             ) {
+                 Ok(tap) => tap,
+@@ -1768,7 +1766,7 @@ pub fn start_mouse_listener(
+                 }
+             };
+ 
+-            let Ok(loop_source) = tap.mach_port.create_runloop_source(0) else {
++            let Ok(loop_source) = tap.mach_port().create_runloop_source(0) else {
+                 log::error!("failed to create CFRunLoop source for mouse event tap");
+                 MOUSE_TAP_INSTALLED.store(false, Ordering::Release);
+                 return;

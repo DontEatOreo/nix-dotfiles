@@ -7,6 +7,7 @@
     - "{{ bootstrap_homebrew_local_tap_dir }}/Formula"
     - "{{ bootstrap_homebrew_local_tap_dir }}/packages/ghostty-patched/patches"
     - "{{ bootstrap_homebrew_local_tap_dir }}/packages/jj-patched/patches"
+    - "{{ bootstrap_homebrew_local_tap_dir }}/packages/kanata-with-cmd/patches"
     - "{{ bootstrap_homebrew_local_tap_dir }}/npins"
     - "{{ bootstrap_homebrew_local_tap_dir }}/Sources"
     - "{{ bootstrap_homebrew_local_tap_dir }}/libexec"
@@ -159,6 +160,18 @@
     - bootstrap
     - homebrew
     - jj
+
+- name: Sync patched Kanata patch series into local Homebrew tap
+  ansible.builtin.copy:
+    src: "{{ dotfiles_repo_root }}/packages/kanata-with-cmd/patches/"
+    dest: "{{ bootstrap_homebrew_local_tap_dir }}/packages/kanata-with-cmd/patches/"
+    mode: "0644"
+    directory_mode: "0755"
+  when: bootstrap_homebrew_enabled | default(false)
+  tags:
+    - bootstrap
+    - homebrew
+    - kanata
 
 - name: Sync repository helpers into local Homebrew tap
   ansible.builtin.copy:

@@ -26,6 +26,9 @@ let
     final: prev:
     let
       dotfilesSourcePins = (import ../npins) { };
+      kanataPatches = [
+        ../packages/kanata-with-cmd/patches/0001-macos-actually-suppress-mapped-mouse-events.patch
+      ];
       withoutUpstreamTests =
         package:
         package.overrideAttrs {
@@ -88,10 +91,16 @@ let
           zig_0_15 = final.unstable.zig;
         };
       };
-      kanata-with-cmd = (final.kanata.override { withCmd = true; }).overrideAttrs {
+      kanata-with-cmd = (final.kanata.override { withCmd = true; }).overrideAttrs (previousAttrs: {
+        patches = (previousAttrs.patches or [ ]) ++ kanataPatches;
+        cargoDeps = final.rustPlatform.fetchCargoVendor {
+          inherit (previousAttrs) pname src version;
+          patches = kanataPatches;
+          hash = "sha256-bw70qWriIuPmYsfg6IkE2IZwDsEvKz31fqlnu43xyTE=";
+        };
         doCheck = false;
         doInstallCheck = false;
-      };
+      });
       kmscon = prev.kmscon.overrideAttrs (
         _: previousAttrs: {
           # The pin follows upstream main rather than a release tag.
