@@ -25,6 +25,15 @@ class KanataWithCmd < Formula
   conflicts_with "kanata", because: "both install a kanata binary"
 
   def install
+    # Session taps can suppress AppKit events while Chromium still handles the
+    # receiver's lower-level side-button event. The USB receiver is unaffected
+    # by the Bluetooth cursor issues that motivated Kanata's Session tap.
+    if OS.mac?
+      inreplace "src/oskbd/macos.rs",
+                "CGEventTapLocation::Session,",
+                "CGEventTapLocation::HID,"
+    end
+
     # Cargo install does not build test targets; only compile the managed
     # executable if upstream adds more binaries to the crate.
     system "cargo", "install", "--bin", "kanata", "--features", "cmd", *std_cargo_args
