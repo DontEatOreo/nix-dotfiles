@@ -32,6 +32,8 @@ runs:
         BB_REGISTRY_NAMESPACE: ${{ github.repository_owner }}
         GH_PR_EVENT_NUMBER: ${{ github.event.number }}
         BB_CACHE_LAYERS: "true"
+        BB_BUILD_RETRY_PUSH: ${{ inputs.publish }}
+        BB_BUILD_RETRY_COUNT: "3"
         RUST_LOG_STYLE: always
         CLICOLOR_FORCE: "1"
       shell: bash
@@ -46,6 +48,9 @@ runs:
         set -euo pipefail
         image=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -m1 "/spectrum:")
         docker run --rm --privileged "$image" bootc container lint --fatal-warnings
+        docker run --rm --entrypoint ghostty "$image" +version
+        docker run --rm --entrypoint bluebuild "$image" --version
+        docker run --rm --entrypoint bluebuild "$image" recipe --help >/dev/null
 
     - name: Resolve Published Digest
       if: inputs.publish == 'true'

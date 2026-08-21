@@ -304,6 +304,12 @@ _spectrum-validate: (doctor 'spectrum')
     # BlueBuild's feature-gated v2 parser is ready, but its validate command
     # still hardcodes the v1 schema. The official v2 schema is checked above.
     bluebuild generate --skip-validation --output "$generated" bluebuild/recipes/spectrum.yml
+    bluebuild_revision=$(jq -er '.pins["bluebuild-cli"].revision' npins/sources.json)
+    grep -Fq "COPY --from=ghcr.io/blue-build/cli:${bluebuild_revision}-installer" "$generated"
+    grep -Fq '/out/bluebuild /bins/bluebuild' "$generated"
+    grep -Fq 'cp /tmp/bins/* /usr/bin/' "$generated"
+    grep -Fq -- '--mount=type=cache,sharing=locked,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-spectrum-' "$generated"
+    grep -Fq -- '--mount=type=cache,sharing=locked,dst=/var/cache/libdnf5,id=dnf-cache-spectrum-' "$generated"
     locked=$(< bluebuild/recipes/spectrum.lock)
     resolved=$(skopeo inspect "docker://${locked%@*}" | jq -r .Digest)
     [[ "$locked" == *@$resolved ]] || {
@@ -336,13 +342,25 @@ _spectrum-build: _spectrum-validate
 [macos]
 spectrum-build: (_linux-only recipe_name())
 
-# Inspect a built image with bootc's native container linter.
+# Build and run the complete local pre-publish validation gate.
+[group('spectrum')]
+[linux]
+spectrum-stage: spectrum-build
+    {{ quote(just_executable()) }} --justfile {{ quote(justfile()) }} spectrum-inspect {{ quote(local_ref) }}
+
+[group('spectrum')]
+[macos]
+spectrum-stage: (_linux-only recipe_name())
+
+# Inspect a built image with bootc and the bundled application smoke tests.
 [arg('target', help='Built image reference to inspect')]
 [group('spectrum')]
 [linux]
 spectrum-inspect target=local_ref: (doctor 'build')
-    {{ quote(podman) }} run --rm {{ quote(target) }} bootc container lint
+    {{ quote(podman) }} run --rm {{ quote(target) }} bootc container lint --fatal-warnings
     {{ quote(podman) }} run --rm --entrypoint ghostty {{ quote(target) }} +version
+    {{ quote(podman) }} run --rm --entrypoint bluebuild {{ quote(target) }} --version
+    {{ quote(podman) }} run --rm --entrypoint bluebuild {{ quote(target) }} recipe --help >/dev/null
 
 [arg('target', help='Built image reference to inspect')]
 [group('spectrum')]

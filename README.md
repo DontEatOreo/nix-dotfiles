@@ -105,6 +105,7 @@ just determinate-upgrade # Upgrade installer-managed Determinate Nix
 just spectrum-validate   # Validate the BlueBuild recipe and base digest
 just spectrum-build      # Build Spectrum locally
 just spectrum-inspect    # Inspect and test the local image
+just spectrum-stage      # Build and run the complete local staging gate
 
 just fmt                 # Format the repository
 just lint                # Run static checks

@@ -16,7 +16,9 @@ spec:
   platforms:
     - linux/amd64
   tool-versions:
-    bluebuild: none
+    # Keep this aligned with the bluebuild-cli npins revision. Unlike tagged
+    # release installers, commit installers include the recipe-v2 feature.
+    bluebuild: f0ab6828bf9a1026be7a00692da27a594934c8e4
 
 stages:
   - name: python-runtime
@@ -280,4 +282,6 @@ modules:
         pathlib.Path("/usr/lib/dotfiles/python/.astral-version").read_text().strip()'
       - rpm -q kmscon kmscon-freetype
       - test -f /usr/lib64/kmscon/mod-freetype.so
+      - bluebuild --version
+      - bluebuild recipe --help >/dev/null
       - bootc container lint
