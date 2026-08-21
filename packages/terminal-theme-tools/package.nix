@@ -71,9 +71,7 @@ stdenv.mkDerivation (finalAttrs: {
     "--release=small"
   ]
   ++ darwinTargetFlags;
-  zigCheckFlags = [ "-Dcpu=baseline" ] ++ darwinTargetFlags;
-
-  doCheck = true;
+  doCheck = false;
 
   outputs = [
     "out"

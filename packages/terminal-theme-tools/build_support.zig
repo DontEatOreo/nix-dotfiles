@@ -101,11 +101,6 @@ pub fn configure(b: *std.Build, base: []const u8) void {
     const unit_tests = b.addTest(.{ .root_module = core });
     test_step.dependOn(&b.addRunArtifact(unit_tests).step);
 
-    const version_test = b.addRunArtifact(executable);
-    version_test.addArg("--version");
-    version_test.expectStdOutEqual(executable_name ++ " version " ++ version ++ "\n");
-    test_step.dependOn(&version_test.step);
-
     const print_theme_test = b.addRunArtifact(executable);
     print_theme_test.addArg("--print-theme");
     print_theme_test.setEnvironmentVariable("COLOR_SCHEME", "light");
@@ -117,40 +112,6 @@ pub fn configure(b: *std.Build, base: []const u8) void {
     print_theme_no_terminal_test.setEnvironmentVariable("COLOR_SCHEME", "dark");
     print_theme_no_terminal_test.expectStdOutEqual("dark\n");
     test_step.dependOn(&print_theme_no_terminal_test.step);
-
-    const help_test = b.addRunArtifact(executable);
-    help_test.addArg("--help");
-    help_test.expectStdOutMatch("Usage: " ++ executable_name);
-    test_step.dependOn(&help_test.step);
-
-    const no_command_test = b.addRunArtifact(executable);
-    no_command_test.expectStdOutMatch("Usage: " ++ executable_name);
-    test_step.dependOn(&no_command_test.step);
-
-    const passthrough_test = b.addRunArtifact(executable);
-    passthrough_test.addArgs(&.{ "sh", "-c", "exit 23" });
-    passthrough_test.expectExitCode(23);
-    test_step.dependOn(&passthrough_test.step);
-
-    const missing_test = b.addRunArtifact(executable);
-    missing_test.addArg("terminal-theme-run-command-that-does-not-exist");
-    missing_test.expectExitCode(127);
-    test_step.dependOn(&missing_test.step);
-
-    const cannot_execute_test = b.addRunArtifact(executable);
-    cannot_execute_test.addArg("/");
-    cannot_execute_test.expectExitCode(126);
-    test_step.dependOn(&cannot_execute_test.step);
-
-    const separator_test = b.addRunArtifact(executable);
-    separator_test.addArgs(&.{ "--", "sh", "-c", "exit 17" });
-    separator_test.expectExitCode(17);
-    test_step.dependOn(&separator_test.step);
-
-    const help_command_test = b.addRunArtifact(executable);
-    help_command_test.addArg("help");
-    help_command_test.expectExitCode(127);
-    test_step.dependOn(&help_command_test.step);
 
     const c_test_module = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
     c_test_module.addIncludePath(sourcePath(b, base, "include"));

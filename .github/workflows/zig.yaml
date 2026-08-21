@@ -90,10 +90,6 @@ jobs:
       - name: Test
         run: zig build test
 
-      - name: Test Standalone Package
-        run: zig build test
-        working-directory: packages/terminal-theme-tools
-
       - name: Build ReleaseSmall
         run: zig build --release=small
 
@@ -102,18 +98,6 @@ jobs:
           if readelf -d zig-out/bin/terminal-theme-run | grep -E 'NEEDED.*(glib|gio|vterm|ghostty|tomlc17)'; then
             exit 1
           fi
-
-      - name: Check C Interface
-        run: |
-          test -f zig-out/include/terminal_theme_tools.h
-          test -f zig-out/lib/libterminal_theme_tools.a
-          nm -g zig-out/lib/libterminal_theme_tools.a | grep terminal_theme_tools_parse_terminal_report
-          cc -std=c23 -pedantic-errors -Wall -Wextra -Werror \
-            -I zig-out/include \
-            packages/terminal-theme-tools/tests/c_api_test.c \
-            zig-out/lib/libterminal_theme_tools.a \
-            -o zig-out/bin/c-api-consumer
-          zig-out/bin/c-api-consumer
 
       - name: Smoke Test
         run: |

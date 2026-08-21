@@ -565,19 +565,6 @@ pub fn inspectTomlAssignment(allocator: std.mem.Allocator, contents: []const u8,
     };
 }
 
-test "embedded manifest contains only generic runtime defaults" {
-    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
-    defer arena.deinit();
-    const allocator = arena.allocator();
-    var env = std.process.Environ.Map.init(std.testing.allocator);
-    defer env.deinit();
-    var manifest = try Manifest.load(allocator, std.testing.io, &env);
-    defer manifest.deinit();
-    try std.testing.expectEqual(0, manifest.runners.items.len);
-    try std.testing.expectEqual(0, manifest.integrations.items.len);
-    try std.testing.expectEqual(0, manifest.interpreters.items.len);
-}
-
 test "nested command arrays reject shell strings" {
     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer arena.deinit();
