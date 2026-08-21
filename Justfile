@@ -31,7 +31,7 @@ nix_profile_tools := ['deadnix:deadnix', 'nh:nh', 'nil:nil', 'nix-instantiate:ni
 doctor_setup_commands := ['bash', 'curl', 'git', 'sudo']
 doctor_format_commands := ['git', 'nix']
 doctor_ansible_commands := ['ansible-doc', 'ansible-galaxy', 'ansible-lint', 'ansible-playbook', 'yamllint']
-doctor_lint_commands := ['actionlint', 'bundle', 'chezmoi', 'deadnix', 'hadolint', 'jq', 'luacheck', 'nix-instantiate', 'quilt', 'ruby', 'rumdl', 'shellcheck', 'statix', 'taplo', 'uv', 'zig', 'zizmor'] ++ doctor_format_commands ++ doctor_ansible_commands
+doctor_lint_commands := ['actionlint', 'bundle', 'chezmoi', 'deadnix', 'diffstat', 'hadolint', 'jq', 'luacheck', 'nix-instantiate', 'quilt', 'ruby', 'rumdl', 'shellcheck', 'statix', 'taplo', 'uv', 'zig', 'zizmor'] ++ doctor_format_commands ++ doctor_ansible_commands
 doctor_all_commands := doctor_lint_commands ++ ['bash', 'curl', 'sudo', 'watchexec']
 
 export PATH := homebrew_path + PATH_VAR_SEP + nix_bin_dir + PATH_VAR_SEP + nix_profile_bin_dir + PATH_VAR_SEP + nixos_profile_bin_dir + PATH_VAR_SEP + env("PATH", "")
@@ -907,8 +907,6 @@ _check-github-actions:
 
 [private]
 _check-bun: (doctor 'bun')
-    bun install --frozen-lockfile
-    bun install --cwd packages/hyper-window-tiling --frozen-lockfile
     bun run check
 
 # Regenerate bun2nix's dependency expression for the independently packaged
@@ -923,7 +921,6 @@ bun-nix-update:
 
 [private]
 _check-ruby:
-    bundle check
     bundle exec rubocop
     while IFS= read -r -d '' file; do
       ruby -c "$file" >/dev/null
@@ -931,12 +928,18 @@ _check-ruby:
     bundle exec ruby -Itest test/ruby_tools_test.rb
 
 # Lint repository source files and run project validation.
+[private]
+_lint-deps:
+    bundle install
+    bun install --frozen-lockfile
+    bun install --cwd packages/hyper-window-tiling --frozen-lockfile
+
 [group('dev')]
-lint: (doctor 'lint') check-format _lint-checks
+lint: (doctor 'lint') check-format _lint-deps _check-ansible _lint-checks
 
 [parallel]
 [private]
-_lint-checks: _lint-files _check-python _check-zig _check-ansible _check-github-actions _check-bun _check-ruby (quilt-check 'all')
+_lint-checks: _lint-files _check-python _check-zig _check-github-actions _check-bun _check-ruby (quilt-check 'all')
 
 # Evaluate every flake output without building package or test derivations.
 [group('dev')]
