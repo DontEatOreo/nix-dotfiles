@@ -26,6 +26,12 @@ permissions:
 jobs:
   simulation:
     name: Disposable host (${{ matrix.os }})
+    # Immutable GitHub bot IDs: Renovate, GitHub Actions, Dependabot.
+    if: >-
+      github.event_name != 'pull_request' ||
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association) ||
+      (github.event.pull_request.user.type == 'Bot' &&
+      contains(fromJSON('[29139614, 41898282, 49699333]'), github.event.pull_request.user.id))
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:

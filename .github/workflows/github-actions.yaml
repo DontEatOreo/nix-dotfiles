@@ -4,6 +4,7 @@ on:
   pull_request:
     paths: &workflow-paths
       - .github/actions/**
+      - .github/scripts/**
       - .github/workflows/**
   push:
     branches:
@@ -47,3 +48,8 @@ jobs:
           annotations: true
           persona: pedantic
           version: "1.28.0"
+
+      - name: Verify Immutable Action Pins
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/scripts/verify-action-pins.sh
