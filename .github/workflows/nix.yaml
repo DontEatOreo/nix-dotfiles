@@ -92,6 +92,18 @@ jobs:
       - name: Set Up Nix
         uses: ./.github/actions/setup-nix
 
+      - name: Check Generated Bun Dependencies
+        run: |
+          generated=$(nix run .#bun2nix -- \
+            --lock-file packages/hyper-window-tiling/bun.lock \
+            --copy-prefix packages/hyper-window-tiling)
+          if ! diff -u \
+            packages/hyper-window-tiling/bun.nix \
+            <(printf '%s\n' "$generated"); then
+            echo "::error::packages/hyper-window-tiling/bun.nix is stale; run just bun-nix-update."
+            exit 1
+          fi
+
       - name: Materialize Flake Partitions
         run: |
           nix store add-path nix/dev
@@ -131,7 +143,7 @@ jobs:
     needs: checks
     if: needs.checks.outputs.build-native == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:

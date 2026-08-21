@@ -944,6 +944,20 @@ _check-github-actions:
 _check-bun: (doctor 'bun')
     bun run check
 
+# Verify bun2nix's dependency expression matches the independently packaged
+# Hyper Window Tiling extension's Bun lockfile.
+[group('check')]
+bun-nix-check:
+    generated=$(nix run .#bun2nix -- \
+      --lock-file packages/hyper-window-tiling/bun.lock \
+      --copy-prefix packages/hyper-window-tiling)
+    if ! diff -u \
+      packages/hyper-window-tiling/bun.nix \
+      <(printf '%s\n' "$generated"); then
+      printf 'packages/hyper-window-tiling/bun.nix is stale; run `just bun-nix-update`.\n' >&2
+      exit 1
+    fi
+
 # Regenerate bun2nix's dependency expression for the independently packaged
 # Hyper Window Tiling extension after its Bun lockfile changes.
 [group('dev')]
