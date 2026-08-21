@@ -30,7 +30,7 @@ signing selected revisions opt-in with --sign.
 
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -51,6 +51,10 @@ to [Semantic Versioning](https://semver.
+@@ -50,6 +50,10 @@ to [Semantic Versioning](https://semver.
    repositories. `jj git ref fetch --shallow-exclude` can fetch a review stack
    plus one parent generation for a usable diff base.
  

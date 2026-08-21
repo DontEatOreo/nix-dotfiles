@@ -8,30 +8,25 @@ other jj configuration. Intersect the configured selector with commits
 outgoing to the pushed references and force-sign exactly the selected
 commits.
 
-Default to none() and migrate boolean values for six releases so
-existing configurations keep their old mutable, unsigned, own-commit
-behavior.
+Default to none(). Configurations must use an explicit revset.
 ---
- CHANGELOG.md                            |    4 +++
- cli/src/commands/git/push.rs            |   30 +++++++++++-------------
- cli/src/config-schema.json              |    6 ++--
- cli/src/config.rs                       |   27 +++++++++++++++++++++-
- cli/src/config/misc.toml                |    2 -
- cli/tests/sample-configs/valid/git.toml |    2 -
- cli/tests/test_config_command.rs        |   39 ++++++++++++++++++++++++++++++++
- cli/tests/test_git_push.rs              |    2 -
- docs/config.md                          |   15 +++++-------
- 9 files changed, 96 insertions(+), 31 deletions(-)
+ CHANGELOG.md                            |    3 +++
+ cli/src/commands/git/push.rs            |   30 ++++++++++++++----------------
+ cli/src/config-schema.json              |    6 +++---
+ cli/src/config/misc.toml                |    2 +-
+ cli/tests/sample-configs/valid/git.toml |    2 +-
+ cli/tests/test_git_push.rs              |    2 +-
+ docs/config.md                          |   15 +++++++--------
+ 7 files changed, 30 insertions(+), 30 deletions(-)
 
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -12,6 +12,10 @@ to [Semantic Versioning](https://semver.
+@@ -12,6 +12,9 @@ to [Semantic Versioning](https://semver.
  
  ### Breaking changes
  
 +* `git.sign-on-push` is now a revset selecting commits to sign instead of a
-+  boolean. The default is `none()`. Existing `true` values are migrated to
-+  `~signed() & mine()` and `false` values to `none()`.
++  boolean. The default is `none()`. Boolean values are no longer accepted.
 +
  ### Deprecations
  
@@ -113,42 +108,6 @@ behavior.
                  },
                  "track-default-bookmark-on-clone": {
                      "type": "boolean",
---- a/cli/src/config.rs
-+++ b/cli/src/config.rs
-@@ -877,7 +877,32 @@ fn parse_config_arg_item(item_str: &str)
- 
- /// List of rules to migrate deprecated config variables.
- pub fn default_config_migrations() -> Vec<ConfigMigrationRule> {
--    vec![]
-+    vec![
-+        // TODO: Delete in jj 0.50.0+
-+        ConfigMigrationRule::custom(
-+            |layer| {
-+                layer
-+                    .look_up_item("git.sign-on-push")
-+                    .is_ok_and(|value| value.is_some_and(|value| value.as_bool().is_some()))
-+            },
-+            |layer| match layer.look_up_item("git.sign-on-push") {
-+                Ok(Some(value)) => {
-+                    let old_value = value.as_bool().unwrap();
-+                    let new_value = if old_value {
-+                        "~signed() & mine()"
-+                    } else {
-+                        "none()"
-+                    };
-+                    layer.set_value("git.sign-on-push", new_value.to_owned())?;
-+                    Ok(format!(
-+                        "git.sign-on-push = {old_value} is updated to git.sign-on-push = \
-+                         '{new_value}'"
-+                    ))
-+                }
-+                _ => unreachable!(),
-+            },
-+        ),
-+    ]
- }
- 
- /// Command name and arguments specified by config.
 --- a/cli/src/config/misc.toml
 +++ b/cli/src/config/misc.toml
 @@ -28,7 +28,7 @@ disabled-branches = []
@@ -171,54 +130,6 @@ behavior.
  subprocess = false
  write-change-id-header = true
  executable-path = "/home/linus/.local/bin/git"
---- a/cli/tests/test_config_command.rs
-+++ b/cli/tests/test_config_command.rs
-@@ -28,6 +28,45 @@ use crate::common::force_interactive;
- use crate::common::to_toml_value;
- 
- #[test]
-+fn test_config_migrate_sign_on_push_boolean() {
-+    let test_env = TestEnvironment::default();
-+
-+    let output = test_env.run_jj_in(
-+        ".",
-+        [
-+            "config",
-+            "list",
-+            "git.sign-on-push",
-+            "--config=git.sign-on-push=true",
-+        ],
-+    );
-+    insta::assert_snapshot!(output, @r#"
-+    git.sign-on-push = "~signed() & mine()"
-+    [EOF]
-+    ------- stderr -------
-+    Warning: Deprecated CLI-provided config: git.sign-on-push = true is updated to git.sign-on-push = '~signed() & mine()'
-+    [EOF]
-+    "#);
-+
-+    let output = test_env.run_jj_in(
-+        ".",
-+        [
-+            "config",
-+            "list",
-+            "git.sign-on-push",
-+            "--config=git.sign-on-push=false",
-+        ],
-+    );
-+    insta::assert_snapshot!(output, @r#"
-+    git.sign-on-push = "none()"
-+    [EOF]
-+    ------- stderr -------
-+    Warning: Deprecated CLI-provided config: git.sign-on-push = false is updated to git.sign-on-push = 'none()'
-+    [EOF]
-+    "#);
-+}
-+
-+#[test]
- fn test_config_list_single() {
-     let test_env = TestEnvironment::default();
-     test_env.add_config(
 --- a/cli/tests/test_git_push.rs
 +++ b/cli/tests/test_git_push.rs
 @@ -3017,7 +3017,7 @@ fn test_git_push_sign_on_push() {

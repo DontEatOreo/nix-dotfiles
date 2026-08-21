@@ -16,7 +16,7 @@ commit.
 
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -20,6 +20,9 @@ to [Semantic Versioning](https://semver.
+@@ -19,6 +19,9 @@ to [Semantic Versioning](https://semver.
  
  ### New features
  

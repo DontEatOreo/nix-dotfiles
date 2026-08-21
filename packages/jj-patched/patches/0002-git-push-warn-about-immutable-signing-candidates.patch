@@ -15,7 +15,7 @@ history-editing commands while making skipped signatures visible.
 
 --- a/CHANGELOG.md
 +++ b/CHANGELOG.md
-@@ -50,6 +50,9 @@ to [Semantic Versioning](https://semver.
+@@ -49,6 +49,9 @@ to [Semantic Versioning](https://semver.
  
  ### Fixed bugs
  
