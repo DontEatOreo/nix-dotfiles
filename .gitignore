@@ -51,6 +51,7 @@ a.out
 build/
 build-*/
 dist/
+.build/
 local.properties
 *.egg-info/
 result
