@@ -70,7 +70,7 @@ doctor profile="setup":
     }
 
     case "$profile" in
-      status) linux_commands bootc ;;
+      status) linux_commands bootc sudo ;;
       reboot) linux_commands systemctl ;;
       install) linux_commands bootc sudo ;;
       build | spectrum) commands=(bluebuild check-jsonschema jq "${podman_command[0]}" skopeo) ;;
@@ -113,7 +113,7 @@ _linux-only recipe:
 [linux]
 [shell]
 status: (doctor 'status')
-    bootc status
+    sudo bootc status
     @if [ -r /usr/share/ublue-os/image-info.json ] && command -v jq >/dev/null 2>&1; then \
       jq . /usr/share/ublue-os/image-info.json; \
     fi
