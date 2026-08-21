@@ -1,0 +1,58 @@
+---
+- name: Create Hyper KWin script directories
+  ansible.builtin.file:
+    path: "{{ desktop_hyper_window_tiling_kwin_dir }}/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - ""
+    - contents
+    - contents/code
+
+- name: Install Hyper KWin scripts
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ desktop_hyper_window_tiling_kwin_dir }}/{{ item.dest }}"
+    mode: "0644"
+  loop:
+    - src: "{{ desktop_hyper_window_tiling_package }}/kde/metadata.json"
+      dest: metadata.json
+    - src: >-
+        {{ desktop_hyper_window_tiling_package }}/dist/kde/contents/code/main.js
+      dest: contents/code/main.js
+  register: desktop_hyper_kwin_scripts
+
+- name: Enable Hyper KWin script
+  community.general.ini_file:
+    path: "{{ dotfiles_config_home }}/kwinrc"
+    section: Plugins
+    option: hyper-window-tilingEnabled
+    value: "true"
+    no_extra_spaces: true
+    mode: "0600"
+  register: desktop_hyper_kwin_config
+
+- name: Detect KDE D-Bus command
+  ansible.builtin.command:
+    argv:
+      - sh
+      - -c
+      - command -v qdbus6 || command -v qdbus
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  register: desktop_hyper_qdbus
+
+- name: Restart KWin scripting after Hyper script changes
+  ansible.builtin.command:
+    argv:
+      - "{{ desktop_hyper_qdbus.stdout | trim }}"
+      - org.kde.KWin
+      - /Scripting
+      - org.kde.kwin.Scripting.start
+  changed_when: false
+  failed_when: false
+  when:
+    - not ansible_check_mode
+    - desktop_hyper_qdbus.rc == 0
+    - desktop_hyper_kwin_scripts is changed or desktop_hyper_kwin_config is changed

@@ -8,13 +8,12 @@ desktop_flatpak_remotes:
     url: https://nightly.gnome.org/gnome-nightly.flatpakrepo
 
 desktop_flatpak_packages:
-  - name: org.flatpak.Builder
+  - names:
+      - org.flatpak.Builder
     remote: flathub
-  - name: org.gnome.Platform
-    branch: master
-    remote: gnome-nightly
-  - name: org.gnome.Sdk
-    branch: master
+  - names:
+      - org.gnome.Platform//master
+      - org.gnome.Sdk//master
     remote: gnome-nightly
 
 desktop_emoji_binding_path: >-

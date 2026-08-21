@@ -1,0 +1,36 @@
+---
+- name: Reconcile the locally built Hyper GNOME extension
+  dotfiles_gnome_extension:
+    uuid: "{{ desktop_hyper_window_tiling_uuid }}"
+    extension_root: "{{ dotfiles_data_home }}/gnome-shell/extensions"
+    metadata_path: >-
+      {{ desktop_hyper_window_tiling_package }}/gnome/metadata.json
+    extension_path: >-
+      {{ desktop_hyper_window_tiling_package }}/dist/gnome/extension.js
+    schema_paths:
+      - >-
+        {{
+          desktop_hyper_window_tiling_package
+          ~ '/gnome/schemas/'
+          ~ 'org.gnome.shell.extensions.hyper-window-tiling.gschema.xml'
+        }}
+
+- name: Configure Hyper GNOME extension shortcuts
+  community.general.dconf:
+    key: "/org/gnome/shell/extensions/hyper-window-tiling/{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+  loop: "{{ desktop_hyper_window_tiling_gnome_keys }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Free GNOME workspace navigation shortcuts for Hyper window tiling
+  community.general.dconf:
+    key: "/org/gnome/desktop/wm/keybindings/{{ item }}"
+    value: "@as []"
+    state: present
+  loop:
+    - switch-to-workspace-left
+    - switch-to-workspace-right
+    - move-to-workspace-left
+    - move-to-workspace-right

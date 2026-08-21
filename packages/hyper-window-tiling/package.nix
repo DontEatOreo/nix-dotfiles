@@ -105,7 +105,7 @@ in
     installPhase = ''
       runHook preInstall
 
-      script_dir="$out/share/kwin-wayland/scripts/${pluginId}"
+      script_dir="$out/share/kwin/scripts/${pluginId}"
       install -d "$script_dir/contents/code"
       install -m0644 kde/metadata.json "$script_dir/metadata.json"
       install -m0644 dist/kde/contents/code/main.js "$script_dir/contents/code/main.js"

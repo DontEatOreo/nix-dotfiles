@@ -10,7 +10,9 @@
 
 - name: Configure NVIDIA Flatpak runtimes
   ansible.builtin.import_tasks: flatpak-nvidia.yml
-  when: platform_is_linux
+  when:
+    - platform_is_linux
+    - desktop_flatpak_command.rc == 0
   tags:
     - desktop
     - flatpak
@@ -35,7 +37,9 @@
 
 - name: Configure file previews
   ansible.builtin.import_tasks: file-preview.yml
-  when: platform_is_linux
+  when:
+    - platform_is_linux
+    - desktop_flatpak_command.rc == 0
   tags:
     - desktop
     - flatpak

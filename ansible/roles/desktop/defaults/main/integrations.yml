@@ -11,11 +11,6 @@ desktop_hyper_window_tiling_metadata: >-
   }}
 desktop_hyper_window_tiling_uuid: >-
   {{ desktop_hyper_window_tiling_metadata.uuid }}
-desktop_hyper_window_tiling_gnome_dir: >-
-  {{
-    dotfiles_data_home ~ '/gnome-shell/extensions/'
-    ~ desktop_hyper_window_tiling_uuid
-  }}
 desktop_hyper_window_tiling_gnome_keys:
   - key: move-up
     value: "['<Super><Control><Alt><Shift>w']"
@@ -29,9 +24,8 @@ desktop_hyper_window_tiling_gnome_keys:
     value: "['<Super><Control><Alt><Shift>Return']"
   - key: move-max
     value: "['<Super><Control><Alt><Shift>backslash']"
-desktop_hyper_window_tiling_kwin_dirs:
-  - "{{ dotfiles_data_home }}/kwin/scripts/hyper-window-tiling"
-  - "{{ dotfiles_data_home }}/kwin-wayland/scripts/hyper-window-tiling"
+desktop_hyper_window_tiling_kwin_dir: >-
+  {{ dotfiles_data_home }}/kwin/scripts/hyper-window-tiling
 
 desktop_sushi_app_id: >-
   {{

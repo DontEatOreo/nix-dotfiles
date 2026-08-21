@@ -4,31 +4,25 @@
     path: /usr/bin/fc-cache
   register: desktop_fc_cache_binary
   tags:
-    - host
-    - fonts
     - font-cache
 
 - name: Detect JetBrainsMono Nerd Font Mono
   ansible.builtin.command:
     argv:
       - fc-match
-      - --format=%{postscriptname}
+      - --format=%{family[0]}
       - JetBrainsMono Nerd Font Mono
   changed_when: false
   failed_when: false
   check_mode: false
   register: desktop_nerd_font_match
   tags:
-    - host
-    - fonts
     - jetbrains-nerd-font
 
 - name: Install JetBrainsMono Nerd Font Mono
   when: >-
-    'JetBrainsMonoNerdFontMono' not in desktop_nerd_font_match.stdout
+    desktop_nerd_font_match.stdout | trim != 'JetBrainsMono Nerd Font Mono'
   tags:
-    - host
-    - fonts
     - jetbrains-nerd-font
   block:
     - name: Create user font directory
@@ -62,12 +56,12 @@
       ansible.builtin.command:
         argv:
           - fc-match
-          - --format=%{postscriptname}
+          - --format=%{family[0]}
           - JetBrainsMono Nerd Font Mono
       changed_when: false
       register: desktop_nerd_font_verify
       failed_when: >-
-        'JetBrainsMonoNerdFontMono' not in desktop_nerd_font_verify.stdout
+        desktop_nerd_font_verify.stdout | trim != 'JetBrainsMono Nerd Font Mono'
 
 - name: Create Noto color emoji font directory
   ansible.builtin.file:
@@ -75,8 +69,6 @@
     state: directory
     mode: "0755"
   tags:
-    - host
-    - fonts
     - color-emoji-font
 
 - name: Install bitmap-backed Noto Color Emoji
@@ -86,8 +78,6 @@
     mode: "0644"
   notify: Refresh user font cache
   tags:
-    - host
-    - fonts
     - color-emoji-font
 
 - name: Detect bitmap-backed Noto Color Emoji alias
@@ -103,8 +93,6 @@
   register: desktop_color_emoji_match
   notify: Refresh user font cache
   tags:
-    - host
-    - fonts
     - color-emoji-font
     - font-cache
 
@@ -122,8 +110,6 @@
   failed_when: >-
     desktop_color_emoji_verify.stdout != desktop_color_emoji_font_file
   tags:
-    - host
-    - fonts
     - color-emoji-font
     - font-cache
 
@@ -141,9 +127,6 @@
   changed_when: false
   failed_when: false
   check_mode: false
-  tags:
-    - host
-    - fonts
 
 - name: Configure writable GNOME font settings
   community.general.dconf:
@@ -156,17 +139,12 @@
   when:
     - item.rc == 0
     - item.stdout | trim == 'true'
-  tags:
-    - host
-    - fonts
 
 - name: Check user fontconfig configuration
   ansible.builtin.stat:
     path: "{{ dotfiles_config_home }}/fontconfig/conf.d"
   register: desktop_user_fontconfig_directory
   tags:
-    - host
-    - fonts
     - font-cache
 
 - name: Find user fontconfig fragments
@@ -178,8 +156,6 @@
   register: desktop_user_fontconfig_files
   when: desktop_user_fontconfig_directory.stat.isdir | default(false)
   tags:
-    - host
-    - fonts
     - font-cache
 
 - name: Check Flatpak application data
@@ -187,8 +163,6 @@
     path: "{{ dotfiles_home_dir }}/.var/app"
   register: desktop_flatpak_app_root
   tags:
-    - host
-    - fonts
     - font-cache
 
 - name: Find Flatpak application directories
@@ -199,8 +173,6 @@
   register: desktop_flatpak_app_directories
   when: desktop_flatpak_app_root.stat.isdir | default(false)
   tags:
-    - host
-    - fonts
     - font-cache
 
 - name: Reconcile Flatpak application font configuration
@@ -216,6 +188,4 @@
     loop_var: desktop_flatpak_app
     label: "{{ desktop_flatpak_app.path | basename }}"
   tags:
-    - host
-    - fonts
     - font-cache
