@@ -21,6 +21,13 @@ if [[ -z "${TERMINAL_THEME:-}" ]] \
   unset _dotfiles_terminal_theme
 fi
 
+# OpenSSH and Tailscale SSH accept LC_* environment variables. Mirror the
+# detected client appearance so remote shells inherit it before consulting the
+# remote desktop's theme.
+case "${TERMINAL_THEME:-}" in
+  dark | light) export LC_TERMINAL_THEME="$TERMINAL_THEME" ;;
+esac
+
 if [[ -n "${GHOSTTY_RESOURCES_DIR:-}" ]] \
   && [[ -r "${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration" ]]; then
   source "${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration"
