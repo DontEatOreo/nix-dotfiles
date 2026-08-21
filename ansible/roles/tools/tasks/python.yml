@@ -1,10 +1,16 @@
 ---
 - name: Link conventional Python command names to uv wrappers
   ansible.builtin.file:
-    src: "{{ dotfiles_bin_dir }}/dotfiles-{{ item }}"
+    # uv owns the versioned executable. Point the conventional aliases at that
+    # stable entry point instead of package console scripts, which can disappear
+    # when the repository Python package changes its exported commands.
+    src: "{{ dotfiles_bin_dir }}/python3.14"
     dest: "{{ dotfiles_bin_dir }}/{{ item }}"
     state: link
     force: true
+    # Operate on the link itself. Following it makes Ansible try to apply file
+    # attributes to the target and emits a warning while replacing a stale link.
+    follow: false
   loop:
     - python
     - python3

@@ -420,6 +420,12 @@ setup: (doctor 'setup') _userland apply _host
 [group('setup')]
 update: _userland apply _host
 
+# Exercise fresh-host bootstrap orchestration using disposable fake tools.
+[arg('scenario', help='Simulation scenario')]
+[group('dev')]
+bootstrap-simulate scenario="success":
+    ansible/tests/bootstrap-simulate.sh {{ quote(scenario) }}
+
 [private]
 _deps:
     install_args=(collection install -r ansible/requirements.yml -p .ansible/collections)

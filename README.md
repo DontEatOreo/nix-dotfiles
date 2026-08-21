@@ -30,20 +30,6 @@ with Homebrew, Nix, Ansible, and chezmoi.
 - **Apple Silicon macOS:** Homebrew and Ansible bootstrap
 - **Everywhere:** shared dotfiles managed by chezmoi
 
-## Shell composition
-
-```text
-.bashenv ─┐
-.zshenv ──┴─> environment.sh
-
-.bash_profile ─> .bashrc
-.zprofile ────> environment.sh (again after macOS path_helper)
-
-.bashrc ────> bashrc.d/*.bash ─┐
-                               ├─> interactive.common.sh
-.zshrc  ───>  zshrc.d/*.zsh   ─┘      └─> interactive.d/*.sh
-```
-
 ## Setup
 
 Clone the repository first:
@@ -91,10 +77,23 @@ sudo nixos-rebuild switch --flake .#nixos
 
 ### Apple Silicon macOS
 
+Requires macOS 26 or newer. From the cloned repository, run:
+
 ```bash
-./ansible/bootstrap.sh --tags userland
-just setup
+./ansible/bootstrap.sh --setup
 ```
+
+This bootstraps Homebrew and Ansible, installs the complete userland, applies
+the dotfiles, and configures the host. It prompts for administrator and
+1Password access when needed.
+
+Exercise the same flow against disposable fake tools without changing the host:
+
+```bash
+just bootstrap-simulate
+```
+
+Pass a scenario such as `apply-failure` to test error handling.
 
 ## Everyday commands
 

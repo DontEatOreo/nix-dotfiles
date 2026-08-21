@@ -18,7 +18,13 @@
       - rust-src
   environment:
     PATH: "{{ bootstrap_homebrew_path | default(dotfiles_path) }}"
-  changed_when: "'unchanged' not in bootstrap_rustup_toolchain.stderr"
+  # rustup writes the toolchain result to stdout but component progress to
+  # stderr. A missing component can therefore change an otherwise unchanged
+  # toolchain, while a fully converged run reports only "up to date" on stderr.
+  changed_when: >-
+    'unchanged' not in bootstrap_rustup_toolchain.stdout or
+    'downloading component' in bootstrap_rustup_toolchain.stderr or
+    'installing component' in bootstrap_rustup_toolchain.stderr
   failed_when: bootstrap_rustup_toolchain.rc != 0
   register: bootstrap_rustup_toolchain
   tags:

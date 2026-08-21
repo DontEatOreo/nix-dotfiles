@@ -1,24 +1,33 @@
 #!/bin/bash
+# shellcheck shell=bash
 #
 # Prepare a fresh macOS or Linux host and run this repository's Ansible
 # playbook. Keep bootstrap policy in the readonly data below; the functions
 # only interpret that policy and orchestrate system-provided command-line tools.
+# The shebang selects macOS's Bash 3.2 regardless of the user's Zsh login
+# shell. Staying 3.2-compatible avoids installing an interpreter merely to
+# install the bootstrap's real dependencies; newer Linux Bash runs it as-is.
 
 set -euo pipefail
 
-readonly SITE_PLAYBOOK='ansible/site.yml'
-readonly ANSIBLE_REQUIREMENTS='ansible/requirements.yml'
-readonly ANSIBLE_COLLECTIONS_PATH='.ansible/collections'
+readonly ANSIBLE_PLAYBOOK='ansible/site.yml'
+readonly ANSIBLE_REQUIREMENTS_FILE='ansible/requirements.yml'
+readonly ANSIBLE_COLLECTIONS_DIRECTORY='.ansible/collections'
+readonly PRIVATE_SETTINGS_FILE='secrets/secrets.yaml'
+readonly MACOS_AGE_KEY_HELPER_FILE='dotfiles/dot_local/bin/executable_sops-age-key-1password'
+readonly MINIMUM_MACOS_MAJOR='26'
 readonly PYTHON_VERSION='3.14'
 readonly PYTHON_COMMAND="python${PYTHON_VERSION}"
-readonly USER_BIN_DIR="${HOME}/.local/bin"
-readonly DEFAULT_HOMEBREW_INSTALLER_URL='https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh'
-HOMEBREW_INSTALLER_URL="${HOMEBREW_INSTALLER_URL:-}"
-if [[ -z "${HOMEBREW_INSTALLER_URL}" ]]; then
-	HOMEBREW_INSTALLER_URL="${DEFAULT_HOMEBREW_INSTALLER_URL}"
-fi
-readonly HOMEBREW_INSTALLER_URL
-readonly HOMEBREW_INSTALLER_CHECKSUM="${HOMEBREW_INSTALLER_CHECKSUM:-}"
+readonly USER_EXECUTABLE_DIRECTORY="${HOME}/.local/bin"
+# Update the revision and checksum together from Homebrew/install's install.sh.
+readonly HOMEBREW_INSTALLER_REVISION='f4aa1b1ca5b256954dbde0315455fb259cdfc45a'
+readonly DEFAULT_HOMEBREW_INSTALLER_URL="https://raw.githubusercontent.com/Homebrew/install/${HOMEBREW_INSTALLER_REVISION}/install.sh"
+readonly DEFAULT_HOMEBREW_INSTALLER_CHECKSUM='12479a24be3f5307eecac7cde670fad7118640f031229e964f544b1367b52a41'
+# These environment overrides are intentional hatches for mirrors and the
+# simulator. Overriding only the URL remains safe because the pinned checksum
+# will reject different content; alternate content must supply both values.
+readonly HOMEBREW_INSTALLER_URL="${HOMEBREW_INSTALLER_URL:-${DEFAULT_HOMEBREW_INSTALLER_URL}}"
+readonly HOMEBREW_INSTALLER_CHECKSUM="${HOMEBREW_INSTALLER_CHECKSUM:-${DEFAULT_HOMEBREW_INSTALLER_CHECKSUM}}"
 
 # Bash 3.2 has indexed arrays but no associative arrays. These aligned arrays
 # model records without delimiter parsing and still work with macOS's Bash.
@@ -74,19 +83,45 @@ readonly -a REQUIRED_ANSIBLE_COMMANDS=(
 	'ansible-playbook'
 )
 
-readonly -a REQUIRED_REPOSITORY_FILES=(
-	"${SITE_PLAYBOOK}"
-	"${ANSIBLE_REQUIREMENTS}"
+readonly -a REQUIRED_ANSIBLE_COLLECTIONS=(
+	'community/general'
+	'community/sops'
 )
 
-UV_PYTHON_BIN_DIR="${USER_BIN_DIR}"
-UV_TOOL_BIN_DIR="${USER_BIN_DIR}"
+# SETUP_PHASE_KINDS and SETUP_PHASE_ARGUMENTS are aligned records. Keeping
+# order here makes the workflow reviewable without mixing policy into branch
+# logic; two arrays are the smallest safe record representation in Bash 3.2.
+readonly -a SETUP_PHASE_KINDS=(
+	'ansible'
+	'userland-checkpoint'
+	'ansible'
+	'just'
+	'ansible'
+)
+readonly -a SETUP_PHASE_ARGUMENTS=(
+	'stage-10,stage-20'
+	''
+	'stage-30'
+	'apply'
+	'host'
+)
+
+readonly -a REQUIRED_REPOSITORY_FILES=(
+	"${ANSIBLE_PLAYBOOK}"
+	"${ANSIBLE_REQUIREMENTS_FILE}"
+	"${PRIVATE_SETTINGS_FILE}"
+	"${MACOS_AGE_KEY_HELPER_FILE}"
+	'Justfile'
+)
+
+UV_PYTHON_BIN_DIR="${USER_EXECUTABLE_DIRECTORY}"
+UV_TOOL_BIN_DIR="${USER_EXECUTABLE_DIRECTORY}"
 readonly UV_PYTHON_BIN_DIR UV_TOOL_BIN_DIR
 export UV_PYTHON_BIN_DIR UV_TOOL_BIN_DIR
 
 # Mutable state is limited to the private directory tracked by exit traps.
-tmp_dir=''
-tmp_dir_parent=''
+temporary_directory=''
+temporary_directory_parent=''
 
 die() {
 	printf 'error: %s\n' "$*" >&2
@@ -101,8 +136,52 @@ log() {
 	printf '\n==> %s\n' "$*"
 }
 
-have_command() {
+command_exists() {
 	command -v "$1" >/dev/null 2>&1
+}
+
+usage() {
+	cat <<'EOF'
+Usage:
+  ansible/bootstrap.sh --setup
+  ansible/bootstrap.sh [ANSIBLE-PLAYBOOK-ARG ...]
+
+Options:
+  --setup  Install userland, apply chezmoi dotfiles, and configure the host.
+  -h, --help
+           Show this help.
+
+Without --setup, all arguments are forwarded to ansible-playbook after the
+bootstrap dependencies and Ansible collections are installed.
+EOF
+}
+
+validate_required_values() {
+	local value_description="$1"
+	shift
+	local value
+
+	if (($# == 0)); then
+		die "bootstrap configuration has no ${value_description}"
+	fi
+	for value in "$@"; do
+		if [[ -z "${value}" ]]; then
+			die "bootstrap configuration contains an empty ${value_description}"
+		fi
+	done
+}
+
+validate_record_field_counts() {
+	local record_description="$1"
+	local expected_field_count="$2"
+	shift 2
+	local actual_field_count
+
+	for actual_field_count in "$@"; do
+		if ((actual_field_count != expected_field_count)); then
+			die "${record_description} configuration has unaligned fields"
+		fi
+	done
 }
 
 # Validate every declarative record before it can affect the host.
@@ -110,29 +189,25 @@ validate_configuration() {
 	local index
 	local platform_count="${#HOMEBREW_PLATFORM_KERNELS[@]}"
 	local uv_tool_count="${#UV_TOOL_SPECS[@]}"
+	local setup_phase_count="${#SETUP_PHASE_KINDS[@]}"
 
-	if ((platform_count != ${#HOMEBREW_PLATFORM_ARCHITECTURES[@]})); then
-		die 'Homebrew platform configuration has unaligned fields'
-	fi
-	if ((platform_count != ${#HOMEBREW_PLATFORM_PREFIXES[@]})); then
-		die 'Homebrew platform configuration has unaligned fields'
-	fi
-	if ((uv_tool_count != ${#UV_TOOL_EXECUTABLE_PROVIDERS[@]})); then
-		die 'uv tool configuration has unaligned fields'
-	fi
+	validate_record_field_counts 'Homebrew platform' "${platform_count}" \
+		"${#HOMEBREW_PLATFORM_ARCHITECTURES[@]}" \
+		"${#HOMEBREW_PLATFORM_PREFIXES[@]}"
+	validate_record_field_counts 'uv tool' "${uv_tool_count}" \
+		"${#UV_TOOL_EXECUTABLE_PROVIDERS[@]}"
+	validate_record_field_counts 'setup phase' "${setup_phase_count}" \
+		"${#SETUP_PHASE_ARGUMENTS[@]}"
 
-	if ((${#HOMEBREW_FORMULAE[@]} == 0)); then
-		die 'bootstrap configuration contains an empty required list'
-	fi
-	if ((uv_tool_count == 0)); then
-		die 'bootstrap configuration contains an empty required list'
-	fi
-	if ((${#REQUIRED_ANSIBLE_COMMANDS[@]} == 0)); then
-		die 'bootstrap configuration contains an empty required list'
-	fi
-	if ((${#REQUIRED_REPOSITORY_FILES[@]} == 0)); then
-		die 'bootstrap configuration contains an empty required list'
-	fi
+	validate_required_values 'Homebrew formula' "${HOMEBREW_FORMULAE[@]}"
+	validate_required_values 'uv tool' "${UV_TOOL_SPECS[@]}"
+	validate_required_values \
+		'required Ansible command' "${REQUIRED_ANSIBLE_COMMANDS[@]}"
+	validate_required_values \
+		'required Ansible collection' "${REQUIRED_ANSIBLE_COLLECTIONS[@]}"
+	validate_required_values \
+		'required repository file' "${REQUIRED_REPOSITORY_FILES[@]}"
+	validate_required_values 'setup phase kind' "${SETUP_PHASE_KINDS[@]}"
 
 	for ((index = 0; index < platform_count; index++)); do
 		if [[ -z "${HOMEBREW_PLATFORM_KERNELS[index]}" ]]; then
@@ -146,10 +221,22 @@ validate_configuration() {
 		fi
 	done
 
-	for ((index = 0; index < uv_tool_count; index++)); do
-		if [[ -z "${UV_TOOL_SPECS[index]}" ]]; then
-			die "empty uv tool specification at index ${index}"
-		fi
+	for ((index = 0; index < setup_phase_count; index++)); do
+		case "${SETUP_PHASE_KINDS[index]}" in
+			ansible | just)
+				if [[ -z "${SETUP_PHASE_ARGUMENTS[index]}" ]]; then
+					die "setup phase ${index} requires an argument"
+				fi
+				;;
+			userland-checkpoint)
+				if [[ -n "${SETUP_PHASE_ARGUMENTS[index]}" ]]; then
+					die "setup phase ${index} does not accept an argument"
+				fi
+				;;
+			*)
+				die "unsupported setup phase kind: ${SETUP_PHASE_KINDS[index]}"
+				;;
+		esac
 	done
 }
 
@@ -169,21 +256,16 @@ has_ansible_become_prompt_arg() {
 	return 1
 }
 
-ansible_become_prompt_enabled() {
-	case "${ANSIBLE_BECOME_ASK_PASS:-}" in
-		1 | true | TRUE | yes | YES | on | ON) return 0 ;;
-		*) return 1 ;;
-	esac
-}
-
 needs_ansible_become_prompt() {
+	# Respect every explicit Ansible credential choice, including the string
+	# "false". The bootstrap may infer a prompt only when the caller is silent.
 	[[ -t 0 ]] || return 1
 	[[ -z "${ANSIBLE_BECOME_PASSWORD:-}" ]] || return 1
 	[[ -z "${ANSIBLE_BECOME_PASS:-}" ]] || return 1
-	ansible_become_prompt_enabled && return 1
+	[[ -z "${ANSIBLE_BECOME_ASK_PASS:-}" ]] || return 1
 	has_ansible_become_prompt_arg "$@" && return 1
 
-	if have_command sudo && sudo -n -v >/dev/null 2>&1; then
+	if command_exists sudo && sudo -n -v >/dev/null 2>&1; then
 		return 1
 	fi
 
@@ -193,7 +275,7 @@ needs_ansible_become_prompt() {
 ensure_sudo_available() {
 	local reason="$1"
 
-	if ! have_command sudo; then
+	if ! command_exists sudo; then
 		die "${reason} requires sudo, but sudo is not installed"
 	fi
 
@@ -201,6 +283,8 @@ ensure_sudo_available() {
 		return 0
 	fi
 
+	# Never attempt an implicit password prompt in CI or redirected execution;
+	# sudo can otherwise block forever while its input is unavailable.
 	if [[ ! -t 0 ]]; then
 		die "${reason} requires sudo; run this script from an interactive " \
 			'terminal or pre-authenticate sudo with: sudo -v'
@@ -212,36 +296,36 @@ ensure_sudo_available() {
 	fi
 }
 
-# Remove only the private directory created by make_tmp_dir.
+# Remove only the private directory created by create_temporary_directory.
 # Globals:
-#   tmp_dir
-#   tmp_dir_parent
+#   temporary_directory
+#   temporary_directory_parent
 cleanup() {
-	if [[ -z "${tmp_dir}" || ! -d "${tmp_dir}" ]]; then
+	if [[ -z "${temporary_directory}" || ! -d "${temporary_directory}" ]]; then
 		return 0
 	fi
 
-	case "${tmp_dir}" in
-		"${tmp_dir_parent}"/dotfiles-bootstrap.*)
-			rm -R "${tmp_dir}" ||
-				warn "failed to remove temporary directory: ${tmp_dir}"
+	case "${temporary_directory}" in
+		"${temporary_directory_parent}"/dotfiles-bootstrap.*)
+			rm -R "${temporary_directory}" ||
+				warn "failed to remove temporary directory: ${temporary_directory}"
 			;;
 		*)
-			warn "refusing to remove unexpected temporary path: ${tmp_dir}"
+			warn "refusing to remove unexpected temporary path: ${temporary_directory}"
 			;;
 	esac
 
-	tmp_dir=''
+	temporary_directory=''
 }
 
 # Create a private temporary directory and register it for cleanup.
 # Globals:
-#   tmp_dir
-#   tmp_dir_parent
-make_tmp_dir() {
+#   temporary_directory
+#   temporary_directory_parent
+create_temporary_directory() {
 	local configured_parent="${TMPDIR:-/tmp}"
 
-	if ! have_command mktemp; then
+	if ! command_exists mktemp; then
 		die 'mktemp is required to create a private temporary directory'
 	fi
 
@@ -249,20 +333,25 @@ make_tmp_dir() {
 		die "temporary directory parent is unavailable: ${configured_parent}"
 	fi
 
-	tmp_dir_parent="$(cd -P "${configured_parent}" && pwd -P)" ||
+	temporary_directory_parent="$(cd -P "${configured_parent}" && pwd -P)" ||
 		die "failed to resolve temporary directory: ${configured_parent}"
-	tmp_dir="$(mktemp -d "${tmp_dir_parent}/dotfiles-bootstrap.XXXXXX")" ||
-		die "failed to create a temporary directory under ${tmp_dir_parent}"
+	temporary_directory="$(
+		mktemp -d "${temporary_directory_parent}/dotfiles-bootstrap.XXXXXX"
+	)" || die \
+		"failed to create a temporary directory under" \
+		"${temporary_directory_parent}"
 }
 
 download_file() {
 	local url="$1"
 	local destination="$2"
 
-	if have_command curl; then
-		curl -fsSL -o "${destination}" "${url}"
-	elif have_command wget; then
-		wget -qO "${destination}" "${url}"
+	if command_exists curl; then
+		curl -fsSL --retry 3 --retry-delay 1 \
+			-o "${destination}" "${url}"
+	elif command_exists wget; then
+		wget --quiet --tries=3 --timeout=30 \
+			--output-document="${destination}" "${url}"
 	else
 		die "neither curl nor wget is available to download ${url}"
 	fi
@@ -283,10 +372,10 @@ verify_sha256() {
 		die "invalid sha256 checksum for ${path}"
 	fi
 
-	if have_command sha256sum; then
+	if command_exists sha256sum; then
 		hash_output="$(sha256sum "${path}")" ||
 			die "failed to hash ${path}"
-	elif have_command shasum; then
+	elif command_exists shasum; then
 		hash_output="$(shasum -a 256 "${path}")" ||
 			die "failed to hash ${path}"
 	else
@@ -306,10 +395,12 @@ verify_sha256() {
 	fi
 }
 
-resolve_repository() {
+resolve_repository_root() {
+	# BASH_SOURCE, rather than PWD, supports invocation from any directory and
+	# deliberately follows the simulator's disposable repository symlink.
 	local script_path="${BASH_SOURCE[0]}"
 	local script_dir
-	local repo_dir
+	local repository_root
 	local required_file
 
 	if [[ "${script_path}" != */* ]]; then
@@ -319,26 +410,37 @@ resolve_repository() {
 
 	script_dir="$(cd -P "$(dirname "${script_path}")" && pwd -P)" ||
 		die 'failed to resolve script directory'
-	repo_dir="$(cd -P "${script_dir}/.." && pwd -P)" ||
+	repository_root="$(cd -P "${script_dir}/.." && pwd -P)" ||
 		die 'failed to resolve repository directory'
 
 	for required_file in "${REQUIRED_REPOSITORY_FILES[@]}"; do
-		if [[ ! -f "${repo_dir}/${required_file}" ]]; then
-			die "required repository file is missing: ${repo_dir}/${required_file}"
+		if [[ ! -f "${repository_root}/${required_file}" ]]; then
+			die \
+				"required repository file is missing:" \
+				"${repository_root}/${required_file}"
 		fi
 	done
 
-	printf '%s\n' "${repo_dir}"
+	printf '%s\n' "${repository_root}"
 }
 
-select_homebrew_prefix() {
-	local kernel_name="$1"
+resolve_homebrew_prefix() {
+	local operating_system="$1"
 	local machine_architecture="$2"
 	local configured_architecture
 	local index
 
+	if [[ "${operating_system}" == 'Darwin' &&
+		"${machine_architecture}" == 'x86_64' ]]; then
+		# Homebrew would otherwise choose Intel paths while the playbook assumes
+		# the native Apple Silicon prefix and packages.
+		die \
+			'this Apple Silicon setup must run from a native arm64 terminal,' \
+			'not Rosetta'
+	fi
+
 	for ((index = 0; index < ${#HOMEBREW_PLATFORM_KERNELS[@]}; index++)); do
-		if [[ "${HOMEBREW_PLATFORM_KERNELS[index]}" != "${kernel_name}" ]]; then
+		if [[ "${HOMEBREW_PLATFORM_KERNELS[index]}" != "${operating_system}" ]]; then
 			continue
 		fi
 		configured_architecture="${HOMEBREW_PLATFORM_ARCHITECTURES[index]}"
@@ -351,24 +453,51 @@ select_homebrew_prefix() {
 		return 0
 	done
 
-	die "unsupported bootstrap platform: ${kernel_name} ${machine_architecture}"
+	die \
+		"unsupported bootstrap platform:" \
+		"${operating_system} ${machine_architecture}"
+}
+
+validate_macos_version() {
+	local operating_system="$1"
+	local macos_version
+	local macos_major_version
+
+	if [[ "${operating_system}" != 'Darwin' ]]; then
+		return 0
+	fi
+	if ! command_exists sw_vers; then
+		die 'sw_vers is required to identify the macOS version'
+	fi
+	macos_version="$(sw_vers -productVersion)" ||
+		die 'failed to identify the macOS version'
+	macos_major_version="${macos_version%%.*}"
+	if [[ -z "${macos_major_version}" ||
+		"${macos_major_version}" == *[!0123456789]* ]]; then
+		die "unexpected macOS version: ${macos_version}"
+	fi
+	if ((macos_major_version < MINIMUM_MACOS_MAJOR)); then
+		die \
+			"macOS ${MINIMUM_MACOS_MAJOR} or newer is required;" \
+			"found ${macos_version}"
+	fi
 }
 
 # Install Homebrew from a downloaded, optionally verified installer.
 # Globals:
-#   tmp_dir
+#   temporary_directory
 ensure_homebrew() {
 	local homebrew_prefix="$1"
-	local homebrew_bin="$2"
+	local homebrew_executable="$2"
 	local installer_file
 
-	if [[ -x "${homebrew_bin}" ]]; then
+	if [[ -x "${homebrew_executable}" ]]; then
 		return 0
 	fi
 
 	ensure_sudo_available 'installing Homebrew'
-	make_tmp_dir
-	installer_file="${tmp_dir}/homebrew-install.sh"
+	create_temporary_directory
+	installer_file="${temporary_directory}/homebrew-install.sh"
 
 	log 'Downloading the Homebrew installer'
 	if ! download_file "${HOMEBREW_INSTALLER_URL}" "${installer_file}"; then
@@ -381,8 +510,8 @@ ensure_homebrew() {
 		die 'Homebrew installation failed'
 	fi
 
-	if [[ ! -x "${homebrew_bin}" ]]; then
-		die "Homebrew did not create ${homebrew_bin}"
+	if [[ ! -x "${homebrew_executable}" ]]; then
+		die "Homebrew did not create ${homebrew_executable}"
 	fi
 
 	cleanup
@@ -391,23 +520,25 @@ ensure_homebrew() {
 # Prepend Homebrew and, on macOS, GNU replacement tools to PATH.
 # Outputs:
 #   Exports PATH.
-activate_homebrew() {
+configure_homebrew_path() {
 	local homebrew_prefix="$1"
-	local homebrew_bin="$2"
-	local kernel_name="$3"
+	local homebrew_executable="$2"
+	local operating_system="$3"
 	local reported_prefix
 	local path_suffix
 	local path_entry
 	local homebrew_path=''
 	local -a path_entries=()
 
-	reported_prefix="$("${homebrew_bin}" --prefix)" ||
+	reported_prefix="$("${homebrew_executable}" --prefix)" ||
 		die 'failed to query the Homebrew prefix'
 	if [[ "${reported_prefix}" != "${homebrew_prefix}" ]]; then
 		die "Homebrew reported an unexpected prefix: ${reported_prefix}"
 	fi
 
-	if [[ "${kernel_name}" == 'Darwin' ]]; then
+	# The playbook expects GNU behavior. Homebrew intentionally keg-prefixes
+	# these replacements on macOS, so bootstrap them into PATH explicitly.
+	if [[ "${operating_system}" == 'Darwin' ]]; then
 		for path_suffix in "${MACOS_GNU_PATH_SUFFIXES[@]}"; do
 			path_entries+=("${homebrew_prefix}/${path_suffix}")
 		done
@@ -422,7 +553,7 @@ activate_homebrew() {
 }
 
 install_homebrew_formulae() {
-	local homebrew_bin="$1"
+	local homebrew_executable="$1"
 	local -a brew_args=(
 		'install'
 		'--formula'
@@ -430,15 +561,17 @@ install_homebrew_formulae() {
 	brew_args+=("${HOMEBREW_FORMULAE[@]}")
 
 	log "Installing Homebrew formulae: ${HOMEBREW_FORMULAE[*]}"
+	# A caller may use this variable for normal brew operations, but bootstrap
+	# must converge tool versions instead of silently retaining stale formulae.
 	unset HOMEBREW_NO_INSTALL_UPGRADE
-	if ! HOMEBREW_NO_ASK=1 "${homebrew_bin}" "${brew_args[@]}"; then
+	if ! HOMEBREW_NO_ASK=1 "${homebrew_executable}" "${brew_args[@]}"; then
 		die 'Homebrew formula installation failed'
 	fi
 }
 
-install_python() {
-	local uv_bin="$1"
-	local python_bin="$2"
+install_python_runtime() {
+	local uv_executable="$1"
+	local python_executable="$2"
 	local python_alias
 	local python_version_check
 
@@ -446,33 +579,36 @@ install_python() {
 	python_version_check+='expected = tuple(map(int, sys.argv[1].split("."))); '
 	python_version_check+='raise SystemExit(sys.version_info[:2] != expected)'
 
-	mkdir -p "${USER_BIN_DIR}"
+	mkdir -p "${USER_EXECUTABLE_DIRECTORY}"
 	log "Installing uv-managed Python ${PYTHON_VERSION}"
-	if ! "${uv_bin}" python install "${PYTHON_VERSION}"; then
+	if ! "${uv_executable}" --no-config python install "${PYTHON_VERSION}"; then
 		die "failed to install Python ${PYTHON_VERSION}"
 	fi
 
-	if [[ ! -x "${python_bin}" ]] ||
-		! "${python_bin}" -c "${python_version_check}" "${PYTHON_VERSION}"; then
-		die "uv did not provide Python ${PYTHON_VERSION} at ${python_bin}"
+	if [[ ! -x "${python_executable}" ]] || ! "${python_executable}" \
+		-c "${python_version_check}" "${PYTHON_VERSION}"; then
+		die "uv did not provide Python ${PYTHON_VERSION} at ${python_executable}"
 	fi
 
-	# The playbook eventually replaces python and python3 with repository-owned
-	# wrappers, so uv's --default mode would overwrite intentional links.
+	# The playbook eventually converges python and python3 on uv's versioned
+	# executable. Create missing aliases here so later bootstrap commands can use
+	# conventional names before Ansible runs. Test both -e and -L because -e is
+	# false for a broken link, which Ansible should replace rather than bootstrap
+	# silently changing before the declarative phase.
 	for python_alias in "${PYTHON_ALIASES[@]}"; do
-		if [[ -e "${USER_BIN_DIR}/${python_alias}" ]]; then
+		if [[ -e "${USER_EXECUTABLE_DIRECTORY}/${python_alias}" ]]; then
 			continue
 		fi
-		if [[ -L "${USER_BIN_DIR}/${python_alias}" ]]; then
+		if [[ -L "${USER_EXECUTABLE_DIRECTORY}/${python_alias}" ]]; then
 			continue
 		fi
-		ln -s "${PYTHON_COMMAND}" "${USER_BIN_DIR}/${python_alias}"
+		ln -s "${PYTHON_COMMAND}" "${USER_EXECUTABLE_DIRECTORY}/${python_alias}"
 	done
 }
 
-install_uv_tools() {
-	local uv_bin="$1"
-	local python_bin="$2"
+install_python_tools() {
+	local uv_executable="$1"
+	local python_executable="$2"
 	local index
 	local tool_spec
 	local executable_provider
@@ -483,10 +619,11 @@ install_uv_tools() {
 		tool_spec="${UV_TOOL_SPECS[index]}"
 		executable_provider="${UV_TOOL_EXECUTABLE_PROVIDERS[index]}"
 		uv_args=(
+			'--no-config'
 			'tool'
 			'install'
 			'--python'
-			"${python_bin}"
+			"${python_executable}"
 			'--no-python-downloads'
 			'--force'
 			'--compile-bytecode'
@@ -499,24 +636,25 @@ install_uv_tools() {
 		fi
 		uv_args+=("${tool_spec}")
 
-		if ! "${uv_bin}" "${uv_args[@]}"; then
+		if ! "${uv_executable}" "${uv_args[@]}"; then
 			die "failed to install uv tool: ${tool_spec}"
 		fi
 	done
 }
 
-verify_ansible_installation() {
+verify_ansible_runtime() {
 	local command_name
 	local ansible_version
-	local ansible_playbook_bin="${USER_BIN_DIR}/ansible-playbook"
+	local ansible_playbook_executable
+	ansible_playbook_executable="${USER_EXECUTABLE_DIRECTORY}/ansible-playbook"
 
 	for command_name in "${REQUIRED_ANSIBLE_COMMANDS[@]}"; do
-		if [[ ! -x "${USER_BIN_DIR}/${command_name}" ]]; then
-			die "uv did not create ${command_name} under ${USER_BIN_DIR}"
+		if [[ ! -x "${USER_EXECUTABLE_DIRECTORY}/${command_name}" ]]; then
+			die "uv did not create ${command_name} under ${USER_EXECUTABLE_DIRECTORY}"
 		fi
 	done
 
-	ansible_version="$("${ansible_playbook_bin}" --version)" ||
+	ansible_version="$("${ansible_playbook_executable}" --version)" ||
 		die 'failed to run uv-installed Ansible'
 	if [[ "${ansible_version}" != *"python version = ${PYTHON_VERSION}."* ]]; then
 		die "uv-installed Ansible is not running on Python ${PYTHON_VERSION}"
@@ -524,78 +662,268 @@ verify_ansible_installation() {
 }
 
 install_ansible_collections() {
-	local ansible_galaxy_bin="$1"
-	local repo_dir="$2"
+	local ansible_galaxy_executable="$1"
+	local repository_root="$2"
+	local collection
+	local collection_manifest
+	local -a install_args=(
+		'collection'
+		'install'
+		'--requirements-file'
+		"${repository_root}/${ANSIBLE_REQUIREMENTS_FILE}"
+		'--collections-path'
+		"${repository_root}/${ANSIBLE_COLLECTIONS_DIRECTORY}"
+	)
+
+	for collection in "${REQUIRED_ANSIBLE_COLLECTIONS[@]}"; do
+		# A previously interrupted install can leave the collection directory
+		# present but unusable. Force repair when any required manifest is absent.
+		collection_manifest="${repository_root}/"
+		collection_manifest+="${ANSIBLE_COLLECTIONS_DIRECTORY}/"
+		collection_manifest+="ansible_collections/${collection}/MANIFEST.json"
+		if [[ ! -f "${collection_manifest}" ]]; then
+			install_args+=('--force')
+			break
+		fi
+	done
 
 	log 'Installing Ansible collections'
-	if ! "${ansible_galaxy_bin}" collection install \
-		--requirements-file "${repo_dir}/${ANSIBLE_REQUIREMENTS}" \
-		--collections-path "${repo_dir}/${ANSIBLE_COLLECTIONS_PATH}"; then
+	if ! "${ansible_galaxy_executable}" "${install_args[@]}"; then
 		die 'Ansible collection installation failed'
 	fi
 }
 
-run_playbook() {
-	local ansible_playbook_bin="$1"
+run_ansible_playbook() {
+	local ansible_playbook_executable="$1"
 	shift
-	local -a playbook_args=("${SITE_PLAYBOOK}" "$@")
+	local disable_become_prompt='false'
+	local -a playbook_args=("${ANSIBLE_PLAYBOOK}" "$@")
 
 	if needs_ansible_become_prompt "${playbook_args[@]}"; then
 		playbook_args=('--ask-become-pass' "${playbook_args[@]}")
 	elif ! has_ansible_become_prompt_arg "${playbook_args[@]}" &&
 		[[ -z "${ANSIBLE_BECOME_ASK_PASS:-}" ]]; then
-		ANSIBLE_BECOME_ASK_PASS='false'
-		export ANSIBLE_BECOME_ASK_PASS
+		disable_become_prompt='true'
 	fi
 
 	cleanup
-	trap - EXIT HUP INT TERM
-	log "Running Ansible playbook: ${SITE_PLAYBOOK}"
-	exec "${ansible_playbook_bin}" "${playbook_args[@]}"
+	# The installer temp directory is no longer useful here. Removing it before
+	# a potentially long playbook also narrows the lifetime of downloaded code.
+	log "Running Ansible playbook: ${ANSIBLE_PLAYBOOK}"
+	if [[ "${disable_become_prompt}" == 'true' ]]; then
+		ANSIBLE_BECOME_ASK_PASS='false' \
+			"${ansible_playbook_executable}" "${playbook_args[@]}"
+	else
+		"${ansible_playbook_executable}" "${playbook_args[@]}"
+	fi
+}
+
+# Bound SOPS because its 1Password helper can wait indefinitely for desktop
+# approval. gtimeout comes from the coreutils package installed in stage 10.
+private_settings_are_accessible() {
+	local repository_root="$1"
+	local sops_executable="$2"
+	local timeout_executable="$3"
+	local timeout_seconds="$4"
+	local age_key_helper="${repository_root}/${MACOS_AGE_KEY_HELPER_FILE}"
+
+	SOPS_AGE_KEY_CMD="${age_key_helper}" \
+		"${timeout_executable}" --kill-after=5s "${timeout_seconds}s" \
+		"${sops_executable}" decrypt "${repository_root}/${PRIVATE_SETTINGS_FILE}" \
+		>/dev/null
+}
+
+ensure_private_settings_access() {
+	local homebrew_prefix="$1"
+	local repository_root="$2"
+	local sops_executable="${homebrew_prefix}/bin/sops"
+	local timeout_executable="${homebrew_prefix}/bin/gtimeout"
+	local initial_timeout='5'
+
+	if [[ ! -x "${sops_executable}" ]]; then
+		die "the bootstrap playbook did not install sops at ${sops_executable}"
+	fi
+	if [[ ! -x "${timeout_executable}" ]]; then
+		die "the bootstrap playbook did not install gtimeout at ${timeout_executable}"
+	fi
+	if [[ -t 0 ]]; then
+		initial_timeout='60'
+	fi
+	log 'Checking access to private settings (1Password may request approval)'
+	if private_settings_are_accessible \
+		"${repository_root}" "${sops_executable}" \
+		"${timeout_executable}" "${initial_timeout}"; then
+		return 0
+	fi
+	if [[ ! -t 0 ]]; then
+		die \
+			'private settings are unavailable; run --setup interactively' \
+			'and sign in to 1Password'
+	fi
+
+	log 'Waiting for access to private settings'
+	if command_exists open && ! open -a '1Password'; then
+		warn 'could not open 1Password automatically'
+	fi
+	printf '%s\n' \
+		'Sign in to and unlock 1Password, then enable:' \
+		'Settings > Developer > Integrate with 1Password CLI.'
+	printf 'Press Return to continue: '
+	if ! IFS= read -r _; then
+		die 'could not read confirmation for 1Password setup'
+	fi
+	if ! private_settings_are_accessible \
+		"${repository_root}" "${sops_executable}" \
+		"${timeout_executable}" '60'; then
+		die 'private settings are still unavailable from 1Password'
+	fi
+}
+
+verify_setup_prerequisites() {
+	local homebrew_prefix="$1"
+	local repository_root="$2"
+	local operating_system="$3"
+	local just_executable="${homebrew_prefix}/bin/just"
+
+	# Homebrew installs the macOS 1Password app and CLI in stage 10. Pause
+	# between package installation and private application configuration so a
+	# genuinely fresh host can establish credential access in one run.
+	if [[ ! -x "${just_executable}" ]]; then
+		die "the bootstrap playbook did not install just at ${just_executable}"
+	fi
+	if [[ "${operating_system}" == 'Darwin' ]]; then
+		ensure_private_settings_access "${homebrew_prefix}" "${repository_root}"
+	fi
+}
+
+# Interpret one setup record without embedding setup order in control flow.
+execute_setup_phase() {
+	local phase_kind="$1"
+	local phase_argument="$2"
+	local ansible_playbook_executable="$3"
+	local homebrew_prefix="$4"
+	local repository_root="$5"
+	local operating_system="$6"
+	local just_executable="${homebrew_prefix}/bin/just"
+
+	case "${phase_kind}" in
+		ansible)
+			run_ansible_playbook \
+				"${ansible_playbook_executable}" --tags "${phase_argument}"
+			;;
+		userland-checkpoint)
+			verify_setup_prerequisites \
+				"${homebrew_prefix}" \
+				"${repository_root}" \
+				"${operating_system}"
+			;;
+		just)
+			log 'Applying chezmoi dotfiles'
+			"${just_executable}" \
+				--justfile "${repository_root}/Justfile" "${phase_argument}"
+			;;
+		*)
+			die "unsupported setup phase kind: ${phase_kind}"
+			;;
+	esac
+}
+
+execute_setup_plan() {
+	local ansible_playbook_executable="$1"
+	local homebrew_prefix="$2"
+	local repository_root="$3"
+	local operating_system="$4"
+	local phase_index
+	local phase_count="${#SETUP_PHASE_KINDS[@]}"
+
+	# A long userland phase may outlive sudo's credential cache. Each Ansible
+	# record independently decides whether to request credentials again.
+	for ((phase_index = 0; phase_index < phase_count; phase_index++)); do
+		execute_setup_phase \
+			"${SETUP_PHASE_KINDS[phase_index]}" \
+			"${SETUP_PHASE_ARGUMENTS[phase_index]}" \
+			"${ansible_playbook_executable}" \
+			"${homebrew_prefix}" \
+			"${repository_root}" \
+			"${operating_system}"
+	done
 }
 
 main() {
-	local repo_dir
-	local kernel_name
+	local repository_root
+	local operating_system
 	local machine_architecture
 	local homebrew_prefix
-	local homebrew_bin
-	local uv_bin
-	local python_bin
-	local ansible_galaxy_bin="${USER_BIN_DIR}/ansible-galaxy"
-	local ansible_playbook_bin="${USER_BIN_DIR}/ansible-playbook"
+	local homebrew_executable
+	local uv_executable
+	local python_executable
+	local ansible_galaxy_executable="${USER_EXECUTABLE_DIRECTORY}/ansible-galaxy"
+	local ansible_playbook_executable
+	local setup_requested='false'
+	ansible_playbook_executable="${USER_EXECUTABLE_DIRECTORY}/ansible-playbook"
+
+	case "${1:-}" in
+		--setup)
+			if (($# != 1)); then
+				die '--setup does not accept additional Ansible arguments'
+			fi
+			setup_requested='true'
+			shift
+			;;
+		-h | --help)
+			usage
+			return 0
+			;;
+	esac
+
+	if ((EUID == 0)); then
+		die 'do not run the bootstrap as root; it uses sudo only when required'
+	fi
 
 	trap cleanup EXIT
 	trap 'exit 1' HUP INT TERM
 
 	validate_configuration
-	repo_dir="$(resolve_repository)"
-	kernel_name="$(uname -s)"
+	repository_root="$(resolve_repository_root)"
+	operating_system="$(uname -s)"
 	machine_architecture="$(uname -m)"
+	validate_macos_version "${operating_system}"
 	homebrew_prefix="$(
-		select_homebrew_prefix "${kernel_name}" "${machine_architecture}"
+		resolve_homebrew_prefix "${operating_system}" "${machine_architecture}"
 	)"
-	homebrew_bin="${homebrew_prefix}/bin/brew"
-	uv_bin="${homebrew_prefix}/bin/uv"
-	python_bin="${USER_BIN_DIR}/${PYTHON_COMMAND}"
+	homebrew_executable="${homebrew_prefix}/bin/brew"
+	uv_executable="${homebrew_prefix}/bin/uv"
+	python_executable="${USER_EXECUTABLE_DIRECTORY}/${PYTHON_COMMAND}"
 
-	ensure_homebrew "${homebrew_prefix}" "${homebrew_bin}"
-	activate_homebrew "${homebrew_prefix}" "${homebrew_bin}" "${kernel_name}"
-	install_homebrew_formulae "${homebrew_bin}"
-	if [[ ! -x "${uv_bin}" ]]; then
-		die "Homebrew did not create uv at ${uv_bin}"
+	ensure_homebrew "${homebrew_prefix}" "${homebrew_executable}"
+	configure_homebrew_path \
+		"${homebrew_prefix}" "${homebrew_executable}" "${operating_system}"
+	install_homebrew_formulae "${homebrew_executable}"
+	if [[ ! -x "${uv_executable}" ]]; then
+		die "Homebrew did not create uv at ${uv_executable}"
 	fi
 
-	install_python "${uv_bin}" "${python_bin}"
-	install_uv_tools "${uv_bin}" "${python_bin}"
+	install_python_runtime "${uv_executable}" "${python_executable}"
+	install_python_tools "${uv_executable}" "${python_executable}"
 
-	PATH="${USER_BIN_DIR}:${PATH}"
+	PATH="${USER_EXECUTABLE_DIRECTORY}:${PATH}"
 	export PATH
-	verify_ansible_installation
+	verify_ansible_runtime
 
-	cd "${repo_dir}" || die "failed to enter repository: ${repo_dir}"
-	install_ansible_collections "${ansible_galaxy_bin}" "${repo_dir}"
-	run_playbook "${ansible_playbook_bin}" "$@"
+	cd "${repository_root}" || die "failed to enter repository: ${repository_root}"
+	install_ansible_collections \
+		"${ansible_galaxy_executable}" "${repository_root}"
+	if [[ "${setup_requested}" == 'true' ]]; then
+		execute_setup_plan \
+			"${ansible_playbook_executable}" \
+			"${homebrew_prefix}" \
+			"${repository_root}" \
+			"${operating_system}"
+	else
+		run_ansible_playbook "${ansible_playbook_executable}" "$@"
+	fi
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+	main "$@"
+fi

@@ -275,7 +275,10 @@
   environment:
     PATH: "{{ bootstrap_homebrew_path }}"
   register: bootstrap_homebrew_dotfiles_tap_trust
-  changed_when: bootstrap_homebrew_dotfiles_tap_trust.stdout is search('Trusted')
+  # Homebrew says either "Trusted tap" or "Already trusted tap". Matching the
+  # whole prefix avoids treating the latter (which contains "trusted") as a
+  # change on every bootstrap run.
+  changed_when: bootstrap_homebrew_dotfiles_tap_trust.stdout is match('^Trusted tap:')
   when: bootstrap_homebrew_enabled | default(false)
   tags:
     - alt-tab
@@ -347,6 +350,16 @@
   when: bootstrap_homebrew_enabled | default(false)
   tags:
     - bootstrap
+    - homebrew
+
+- name: Remove legacy standalone chezmoi binary
+  ansible.builtin.file:
+    path: "{{ dotfiles_bin_dir }}/chezmoi"
+    state: absent
+  when: bootstrap_homebrew_enabled | default(false)
+  tags:
+    - bootstrap
+    - chezmoi
     - homebrew
 
 - name: Register Homebrew OpenJDK 21 with macOS
