@@ -9,9 +9,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "f0ab6828bf9a1026be7a00692da27a594934c8e4",
-      "url": "https://github.com/blue-build/cli/archive/f0ab6828bf9a1026be7a00692da27a594934c8e4.tar.gz",
-      "hash": "sha256-XdrZEPu7YjOXaWvvi3cAKm3mNaR+LSbgS1M2u1MRLoc="
+      "revision": "84f8726bcb44a0d0e79f5768e311ed7184ad8b3f",
+      "url": "https://github.com/blue-build/cli/archive/84f8726bcb44a0d0e79f5768e311ed7184ad8b3f.tar.gz",
+      "hash": "sha256-P2CG22ptBggTUnrDCSV9ST1ydXiId4DrMB55zEHPYXI="
     },
     "ghidra_mcp": {
       "type": "Git",
@@ -146,9 +146,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "f62b6cb92736a2f954a6701b4a861dbd0caf7d26",
-      "url": "https://github.com/kmscon/kmscon/archive/f62b6cb92736a2f954a6701b4a861dbd0caf7d26.tar.gz",
-      "hash": "sha256-+z4GZ/RPziXYLWQza3QlQhr05nLpS6xX0+E45NqKX/M=",
+      "revision": "baa2bcc5bde55318dcfbff0dd0090271e1f88674",
+      "url": "https://github.com/kmscon/kmscon/archive/baa2bcc5bde55318dcfbff0dd0090271e1f88674.tar.gz",
+      "hash": "sha256-xUqPVI6pX0Chltq4Yt/J2HMv+zQ+IKI6kAbZrkd0wY4=",
       "frozen": true
     },
     "libtsm": {

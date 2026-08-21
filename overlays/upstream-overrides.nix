@@ -12,7 +12,7 @@ in
   kmscon = (prev.kmscon.override { inherit (final) libtsm; }).overrideAttrs (
     _finalAttrs: previousAttrs: {
       # The pin follows upstream main rather than a release tag.
-      version = "10.0.1-unstable-2026-08-17";
+      version = "10.0.2-unstable-2026-08-20";
       src = dotfilesSourcePins.kmscon.outPath;
       buildInputs = previousAttrs.buildInputs ++ [ final.dbus ];
       mesonFlags = (previousAttrs.mesonFlags or [ ]) ++ [ "-Dtests=false" ];
