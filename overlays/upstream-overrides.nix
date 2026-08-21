@@ -9,7 +9,7 @@ in
     src = dotfilesSourcePins.libtsm.outPath;
   };
 
-  kmscon = (prev.kmscon.override { libtsm = final.libtsm; }).overrideAttrs (
+  kmscon = (prev.kmscon.override { inherit (final) libtsm; }).overrideAttrs (
     _finalAttrs: previousAttrs: {
       # The pin follows upstream main rather than a release tag.
       version = "10.0.1-unstable-2026-08-17";
