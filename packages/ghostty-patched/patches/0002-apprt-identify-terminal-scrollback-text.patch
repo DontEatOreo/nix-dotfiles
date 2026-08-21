@@ -7,17 +7,15 @@ Give scrollback text its own open-URL kind so runtimes can choose an
 in-terminal editor while preserving the existing platform text-editor
 fallback.
 ---
- include/ghostty.h    | 1 +
- src/Surface.zig      | 5 ++++-
- src/apprt/action.zig | 4 ++++
- src/os/open.zig      | 2 +-
+ include/ghostty.h    |    1 +
+ src/Surface.zig      |    5 ++++-
+ src/apprt/action.zig |    4 ++++
+ src/os/open.zig      |    2 +-
  4 files changed, 10 insertions(+), 2 deletions(-)
 
-diff --git a/include/ghostty.h b/include/ghostty.h
-index ac7df2b37..796dc9d8e 100644
 --- a/include/ghostty.h
 +++ b/include/ghostty.h
-@@ -819,6 +819,7 @@ typedef enum {
+@@ -831,6 +831,7 @@ typedef enum {
    GHOSTTY_ACTION_OPEN_URL_KIND_TEXT,
    GHOSTTY_ACTION_OPEN_URL_KIND_HTML,
    GHOSTTY_ACTION_OPEN_URL_KIND_OSC8,
@@ -25,8 +23,6 @@ index ac7df2b37..796dc9d8e 100644
  } ghostty_action_open_url_kind_e;
  
  // apprt.action.OpenUrl.C
-diff --git a/src/Surface.zig b/src/Surface.zig
-index 9535f7d95..8a69b4f5e 100644
 --- a/src/Surface.zig
 +++ b/src/Surface.zig
 @@ -5814,7 +5814,10 @@ fn writeScreenFile(
@@ -41,8 +37,6 @@ index 9535f7d95..8a69b4f5e 100644
                  .html => .html,
              },
              .url = path,
-diff --git a/src/apprt/action.zig b/src/apprt/action.zig
-index 24a81393e..c692d5b09 100644
 --- a/src/apprt/action.zig
 +++ b/src/apprt/action.zig
 @@ -950,6 +950,10 @@ pub const OpenUrl = struct {
@@ -56,8 +50,6 @@ index 24a81393e..c692d5b09 100644
          test "ghostty.h OpenUrl.Kind" {
              try lib.checkGhosttyHEnum(Kind, "GHOSTTY_ACTION_OPEN_URL_KIND_");
          }
-diff --git a/src/os/open.zig b/src/os/open.zig
-index bc09518e6..738cf5038 100644
 --- a/src/os/open.zig
 +++ b/src/os/open.zig
 @@ -31,7 +31,7 @@ pub fn open(

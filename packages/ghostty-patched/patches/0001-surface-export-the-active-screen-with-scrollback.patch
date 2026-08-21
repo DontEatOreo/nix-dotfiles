@@ -7,11 +7,9 @@ Include visible rows when writing scrollback so the exported file
 matches what the user can inspect in the terminal. Alternate screens
 have no history, so export their active screen instead.
 ---
- src/Surface.zig | 15 +++++++--------
+ src/Surface.zig |   15 +++++++--------
  1 file changed, 7 insertions(+), 8 deletions(-)
 
-diff --git a/src/Surface.zig b/src/Surface.zig
-index 3002e9f58..9535f7d95 100644
 --- a/src/Surface.zig
 +++ b/src/Surface.zig
 @@ -5744,15 +5744,14 @@ fn writeScreenFile(

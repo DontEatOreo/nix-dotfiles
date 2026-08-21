@@ -9,14 +9,12 @@ intercept a modified press only when it begins over a detected link,
 keep motion local for drag cancellation, and swallow the matching
 release.
 ---
- src/Surface.zig          | 62 +++++++++++++++++++++++++++++++---------
- src/input/Link.zig       | 33 +++++++++++++++++++++
- src/renderer/generic.zig |  5 +++-
- src/renderer/link.zig    |  7 +----
+ src/Surface.zig          |   62 ++++++++++++++++++++++++++++++++++++-----------
+ src/input/Link.zig       |   33 +++++++++++++++++++++++++
+ src/renderer/generic.zig |    5 +++
+ src/renderer/link.zig    |    7 -----
  4 files changed, 86 insertions(+), 21 deletions(-)
 
-diff --git a/src/Surface.zig b/src/Surface.zig
-index 8a69b4f5e..eb9d79a0e 100644
 --- a/src/Surface.zig
 +++ b/src/Surface.zig
 @@ -248,6 +248,10 @@ const Mouse = struct {
@@ -163,8 +161,6 @@ index 8a69b4f5e..eb9d79a0e 100644
          // Shift overrides mouse "grabbing" in the window, taken from Kitty.
          // This only applies if there is a mouse button pressed so that
          // movement reports are not affected.
-diff --git a/src/input/Link.zig b/src/input/Link.zig
-index 37b45dbd1..730fedf35 100644
 --- a/src/input/Link.zig
 +++ b/src/input/Link.zig
 @@ -49,8 +49,41 @@ pub const Highlight = union(enum) {
@@ -209,11 +205,9 @@ index 37b45dbd1..730fedf35 100644
  /// Returns a new oni.Regex that can be used to match the link.
  pub fn oniRegex(self: *const Link) !oni.Regex {
      return try oni.Regex.init(
-diff --git a/src/renderer/generic.zig b/src/renderer/generic.zig
-index 2882c9c8e..5141ce784 100644
 --- a/src/renderer/generic.zig
 +++ b/src/renderer/generic.zig
-@@ -1272,7 +1272,10 @@ pub fn Renderer(comptime GraphicsAPI: type) type {
+@@ -1277,7 +1277,10 @@ pub fn Renderer(comptime GraphicsAPI: ty
                      const vp = state.mouse.point orelse break :osc8 .empty;
  
                      // If the right mods aren't pressed, then we can't match.
@@ -225,8 +219,6 @@ index 2882c9c8e..5141ce784 100644
                          break :osc8 .empty;
  
                      break :osc8 self.terminal_state.linkCells(
-diff --git a/src/renderer/link.zig b/src/renderer/link.zig
-index dfc6fe671..6dc047966 100644
 --- a/src/renderer/link.zig
 +++ b/src/renderer/link.zig
 @@ -28,12 +28,7 @@ pub const Link = struct {

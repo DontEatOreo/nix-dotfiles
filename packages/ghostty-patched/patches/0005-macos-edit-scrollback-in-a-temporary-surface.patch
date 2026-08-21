@@ -7,12 +7,10 @@ Open terminal scrollback text in a themed Helix surface that temporarily
 replaces the current pane. Restore the original surface and remove
 the exported file directory when the editor exits.
 ---
- macos/Sources/Ghostty/Ghostty.Action.swift |   3 +
- macos/Sources/Ghostty/Ghostty.App.swift    | 101 ++++++++++++++++++++-
+ macos/Sources/Ghostty/Ghostty.Action.swift |    3 
+ macos/Sources/Ghostty/Ghostty.App.swift    |  101 ++++++++++++++++++++++++++++-
  2 files changed, 103 insertions(+), 1 deletion(-)
 
-diff --git a/macos/Sources/Ghostty/Ghostty.Action.swift b/macos/Sources/Ghostty/Ghostty.Action.swift
-index f1df63133..b24b4f34d 100644
 --- a/macos/Sources/Ghostty/Ghostty.Action.swift
 +++ b/macos/Sources/Ghostty/Ghostty.Action.swift
 @@ -47,6 +47,7 @@ extension Ghostty.Action {
@@ -32,8 +30,6 @@ index f1df63133..b24b4f34d 100644
                  default:
                      self = .unknown
                  }
-diff --git a/macos/Sources/Ghostty/Ghostty.App.swift b/macos/Sources/Ghostty/Ghostty.App.swift
-index 1e02c8c57..c22f2966c 100644
 --- a/macos/Sources/Ghostty/Ghostty.App.swift
 +++ b/macos/Sources/Ghostty/Ghostty.App.swift
 @@ -329,6 +329,27 @@ extension Ghostty {

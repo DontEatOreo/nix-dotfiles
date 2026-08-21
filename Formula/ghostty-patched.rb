@@ -23,16 +23,9 @@ class GhosttyPatched < Formula
 
   def install
     patch_dir = Pathname(__dir__).parent/"packages/ghostty-patched/patches"
-    patches = (patch_dir/"series").each_line(chomp: true).filter_map do |line|
-      name = line.strip
-      next if name.empty? || name.start_with?("#")
-
-      patch_dir/name
-    end
+    patches = (patch_dir/"series").readlines(chomp: true).map { |name| patch_dir/name }
     odie "Ghostty patch series is empty: #{patch_dir}" if patches.empty?
-    odie "Ghostty patch series contains a missing file" unless patches.all?(&:file?)
 
-    system "git", "apply", "--check", *patches
     system "git", "apply", *patches
     system formula_opt_bin("zig")/"zig", "build",
            "-Doptimize=ReleaseFast",

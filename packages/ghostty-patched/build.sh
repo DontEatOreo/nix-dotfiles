@@ -42,8 +42,6 @@ tar -xzf /build/ghostty.tar.gz --strip-components=1 -C /build/source
 tar -xJf /build/zig.tar.xz --strip-components=1 -C /build/zig
 
 while IFS= read -r patch_name; do
-	[[ -n $patch_name ]] || continue
-	git -C /build/source apply --check "$PATCHES/$patch_name"
 	git -C /build/source apply "$PATCHES/$patch_name"
 done <"$PATCHES/series"
 

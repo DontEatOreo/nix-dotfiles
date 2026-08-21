@@ -7,17 +7,15 @@ Add a configurable terminal editor for scrollback files. Replace the
 current pane while the editor runs, restore the original surface on
 exit, and clean up the temporary export directory.
 ---
- src/apprt/gtk/class/application.zig | 163 +++++++++++++++++++++++++++-
- src/apprt/gtk/class/split_tree.zig  |  26 +++++
- src/config/Config.zig               |  16 +++
- src/datastruct/split_tree.zig       |  46 ++++++++
+ src/apprt/gtk/class/application.zig |  163 +++++++++++++++++++++++++++++++++++-
+ src/apprt/gtk/class/split_tree.zig  |   26 +++++
+ src/config/Config.zig               |   16 +++
+ src/datastruct/split_tree.zig       |   46 ++++++++++
  4 files changed, 249 insertions(+), 2 deletions(-)
 
-diff --git a/src/apprt/gtk/class/application.zig b/src/apprt/gtk/class/application.zig
-index 8cc5918eb..6f4cea0a7 100644
 --- a/src/apprt/gtk/class/application.zig
 +++ b/src/apprt/gtk/class/application.zig
-@@ -743,7 +743,7 @@ pub const Application = extern struct {
+@@ -740,7 +740,7 @@ pub const Application = extern struct {
  
              .open_config => return Action.openConfig(self, value),
  
@@ -35,7 +33,8 @@ index 8cc5918eb..6f4cea0a7 100644
              },
  
              .new_window => {
-@@ -2803,7 +2803,14 @@ const Action = struct {
+@@ -2802,8 +2802,15 @@ const Action = struct {
+ 
      pub fn openUrl(
          self: *Application,
 +        target: apprt.Target,
@@ -50,7 +49,7 @@ index 8cc5918eb..6f4cea0a7 100644
          if (std.mem.startsWith(u8, value.url, "/")) {
              self.openUrlFallback(value.kind, value.url);
              return;
-@@ -2818,6 +2825,158 @@ const Action = struct {
+@@ -2820,6 +2827,158 @@ const Action = struct {
          };
      }
  
@@ -209,11 +208,9 @@ index 8cc5918eb..6f4cea0a7 100644
      pub fn pwd(
          target: apprt.Target,
          value: apprt.action.Pwd,
-diff --git a/src/apprt/gtk/class/split_tree.zig b/src/apprt/gtk/class/split_tree.zig
-index 473ae3daf..d7e890e82 100644
 --- a/src/apprt/gtk/class/split_tree.zig
 +++ b/src/apprt/gtk/class/split_tree.zig
-@@ -455,6 +455,32 @@ pub const SplitTree = extern struct {
+@@ -453,6 +453,32 @@ pub const SplitTree = extern struct {
          }
      }
  
@@ -246,8 +243,6 @@ index 473ae3daf..d7e890e82 100644
      fn disconnectSurfaceHandlers(self: *Self) void {
          const tree = self.getTree() orelse return;
          var it = tree.iterator();
-diff --git a/src/config/Config.zig b/src/config/Config.zig
-index 7fa282437..f9e9f27e0 100644
 --- a/src/config/Config.zig
 +++ b/src/config/Config.zig
 @@ -1431,6 +1431,22 @@ input: RepeatableReadableIO = .{},
@@ -273,11 +268,9 @@ index 7fa282437..f9e9f27e0 100644
  /// Control when the scrollbar is shown to scroll the scrollback buffer.
  ///
  /// The default value is `system`.
-diff --git a/src/datastruct/split_tree.zig b/src/datastruct/split_tree.zig
-index 012f107f3..51f71bf99 100644
 --- a/src/datastruct/split_tree.zig
 +++ b/src/datastruct/split_tree.zig
-@@ -164,6 +164,28 @@ pub fn SplitTree(comptime V: type) type {
+@@ -164,6 +164,28 @@ pub fn SplitTree(comptime V: type) type
              };
          }
  

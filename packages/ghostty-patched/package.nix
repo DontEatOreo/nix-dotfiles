@@ -8,9 +8,7 @@ let
   version = "1.3.2-dev.${builtins.substring 0 7 dotfilesSourcePins.ghostty.revision}";
   source = dotfilesSourcePins.ghostty.outPath;
   patchDirectory = ./patches;
-  patchNames = lib.filter (name: name != "") (
-    lib.splitString "\n" (builtins.readFile (patchDirectory + /series))
-  );
+  patchNames = lib.init (lib.splitString "\n" (builtins.readFile (patchDirectory + /series)));
 in
 ghostty.overrideAttrs (
   finalAttrs: _: {

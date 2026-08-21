@@ -7,14 +7,12 @@ Propagate the surface option instead of forcing command surfaces to
 remain open. Temporary editor surfaces need to close as soon as their
 command exits.
 ---
- src/apprt/embedded.zig | 2 +-
+ src/apprt/embedded.zig |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/src/apprt/embedded.zig b/src/apprt/embedded.zig
-index 1f3b98e24..140230f0b 100644
 --- a/src/apprt/embedded.zig
 +++ b/src/apprt/embedded.zig
-@@ -533,7 +533,7 @@ pub const Surface = struct {
+@@ -551,7 +551,7 @@ pub const Surface = struct {
              const cmd = std.mem.sliceTo(c_command, 0);
              if (cmd.len > 0) {
                  config.command = .{ .shell = cmd };
