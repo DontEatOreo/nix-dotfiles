@@ -2,7 +2,7 @@
 # check=error=true
 
 ARG FEDORA_VERSION=45@sha256:7791538bb091b82097f1aef71ec64b2154f886716f6f0b822dc839bb3c74c0aa
-FROM ghcr.io/astral-sh/uv:0.12.3@sha256:2d890623d310b57771ce840f0da5eed5fc6d657da05ffaa45d82797b53fa3abc AS uv
+FROM ghcr.io/astral-sh/uv:0.12.4@sha256:d0a6eca6c669dc7e9c51218707b8438a3d30402733d739dcc00adb3e213e8f5c AS uv
 
 FROM registry.fedoraproject.org/fedora:${FEDORA_VERSION} AS dotfiles-base
 
