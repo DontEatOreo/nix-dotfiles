@@ -37,5 +37,19 @@ embedded BlueBuild checks against it. The lower-level `just spectrum-build` and
 BlueBuild supplies locked package-manager cache mounts to every module. Local Podman
 builds reuse those mounts and unchanged image layers. Published CI builds additionally
 set `BB_CACHE_LAYERS=true`, which imports and exports the registry cache at
-`ghcr.io/4evy/spectrum:latest-cache`; pull-request builds stay read-only and therefore
-use only the current runner's local cache.
+`ghcr.io/4evy/spectrum:latest-cache`. Pull-request builds stay read-only while importing
+that registry cache and using a branch-aware GitHub Actions layer cache, so they reuse
+work without pushing test images.
+
+The top-level recipe is intentionally only an assembly manifest. Expensive build
+stages live under `recipes/spectrum/stages`, while main-image modules are ordered under
+`recipes/spectrum/modules` from remote-heavy software installation to local files,
+system policy, and final assertions. This ordering means edits to local configuration
+do not invalidate package, font, extension, or Linuxbrew layers.
+
+Astral and Ghostty consume minimal source-lock projections under
+`recipes/spectrum/sources` instead of the repository-wide npins lock. Consequently, an
+unrelated source update does not invalidate either builder stage. `just source-update`
+refreshes these projections, and `just spectrum-validate` rejects any drift from
+`npins/sources.json`. The Ghostty stage also mounts persistent global and local Zig
+caches, allowing compilation artifacts to survive a source or patch cache miss.

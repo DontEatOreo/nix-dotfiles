@@ -1,105 +1,19 @@
 ---
-- name: Check fontconfig cache executable
-  ansible.builtin.stat:
-    path: /usr/bin/fc-cache
-  register: desktop_fc_cache_binary
-  tags:
-    - font-cache
-
-- name: Detect JetBrainsMono Nerd Font Mono
+- name: Require the image-provided JetBrainsMono Nerd Font Mono
   ansible.builtin.command:
     argv:
       - fc-match
       - --format=%{family[0]}
       - JetBrainsMono Nerd Font Mono
   changed_when: false
-  failed_when: false
+  failed_when: >-
+    desktop_nerd_font_match.stdout | trim != 'JetBrainsMono Nerd Font Mono'
   check_mode: false
   register: desktop_nerd_font_match
   tags:
     - jetbrains-nerd-font
 
-- name: Install JetBrainsMono Nerd Font Mono
-  when: >-
-    desktop_nerd_font_match.stdout | trim != 'JetBrainsMono Nerd Font Mono'
-  tags:
-    - jetbrains-nerd-font
-  block:
-    - name: Create user font directory
-      ansible.builtin.file:
-        path: "{{ desktop_nerd_font_dir }}"
-        state: directory
-        mode: "0755"
-
-    - name: Download JetBrainsMono Nerd Font archive
-      ansible.builtin.get_url:
-        url: "{{ desktop_nerd_font_archive_url }}"
-        dest: "{{ desktop_nerd_font_archive }}"
-        mode: "0644"
-
-    - name: Extract JetBrainsMono Nerd Font Mono files
-      ansible.builtin.unarchive:
-        src: "{{ desktop_nerd_font_archive }}"
-        dest: "{{ desktop_nerd_font_dir }}"
-        remote_src: true
-        include:
-          - JetBrainsMonoNerdFontMono-*.ttf
-          - JetBrainsMonoNLNerdFontMono-*.ttf
-        mode: "0644"
-      notify:
-        - Refresh user font cache
-
-    - name: Refresh fontconfig before font verification
-      ansible.builtin.meta: flush_handlers
-
-    - name: Verify JetBrainsMono Nerd Font Mono installation
-      ansible.builtin.command:
-        argv:
-          - fc-match
-          - --format=%{family[0]}
-          - JetBrainsMono Nerd Font Mono
-      changed_when: false
-      register: desktop_nerd_font_verify
-      failed_when: >-
-        desktop_nerd_font_verify.stdout | trim != 'JetBrainsMono Nerd Font Mono'
-
-- name: Create Noto color emoji font directory
-  ansible.builtin.file:
-    path: "{{ desktop_color_emoji_font_dir }}"
-    state: directory
-    mode: "0755"
-  tags:
-    - color-emoji-font
-
-- name: Install bitmap-backed Noto Color Emoji
-  ansible.builtin.get_url:
-    url: "{{ desktop_color_emoji_font_url }}"
-    dest: "{{ desktop_color_emoji_font_file }}"
-    mode: "0644"
-  notify: Refresh user font cache
-  tags:
-    - color-emoji-font
-
-- name: Detect bitmap-backed Noto Color Emoji alias
-  ansible.builtin.command:
-    argv:
-      - fc-match
-      - --format=%{family}
-      - Noto Color Emoji Bitmap
-  changed_when: >-
-    'Noto Color Emoji Bitmap' not in desktop_color_emoji_match.stdout
-  failed_when: false
-  check_mode: false
-  register: desktop_color_emoji_match
-  notify: Refresh user font cache
-  tags:
-    - color-emoji-font
-    - font-cache
-
-- name: Refresh fontconfig before color emoji verification
-  ansible.builtin.meta: flush_handlers
-
-- name: Verify bitmap-backed Noto Color Emoji alias
+- name: Require the image-provided bitmap-backed Noto Color Emoji alias
   ansible.builtin.command:
     argv:
       - fc-match

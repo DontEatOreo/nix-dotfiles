@@ -71,3 +71,5 @@ if [[ -n $problems ]]; then
 	printf 'inconsistent npins lock metadata:\n%s\n' "$problems" >&2
 	exit 1
 fi
+
+bash bluebuild/recipes/spectrum/sync-sources.sh --check

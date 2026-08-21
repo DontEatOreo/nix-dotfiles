@@ -1,0 +1,63 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+modules:
+  - type: kargs@v1
+    source: ghcr.io/blue-build/modules@sha256:c5ed99f07b15c8d575a4fa64a77e5cd5602b00da4c84379f5675db2ae4757061
+    kargs:
+      - plymouth.enable=0
+      - rd.plymouth=0
+      - systemd.show_status=1
+      - rd.systemd.show_status=1
+      - loglevel=7
+
+  - type: systemd@v1
+    source: ghcr.io/blue-build/modules@sha256:c5ed99f07b15c8d575a4fa64a77e5cd5602b00da4c84379f5675db2ae4757061
+    system:
+      enabled:
+        - fedora-atomic-desktop-appstream-cache-refresh.timer
+        - kmscon-theme-refresh.timer
+        - kmsconvt@.service
+        - pcscd.socket
+        - podman.socket
+        - rustdesk.service
+        - systemd-oomd.service
+        - systemd-oomd.socket
+        - tailscaled.service
+        - uresourced.service
+      disabled:
+        - bootc-unified-storage.service
+        - fedora-atomic-desktop-appstream-cache-refresh.service
+
+  - type: script@v1
+    source: ghcr.io/blue-build/modules@sha256:c5ed99f07b15c8d575a4fa64a77e5cd5602b00da4c84379f5675db2ae4757061
+    snippets:
+      - install -d -m 0755 /nix /var/roothome
+      - touch /nix/.spectrum-mountpoint
+      - |
+        if authselect is-feature-enabled with-fingerprint >/dev/null 2>&1; then
+          authselect disable-feature with-fingerprint
+        fi
+      - rm -rf -- /boot/efi
+      - rm -rf -- /run/selinux-policy /run/setrans
+      - rm -f -- /etc/yum.repos.d/vscode.repo
+      - rm -f -- /usr/etc/profile.d/umotd.sh /etc/profile.d/umotd.sh
+      - |
+        for unit in \
+          zfs.target \
+          zfs-import-cache.service \
+          zfs-mount.service \
+          zfs-share.service \
+          zfs-zed.service \
+          zfs-volume-wait.service \
+          flatpak-preinstall.service \
+          NetworkManager-wait-online.service; do
+          if systemctl list-unit-files "$unit" --no-legend 2>/dev/null | grep -q .; then
+            systemctl disable "$unit"
+          fi
+        done
+      - |
+        for directory in /run/rpm-ostree/lock /run/rpm-ostree /run/dnf; do
+          if test -d "$directory"; then
+            rmdir "$directory"
+          fi
+        done

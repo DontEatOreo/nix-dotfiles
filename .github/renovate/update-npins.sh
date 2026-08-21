@@ -10,4 +10,5 @@ cd "$repository_root"
 # the revision, fetch URL, and hash as one atomic update.
 git restore --source=HEAD --staged --worktree -- npins/sources.json
 nix shell nixpkgs#npins --command npins update
+bash bluebuild/recipes/spectrum/sync-sources.sh
 bash .github/renovate/check-npins.sh

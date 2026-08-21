@@ -1,8 +1,9 @@
 # Ansible design principles
 
-This directory defines the desired state of a workstation through Ansible. Its purpose
-is to make system setup consistent, understandable, and durable across supported
-platforms
+This directory is the mutable integration layer for a workstation. Spectrum's static
+Linux state belongs to BlueBuild, ordinary programs belong to Homebrew, and home files
+belong to chezmoi. Ansible handles the remaining state that depends on a user account,
+live hardware, credentials, or an already-running desktop session
 
 ## What we want
 
@@ -13,6 +14,8 @@ platforms
 - Secure handling of sensitive information.
 - An architecture built from maintained Ansible capabilities.
 - A small and intentional surface area for custom behavior.
+- No duplication of files, packages, or systemd enablement already owned by the
+  Spectrum image or Brewfile.
 
 ## Design direction
 
@@ -23,3 +26,7 @@ understand as the system evolves
 Custom behavior represents a deliberate exception for capabilities that Ansible does
 not model directly. These exceptions remain contained so the overall design stays
 declarative and predictable
+
+Before adding a Linux task, prefer the following ownership order: BlueBuild for
+immutable host state, Homebrew for programs, chezmoi for home files, and Ansible only
+for machine-local reconciliation that cannot be expressed by those layers

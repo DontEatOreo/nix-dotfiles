@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+modules:
+  # Builder outputs and repository-local configuration deliberately follow
+  # remote-heavy modules. Changes here invalidate only this assembly tail.
+  - type: copy@v1
+    from: python-runtime
+    src: /out/usr
+    dest: /usr
+
+  - type: copy@v1
+    from: ghostty
+    src: /out/usr
+    dest: /usr
+
+  - type: copy@v1
+    src: bluebuild/files/system
+    dest: /
+
+  - type: copy@v1
+    src: bluebuild/files/kmscon
+    dest: /usr/libexec/dotfiles/kmscon
+
+  - type: copy@v1
+    src: dotfiles/.chezmoidata/black_rose_doll.json
+    dest: /usr/share/dotfiles/black_rose_doll_palette.json

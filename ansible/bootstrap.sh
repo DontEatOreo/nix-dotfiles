@@ -489,9 +489,24 @@ validate_macos_version() {
 ensure_homebrew() {
 	local homebrew_prefix="$1"
 	local homebrew_executable="$2"
+	local operating_system="$3"
 	local installer_file
 
 	if [[ -x "${homebrew_executable}" ]]; then
+		return 0
+	fi
+	if [[ "${operating_system}" == 'Linux' &&
+		-f /usr/lib/systemd/system/brew-setup.service ]]; then
+		ensure_sudo_available 'activating image-provisioned Homebrew'
+		log 'Activating Homebrew provisioned by the Spectrum image'
+		if ! sudo systemctl start brew-setup.service; then
+			die 'the Spectrum brew-setup service failed'
+		fi
+		if [[ ! -x "${homebrew_executable}" ]]; then
+			die \
+				'the Spectrum image did not provision Homebrew;' \
+				'rebuild and boot the current image before rerunning setup'
+		fi
 		return 0
 	fi
 
@@ -895,7 +910,8 @@ main() {
 	uv_executable="${homebrew_prefix}/bin/uv"
 	python_executable="${USER_EXECUTABLE_DIRECTORY}/${PYTHON_COMMAND}"
 
-	ensure_homebrew "${homebrew_prefix}" "${homebrew_executable}"
+	ensure_homebrew \
+		"${homebrew_prefix}" "${homebrew_executable}" "${operating_system}"
 	configure_homebrew_path \
 		"${homebrew_prefix}" "${homebrew_executable}" "${operating_system}"
 	install_homebrew_formulae "${homebrew_executable}"

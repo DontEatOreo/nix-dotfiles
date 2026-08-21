@@ -21,11 +21,3 @@
       - -q
   changed_when: false
   failed_when: false
-
-- name: Refresh user font cache
-  ansible.builtin.command:
-    argv:
-      - /usr/bin/fc-cache
-      - -f
-  changed_when: true
-  when: desktop_fc_cache_binary.stat.executable | default(false)

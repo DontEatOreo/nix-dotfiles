@@ -1,0 +1,55 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/stage-v1.json
+name: python-runtime
+from: registry.fedoraproject.org/fedora:45@sha256:880a6f885db64973f88e01289baa74e3854506afaafdb8d705d18f408bddaa56
+modules:
+  # This projection contains only Astral's pin. Updating an unrelated npins
+  # source therefore leaves this stage's cache key intact.
+  - type: copy@v1
+    src: bluebuild/recipes/spectrum/sources/astral.json
+    dest: /src/sources.json
+
+  - type: dnf@v1
+    source: ghcr.io/blue-build/modules@sha256:c5ed99f07b15c8d575a4fa64a77e5cd5602b00da4c84379f5675db2ae4757061
+    install:
+      install-weak-deps: false
+      packages:
+        - python3
+
+  - type: script@v1
+    source: ghcr.io/blue-build/modules@sha256:c5ed99f07b15c8d575a4fa64a77e5cd5602b00da4c84379f5675db2ae4757061
+    snippets:
+      - |
+        python3 - <<'PYTHON'
+        import base64
+        import hashlib
+        import json
+        import shutil
+        import tarfile
+        import tempfile
+        import urllib.request
+        from pathlib import Path
+
+        pin = json.loads(Path("/src/sources.json").read_text())["pins"]["python_astral"]
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary_path = Path(temporary_directory)
+            archive = temporary_path / "astral.tar.gz"
+            urllib.request.urlretrieve(pin["url"], archive)
+
+            algorithm, expected_digest = pin["hash"].split("-", maxsplit=1)
+            if algorithm != "sha256":
+                raise ValueError(f"unsupported Astral hash algorithm: {algorithm}")
+            actual_digest = base64.b64encode(
+                hashlib.sha256(archive.read_bytes()).digest()
+            ).decode()
+            if actual_digest != expected_digest:
+                raise ValueError("Astral source archive checksum mismatch")
+
+            with tarfile.open(archive) as source_archive:
+                source_archive.extractall(temporary_path, filter="data")
+            source = temporary_path / f"astral-{pin['version']}" / "src" / "astral"
+            destination = Path("/out/usr/lib/dotfiles/python/astral")
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copytree(source, destination)
+            (destination.parent / ".astral-version").write_text(f"{pin['version']}\n")
+        PYTHON

@@ -68,6 +68,15 @@ runs:
           --base-uri https://schema.blue-build.org/ \
           --schemafile https://schema.blue-build.org/recipe-v2.json \
           bluebuild/recipes/spectrum.yml
+        "$CHECK_JSONSCHEMA" \
+          --base-uri https://schema.blue-build.org/ \
+          --schemafile https://schema.blue-build.org/stage-v1.json \
+          bluebuild/recipes/spectrum/stages/*.yml
+        "$CHECK_JSONSCHEMA" \
+          --base-uri https://schema.blue-build.org/ \
+          --schemafile https://schema.blue-build.org/module-list-v1.json \
+          bluebuild/recipes/spectrum/modules/*.yml
+        bash bluebuild/recipes/spectrum/sync-sources.sh --check
         # Upstream's feature-gated v2 parser works, but its validate
         # subcommand still hardcodes the v1 schema.
         "$BLUEBUILD" generate \
@@ -80,6 +89,11 @@ runs:
         grep -Fq 'cp /tmp/bins/* /usr/bin/' /tmp/Containerfile
         grep -Fq -- '--mount=type=cache,sharing=locked,dst=/var/cache/rpm-ostree,id=rpm-ostree-cache-spectrum-' /tmp/Containerfile
         grep -Fq -- '--mount=type=cache,sharing=locked,dst=/var/cache/libdnf5,id=dnf-cache-spectrum-' /tmp/Containerfile
+        grep -Fq 'bluebuild/recipes/spectrum/sources/astral.json /src/sources.json' /tmp/Containerfile
+        grep -Fq 'bluebuild/recipes/spectrum/sources/ghostty.json /src/sources.json' /tmp/Containerfile
+        grep -Fq -- '--mount=type=cache,id=spectrum-ghostty-zig-global-v1,sharing=locked,target=/build/zig-cache' /tmp/Containerfile
+        grep -Fq -- '--mount=type=cache,id=spectrum-ghostty-zig-local-v1,sharing=locked,target=/build/source/.zig-cache' /tmp/Containerfile
+        ! grep -Fq 'npins/sources.json /src/' /tmp/Containerfile
         expected=$(tr -d '\n' <bluebuild/recipes/spectrum.lock)
         tagged=${expected%@*}
         expected_arg="${tagged%:*}@${expected##*@}"

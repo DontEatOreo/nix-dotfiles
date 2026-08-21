@@ -1,0 +1,15 @@
+{
+  "pins": {
+    "ghostty": {
+      "revision": "b97b17f06b1ffd694f80edd3df5dd2134a0bcb9e"
+    },
+    "ghostty_archive": {
+      "hash": "sha256-LMBfvN6tKssFL1Bsz3Cu1DJSLe7kw2NcRY/xj7SWB5g=",
+      "url": "https://github.com/ghostty-org/ghostty/archive/b97b17f06b1ffd694f80edd3df5dd2134a0bcb9e.tar.gz"
+    },
+    "ghostty_zig_x86_64_linux": {
+      "hash": "sha256-cOSWZKdDdLSLUebz/fv0N/Y5XUJQkFBYi9SavlK6PQA=",
+      "url": "https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz"
+    }
+  }
+}

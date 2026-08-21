@@ -3,7 +3,7 @@
 <fontconfig>
   <match target="scan">
     <test name="file" compare="eq">
-      <string>{{ .chezmoi.homeDir }}/.local/share/fonts/NotoColorEmoji/NotoColorEmoji.ttf</string>
+      <string>{{ if eq .chezmoi.os "linux" }}/usr/share/fonts/url-fonts/NotoColorEmojiBitmap/NotoColorEmoji.ttf{{ else }}{{ .chezmoi.homeDir }}/.local/share/fonts/NotoColorEmoji/NotoColorEmoji.ttf{{ end }}</string>
     </test>
     <edit name="family" mode="prepend">
       <string>Noto Color Emoji Bitmap</string>

@@ -115,7 +115,10 @@
       "groupSlug": "npins-sources",
       "postUpgradeTasks": {
         "commands": ["bash .github/renovate/update-npins.sh"],
-        "fileFilters": ["npins/sources.json"],
+        "fileFilters": [
+          "npins/sources.json",
+          "bluebuild/recipes/spectrum/sources/*.json"
+        ],
         "executionMode": "branch"
       }
     }
