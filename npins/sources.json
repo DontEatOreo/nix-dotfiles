@@ -22,9 +22,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "050e80606cfef57715edecfa176d3444e874414e",
-      "url": "https://github.com/bethington/ghidra-mcp/archive/050e80606cfef57715edecfa176d3444e874414e.tar.gz",
-      "hash": "sha256-sOLvLrrQvw61jppueS8Lc2VLPVI87rn12A9Ea9eP9oQ=",
+      "revision": "ea650fca90adcc5434446ecfcc04865156c68778",
+      "url": "https://github.com/bethington/ghidra-mcp/archive/ea650fca90adcc5434446ecfcc04865156c68778.tar.gz",
+      "hash": "sha256-kT/SUbFQrsouJlEQ0a6Hnb7JwQCI/yzzd55H91FTDPo=",
       "frozen": true
     },
     "ghostty": {
@@ -36,16 +36,16 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "f64f4aca2c29b554d111b36c3d946a9bddd159ff",
-      "url": "https://github.com/ghostty-org/ghostty/archive/f64f4aca2c29b554d111b36c3d946a9bddd159ff.tar.gz",
-      "hash": "sha256-tzt9C99wsV0lriI6LtLDYMhnNbWNwIzmcWfRJStGhMs=",
+      "revision": "7e463bc65d430e8a8f0aa786abf83601cf2b9598",
+      "url": "https://github.com/ghostty-org/ghostty/archive/7e463bc65d430e8a8f0aa786abf83601cf2b9598.tar.gz",
+      "hash": "sha256-ZtBVoytrYqQLPyZbWNQNjqvChecnoqSH6Yjwq69GSzM=",
       "frozen": true
     },
     "ghostty_archive": {
       "type": "Url",
-      "url": "https://github.com/ghostty-org/ghostty/archive/f64f4aca2c29b554d111b36c3d946a9bddd159ff.tar.gz",
+      "url": "https://github.com/ghostty-org/ghostty/archive/7e463bc65d430e8a8f0aa786abf83601cf2b9598.tar.gz",
       "unpack": false,
-      "hash": "sha256-wzbH1sBQwFyUGzSjCKj3W11hu4sM/qHYpSEuXO+9K/k=",
+      "hash": "sha256-0TOiIpc2qWz8EKFb5WKDdL/KXXAXnsQ+lYtykyDgcMU=",
       "frozen": true
     },
     "ghostty_zig_aarch64_linux": {
@@ -173,8 +173,8 @@
       "branch": "main",
       "submodules": false,
       "revision": "7a5db764e5b2300b515ed99b61e256f57d101dcf",
-      "url": "https://github.com/GNOME/sushi/archive/930b1805da7149f31affedbfb4a597319a936517.tar.gz",
-      "hash": "sha256-fdqs+YC741SQQhMATYuasuhWOaclg6K02fvUyj8Z1+s="
+      "url": "https://github.com/GNOME/sushi/archive/7a5db764e5b2300b515ed99b61e256f57d101dcf.tar.gz",
+      "hash": "sha256-Vcwv0myu8orNnn6WZCYB4y9Fnz/M23J1e1/Npc6jxkE="
     },
     "toshy": {
       "type": "GitRelease",
