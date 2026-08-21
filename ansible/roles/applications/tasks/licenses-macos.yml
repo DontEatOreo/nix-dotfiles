@@ -17,8 +17,10 @@
       - install
   environment:
     PATH: "{{ platform_homebrew_path | default(dotfiles_path) }}"
+    SOPS_AGE_KEY_CMD: >-
+      {{ dotfiles_repo_root }}/dotfiles/dot_local/bin/executable_sops-age-key-1password
   register: applications_shottr_license
   changed_when: >-
-    'submitted license key' in applications_shottr_license.stderr
+    'license state installed' in applications_shottr_license.stderr
   tags:
     - shottr

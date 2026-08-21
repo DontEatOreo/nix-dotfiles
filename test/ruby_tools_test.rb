@@ -70,45 +70,50 @@ class RubyToolsTest < Minitest::Test
     end
   end
 
-  def test_shottr_install_uses_sops_output_and_osascript
+  def test_shottr_install_restores_sops_state_without_ui_automation
     Dir.mktmpdir("shottr-license-test-") do |directory|
       root = Pathname(directory)
       secrets = root/"secrets.yaml"
-      activation = root/"activate.applescript"
-      activation.write("-- fixture\n")
       secrets.write("fixture: true\n")
-      defaults = write_executable(root/"defaults", <<~RUBY)
+      preferences = root/"cc.ffitch.shottr.plist"
+      preferences.write("fixture\n")
+      log = root/"plutil.log"
+      plutil = write_executable(root/"plutil", <<~RUBY)
         #!#{RbConfig.ruby}
-        exit 1
+        File.open(ENV.fetch("PLUTIL_LOG"), "a") { |file| file.puts(ARGV.join("\t")) }
+        if ARGV.first == "-extract"
+          exit 1
+        end
       RUBY
       sops = write_executable(root/"sops", <<~RUBY)
         #!#{RbConfig.ruby}
-        puts "ABCDEF-ABCDEF-ABCDEF-ABCDEF-ABCDEF"
+        puts ENV.fetch("SHOTTR_STATE")
       RUBY
-      osascript = write_executable(root/"osascript", <<~RUBY)
-        #!#{RbConfig.ruby}
-        File.write(ENV.fetch("OSASCRIPT_LOG"), ARGV.join("\n"))
-      RUBY
-      log = root/"osascript.log"
+      license = ["L" * 34].pack("m0")
+      vault = ["V" * 64].pack("m0")
 
       _, stderr, status = run_tool(
         "shottr-license.rb",
         "install",
         environment: {
-          "SHOTTR_DEFAULTS"          => defaults.to_s,
-          "SHOTTR_SOPS"              => sops.to_s,
-          "SHOTTR_OSASCRIPT"         => osascript.to_s,
-          "SHOTTR_SECRETS_FILE"      => secrets.to_s,
-          "SHOTTR_ACTIVATION_SCRIPT" => activation.to_s,
-          "OSASCRIPT_LOG"            => log.to_s,
+          "SHOTTR_OPEN"             => "/usr/bin/true",
+          "SHOTTR_PKILL"            => "/usr/bin/false",
+          "SHOTTR_PLUTIL"           => plutil.to_s,
+          "SHOTTR_PREFERENCES_FILE" => preferences.to_s,
+          "SHOTTR_SECRETS_FILE"     => secrets.to_s,
+          "SHOTTR_SOPS"             => sops.to_s,
+          "SHOTTR_STATE"            => JSON.generate("license" => license, "vault" => vault),
+          "PLUTIL_LOG"              => log.to_s,
         },
       )
 
       assert status.success?, stderr
-      assert_equal [
-        activation.to_s,
-        "ABCDEF-ABCDEF-ABCDEF-ABCDEF-ABCDEF",
-      ], log.readlines(chomp: true)
+      assert_includes stderr, "license state installed"
+      commands = log.readlines(chomp: true)
+      extract_count = commands.count { |command| command.start_with?("-extract\t") }
+      assert_equal 2, extract_count
+      assert_includes commands, ["-insert", "kc-license", "-string", license, preferences].join("\t")
+      assert_includes commands, ["-insert", "kc-vault", "-string", vault, preferences].join("\t")
     end
   end
 
