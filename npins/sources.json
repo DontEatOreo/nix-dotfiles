@@ -9,9 +9,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "ea5c24de7f8a523b8ac8aa7c41fe5dd78b0d9a5a",
-      "url": "https://github.com/blue-build/cli/archive/ea5c24de7f8a523b8ac8aa7c41fe5dd78b0d9a5a.tar.gz",
-      "hash": "sha256-+LRFGP8CO3nNRIbPYewOn0YwDLgyv6cBCObQC+rFgGM="
+      "revision": "513065f998825e2de59f2e51ad1647fd0666f652",
+      "url": "https://github.com/blue-build/cli/archive/513065f998825e2de59f2e51ad1647fd0666f652.tar.gz",
+      "hash": "sha256-LfWzB67XRvz0L2ktsR3hfcDicP95a40LTOBuL3V9C7s="
     },
     "ghidra_mcp": {
       "type": "Git",
