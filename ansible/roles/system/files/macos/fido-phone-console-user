@@ -1,0 +1,41 @@
+#!/bin/bash
+# shellcheck shell=bash
+
+set -euo pipefail
+
+console_user=$(/usr/bin/stat -f '%Su' /dev/console)
+case "${console_user}" in
+'' | root | loginwindow | _mbsetupuser)
+  printf 'fido-phone: no interactive console user is available\n' >&2
+  exit 1
+  ;;
+esac
+
+console_uid=$(/usr/bin/id -u "${console_user}")
+console_home=$(
+  /usr/bin/dscacheutil -q user -a name "${console_user}" |
+    /usr/bin/awk 'sub(/^dir: /, "") { print; exit }'
+)
+
+case "${console_home}" in
+'' | /)
+  printf 'fido-phone: invalid home directory for %s\n' "${console_user}" >&2
+  exit 1
+  ;;
+esac
+
+fido_phone="${console_home}/.nix-profile/bin/fido-phone"
+if [[ ! -x "${fido_phone}" ]]; then
+  printf 'fido-phone: executable is unavailable for %s: %s\n' \
+    "${console_user}" "${fido_phone}" >&2
+  exit 1
+fi
+
+exec /bin/launchctl asuser "${console_uid}" \
+  /usr/bin/sudo -u "${console_user}" \
+  /usr/bin/env \
+  HOME="${console_home}" \
+  LOGNAME="${console_user}" \
+  USER="${console_user}" \
+  PATH=/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin \
+  "${fido_phone}"

@@ -10,7 +10,7 @@
 
 (defalias
   caps-hyper (tap-hold-press 200 200 esc (multi lmet lctl lalt lsft (layer-while-held hyper)))
-  fido-phone (cmd /bin/launchctl asuser 501 /usr/bin/sudo -u evy /usr/bin/env HOME=/Users/evy PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin /Users/evy/.local/bin/fido-phone)
+  fido-phone (cmd /usr/local/libexec/dotfiles/fido-phone-console-user)
   win-up (macos-window top-half top-two-thirds top-third)
   win-left (macos-window left-half left-two-thirds first-third)
   win-down (macos-window bottom-half bottom-two-thirds bottom-third)

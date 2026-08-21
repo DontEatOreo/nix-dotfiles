@@ -7,7 +7,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-fingerprint = "{{ include "dot_config/kanata/kanata-macos.kbd" | sha256sum }}:{{ output "shasum" "-a" "256" (joinPath $repo "ansible/library/dotfiles_codesign.py") (joinPath $repo "ansible/roles/system/tasks/macos.yml") (joinPath $repo "ansible/roles/system/templates/macos/kanata-app-info.plist.j2") (joinPath $repo "Formula/kanata-with-cmd.rb") | sha256sum }}"
+fingerprint = "{{ include "dot_config/kanata/kanata-macos.kbd" | sha256sum }}:{{ output "shasum" "-a" "256" (joinPath $repo "ansible/library/dotfiles_codesign.py") (joinPath $repo "ansible/roles/system/files/macos/fido-phone-console-user") (joinPath $repo "ansible/roles/system/tasks/macos.yml") (joinPath $repo "ansible/roles/system/templates/macos/kanata-app-info.plist.j2") (joinPath $repo "Formula/kanata-with-cmd.rb") | sha256sum }}"
 marker = Path.home() / ".cache/dotfiles/kanata-reconcile.sha256"
 state = subprocess.run(
     ("/bin/launchctl", "print", "system/dev.4evy.kanata"),
