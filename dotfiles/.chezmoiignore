@@ -35,6 +35,7 @@ Library/
 {{ if ne .chezmoi.os "darwin" }}
 Library/
 .config/raycast/
+.local/bin/hide-display-audio
 {{ end }}
 
 {{ if eq .chezmoi.os "darwin" }}

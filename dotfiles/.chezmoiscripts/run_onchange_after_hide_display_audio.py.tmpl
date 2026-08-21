@@ -1,5 +1,5 @@
+{{- if eq .chezmoi.os "darwin" -}}
 {{- $repo := joinPath .chezmoi.sourceDir ".." -}}
-{{ if eq .chezmoi.os "darwin" -}}
 #!/usr/bin/env python3.14
 # Source fingerprint: {{ output "git" "-C" $repo "hash-object" (joinPath $repo "packages/hide-display-audio/Package.swift") (joinPath $repo "packages/hide-display-audio/Sources/EDIDKit/EDID.swift") (joinPath $repo "packages/hide-display-audio/Sources/HideDisplayAudio/main.swift") (joinPath $repo "packages/hide-display-audio/Sources/PrivateIOKit/PrivateIOKit.c") (joinPath $repo "packages/hide-display-audio/Sources/PrivateIOKit/include/PrivateIOKit.h") (joinPath $repo "packages/hide-display-audio/Tests/EDIDKitTests/EDIDTests.swift") | sha256sum }}
 from __future__ import annotations
@@ -49,7 +49,4 @@ subprocess.run(
     stderr=subprocess.DEVNULL,
 )
 subprocess.run(("/bin/launchctl", "bootstrap", domain, str(plist)), check=True)
-{{ else -}}
-#!/bin/sh
-exit 0
 {{ end -}}
