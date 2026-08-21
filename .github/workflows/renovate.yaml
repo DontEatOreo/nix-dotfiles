@@ -8,6 +8,8 @@ on:
       - master
     paths:
       - .tool-versions
+      - .github/actions/setup-bun/**
+      - .github/actions/setup-nix/**
       - .github/renovate.json
       - .github/renovate/bun.lock
       - .github/renovate/package.json
@@ -19,6 +21,8 @@ on:
       - npins/sources.json
       - bluebuild/recipes/spectrum.yml
       - bluebuild/recipes/spectrum.lock
+      - Gemfile
+      - Gemfile.lock
   workflow_dispatch: null
 
 concurrency:
@@ -44,18 +48,19 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Determinate Nix
-        uses: DeterminateSystems/determinate-nix-action@d96678350ffd6a456235832eb11e1c491589b7bb # v3.21.8
+      - name: Set Up Nix
+        uses: ./.github/actions/setup-nix
 
       - name: Install Node
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version-file: .tool-versions
 
-      - name: Install Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      - name: Set Up Bun
+        uses: ./.github/actions/setup-bun
         with:
-          bun-version-file: .tool-versions
+          cache-dependency-path: .github/renovate/bun.lock
+          cache-scope: renovate
 
       - name: Install Renovate
         run: bun install --cwd .github/renovate --frozen-lockfile

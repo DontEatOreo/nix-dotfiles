@@ -7,8 +7,6 @@
   "automerge": true,
   "automergeType": "branch",
   "ignoreTests": true,
-  "platformAutomerge": false,
-  "prCreation": "status-success",
   "rebaseWhen": "auto",
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -36,6 +34,35 @@
       ],
       "depNameTemplate": "ghcr.io/projectbluefin/bluefin-nvidia",
       "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Track the pinned Spectrum Fedora build stages",
+      "managerFilePatterns": ["/^bluebuild\\/recipes\\/spectrum\\.yml$/"],
+      "matchStrings": [
+        "from:\\s+(?<depName>registry\\.fedoraproject\\.org/fedora):(?<currentValue>[^\\s@]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Track annotated GitHub release assets in the Spectrum recipe",
+      "managerFilePatterns": ["/^bluebuild\\/recipes\\/spectrum\\.yml$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[^\\s]+)\\s+- https://github\\.com/[^\\s]+/releases/download/v?(?<currentValue>[^/\\s]+)/[^\\s]+"
+      ]
+    },
+    {
+      "customType": "regex",
+      "description": "Track pinned BlueBuild module image digests",
+      "managerFilePatterns": ["/^bluebuild\\/recipes\\/spectrum\\.yml$/"],
+      "matchStrings": [
+        "source:\\s+(?<depName>ghcr\\.io/blue-build/modules)@(?<currentDigest>sha256:[a-f0-9]{64})"
+      ],
+      "datasourceTemplate": "docker",
+      "currentValueTemplate": "latest",
       "versioningTemplate": "docker"
     },
     {
@@ -73,15 +100,7 @@
     {
       "description": "Keep pyproject.toml and uv.lock Python updates together.",
       "matchManagers": ["pep621"],
-      "groupName": "python dependencies",
-      "automerge": true,
-      "automergeType": "branch"
-    },
-    {
-      "description": "Automerge digest-only updates after checks pass",
-      "matchUpdateTypes": ["digest", "pin", "pinDigest"],
-      "automerge": true,
-      "automergeType": "branch"
+      "groupName": "python dependencies"
     },
     {
       "description": "Keep the Spectrum Bluefin base image on the selected stream",
@@ -98,7 +117,7 @@
       "postUpgradeTasks": {
         "commands": ["nix shell nixpkgs#npins --command npins update"],
         "fileFilters": ["npins/sources.json"],
-        "executionMode": "update"
+        "executionMode": "branch"
       }
     }
   ]
