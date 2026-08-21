@@ -14,6 +14,7 @@ on:
       - ansible/**
       - '!ansible/tests/**'
       - browser/**
+      - compose.yaml
       - containers/**
       - dotfiles/**
       - npins/sources.json
@@ -59,21 +60,35 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Build Image
+      - name: Validate Compose Model
         run: |
-          sudo podman build \
-            --pull=newer \
+          docker compose config --quiet
+          docker compose --profile shell config --quiet
+
+      - name: Set Up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+        with:
+          cache-binary: true
+
+      - name: Check Docker Build
+        run: |
+          docker buildx build \
+            --check \
             --platform linux/amd64 \
-            --build-arg TARGETPLATFORM=linux/amd64 \
             --target dotfiles-test \
-            --tag dotfiles:fedora-test \
             .
 
+      - name: Build Cached Smoke Image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          target: dotfiles-test
+          platforms: linux/amd64
+          pull: true
+          load: true
+          tags: dotfiles:fedora-test
+          cache-from: type=gha,scope=dotfiles-fedora-smoke
+          cache-to: type=gha,mode=max,scope=dotfiles-fedora-smoke,ignore-error=true
+
       - name: Validate Image
-        run: |
-          sudo podman run --rm dotfiles:fedora-test sh -eu -c '
-            ! command -v starship
-            ansible-playbook --version >/dev/null
-            ansible-lint --version >/dev/null
-            yamllint --version >/dev/null
-          '
+        run: docker run --rm dotfiles:fedora-test

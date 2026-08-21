@@ -1,0 +1,45 @@
+---
+- name: Build and verify repo-local smoke-test tools
+  hosts: localhost
+  gather_facts: true
+  tasks:
+    - name: Detect the platform and define shared paths
+      ansible.builtin.import_role:
+        name: platform
+      tags:
+        - always
+
+    - name: Install the repository Python tool
+      ansible.builtin.include_role:
+        name: bootstrap
+        tasks_from: python-tool
+      tags:
+        - python
+
+    - name: Link Python command aliases
+      ansible.builtin.include_role:
+        name: tools
+        tasks_from: python
+      tags:
+        - python
+
+    - name: Build the repository Zig tools
+      ansible.builtin.include_role:
+        name: tools
+        tasks_from: zig
+      tags:
+        - zig
+
+    - name: Install upstream script tools
+      ansible.builtin.include_role:
+        name: tools
+        tasks_from: upstream
+      tags:
+        - upstream
+
+    - name: Verify every installed repo-local tool
+      ansible.builtin.include_role:
+        name: tools
+        tasks_from: verify
+      tags:
+        - verify

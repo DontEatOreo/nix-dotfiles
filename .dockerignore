@@ -2,8 +2,6 @@
 # smoke-test Dockerfile and Spectrum image builds.
 *
 
-!Dockerfile
-!.dockerignore
 !.ansible-lint
 !.yamllint
 !ansible.cfg
@@ -15,6 +13,7 @@
 
 !ansible/
 !ansible/**
+ansible/tests/
 
 !bluebuild/
 !bluebuild/**
@@ -32,11 +31,28 @@
 !packages/
 packages/*
 !packages/dotfiles-python/
-!packages/dotfiles-python/**
+packages/dotfiles-python/*
+!packages/dotfiles-python/assets/
+!packages/dotfiles-python/assets/**
+!packages/dotfiles-python/src/
+!packages/dotfiles-python/src/**
 !packages/ghostty-patched/
 !packages/ghostty-patched/**
 !packages/terminal-theme-tools/
-!packages/terminal-theme-tools/**
+packages/terminal-theme-tools/*
+!packages/terminal-theme-tools/build.zig
+!packages/terminal-theme-tools/build.zig.zon
+!packages/terminal-theme-tools/build_support.zig
+!packages/terminal-theme-tools/config/
+!packages/terminal-theme-tools/config/**
+!packages/terminal-theme-tools/include/
+!packages/terminal-theme-tools/include/**
+!packages/terminal-theme-tools/src/
+!packages/terminal-theme-tools/src/**
+!packages/terminal-theme-tools/tests/
+!packages/terminal-theme-tools/tests/**
+!packages/terminal-theme-tools/vendor/
+!packages/terminal-theme-tools/vendor/**
 
 # Never send local generated state if it appears under an included path.
 **/.DS_Store
