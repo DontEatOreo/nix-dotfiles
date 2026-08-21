@@ -10,17 +10,15 @@ commit was signed, or when the caller explicitly requires signing.
 Use the helper in the push signing path so later metadata rewrites can
 share the same semantics.
 ---
- cli/src/commands/git/push.rs | 79 +++++++++++++++---------------------
- cli/src/lib.rs               |  1 +
- cli/src/rewrite_util.rs      | 40 ++++++++++++++++++
+ cli/src/commands/git/push.rs |   79 +++++++++++++++++--------------------------
+ cli/src/lib.rs               |    1 
+ cli/src/rewrite_util.rs      |   40 +++++++++++++++++++++
  3 files changed, 74 insertions(+), 46 deletions(-)
  create mode 100644 cli/src/rewrite_util.rs
 
-diff --git a/cli/src/commands/git/push.rs b/cli/src/commands/git/push.rs
-index 000000000..000000000 100644
 --- a/cli/src/commands/git/push.rs
 +++ b/cli/src/commands/git/push.rs
-@@ -55,7 +55,6 @@ use jj_lib::revset::RevsetEvaluationError;
+@@ -55,7 +55,6 @@ use jj_lib::revset::RevsetEvaluationErro
  use jj_lib::revset::RevsetExpression;
  use jj_lib::revset::RevsetStreamExt as _;
  use jj_lib::revset::UserRevsetExpression;
@@ -36,7 +34,7 @@ index 000000000..000000000 100644
  use crate::ui::Ui;
  
  /// Push to a Git remote
-@@ -841,52 +841,39 @@ async fn sign_commits_before_push(
+@@ -847,52 +847,39 @@ async fn sign_commits_before_push(
          let mut progress_writer = ProgressWriter::new(ui, "Signing");
  
          tx.repo_mut()
@@ -49,7 +47,22 @@ index 000000000..000000000 100644
 -                        writer
 -                            .display(&short_change_hash(old_commit.change_id()))
 -                            .ok();
--                    }
++            .transform_descendants(commit_ids.iter().cloned().collect_vec(), async |rewriter| {
++                let old_commit = rewriter.old_commit();
++                let old_commit_id = old_commit.id().clone();
++                if let Some(writer) = &mut progress_writer {
++                    writer
++                        .display(&short_change_hash(old_commit.change_id()))
++                        .ok();
++                }
++                let author = old_commit.author().clone();
++                if commit_ids.contains(&old_commit_id) {
++                    let mut committer = current_committer.clone();
++                    if own_identities.iter().any(|(name, email)| {
++                        author.name == name.as_str() && author.email.eq_ignore_ascii_case(email)
++                    }) {
++                        committer.timestamp = author.timestamp;
+                     }
 -                    let author = old_commit.author().clone();
 -                    if commit_ids.contains(&old_commit_id) {
 -                        let mut committer = current_committer.clone();
@@ -82,22 +95,7 @@ index 000000000..000000000 100644
 -                            .write()
 -                            .await?;
 -                        old_to_new_commits_map.insert(old_commit_id, commit.id().clone());
-+            .transform_descendants(commit_ids.iter().cloned().collect_vec(), async |rewriter| {
-+                let old_commit = rewriter.old_commit();
-+                let old_commit_id = old_commit.id().clone();
-+                if let Some(writer) = &mut progress_writer {
-+                    writer
-+                        .display(&short_change_hash(old_commit.change_id()))
-+                        .ok();
-+                }
-+                let author = old_commit.author().clone();
-+                if commit_ids.contains(&old_commit_id) {
-+                    let mut committer = current_committer.clone();
-+                    if own_identities.iter().any(|(name, email)| {
-+                        author.name == name.as_str() && author.email.eq_ignore_ascii_case(email)
-+                    }) {
-+                        committer.timestamp = author.timestamp;
-                     }
+-                    }
 -                    Ok(())
 -                },
 -            )
@@ -121,8 +119,6 @@ index 000000000..000000000 100644
              .await?;
      }
  
-diff --git a/cli/src/lib.rs b/cli/src/lib.rs
-index 000000000..000000000 100644
 --- a/cli/src/lib.rs
 +++ b/cli/src/lib.rs
 @@ -34,6 +34,7 @@ pub mod movement_util;
@@ -133,9 +129,6 @@ index 000000000..000000000 100644
  pub mod template_builder;
  pub mod template_parser;
  pub mod templater;
-diff --git a/cli/src/rewrite_util.rs b/cli/src/rewrite_util.rs
-new file mode 100644
-index 000000000..000000000
 --- /dev/null
 +++ b/cli/src/rewrite_util.rs
 @@ -0,0 +1,40 @@

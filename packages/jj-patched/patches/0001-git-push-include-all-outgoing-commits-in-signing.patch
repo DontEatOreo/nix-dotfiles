@@ -7,14 +7,12 @@ Use remote bookmarks and tags as the lower boundary for the outgoing
 range. Keep only the synthetic root immutable so explicitly pushed
 immutable commits, including tag targets, can be rewritten and signed.
 ---
- cli/src/commands/git/push.rs | 5 +++--
+ cli/src/commands/git/push.rs |    5 +++--
  1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/cli/src/commands/git/push.rs b/cli/src/commands/git/push.rs
-index 000000000..000000000 100644
 --- a/cli/src/commands/git/push.rs
 +++ b/cli/src/commands/git/push.rs
-@@ -786,11 +786,12 @@ fn ready_to_push_revset_expression(
+@@ -792,11 +792,12 @@ fn ready_to_push_revset_expression(
      let old_heads = repo
          .view()
          .remote_bookmarks(remote)

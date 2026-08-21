@@ -11,14 +11,12 @@ Preserve the authors, committer timestamps, and signature state of
 rewritten descendants. This limits changes to those required by the new
 ancestry.
 ---
- cli/src/commands/git/push.rs | 50 ++++++++++++++++++++++++++++++------
+ cli/src/commands/git/push.rs |   50 ++++++++++++++++++++++++++++++++++++-------
  1 file changed, 42 insertions(+), 8 deletions(-)
 
-diff --git a/cli/src/commands/git/push.rs b/cli/src/commands/git/push.rs
-index 000000000..000000000 100644
 --- a/cli/src/commands/git/push.rs
 +++ b/cli/src/commands/git/push.rs
-@@ -805,16 +805,29 @@ async fn sign_commits_before_push(
+@@ -811,16 +811,29 @@ async fn sign_commits_before_push(
      commits_to_push: Arc<UserRevsetExpression>,
      ref_updates: GitPushRefTargets,
  ) -> Result<GitPushRefTargets, CommandError> {
@@ -54,7 +52,7 @@ index 000000000..000000000 100644
          .map_ok(|commit| commit.id().clone())
          .try_collect()
          .await?;
-@@ -838,16 +851,37 @@ async fn sign_commits_before_push(
+@@ -844,16 +857,37 @@ async fn sign_commits_before_push(
                              .display(&short_change_hash(old_commit.change_id()))
                              .ok();
                      }

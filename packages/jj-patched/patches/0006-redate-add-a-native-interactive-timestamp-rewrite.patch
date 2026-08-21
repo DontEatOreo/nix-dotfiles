@@ -9,29 +9,27 @@ Preserve descendant metadata and signature state, and cover the
 collision path with deterministic SSH signing.
 
 ---
- Cargo.lock                       |   1 +
- Cargo.toml                       |   1 +
- cli/Cargo.toml                   |   1 +
- cli/src/commands/metaedit.rs     | 144 ++++++++++++-
- cli/src/commands/mod.rs          |   3 +
- cli/src/commands/redate.rs       | 359 +++++++++++++++++++++++++++++++
- cli/src/config-schema.json       |  20 ++
- cli/src/config/colors.toml       |   4 +
- cli/src/config/revsets.toml      |   1 +
- cli/src/config/templates.toml    |   8 +
- cli/tests/cli-reference@.md.snap |  14 ++
- cli/tests/runner.rs              |   1 +
- cli/tests/test_git_push.rs       |  28 ++-
- cli/tests/test_redate_command.rs | 153 +++++++++++++
+ Cargo.lock                       |    1 
+ Cargo.toml                       |    1 
+ cli/Cargo.toml                   |    1 
+ cli/src/commands/metaedit.rs     |  144 +++++++++++++++
+ cli/src/commands/mod.rs          |    3 
+ cli/src/commands/redate.rs       |  359 +++++++++++++++++++++++++++++++++++++++
+ cli/src/config-schema.json       |   20 ++
+ cli/src/config/colors.toml       |    4 
+ cli/src/config/revsets.toml      |    1 
+ cli/src/config/templates.toml    |    8 
+ cli/tests/cli-reference@.md.snap |   14 +
+ cli/tests/runner.rs              |    1 
+ cli/tests/test_git_push.rs       |   28 +--
+ cli/tests/test_redate_command.rs |  153 ++++++++++++++++
  14 files changed, 723 insertions(+), 15 deletions(-)
  create mode 100644 cli/src/commands/redate.rs
  create mode 100644 cli/tests/test_redate_command.rs
 
-diff --git a/Cargo.lock b/Cargo.lock
-index 000000000..000000000 100644
 --- a/Cargo.lock
 +++ b/Cargo.lock
-@@ -2620,6 +2620,7 @@ dependencies = [
+@@ -2652,6 +2652,7 @@ dependencies = [
   "shlex",
   "slab",
   "tempfile",
@@ -39,11 +37,9 @@ index 000000000..000000000 100644
   "test-case",
   "testutils",
   "textwrap",
-diff --git a/Cargo.toml b/Cargo.toml
-index 000000000..000000000 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
-@@ -117,6 +117,7 @@ smallvec = { version = "1.15.1", features = [
+@@ -116,6 +116,7 @@ smallvec = { version = "1.15.1", feature
  strsim = "0.11.1"
  syn = "3.0.3"
  tempfile = "3.27.0"
@@ -51,8 +47,6 @@ index 000000000..000000000 100644
  test-case = "3.3.1"
  textwrap = "0.16.2"
  thiserror = "2.0.17"
-diff --git a/cli/Cargo.toml b/cli/Cargo.toml
-index 000000000..000000000 100644
 --- a/cli/Cargo.toml
 +++ b/cli/Cargo.toml
 @@ -103,6 +103,7 @@ serde_json = { workspace = true }
@@ -63,8 +57,6 @@ index 000000000..000000000 100644
  textwrap = { workspace = true }
  tokio = { workspace = true }
  thiserror = { workspace = true }
-diff --git a/cli/src/commands/metaedit.rs b/cli/src/commands/metaedit.rs
-index 000000000..000000000 100644
 --- a/cli/src/commands/metaedit.rs
 +++ b/cli/src/commands/metaedit.rs
 @@ -12,13 +12,19 @@
@@ -87,7 +79,7 @@ index 000000000..000000000 100644
  use jj_lib::time_util::parse_datetime;
  use tracing::instrument;
  
-@@ -29,6 +35,7 @@ use crate::cli_util::print_updated_commits;
+@@ -29,6 +35,7 @@ use crate::cli_util::print_updated_commi
  use crate::command_error::CommandError;
  use crate::complete;
  use crate::description_util::join_message_paragraphs;
@@ -305,8 +297,6 @@ index 000000000..000000000 100644
 +            verification.is_some_and(|verification| verification.status != SigStatus::Bad)
 +        })
 +}
-diff --git a/cli/src/commands/mod.rs b/cli/src/commands/mod.rs
-index 000000000..000000000 100644
 --- a/cli/src/commands/mod.rs
 +++ b/cli/src/commands/mod.rs
 @@ -44,6 +44,7 @@ mod operation;
@@ -325,7 +315,7 @@ index 000000000..000000000 100644
      Redo(redo::RedoArgs),
      Resolve(resolve::ResolveArgs),
      Restore(restore::RestoreArgs),
-@@ -205,6 +207,7 @@ pub async fn run_command(ui: &mut Ui, command_helper: &CommandHelper) -> Result<
+@@ -205,6 +207,7 @@ pub async fn run_command(ui: &mut Ui, co
          Command::Parallelize(args) => parallelize::cmd_parallelize(ui, command_helper, args).await,
          Command::Prev(args) => prev::cmd_prev(ui, command_helper, args).await,
          Command::Rebase(args) => rebase::cmd_rebase(ui, command_helper, args).await,
@@ -333,9 +323,6 @@ index 000000000..000000000 100644
          Command::Redo(args) => redo::cmd_redo(ui, command_helper, args).await,
          Command::Resolve(args) => resolve::cmd_resolve(ui, command_helper, args).await,
          Command::Restore(args) => restore::cmd_restore(ui, command_helper, args).await,
-diff --git a/cli/src/commands/redate.rs b/cli/src/commands/redate.rs
-new file mode 100644
-index 000000000..000000000
 --- /dev/null
 +++ b/cli/src/commands/redate.rs
 @@ -0,0 +1,359 @@
@@ -698,8 +685,6 @@ index 000000000..000000000
 +    };
 +    NaiveTime::parse_from_str(&normalized, "%H:%M:%S").map_err(|error| error.to_string())
 +}
-diff --git a/cli/src/config-schema.json b/cli/src/config-schema.json
-index 000000000..000000000 100644
 --- a/cli/src/config-schema.json
 +++ b/cli/src/config-schema.json
 @@ -741,6 +741,11 @@
@@ -743,8 +728,6 @@ index 000000000..000000000 100644
                  "bookmark_list": {
                      "type": "string",
                      "description": "`jj bookmark list`'s output"
-diff --git a/cli/src/config/colors.toml b/cli/src/config/colors.toml
-index 000000000..000000000 100644
 --- a/cli/src/config/colors.toml
 +++ b/cli/src/config/colors.toml
 @@ -118,3 +118,7 @@
@@ -755,8 +738,6 @@ index 000000000..000000000 100644
 +"redate commit change" = { fg = "cyan", bold = true }
 +"redate commit empty" = { fg = "bright black", italic = true }
 +"redate commit timestamp" = "bright black"
-diff --git a/cli/src/config/revsets.toml b/cli/src/config/revsets.toml
-index 000000000..000000000 100644
 --- a/cli/src/config/revsets.toml
 +++ b/cli/src/config/revsets.toml
 @@ -6,6 +6,7 @@ arrange = "reachable(@, mutable())"
@@ -767,11 +748,9 @@ index 000000000..000000000 100644
  # log revset is also used as the default short-prefixes. If it failed to
  # evaluate, lengthy warning messages would be printed. Use present(expr) if
  # symbols in expr might not always exist.
-diff --git a/cli/src/config/templates.toml b/cli/src/config/templates.toml
-index 000000000..000000000 100644
 --- a/cli/src/config/templates.toml
 +++ b/cli/src/config/templates.toml
-@@ -3,6 +3,14 @@ bookmark_list = 'format_commit_ref(self, "bookmark") ++ "\n"'
+@@ -3,6 +3,14 @@ bookmark_list = 'format_commit_ref(self,
  
  commit_summary = 'format_commit_summary_with_refs(self, format_commit_ref_names(bookmarks))'
  arrange = 'builtin_log_compact'
@@ -786,11 +765,9 @@ index 000000000..000000000 100644
  
  file_annotate = '''
  join(" ",
-diff --git a/cli/tests/cli-reference@.md.snap b/cli/tests/cli-reference@.md.snap
-index 000000000..000000000 100644
 --- a/cli/tests/cli-reference@.md.snap
 +++ b/cli/tests/cli-reference@.md.snap
-@@ -94,6 +94,7 @@ This document contains the help content for the `jj` command-line program.
+@@ -94,6 +94,7 @@ This document contains the help content
  * [`jj parallelize`↴](#jj-parallelize)
  * [`jj prev`↴](#jj-prev)
  * [`jj rebase`↴](#jj-rebase)
@@ -798,7 +775,7 @@ index 000000000..000000000 100644
  * [`jj redo`↴](#jj-redo)
  * [`jj resolve`↴](#jj-resolve)
  * [`jj restore`↴](#jj-restore)
-@@ -180,6 +181,7 @@ To get started, see the tutorial [`jj help -k tutorial`].
+@@ -180,6 +181,7 @@ To get started, see the tutorial [`jj he
  * `parallelize` — Parallelize revisions by making them siblings
  * `prev` — Change the working copy revision relative to the parent revision
  * `rebase` — Move revisions to different parent(s)
@@ -825,8 +802,6 @@ index 000000000..000000000 100644
  ## `jj redo`
  
  Redo the most recently undone operation
-diff --git a/cli/tests/runner.rs b/cli/tests/runner.rs
-index 000000000..000000000 100644
 --- a/cli/tests/runner.rs
 +++ b/cli/tests/runner.rs
 @@ -68,6 +68,7 @@ mod test_op_revert_command;
@@ -837,11 +812,9 @@ index 000000000..000000000 100644
  mod test_repo_change_report;
  mod test_resolve_command;
  mod test_restore_command;
-diff --git a/cli/tests/test_git_push.rs b/cli/tests/test_git_push.rs
-index 000000000..000000000 100644
 --- a/cli/tests/test_git_push.rs
 +++ b/cli/tests/test_git_push.rs
-@@ -3058,9 +3058,9 @@ fn test_git_push_sign_on_push() {
+@@ -3083,9 +3083,9 @@ fn test_git_push_sign_on_push() {
      Updated signatures of 2 commits.
      Rebased 2 descendant commits.
      Changes to push to origin:
@@ -854,7 +827,7 @@ index 000000000..000000000 100644
      [EOF]
      ");
      // Only commits which are being pushed should be signed
-@@ -3083,21 +3083,26 @@ fn test_git_push_sign_on_push() {
+@@ -3108,21 +3108,26 @@ fn test_git_push_sign_on_push() {
      let output = work_dir.run_jj(["bookmark", "move", "bookmark2", "--to", "@-"]);
      insta::assert_snapshot!(output, @"
      ------- stderr -------
@@ -883,7 +856,7 @@ index 000000000..000000000 100644
      ◆  commit to be signed 2
      │  Signature: test-display, Status: good, Key: impeccable
      ◆  commit to be signed 1
-@@ -3134,6 +3139,7 @@ fn test_git_push_sign_on_push() {
+@@ -3159,6 +3164,7 @@ fn test_git_push_sign_on_push() {
      ○  pre-signed commit
      │  Signature: test-display, Status: good, Key: impeccable
      ◆  commit which should not be signed 1
@@ -891,7 +864,7 @@ index 000000000..000000000 100644
      ~  (elided revisions)
      │ ○  description 1
      ├─╯
-@@ -3141,13 +3147,13 @@ fn test_git_push_sign_on_push() {
+@@ -3166,13 +3172,13 @@ fn test_git_push_sign_on_push() {
      [EOF]
      ");
      let output = work_dir.run_jj(["git", "push"]);
@@ -910,7 +883,7 @@ index 000000000..000000000 100644
      [EOF]
      ");
      let output = work_dir.run_jj(["log", "-T", template]);
-@@ -3155,9 +3161,11 @@ fn test_git_push_sign_on_push() {
+@@ -3180,9 +3186,11 @@ fn test_git_push_sign_on_push() {
      @  commit to be signed 3
      │  Signature: test-display, Status: good, Key: impeccable
      ○  commit which should not be signed 2
@@ -922,9 +895,6 @@ index 000000000..000000000 100644
      ~  (elided revisions)
      │ ○  description 1
      ├─╯
-diff --git a/cli/tests/test_redate_command.rs b/cli/tests/test_redate_command.rs
-new file mode 100644
-index 000000000..000000000
 --- /dev/null
 +++ b/cli/tests/test_redate_command.rs
 @@ -0,0 +1,153 @@
