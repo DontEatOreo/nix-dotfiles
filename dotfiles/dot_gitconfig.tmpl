@@ -7,11 +7,8 @@
     format = ssh
 
 [gpg "ssh"]
-    program = {{- if eq .chezmoi.os "darwin" -}}
-/Applications/1Password.app/Contents/MacOS/op-ssh-sign
-{{- else -}}
-/opt/1Password/op-ssh-sign
-{{- end }}
+    # Use the local 1Password agent normally and its forwarded socket over SSH.
+    program = ssh-keygen
     allowedSignersFile = "{{ .chezmoi.homeDir }}/.ssh/allowed_signers"
 
 [commit]

@@ -31,11 +31,10 @@ backend = "ssh"
 key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPsZFHUhLSPiz0EF1Q59jzu7IS7qdn3MSEImztN4KgmN"
 
 [signing.backends.ssh]
-program = {{ if eq .chezmoi.os "darwin" -}}
-"/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
-{{- else -}}
-"/opt/1Password/op-ssh-sign"
-{{- end }}
+# ssh-keygen signs with the matching key from SSH_AUTH_SOCK. In an SSH session,
+# that is the originating computer's forwarded 1Password agent, so approval is
+# requested there instead of by the remote computer's 1Password app.
+program = "ssh-keygen"
 allowed-signers = "{{ .chezmoi.homeDir }}/.ssh/allowed_signers"
 
 [aliases]
