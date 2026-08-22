@@ -41,7 +41,8 @@ class GhosttyPatched < Formula
       Ghostty.app is installed at:
         #{opt_prefix}/Ghostty.app
 
-      The dotfiles Ansible role links it into /Applications.
+      The dotfiles Ansible role copies it into /Applications so launchers can
+      discover the application bundle.
     CAVEATS
   end
 
