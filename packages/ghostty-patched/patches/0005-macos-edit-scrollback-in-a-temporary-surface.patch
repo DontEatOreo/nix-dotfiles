@@ -134,7 +134,7 @@ the exported file directory when the editor exits.
 +            var config = SurfaceConfiguration(
 +                from: ghostty_surface_inherited_config(surface, GHOSTTY_SURFACE_CONTEXT_SPLIT)
 +            )
-+            config.command = "/opt/homebrew/bin/terminal-theme-run hx \(shellQuote(url.path))"
++            config.command = "/opt/homebrew/bin/terminal-theme-run /opt/homebrew/bin/hx \(shellQuote(url.path))"
 +            config.context = GHOSTTY_SURFACE_CONTEXT_SPLIT
 +
 +            let editor = SurfaceView(app, baseConfig: config)
