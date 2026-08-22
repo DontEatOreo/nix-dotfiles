@@ -14,7 +14,10 @@ class JjPatched < Formula
   url archive.fetch("url")
   version "0.44.0-head-#{jj.fetch("revision")[0, 8]}"
   sha256 digest
+  # The patch queue can change without moving the pinned upstream revision.
+  # Bump this whenever the queue changes so Homebrew upgrades installed builds.
   license "Apache-2.0"
+  revision 1
   depends_on "rust" => :build
 
   conflicts_with "jj", because: "both install a jj binary"
