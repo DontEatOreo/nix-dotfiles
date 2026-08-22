@@ -104,7 +104,6 @@
       - "{{ item }}"
   changed_when: false
   failed_when: false
-  become: true
   when:
     - platform_is_macos
     - not ansible_check_mode
