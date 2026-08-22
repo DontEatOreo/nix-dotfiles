@@ -128,6 +128,80 @@
   tags:
     - docker
 
+- name: Inspect the Ghostty patched Cellar
+  ansible.builtin.stat:
+    path: "{{ bootstrap_homebrew_prefix }}/Cellar/ghostty-patched"
+  register: bootstrap_ghostty_patched_cellar
+  when: platform_is_macos
+  tags:
+    - ghostty
+
+- name: Enumerate installed Ghostty patched kegs
+  ansible.builtin.find:
+    paths: "{{ bootstrap_homebrew_prefix }}/Cellar/ghostty-patched"
+    file_type: directory
+    recurse: false
+  register: bootstrap_ghostty_patched_kegs
+  when:
+    - platform_is_macos
+    - bootstrap_ghostty_patched_cellar.stat.isdir | default(false)
+  tags:
+    - ghostty
+
+- name: Inspect installed Ghostty patched keg receipts
+  ansible.builtin.stat:
+    path: "{{ item.path }}/INSTALL_RECEIPT.json"
+  loop: "{{ bootstrap_ghostty_patched_kegs.files | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  register: bootstrap_ghostty_patched_receipts
+  when: platform_is_macos
+  tags:
+    - ghostty
+
+- name: Inspect the Ghostty patched Homebrew opt link
+  ansible.builtin.stat:
+    path: "{{ bootstrap_homebrew_prefix }}/opt/ghostty-patched"
+    follow: false
+  register: bootstrap_ghostty_patched_opt
+  when: platform_is_macos
+  tags:
+    - ghostty
+
+- name: Inspect the Ghostty patched opt link target receipt
+  ansible.builtin.stat:
+    path: "{{ bootstrap_ghostty_patched_opt.stat.lnk_source }}/INSTALL_RECEIPT.json"
+  register: bootstrap_ghostty_patched_opt_receipt
+  when:
+    - platform_is_macos
+    - bootstrap_ghostty_patched_opt.stat.islnk | default(false)
+  tags:
+    - ghostty
+
+- name: Remove a Ghostty patched opt link to an incomplete keg
+  ansible.builtin.file:
+    path: "{{ bootstrap_homebrew_prefix }}/opt/ghostty-patched"
+    state: absent
+  when:
+    - platform_is_macos
+    - bootstrap_ghostty_patched_opt.stat.islnk | default(false)
+    - not (bootstrap_ghostty_patched_opt_receipt.stat.exists | default(false))
+  tags:
+    - ghostty
+
+- name: Remove incomplete Ghostty patched kegs
+  ansible.builtin.file:
+    path: "{{ item.item.path }}"
+    state: absent
+  loop: "{{ bootstrap_ghostty_patched_receipts.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item.path }}"
+  when:
+    - platform_is_macos
+    - not item.stat.exists
+  tags:
+    - ghostty
+
 - name: Apply Homebrew bundle
   ansible.builtin.command:
     argv:
