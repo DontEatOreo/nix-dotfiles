@@ -173,34 +173,34 @@
       "type": "Git",
       "repository": {
         "type": "GitHub",
-        "owner": "4evy",
+        "owner": "jtroo",
         "repo": "kanata"
       },
-      "branch": "4evy/push-vmowpyplsmyt",
+      "branch": "main",
       "submodules": false,
-      "revision": "a20e0e2f7fd4dfae66db4f5c2130732de0fe28c5",
-      "url": "https://github.com/4evy/kanata/archive/a20e0e2f7fd4dfae66db4f5c2130732de0fe28c5.tar.gz",
-      "hash": "sha256-8BdW7SuWbYTLcYTbJjHI/kyaF7rWBojb9h/pqrutIaU="
+      "revision": "565d5070e9e61992af5b4e844d512a9ce2f2d8c1",
+      "url": "https://github.com/jtroo/kanata/archive/565d5070e9e61992af5b4e844d512a9ce2f2d8c1.tar.gz",
+      "hash": "sha256-O3cKyJ352/miOr2sTnO7ZmKz4dJKYSH6iQZo9ELDIms="
     },
     "kanata_homebrew": {
       "type": "Git",
       "repository": {
         "type": "GitHub",
-        "owner": "4evy",
+        "owner": "jtroo",
         "repo": "kanata"
       },
-      "branch": "4evy/push-vmowpyplsmyt",
+      "branch": "main",
       "submodules": false,
-      "revision": "a20e0e2f7fd4dfae66db4f5c2130732de0fe28c5",
-      "url": "https://github.com/4evy/kanata/archive/a20e0e2f7fd4dfae66db4f5c2130732de0fe28c5.tar.gz",
-      "hash": "sha256-8BdW7SuWbYTLcYTbJjHI/kyaF7rWBojb9h/pqrutIaU=",
+      "revision": "565d5070e9e61992af5b4e844d512a9ce2f2d8c1",
+      "url": "https://github.com/jtroo/kanata/archive/565d5070e9e61992af5b4e844d512a9ce2f2d8c1.tar.gz",
+      "hash": "sha256-O3cKyJ352/miOr2sTnO7ZmKz4dJKYSH6iQZo9ELDIms=",
       "frozen": true
     },
     "kanata_homebrew_archive": {
       "type": "Url",
-      "url": "https://github.com/4evy/kanata/archive/a20e0e2f7fd4dfae66db4f5c2130732de0fe28c5.tar.gz",
+      "url": "https://github.com/jtroo/kanata/archive/565d5070e9e61992af5b4e844d512a9ce2f2d8c1.tar.gz",
       "unpack": false,
-      "hash": "sha256-5Ru5io2lLTlMYusSwchcZ+c8rl48k3NH1rBFR9VFuZ8=",
+      "hash": "sha256-vZO0ESYSYuz5UriSKvB4EgyjiWR1jKHDJBgQxEllKw4=",
       "frozen": true
     },
     "karabiner_vhid_package": {
