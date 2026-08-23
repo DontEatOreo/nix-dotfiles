@@ -138,8 +138,8 @@ jobs:
             echo "build=true" >> "$GITHUB_OUTPUT"
           fi
 
-  native-checks:
-    name: Native check (${{ matrix.check }})
+  # Omit `name` so skipped matrices do not expose an unevaluated matrix expression.
+  native-checks: # zizmor: ignore[anonymous-definition] GitHub adds matrix values to the job ID.
     needs: checks
     if: needs.checks.outputs.build-native == 'true'
     runs-on: ubuntu-latest
