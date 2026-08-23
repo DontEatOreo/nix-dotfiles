@@ -3,12 +3,10 @@ import os
 from collections.abc import Sequence
 from pathlib import Path
 from subprocess import CompletedProcess
-from typing import TYPE_CHECKING
+
+import pytest
 
 from workstation.apps import discord
-
-if TYPE_CHECKING:
-    import pytest
 
 
 def _discord_app(tmp_path: Path) -> tuple[Path, Path]:
@@ -115,7 +113,7 @@ def test_macos_repair_refreshes_and_relocks_when_equicord_is_present(
 def test_macos_repair_relocks_asars_after_failed_install(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    app, resources = _discord_app(tmp_path)
+    app, _resources = _discord_app(tmp_path)
     equilotl = tmp_path / "EquilotlCli-darwin-arm64"
     equilotl.write_text("#!/bin/sh\n")
     equilotl.chmod(0o755)

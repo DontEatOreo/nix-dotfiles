@@ -27,9 +27,7 @@ for command in ansible-lint ansible-playbook terminal-theme-run yamllint; do
 	"${command}" --version >/dev/null
 done
 
-for command in phone-mirror; do
-	command -v "${command}" >/dev/null 2>&1 || fail "command is missing: ${command}"
-done
+command -v phone-mirror >/dev/null 2>&1 || fail 'command is missing: phone-mirror'
 
 for path in \
 	/workspace/dotfiles/packages/terminal-theme-tools/.zig-cache \
