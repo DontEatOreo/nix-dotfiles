@@ -39,10 +39,10 @@
     },
     {
       "customType": "regex",
-      "description": "Track the pinned Spectrum Fedora build stages",
-      "managerFilePatterns": ["/^bluebuild\\/recipes\\/spectrum\\.yml$/"],
+      "description": "Track pinned Spectrum builder images",
+      "managerFilePatterns": ["/^bluebuild\\/recipes\\/spectrum\\/stages\\/.*\\.yml$/"],
       "matchStrings": [
-        "from:\\s+(?<depName>registry\\.fedoraproject\\.org/fedora):(?<currentValue>[^\\s@]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+        "from:\\s+(?<depName>[^\\s:@]+(?:/[^\\s:@]+)+):(?<currentValue>[^\\s@]+)@(?<currentDigest>sha256:[a-f0-9]+)"
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker"
@@ -50,7 +50,9 @@
     {
       "customType": "regex",
       "description": "Track annotated GitHub release assets in the Spectrum recipe",
-      "managerFilePatterns": ["/^bluebuild\\/recipes\\/spectrum\\.yml$/"],
+      "managerFilePatterns": [
+        "/^bluebuild\\/recipes\\/spectrum(?:\\.yml|\\/.*\\.yml)$/"
+      ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[^\\s]+)\\s+- https://github\\.com/[^\\s]+/releases/download/v?(?<currentValue>[^/\\s]+)/[^\\s]+"
       ]
@@ -58,25 +60,15 @@
     {
       "customType": "regex",
       "description": "Track pinned BlueBuild module image digests",
-      "managerFilePatterns": ["/^bluebuild\\/recipes\\/spectrum\\.yml$/"],
+      "managerFilePatterns": [
+        "/^bluebuild\\/recipes\\/spectrum(?:\\.yml|\\/.*\\.yml)$/"
+      ],
       "matchStrings": [
         "source:\\s+(?<depName>ghcr\\.io/blue-build/modules)@(?<currentDigest>sha256:[a-f0-9]{64})"
       ],
       "datasourceTemplate": "docker",
       "currentValueTemplate": "latest",
       "versioningTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "description": "Track the pinned Go Helium profile configurer",
-      "managerFilePatterns": [
-        "/^ansible\\/roles\\/applications\\/defaults\\/main\\.yml$/"
-      ],
-      "matchStrings": ["browser@(?<currentDigest>[a-f0-9]{40})"],
-      "depNameTemplate": "4evy/browser",
-      "datasourceTemplate": "github-digest",
-      "currentValueTemplate": "HEAD",
-      "versioningTemplate": "git"
     },
     {
       "customType": "jsonata",

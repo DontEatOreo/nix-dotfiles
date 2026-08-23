@@ -51,6 +51,12 @@ problems=$(
           | "\($archive.key): URL differs from \($source_name)"
         ),
         (
+          $pins.helium_linux.version as $version
+          | "https://github.com/imputnet/helium-linux/releases/download/\($version)/helium-\($version)-x86_64_linux.tar.xz" as $expected
+          | select($pins.helium_linux_binary.url != $expected)
+          | "helium_linux_binary: release \($version) requires URL \($expected), got \($pins.helium_linux_binary.url)"
+        ),
+        (
           $pins
           | to_entries[]
           | select(

@@ -13,6 +13,49 @@
       "url": "https://github.com/blue-build/cli/archive/84f8726bcb44a0d0e79f5768e311ed7184ad8b3f.tar.gz",
       "hash": "sha256-P2CG22ptBggTUnrDCSV9ST1ydXiId4DrMB55zEHPYXI="
     },
+    "browser": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "4evy",
+        "repo": "browser"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "b4f39de39c1d2cf516e78cc2a52803777f6fb02c",
+      "url": "https://github.com/4evy/browser/archive/b4f39de39c1d2cf516e78cc2a52803777f6fb02c.tar.gz",
+      "hash": "sha256-flaIJuG2xknNOLilbsfAaMdqu0qL5/3U8xXoaWn34xg="
+    },
+    "browser_archive": {
+      "type": "Url",
+      "url": "https://github.com/4evy/browser/archive/b4f39de39c1d2cf516e78cc2a52803777f6fb02c.tar.gz",
+      "unpack": false,
+      "hash": "sha256-EG3lNWXx3Zcoz5lfsJkat0+C4mkuZeIjmFNBkzT1DNk=",
+      "frozen": true
+    },
+    "equilotl": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "Equicord",
+        "repo": "Equilotl"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "v2.2.6",
+      "revision": "c6bfed9c941883fb0aa48cc1ab6031ed69334c2a",
+      "url": "https://api.github.com/repos/Equicord/Equilotl/tarball/refs/tags/v2.2.6",
+      "hash": "sha256-BPc3j69lzCqDkgP7f0u+SBS9o166CA7xKeGjgXZv92w="
+    },
+    "equilotl_archive": {
+      "type": "Url",
+      "url": "https://api.github.com/repos/Equicord/Equilotl/tarball/refs/tags/v2.2.6",
+      "unpack": false,
+      "hash": "sha256-yynjkW99Z91vgUCs/pqvlK/UpQlCdyLlehYIkBZYTxA=",
+      "frozen": true
+    },
     "ghidra_mcp": {
       "type": "Git",
       "repository": {
@@ -60,6 +103,29 @@
       "url": "https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz",
       "unpack": false,
       "hash": "sha256-cOSWZKdDdLSLUebz/fv0N/Y5XUJQkFBYi9SavlK6PQA=",
+      "frozen": true
+    },
+    "helium_linux": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "imputnet",
+        "repo": "helium-linux"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "submodules": false,
+      "version": "0.15.6.1",
+      "revision": "fa8c2be6fe144257052c04ad0baef1dcba54382b",
+      "url": "https://api.github.com/repos/imputnet/helium-linux/tarball/refs/tags/0.15.6.1",
+      "hash": "sha256-XTVT/hzng6FG72s6xOt1dAPhCIbg6rKyYFj4i5ZGS8w="
+    },
+    "helium_linux_binary": {
+      "type": "Url",
+      "url": "https://github.com/imputnet/helium-linux/releases/download/0.15.6.1/helium-0.15.6.1-x86_64_linux.tar.xz",
+      "unpack": false,
+      "hash": "sha256-TVzi5ZWyvFsh6ovoBhU5DW0k3wlQ5/gUDD4+ykAQPTY=",
       "frozen": true
     },
     "helix": {
@@ -254,6 +320,26 @@
       "revision": "68668042c91afd53cf3119bdfb62b0e1345e8ad6",
       "url": null,
       "hash": "sha256-WTTQYk8tADY9BIfeQ5kFuBbODbRWW8/YCw3vp6O032o=",
+      "frozen": true
+    },
+    "yt_dlp_script": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "euvlok",
+        "repo": "pkgs"
+      },
+      "branch": "master",
+      "submodules": false,
+      "revision": "cc231ba5e27ca60d95c15249b680c144205276b4",
+      "url": "https://github.com/euvlok/pkgs/archive/cc231ba5e27ca60d95c15249b680c144205276b4.tar.gz",
+      "hash": "sha256-+f8KFemSjUJ2uHnBcoKLQ2NF0w88QAUWcJJC0GeQAWw="
+    },
+    "yt_dlp_script_archive": {
+      "type": "Url",
+      "url": "https://github.com/euvlok/pkgs/archive/cc231ba5e27ca60d95c15249b680c144205276b4.tar.gz",
+      "unpack": false,
+      "hash": "sha256-g7S5JhHePALsbM5iXTzJJyt8ETAiV9zcZgoOGOXpecQ=",
       "frozen": true
     }
   },

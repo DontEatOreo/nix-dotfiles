@@ -15,9 +15,9 @@ on:
       - .github/renovate/check-npins.sh
       - .github/renovate/package.json
       - .github/renovate/update-npins.sh
+      - .github/renovate/update-npins-lock.sh
       - .github/workflows/renovate.yaml
       - .github/workflows/validate-renovate.yaml
-      - ansible/roles/applications/defaults/main.yml
       - ansible/roles/system/defaults/main/macos.yml
       - pyproject.toml
       - npins/sources.json

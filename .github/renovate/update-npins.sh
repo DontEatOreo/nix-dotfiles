@@ -9,6 +9,6 @@ cd "$repository_root"
 # tasks run. Restore the coherent lock first so npins sees the change and owns
 # the revision, fetch URL, and hash as one atomic update.
 git restore --source=HEAD --staged --worktree -- npins/sources.json
-nix shell nixpkgs#npins --command npins update
+nix shell nixpkgs#npins --command bash .github/renovate/update-npins-lock.sh
 bash bluebuild/recipes/spectrum/sync-sources.sh
 bash .github/renovate/check-npins.sh
