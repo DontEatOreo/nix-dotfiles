@@ -9,7 +9,6 @@
     - helix
     - jj
     - kanata
-    - raycast
     - shottr
     - terminal-theme-tools
 
@@ -222,17 +221,6 @@
   changed_when: >-
     bootstrap_homebrew_bundle_install.stdout is search('(^|\n)(==> )?(Installing|Upgrading|Uninstalling|Uninstalled|Untapping|Removing) ')
     or bootstrap_homebrew_bundle_install.stderr is search('(^|\n)(==> )?(Installing|Upgrading|Uninstalling|Uninstalled|Untapping|Removing) ')
-
-- name: Register Homebrew OpenJDK 21 with macOS
-  ansible.builtin.file:
-    src: "{{ bootstrap_homebrew_prefix }}/opt/openjdk@21/libexec/openjdk.jdk"
-    dest: /Library/Java/JavaVirtualMachines/openjdk.jdk
-    state: link
-    force: true
-  become: true
-  when: platform_is_macos
-  tags:
-    - java
 
 - name: Reconcile the installed terminal theme tools source
   ansible.builtin.import_tasks: homebrew-terminal-theme-tools.yml

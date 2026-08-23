@@ -122,6 +122,7 @@ export UV_PYTHON_BIN_DIR UV_TOOL_BIN_DIR
 # Mutable state is limited to the private directory tracked by exit traps.
 temporary_directory=''
 temporary_directory_parent=''
+inferred_ansible_become_pass=''
 
 die() {
 	printf 'error: %s\n' "$*" >&2
@@ -265,11 +266,53 @@ needs_ansible_become_prompt() {
 	[[ -z "${ANSIBLE_BECOME_ASK_PASS:-}" ]] || return 1
 	has_ansible_become_prompt_arg "$@" && return 1
 
-	if command_exists sudo && sudo -n -v >/dev/null 2>&1; then
+	# Ignore cached credentials here: their scope can differ from the sudo
+	# process Ansible starts. Only skip a password when sudo is genuinely
+	# configured to work without one.
+	if command_exists sudo && sudo -n -k -v >/dev/null 2>&1; then
 		return 1
 	fi
 
 	return 0
+}
+
+# Read and validate the password before Ansible starts. Ansible aborts when a
+# rejected password makes sudo emit a second prompt, so retries must happen
+# here instead. The password remains only in this shell's memory.
+# Globals:
+#   inferred_ansible_become_pass
+capture_ansible_become_password() {
+	local attempt
+	local current_user
+
+	if ! command_exists sudo; then
+		die 'privileged Ansible tasks require sudo, but sudo is not installed'
+	fi
+	if [[ ! -t 0 ]]; then
+		die 'privileged Ansible tasks require a terminal for sudo authentication'
+	fi
+
+	current_user="$(id -un)" || die 'could not determine the current user'
+	for attempt in 1 2 3; do
+		printf '[sudo] password for %s: ' "${current_user}" >&2
+		if ! IFS= read -r -s inferred_ansible_become_pass; then
+			printf '\n' >&2
+			die 'could not read the sudo password'
+		fi
+		printf '\n' >&2
+
+		if printf '%s\n' "${inferred_ansible_become_pass}" |
+			sudo -S -k -p '' -v >/dev/null 2>&1; then
+			return 0
+		fi
+
+		inferred_ansible_become_pass=''
+		if ((attempt < 3)); then
+			printf 'Sorry, try again.\n' >&2
+		fi
+	done
+
+	die 'failed to validate sudo credentials for privileged Ansible tasks'
 }
 
 ensure_sudo_available() {
@@ -712,10 +755,13 @@ run_ansible_playbook() {
 	local ansible_playbook_executable="$1"
 	shift
 	local disable_become_prompt='false'
+	local use_inferred_become_pass='false'
 	local -a playbook_args=("${ANSIBLE_PLAYBOOK}" "$@")
 
 	if needs_ansible_become_prompt "${playbook_args[@]}"; then
-		playbook_args=('--ask-become-pass' "${playbook_args[@]}")
+		capture_ansible_become_password
+		disable_become_prompt='true'
+		use_inferred_become_pass='true'
 	elif ! has_ansible_become_prompt_arg "${playbook_args[@]}" &&
 		[[ -z "${ANSIBLE_BECOME_ASK_PASS:-}" ]]; then
 		disable_become_prompt='true'
@@ -725,7 +771,11 @@ run_ansible_playbook() {
 	# The installer temp directory is no longer useful here. Removing it before
 	# a potentially long playbook also narrows the lifetime of downloaded code.
 	log "Running Ansible playbook: ${ANSIBLE_PLAYBOOK}"
-	if [[ "${disable_become_prompt}" == 'true' ]]; then
+	if [[ "${use_inferred_become_pass}" == 'true' ]]; then
+		ANSIBLE_BECOME_ASK_PASS='false' \
+			ANSIBLE_BECOME_PASS="${inferred_ansible_become_pass}" \
+			"${ansible_playbook_executable}" "${playbook_args[@]}"
+	elif [[ "${disable_become_prompt}" == 'true' ]]; then
 		ANSIBLE_BECOME_ASK_PASS='false' \
 			"${ansible_playbook_executable}" "${playbook_args[@]}"
 	else

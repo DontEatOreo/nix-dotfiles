@@ -1,22 +1,7 @@
 ---
-- name: Install Linux bootstrap packages before Homebrew
-  ansible.builtin.import_tasks: packages.yml
-  when: platform_is_linux
-  tags:
-    - bootstrap
-    - packages
-
-- name: Install Homebrew
-  ansible.builtin.import_tasks: homebrew.yml
-  when: platform_system in ['Darwin', 'Linux']
-  tags:
-    - bootstrap
-    - bash
-    - homebrew
-
 - name: Apply Homebrew bundle
   ansible.builtin.import_tasks: homebrew-bundle.yml
-  when: bootstrap_homebrew_enabled | default(false)
+  when: platform_system in ['Darwin', 'Linux']
   tags:
     - bootstrap
     - homebrew

@@ -16,6 +16,8 @@ live hardware, credentials, or an already-running desktop session
 - A small and intentional surface area for custom behavior.
 - No duplication of files, packages, or systemd enablement already owned by the
   Spectrum image or Brewfile.
+- Application launchers and generated home-directory settings belong to chezmoi
+  when they can be reconciled without host privileges or live hardware facts.
 
 ## Design direction
 

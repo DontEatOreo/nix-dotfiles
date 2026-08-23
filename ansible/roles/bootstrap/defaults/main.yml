@@ -1,5 +1,6 @@
 ---
-bootstrap_homebrew_installer_url: https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+bootstrap_homebrew_prefix: "{{ platform_homebrew_prefix }}"
+bootstrap_homebrew_path: "{{ platform_homebrew_path }}"
 bootstrap_homebrew_repository: >-
   {{
     bootstrap_homebrew_prefix
@@ -8,51 +9,3 @@ bootstrap_homebrew_repository: >-
   }}
 bootstrap_homebrew_local_tap_dir: >-
   {{ bootstrap_homebrew_repository }}/Library/Taps/4evy/homebrew-dotfiles
-
-bootstrap_bootstrap_packages_common:
-  - bubblewrap
-  - curl
-  - file
-  - git
-  - podman
-  - podman-compose
-  - rsync
-bootstrap_bootstrap_packages:
-  apt: "{{ bootstrap_bootstrap_packages_common + ['procps'] }}"
-  apk: "{{ bootstrap_bootstrap_packages_common + ['procps-ng'] }}"
-  dnf: "{{ bootstrap_bootstrap_packages_common + ['procps-ng'] }}"
-  pacman: "{{ bootstrap_bootstrap_packages_common + ['procps-ng'] }}"
-
-bootstrap_build_toolchain_packages_common:
-  - binutils
-  - clang
-  - cmake
-  - lld
-  - lldb
-  - patch
-  - perl
-  - quilt
-bootstrap_build_toolchain_packages:
-  apt: >-
-    {{
-      bootstrap_build_toolchain_packages_common
-      + ['build-essential', 'libclang-dev', 'libssl-dev', 'pkg-config',
-         'zlib1g-dev', 'zig']
-    }}
-  apk: >-
-    {{
-      bootstrap_build_toolchain_packages_common
-      + ['build-base', 'linux-headers', 'openssl-dev', 'pkgconf', 'zlib-dev',
-         'zig']
-    }}
-  dnf: >-
-    {{
-      bootstrap_build_toolchain_packages_common
-      + ['gcc', 'gcc-c++', 'glibc-devel', 'make', 'openssl-devel',
-         'pkgconf-pkg-config', 'zlib-devel', 'zig']
-    }}
-  pacman: >-
-    {{
-      bootstrap_build_toolchain_packages_common
-      + ['base-devel', 'openssl', 'pkgconf', 'zlib', 'zig']
-    }}
