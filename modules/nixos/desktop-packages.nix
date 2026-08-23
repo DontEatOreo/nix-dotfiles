@@ -42,6 +42,7 @@ let
   heliumConfig = heliumConfigSource // {
     browser = heliumConfigSource.browser // {
       linux = heliumConfigSource.browser.linux // {
+        app_dir = toString heliumAppDir;
         wrapper_flags = commandLineArgs;
       };
     };
@@ -59,8 +60,8 @@ let
     "product_logo_256.png" = "${heliumBrowser}/share/icons/hicolor/256x256/apps/helium.png";
   };
 
-  configureHelium = pkgs.writeShellApplication {
-    name = "configure-helium";
+  applyHelium = pkgs.writeShellApplication {
+    name = "apply-helium";
     runtimeInputs = [
       pkgs.coreutils
       pkgs.curl
@@ -69,7 +70,6 @@ let
     ];
     text = ''
       config_home="''${XDG_CONFIG_HOME:-$HOME/.config}"
-      cache_home="''${XDG_CACHE_HOME:-$HOME/.cache}"
       profile_dir="$config_home/net.imput.helium/Default"
 
       curl -fsSL 'https://github.com/4evy.png?size=256' |
@@ -83,12 +83,8 @@ let
       input="$(jq -nc --arg token "$token" \
         '{extension_values: (if $token == "" then {} else {"refined-github-personal-token": $token} end)}')"
 
-      printf '%s' "$input" | ${getExe config.programs.browser.package} configure \
-        --config '${config.programs.browser.configFiles.helium}' \
-        --mode linux \
-        --root "$cache_home/helium-browser" \
-        --app-dir '${heliumAppDir}' \
-        --bin-dir "$HOME/.local/bin" \
+      printf '%s' "$input" | ${getExe config.programs.browser.package} apply \
+        '${config.programs.browser.configFile}' \
         --input -
     '';
   };
@@ -98,7 +94,7 @@ in
     programs.chromium.enable = true;
     programs.browser = {
       enable = true;
-      configurations.helium = heliumConfig;
+      settings = heliumConfig;
     };
 
     environment.systemPackages = attrValues {
@@ -112,24 +108,24 @@ in
         ;
     };
 
-    systemd.user.services.configure-helium = {
-      description = "Reconcile the declarative Helium browser configuration";
+    systemd.user.services.apply-helium = {
+      description = "Apply the declarative Helium browser configuration";
       after = [ "graphical-session.target" ];
       partOf = [ "graphical-session.target" ];
       unitConfig.ConditionUser = config.local.user.name;
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = getExe configureHelium;
+        ExecStart = getExe applyHelium;
       };
     };
 
-    systemd.user.timers.configure-helium = {
-      description = "Reconcile Helium after the graphical session starts";
+    systemd.user.timers.apply-helium = {
+      description = "Apply Helium after the graphical session starts";
       wantedBy = [ "graphical-session.target" ];
       partOf = [ "graphical-session.target" ];
       timerConfig = {
         OnActiveSec = "1s";
-        Unit = "configure-helium.service";
+        Unit = "apply-helium.service";
       };
     };
   };

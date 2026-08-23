@@ -68,10 +68,6 @@ path = "user_experience_metrics.stability.exited_cleanly"
 value = true
 
 [[browser.preferences.local_state_values]]
-path = "helium.browser.default_browser_infobar_rejected"
-value = true
-
-[[browser.preferences.local_state_values]]
 path = "profile.info_cache.Default.name"
 value = "Evy"
 
@@ -108,18 +104,6 @@ path = "helium.services.schema_version"
 value = 1
 
 [[browser.preferences.values]]
-path = "helium.browser.layout"
-value = 2
-
-[[browser.preferences.values]]
-path = "helium.browser.centered_location_bar"
-value = true
-
-[[browser.preferences.values]]
-path = "helium.browser.rounded_frame"
-value = false
-
-[[browser.preferences.values]]
 path = "profile.name"
 value = "Evy"
 
@@ -142,6 +126,15 @@ value = true
 [browser.helium]
 completed_onboarding = true
 crash_reporting = "disabled"
+
+[browser.helium.appearance]
+layout = "vertical"
+centered_location_bar = true
+rounded_frame = false
+zen_mode = true
+
+[browser.helium.behavior]
+suppress_default_browser_prompt = true
 
 [browser.helium.services]
 enabled = true

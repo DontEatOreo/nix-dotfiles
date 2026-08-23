@@ -9,7 +9,7 @@ class BrowserConfigurer < Formula
   archive = pins.fetch("browser_archive")
   digest = archive.fetch("hash").delete_prefix("sha256-").unpack1("m0").unpack1("H*")
 
-  desc "Configure Chromium-family browsers and extension profiles"
+  desc "Make Chromium-family browsers declarative"
   homepage "https://github.com/4evy/browser"
   url archive.fetch("url")
   version "git-#{pin.fetch("revision")[0, 8]}"
@@ -23,6 +23,6 @@ class BrowserConfigurer < Formula
   end
 
   test do
-    assert_match "Configure a Chromium-family browser", shell_output("#{bin}/browser-configurer --help")
+    assert_match "Make Chromium-family browsers declarative", shell_output("#{bin}/browser-configurer --help")
   end
 end

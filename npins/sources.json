@@ -22,15 +22,15 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "b4f39de39c1d2cf516e78cc2a52803777f6fb02c",
-      "url": "https://github.com/4evy/browser/archive/b4f39de39c1d2cf516e78cc2a52803777f6fb02c.tar.gz",
-      "hash": "sha256-flaIJuG2xknNOLilbsfAaMdqu0qL5/3U8xXoaWn34xg="
+      "revision": "f863b552329900ccd3901fec0a4ca858b653e518",
+      "url": "https://github.com/4evy/browser/archive/f863b552329900ccd3901fec0a4ca858b653e518.tar.gz",
+      "hash": "sha256-+xMGC96+IWarNy6R9TZYRzhqLDdLV4hX4x773MEAtFI="
     },
     "browser_archive": {
       "type": "Url",
-      "url": "https://github.com/4evy/browser/archive/b4f39de39c1d2cf516e78cc2a52803777f6fb02c.tar.gz",
+      "url": "https://github.com/4evy/browser/archive/f863b552329900ccd3901fec0a4ca858b653e518.tar.gz",
       "unpack": false,
-      "hash": "sha256-EG3lNWXx3Zcoz5lfsJkat0+C4mkuZeIjmFNBkzT1DNk=",
+      "hash": "sha256-lO4T45UkghC9ZdMA/xnP7lHgqTAKcrvSd0+GIZYx05M=",
       "frozen": true
     },
     "equilotl": {

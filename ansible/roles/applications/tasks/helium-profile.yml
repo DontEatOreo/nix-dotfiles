@@ -57,22 +57,20 @@
   no_log: true
   when: lookup('ansible.builtin.env', 'OP_ACCOUNT') | length > 0
 
-- name: Configure the Helium profile
+- name: Apply the Helium configuration
   ansible.builtin.command:
     argv:
       - "{{ platform_homebrew_prefix }}/bin/browser-configurer"
-      - configure
-      - --config
+      - apply
       - "{{ dotfiles_repo_root }}/browser/helium.toml"
-      - --mode
+      - --platform
       - "{{ applications_helium_platform }}"
-      - --root
+      - --install-dir
       - "{{ applications_helium_root }}"
       - --bin-dir
       - "{{ dotfiles_bin_dir }}"
       - --input
       - "-"
-    chdir: "{{ dotfiles_repo_root }}/browser"
     stdin: "{{ applications_helium_apply_input | to_json }}"
   environment:
     PATH: "{{ applications_helium_path }}"
