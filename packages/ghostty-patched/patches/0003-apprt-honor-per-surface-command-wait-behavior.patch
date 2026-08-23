@@ -1,0 +1,72 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: 4evy <git@evy.pink>
+Date: Thu, 1 Jan 1970 00:00:00 +0000
+Subject: [PATCH 3/5] apprt: honor per-surface command wait behavior
+
+Respect the embedded surface wait_after_command option instead of forcing
+all command surfaces to remain open. Add the equivalent optional GTK surface
+override so transient command surfaces can close when their process exits.
+
+---
+ src/apprt/embedded.zig          |    6 +++---
+ src/apprt/gtk/class/surface.zig |    6 ++++++
+ 2 files changed, 9 insertions(+), 3 deletions(-)
+
+--- a/src/apprt/embedded.zig
++++ b/src/apprt/embedded.zig
+@@ -460,8 +460,8 @@ pub const Surface = struct {
+         working_directory: ?[*:0]const u8 = null,
+ 
+         /// The command to run in the new surface. If this is set then
+-        /// the "wait-after-command" option is also automatically set to true,
+-        /// since this is used for scripting.
++        /// `wait_after_command` controls whether the surface remains open after
++        /// the command exits.
+         ///
+         /// This command always run in a shell (e.g. via `/bin/sh -c`),
+         /// despite Ghostty allowing directly executed commands via config.
+@@ -551,7 +551,7 @@ pub const Surface = struct {
+             const cmd = std.mem.sliceTo(c_command, 0);
+             if (cmd.len > 0) {
+                 config.command = .{ .shell = cmd };
+-                config.@"wait-after-command" = true;
++                config.@"wait-after-command" = opts.wait_after_command;
+             }
+         }
+ 
+--- a/src/apprt/gtk/class/surface.zig
++++ b/src/apprt/gtk/class/surface.zig
+@@ -738,6 +738,7 @@ pub const Surface = extern struct {
+             command: ?configpkg.Command = null,
+             shell_integration: ?configpkg.Config.ShellIntegration = null,
+             working_directory: ?[:0]const u8 = null,
++            wait_after_command: ?bool = null,
+ 
+             pub const none: @This() = .{};
+         } = .none,
+@@ -749,6 +750,7 @@ pub const Surface = extern struct {
+         command: ?configpkg.Command = null,
+         shell_integration: ?configpkg.Config.ShellIntegration = null,
+         working_directory: ?[:0]const u8 = null,
++        wait_after_command: ?bool = null,
+         title: ?[:0]const u8 = null,
+ 
+         pub const none: @This() = .{};
+@@ -762,6 +764,7 @@ pub const Surface = extern struct {
+             .command = if (overrides.command) |c| c.clone(alloc) catch null else null,
+             .shell_integration = overrides.shell_integration,
+             .working_directory = if (overrides.working_directory) |wd| alloc.dupeZ(u8, wd) catch null else null,
++            .wait_after_command = overrides.wait_after_command,
+         };
+         return self;
+     }
+@@ -3535,6 +3538,9 @@ pub const Surface = extern struct {
+             priv.overrides.command,
+             priv.overrides.shell_integration,
+         );
++        if (priv.overrides.wait_after_command) |value| {
++            config.@"wait-after-command" = value;
++        }
+         if (priv.overrides.working_directory) |wd| {
+             const config_alloc = config.arenaAlloc();
+             var wd_val: configpkg.WorkingDirectory = .{ .path = try config_alloc.dupe(u8, wd) };

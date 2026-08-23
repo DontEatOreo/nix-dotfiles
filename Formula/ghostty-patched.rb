@@ -31,6 +31,7 @@ class GhosttyPatched < Formula
            "-Doptimize=ReleaseFast",
            "-Demit-test-exe=false",
            "-Dxcframework-target=native",
+           "-Dxcodebuild-disable-package-manifest-sandbox=true",
            "-Dversion-string=#{version}"
 
     prefix.install "zig-out/Ghostty.app"

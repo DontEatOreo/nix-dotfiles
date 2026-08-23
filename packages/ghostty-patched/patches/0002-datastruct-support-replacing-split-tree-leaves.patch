@@ -1,0 +1,78 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: 4evy <git@evy.pink>
+Date: Thu, 1 Jan 1970 00:00:00 +0000
+Subject: [PATCH 2/5] datastruct: support replacing split tree leaves
+
+Add an immutable split-tree replacement operation that preserves topology
+and zoom state while balancing view references. Temporary surface users can
+now swap a leaf without rebuilding the tree by hand.
+
+---
+ src/datastruct/split_tree.zig |   49 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 49 insertions(+)
+
+--- a/src/datastruct/split_tree.zig
++++ b/src/datastruct/split_tree.zig
+@@ -624,6 +624,29 @@ pub fn SplitTree(comptime V: type) type
+             return result;
+         }
+ 
++        /// Replace the view at a leaf while preserving the tree topology and
++        /// zoom state. The original tree remains unchanged.
++        pub fn replace(
++            self: *const Self,
++            gpa: Allocator,
++            at: Node.Handle,
++            view: *View,
++        ) Allocator.Error!Self {
++            assert(at.idx() < self.nodes.len);
++            assert(self.nodes[at.idx()] == .leaf);
++
++            var result = try self.clone(gpa);
++            errdefer result.deinit();
++
++            const replacement = try viewRef(view, gpa);
++            const node: *Node = @constCast(&result.nodes[at.idx()]);
++            const previous_view = node.leaf;
++            node.* = .{ .leaf = replacement };
++            viewUnref(previous_view, gpa);
++
++            return result;
++        }
++
+         fn removeNode(
+             old: *Self,
+             new: *Self,
+@@ -1452,6 +1475,32 @@ test "SplitTree: single node" {
+     );
+ }
+ 
++test "SplitTree: replace leaf preserves source and topology" {
++    const testing = std.testing;
++    const alloc = testing.allocator;
++
++    var left_view: TestTree.View = .{ .label = "A" };
++    var left: TestTree = try .init(alloc, &left_view);
++    defer left.deinit();
++    var right_view: TestTree.View = .{ .label = "B" };
++    var right: TestTree = try .init(alloc, &right_view);
++    defer right.deinit();
++    var tree = try left.split(alloc, .root, .right, 0.5, &right);
++    defer tree.deinit();
++
++    var replacement_view: TestTree.View = .{ .label = "C" };
++    const right_handle = tree.nodes[0].split.right;
++    tree.zoom(right_handle);
++    var replaced = try tree.replace(alloc, right_handle, &replacement_view);
++    defer replaced.deinit();
++
++    try testing.expectEqualStrings("B", tree.nodes[right_handle.idx()].leaf.label);
++    try testing.expectEqualStrings("C", replaced.nodes[right_handle.idx()].leaf.label);
++    try testing.expectEqual(tree.nodes[0].split, replaced.nodes[0].split);
++    try testing.expectEqual(right_handle, tree.zoomed.?);
++    try testing.expectEqual(tree.zoomed, replaced.zoomed);
++}
++
+ test "SplitTree: split horizontal" {
+     const testing = std.testing;
+     const alloc = testing.allocator;

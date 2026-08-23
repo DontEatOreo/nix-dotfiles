@@ -1,0 +1,64 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: 4evy <git@evy.pink>
+Date: Thu, 1 Jan 1970 00:00:00 +0000
+Subject: [PATCH 5/5] build: make package manifest sandbox opt-in
+
+Add a Zig build option that passes Xcode manifest-sandbox disabling only
+when requested. Normal builds keep SwiftPM protection enabled, while nested
+Homebrew sandboxes can opt out with
+-Dxcodebuild-disable-package-manifest-sandbox=true.
+
+---
+ src/build/Config.zig            |    7 +++++++
+ src/build/GhosttyXcodebuild.zig |   10 ++++++++++
+ 2 files changed, 17 insertions(+)
+
+--- a/src/build/Config.zig
++++ b/src/build/Config.zig
+@@ -61,6 +61,7 @@ emit_themes: bool = false,
+ emit_xcframework: bool = false,
+ emit_webdata: bool = false,
+ emit_unicode_table_gen: bool = false,
++xcodebuild_disable_package_manifest_sandbox: bool = false,
+ 
+ /// Feature gates for libghostty-vt artifacts (-Dvt-features). The full
+ /// Ghostty application ignores this and always enables everything.
+@@ -560,6 +561,12 @@ pub fn init(b: *std.Build, appVersion: [
+         "Build and install the macOS app bundle.",
+     ) orelse !config.emit_lib_vt and config.emit_xcframework;
+ 
++    config.xcodebuild_disable_package_manifest_sandbox = b.option(
++        bool,
++        "xcodebuild-disable-package-manifest-sandbox",
++        "Disable SwiftPM's package manifest sandbox for nested build sandboxes.",
++    ) orelse false;
++
+     //---------------------------------------------------------------
+     // System Packages
+ 
+--- a/src/build/GhosttyXcodebuild.zig
++++ b/src/build/GhosttyXcodebuild.zig
+@@ -65,6 +65,11 @@ pub fn init(
+         step.environ_map = env_map;
+         step.addArgs(&.{
+             "xcodebuild",
++        });
++        if (config.xcodebuild_disable_package_manifest_sandbox) {
++            step.addArg("-IDEPackageSupportDisableManifestSandbox=1");
++        }
++        step.addArgs(&.{
+             "-target",
+             "Ghostty",
+             "-configuration",
+@@ -101,6 +106,11 @@ pub fn init(
+         step.environ_map = env_map;
+         step.addArgs(&.{
+             "xcodebuild",
++        });
++        if (config.xcodebuild_disable_package_manifest_sandbox) {
++            step.addArg("-IDEPackageSupportDisableManifestSandbox=1");
++        }
++        step.addArgs(&.{
+             "test",
+             "-scheme",
+             "Ghostty",
