@@ -113,7 +113,6 @@ let
       serverListIndicators.enable = true;
       showBadgesInChat.enable = true;
       showConnections.enable = true;
-      showHiddenChannels.enable = true;
       showHiddenThings.enable = true;
       showTimeoutDuration.enable = true;
       silentTyping.enable = true;
