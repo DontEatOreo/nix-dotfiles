@@ -1,5 +1,6 @@
 import os
 import shlex
+import shutil
 import sys
 from pathlib import Path
 from typing import Annotated
@@ -114,8 +115,10 @@ def _patch_current(discord_dir: Path, equilotl: Path) -> None:
 
 def _macos_equilotl(package_bin: Path) -> Path | None:
     configured = os.environ.get("DISCORD_EQUICORD_EQUILOTL")
+    path_command = shutil.which("equilotl")
     candidates = (
         Path(configured) if configured else None,
+        Path(path_command) if path_command else None,
         user_bin_home() / "EquilotlCli-darwin-arm64",
         package_bin / "EquilotlCli-darwin-arm64",
     )
@@ -131,8 +134,10 @@ def _macos_equilotl(package_bin: Path) -> Path | None:
 
 def _linux_equilotl(package_bin: Path) -> Path:
     configured = os.environ.get("DISCORD_EQUICORD_EQUILOTL")
+    path_command = shutil.which("equilotl")
     candidates = (
         Path(configured) if configured else None,
+        Path(path_command) if path_command else None,
         user_bin_home() / "EquilotlCli-linux",
         package_bin / "EquilotlCli-linux",
     )
@@ -173,29 +178,28 @@ def _repair_macos(package_bin: Path) -> None:
     resources = app / "Contents/Resources"
     if not (resources / "app.asar").is_file():
         return
-    if _macos_equicord_is_patched(resources):
-        _set_macos_asar_lock(resources, locked=True)
-        return
     equilotl = _macos_equilotl(package_bin)
     if equilotl is None:
         return
 
     _set_macos_asar_lock(resources, locked=False)
-    environment = {"HOME": os.fspath(Path.home())}
-    result = run(
-        (equilotl, "--repair", "--branch", "stable"),
-        check=False,
-        env=environment,
-    )
-    if result.returncode != 0:
+    try:
+        environment = {"HOME": os.fspath(Path.home())}
         result = run(
-            (equilotl, "--install", "--branch", "stable"),
+            (equilotl, "--repair", "--branch", "stable"),
             check=False,
             env=environment,
         )
-    if result.returncode != 0 or not _macos_equicord_is_patched(resources):
-        raise DotfilesError("discord-equicord: failed to patch Discord on macOS")
-    _set_macos_asar_lock(resources, locked=True)
+        if result.returncode != 0:
+            result = run(
+                (equilotl, "--install", "--branch", "stable"),
+                check=False,
+                env=environment,
+            )
+        if result.returncode != 0 or not _macos_equicord_is_patched(resources):
+            raise DotfilesError("discord-equicord: failed to patch Discord on macOS")
+    finally:
+        _set_macos_asar_lock(resources, locked=True)
 
 
 def main(

@@ -5,23 +5,11 @@
     - repo-tools
     - scripts
 
-- name: Install upstream script commands
-  ansible.builtin.import_tasks: upstream.yml
-  tags:
-    - repo-tools
-    - scripts
-    - upstream
-
 - name: Verify repo-local commands
   ansible.builtin.import_tasks: verify.yml
   tags:
     - repo-tools
     - verify
-
-- name: Install Bun tools
-  ansible.builtin.import_tasks: bun.yml
-  tags:
-    - bun
 
 - name: Install Nix tools
   ansible.builtin.import_tasks: nix.yml

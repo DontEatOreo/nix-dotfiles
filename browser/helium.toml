@@ -16,7 +16,7 @@ flags = [
 ]
 
 [browser.linux]
-app_dir = "${data_home}/dotfiles/helium/current"
+app_dir = "/home/linuxbrew/.linuxbrew/opt/helium-linux/libexec"
 desktop_id = "helium-browser"
 portal_app_id = "net.imput.helium"
 wrapper_flags = [

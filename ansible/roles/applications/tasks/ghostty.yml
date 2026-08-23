@@ -1,27 +1,4 @@
 ---
-- name: Detect Ghostty
-  ansible.builtin.command:
-    argv:
-      - ghostty
-      - +version
-  changed_when: false
-  failed_when: false
-  check_mode: false
-  register: applications_ghostty
-  when: platform_is_linux
-
-- name: Require Ghostty from the native Linux host or image
-  ansible.builtin.assert:
-    that:
-      - applications_ghostty.rc == 0
-    fail_msg: >-
-      Ghostty is missing or cannot run. Spectrum supplies the patched native
-      build in its BlueBuild image and NixOS supplies packages.ghostty-patched;
-      this role does not install GUI applications through Nix on other Linux
-      hosts.
-  when:
-    - platform_is_linux
-
 - name: Keep Ghostty's macOS signing identity stable
   dotfiles_codesign:
     bundle: "{{ platform_homebrew_prefix }}/opt/ghostty-patched/Ghostty.app"

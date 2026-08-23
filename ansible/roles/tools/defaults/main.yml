@@ -5,18 +5,6 @@ tools_homebrew_commands:
 tools_python_tools:
   - phone-mirror
 
-tools_upstream_script_tools:
-  - name: yt-dlp-script
-    url: https://raw.githubusercontent.com/euvlok/pkgs/HEAD/pkgs/by-name/yt/yt-dlp-script/yt-dlp-script.sh
-    dest: "{{ dotfiles_bin_dir }}/yt-dlp-script"
-    platforms:
-      - Darwin
-      - Linux
-
-tools_bun_global_packages:
-  - package: "@openai/codex"
-    bin: codex
-
 tools_determinate_nix_installer_url: https://install.determinate.systems/nix
 tools_determinate_nix_pkg_url: https://install.determinate.systems/determinate-pkg/stable/Universal
 tools_determinate_nix_team_id: X3JQ4VPJZ6

@@ -15,10 +15,15 @@ brew "gradle"
 brew "maven"
 brew "node"
 brew "opencode"
-brew "openjdk@21"
 brew "ruby"
 brew "ruby-lsp"
 brew "rustup"
+
+if OS.mac?
+  cask "temurin@21"
+else
+  brew "openjdk@21"
+end
 
 # Shells and prompts
 brew "atuin", restart_service: true
@@ -114,6 +119,7 @@ brew "gdb" if OS.linux?
 # Editors and terminals
 brew "4evy/dotfiles/helix-tip"
 brew "yazi"
+cask "codex"
 
 # File management and archives
 brew "chafa"
@@ -165,15 +171,17 @@ brew "yq"
 
 # System and misc
 brew "btop"
+brew "4evy/dotfiles/browser-configurer"
 brew "fastfetch"
 brew "fzf"
 brew "ghidra"
-brew "4evy/dotfiles/kanata-with-cmd"
+brew "4evy/dotfiles/equilotl"
 brew "4evy/dotfiles/terminal-theme-tools"
 
-# The host integration for Kanata remains in Ansible: Linux needs uinput,
-# udev, and systemd setup, while macOS needs its signed launch daemon.
+# Linux's image owns Kanata's executable, configuration, and host integration.
+# macOS keeps its Brew-provided binary and signed launch daemon in Ansible.
 if OS.mac?
+  brew "4evy/dotfiles/kanata-with-cmd"
   brew "gettext"
   brew "hidapi"
   brew "zig"
@@ -187,6 +195,7 @@ brew "tlrc"
 brew "tokei"
 brew "ty"
 brew "yt-dlp"
+brew "4evy/dotfiles/yt-dlp-script"
 
 if OS.linux?
   brew "wl-clipboard"
@@ -215,14 +224,62 @@ if OS.mac?
   cask "itsycal"
   cask "libreoffice"
   cask "prismlauncher"
-  brew "4evy/dotfiles/raycast"
+  # Let the official cask adopt installations created by the retired local
+  # Raycast manager during the one-time migration.
+  cask "raycast", args: { force: true }
   cask "rustdesk"
   cask "shottr"
   brew "4evy/dotfiles/shottr-license"
   cask "stats"
   cask "telegram"
   cask "visual-studio-code"
+else
+  brew "4evy/dotfiles/helium-linux"
 end
+
+# Brew Bundle installs these through the native editor CLI on both Spectrum
+# and macOS, keeping editor packages in the same manifest as the editor.
+vscode "astral-sh.ty"
+vscode "biomejs.biome"
+vscode "bradlc.vscode-tailwindcss"
+vscode "catppuccin.catppuccin-vsc-icons"
+vscode "charliermarsh.ruff"
+vscode "christian-kohler.path-intellisense"
+vscode "csstools.postcss"
+vscode "davidanson.vscode-markdownlint"
+vscode "dbaeumer.vscode-eslint"
+vscode "editorconfig.editorconfig"
+vscode "github.vscode-github-actions"
+vscode "golang.go"
+vscode "hangxingliu.vscode-systemd-support"
+vscode "jnoortheen.nix-ide"
+vscode "johnnymorganz.stylua"
+vscode "kdl-org.kdl"
+vscode "mads-hartmann.bash-ide-vscode"
+vscode "mikestead.dotenv"
+vscode "mkhl.shfmt"
+vscode "ms-azuretools.vscode-containers"
+vscode "ms-azuretools.vscode-docker"
+vscode "ms-python.debugpy"
+vscode "ms-python.python"
+vscode "ms-python.vscode-python-envs"
+vscode "ms-vscode.cpptools"
+vscode "ms-vscode.vscode-typescript-next"
+vscode "myriad-dreamin.tinymist"
+vscode "nefrob.vscode-just-syntax"
+vscode "oderwat.indent-rainbow"
+vscode "oven.bun-vscode"
+vscode "redhat.ansible"
+vscode "redhat.vscode-xml"
+vscode "redhat.vscode-yaml"
+vscode "sumneko.lua"
+vscode "svelte.svelte-vscode"
+vscode "tamasfe.even-better-toml"
+vscode "timonwong.shellcheck"
+vscode "tomoki1207.pdf"
+vscode "usernamehw.errorlens"
+vscode "xembly.gomplate"
+vscode "yoavbls.pretty-ts-errors"
 
 # Fonts
 cask "font-jetbrains-mono-nerd-font" if OS.mac?

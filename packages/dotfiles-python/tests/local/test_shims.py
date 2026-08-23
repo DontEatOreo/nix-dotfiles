@@ -15,6 +15,20 @@ class ProcessReplacedError(Exception):
     pass
 
 
+def test_codex_shim_selects_linuxbrew_cask(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    executable = Path("/home/linuxbrew/.linuxbrew/bin/codex")
+    monkeypatch.delenv("CODEX_REAL_BIN", raising=False)
+    monkeypatch.setattr(
+        shims,
+        "is_executable",
+        lambda candidate: Path(candidate) == executable,
+    )
+
+    assert shims._real_codex(Path("/wrapper/codex")) == executable
+
+
 def test_codex_shim_does_not_rewrap_an_active_themed_invocation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -34,7 +48,7 @@ def test_codex_shim_does_not_rewrap_an_active_themed_invocation(
 
     monkeypatch.setattr(sys, "argv", ["/wrapper/codex", "resume", "thread-id"])
     monkeypatch.setenv("TERMINAL_THEME_RUN_ACTIVE", "1")
-    monkeypatch.setattr(shims, "_real_codex", lambda _home, _wrapper: real)
+    monkeypatch.setattr(shims, "_real_codex", lambda _wrapper: real)
     monkeypatch.setattr(shims, "exec_process", record_exec)
 
     with pytest.raises(ProcessReplacedError):

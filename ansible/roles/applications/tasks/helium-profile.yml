@@ -6,7 +6,6 @@
     mode: "0755"
   loop:
     - "{{ applications_helium_root }}"
-    - "{{ applications_helium_installer_bin }}"
     - "{{ applications_helium_profile_dir }}"
 
 - name: Inspect the installed Helium profile avatar
@@ -58,23 +57,10 @@
   no_log: true
   when: lookup('ansible.builtin.env', 'OP_ACCOUNT') | length > 0
 
-- name: Install the pinned Helium profile configurer
-  ansible.builtin.command:
-    argv:
-      - go
-      - install
-      - "{{ applications_helium_browser_go_package }}"
-    chdir: "{{ dotfiles_repo_root }}/browser"
-  environment:
-    PATH: "{{ applications_helium_path }}"
-    GOBIN: "{{ applications_helium_installer_bin }}"
-    CGO_ENABLED: "{{ '0' if applications_helium_platform == 'linux' else '1' }}"
-  changed_when: false
-
 - name: Configure the Helium profile
   ansible.builtin.command:
     argv:
-      - "{{ applications_helium_installer_bin }}/browser"
+      - "{{ platform_homebrew_prefix }}/bin/browser-configurer"
       - configure
       - --config
       - "{{ dotfiles_repo_root }}/browser/helium.toml"

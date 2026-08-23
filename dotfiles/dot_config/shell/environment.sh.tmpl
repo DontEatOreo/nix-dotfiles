@@ -60,14 +60,13 @@ if [[ -n "$_dotfiles_homebrew_prefix" ]]; then
 fi
 unset _dotfiles_homebrew_prefix
 
-# Use Homebrew OpenJDK 21 as the default while preserving an explicitly selected
-# JDK. Pinning the developer JDK keeps Gradle builds stable across Brew upgrades.
-# Its bin directory is added from JAVA_HOME below.
-if [[ -z "${JAVA_HOME:-}" && -n "${HOMEBREW_PREFIX:-}" ]]; then
+# Use the Brewfile-managed JDK 21 as the default while preserving an explicitly
+# selected JDK. Its bin directory is added from JAVA_HOME below.
+if [[ -z "${JAVA_HOME:-}" ]]; then
 {{- if eq .chezmoi.os "darwin" }}
-	_dotfiles_java_home="$HOMEBREW_PREFIX/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
+	_dotfiles_java_home="$(/usr/libexec/java_home -v 21 2>/dev/null || true)"
 {{- else }}
-	_dotfiles_java_home="$HOMEBREW_PREFIX/opt/openjdk@21/libexec"
+	_dotfiles_java_home="${HOMEBREW_PREFIX:-}/opt/openjdk@21/libexec"
 {{- end }}
 	if [[ -x "$_dotfiles_java_home/bin/java" ]]; then
 		export JAVA_HOME="$_dotfiles_java_home"

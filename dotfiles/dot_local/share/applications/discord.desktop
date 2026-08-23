@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Discord
+StartupWMClass=discord
+Comment=All-in-one voice and text chat
+GenericName=Internet Messenger
+Exec=discord-equicord --url -- %u
+Icon=discord
+Type=Application
+Categories=Network;InstantMessaging;
+MimeType=x-scheme-handler/discord;
+Terminal=false

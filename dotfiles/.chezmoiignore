@@ -23,6 +23,7 @@ node_modules/**
 .oh-my-zsh/
 .fzf-tab-completion/
 .local/bin/
+.local/share/applications/
 .config/atuin/
 .config/autostart/
 .config/ghostty/

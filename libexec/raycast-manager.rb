@@ -1,10 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "digest"
 require "fileutils"
 require "json"
-require "open3"
 require "open-uri"
 require "openssl"
 require "optparse"
@@ -17,22 +15,14 @@ require "timeout"
 require "tmpdir"
 require "uri"
 
-# Installs and configures Raycast using dotfiles-managed data.
+# Configures the Homebrew-managed Raycast app using dotfiles-managed data.
 module Raycast
   PROGRAM_NAME = "raycast-manager"
   APP_NAME = "Raycast"
-  EXPECTED_BUNDLE_ID = "com.raycast.macos"
   HTTP_OPEN_TIMEOUT = 30
   HTTP_READ_TIMEOUT = 300
   USER_AGENT = "#{PROGRAM_NAME}/6".freeze
-  DMG_CHECKSUM_PATTERN = /\A[a-f0-9]{32}\z/i
-  RELEASE_URL_PATTERN = %r{
-    \Ahttps://x-r2\.raycast-releases\.com/
-    Raycast_(\d+(?:\.\d+)+)_[a-f0-9]+_arm64\.dmg
-    \z
-  }ix
 
-  Release = Data.define(:uri, :version, :checksum).freeze
   Profile = Data.define(
     :current_user,
     :oauth_token,
@@ -52,8 +42,7 @@ module Raycast
                 :disable_ai_cli,
                 :keydump_hook,
                 :lock_file,
-                :profile_file,
-                :release_api
+                :profile_file
 
     def initialize(environment: ENV, home: Pathname(Dir.home))
       @app = path(environment.fetch("RAYCAST_APP", "/Applications/Raycast.app"))
@@ -100,24 +89,12 @@ module Raycast
         ),
       )
       @avatar_source = optional_path(environment.fetch("RAYCAST_AVATAR_SRC", nil))
-      @release_api = URI(
-        environment.fetch(
-          "RAYCAST_RELEASE_API",
-          "https://x.raycast-releases.com/releases/latest",
-        ),
-      )
-      unless @release_api.is_a?(URI::HTTP) && @release_api.host
-        raise Error, "Raycast release API must use HTTP(S): #{@release_api}"
-      end
-
       @lock_file = path(
         environment.fetch(
           "RAYCAST_LOCK_FILE",
           Pathname(Dir.tmpdir)/"#{PROGRAM_NAME}-#{Process.uid}.lock",
         ),
       )
-    rescue URI::InvalidURIError => e
-      raise Error, "invalid Raycast release API URL: #{e.message}"
     end
 
     private
@@ -131,7 +108,7 @@ module Raycast
     end
   end
 
-  # Owns Raycast installation, local database configuration, and lifecycle.
+  # Applies the dotfiles-owned profile to the Homebrew-managed application.
   class Manager
     WAIT_TIMEOUT = 30
     WAIT_INTERVAL = 1
@@ -151,67 +128,6 @@ module Raycast
         lock.flock(File::LOCK_EX)
         yield
       end
-    end
-
-    def install_latest(force: false)
-      installed_version = app_version(@configuration.app)
-      release = latest_release(current_version: force ? nil : installed_version)
-      unless release
-        raise Error, "Raycast release API reported an absent app as current" unless installed_version
-
-        log "Raycast #{installed_version} is current"
-        return false
-      end
-      if !force && installed_version && installed_version >= release.version
-        log "Raycast #{installed_version} is current"
-        return false
-      end
-
-      Dir.mktmpdir("raycast-") do |directory|
-        root = Pathname(directory)
-        image = root/"Raycast.dmg"
-        mount = root/"mount"
-        mount.mkpath
-        log "downloading Raycast #{release.version}"
-        download(release.uri, image)
-        verify_dmg_checksum(image, release.checksum)
-        system(
-          "/usr/bin/hdiutil",
-          "verify",
-          image.to_s,
-          out:       File::NULL,
-          err:       File::NULL,
-          exception: true,
-        )
-        attached = false
-        begin
-          system(
-            "/usr/bin/hdiutil",
-            "attach",
-            image.to_s,
-            "-nobrowse",
-            "-readonly",
-            "-mountpoint",
-            mount.to_s,
-            out:       File::NULL,
-            err:       File::NULL,
-            exception: true,
-          )
-          attached = true
-          install_app(mount/"#{APP_NAME}.app", force:)
-        ensure
-          if attached
-            system(
-              "/usr/bin/hdiutil",
-              "detach",
-              mount.to_s,
-              out: File::NULL,
-              err: File::NULL,
-            )
-          end
-        end
-      end
-      true
     end
 
     def configure(if_present: false)
@@ -270,61 +186,6 @@ module Raycast
       true
     end
 
-    def refresh(force: false)
-      install_latest(force:)
-      configure(if_present: true)
-    end
-
-    def installed_version
-      app_version(@configuration.app)
-    end
-
-    def latest_release(current_version: nil)
-      endpoint = @configuration.release_api.dup
-      endpoint.query = URI.encode_www_form(
-        "platform"     => "macos",
-        "architecture" => "arm64",
-        "version"      => (current_version || Gem::Version.new("0.0.0.0")).to_s,
-      )
-      response_status = nil
-      response_body = URI.open(
-        endpoint,
-        "Accept" => "application/json",
-        "User-Agent" => USER_AGENT,
-        open_timeout: HTTP_OPEN_TIMEOUT,
-        read_timeout: HTTP_READ_TIMEOUT,
-      ) do |response|
-        response_status = response.status.first
-
-        response.read unless response_status == "204"
-      end
-      return if response_status == "204"
-
-      payload = JSON.parse(response_body)
-      version = parse_version(payload.fetch("version"))
-      download_url = payload.fetch("download_url")
-      match = RELEASE_URL_PATTERN.match(download_url)
-      raise Error, "Raycast release API returned an unexpected Apple Silicon DMG URL" unless match
-      unless parse_version(match[1]) == version
-        raise Error, "Raycast release API returned mismatched release and download versions"
-      end
-
-      Release.new(
-        uri:      URI(download_url),
-        version:,
-        checksum: parse_dmg_checksum(payload["checksum"]),
-      )
-    rescue JSON::ParserError, KeyError, TypeError, URI::InvalidURIError => e
-      raise Error, "invalid response from the Raycast release API: #{e.message}"
-    rescue IOError,
-           OpenURI::HTTPError,
-           OpenSSL::SSL::SSLError,
-           SocketError,
-           SystemCallError,
-           Timeout::Error => e
-      raise Error, "could not read the Raycast release API: #{e.message}"
-    end
-
     def file_url(path)
       escaped = URI::DEFAULT_PARSER.escape(Pathname(path).expand_path.to_s)
       URI::File.build(path: escaped).to_s
@@ -332,107 +193,10 @@ module Raycast
 
     private
 
-    def install_app(source, force: false)
-      source = Pathname(source).expand_path
-      source_version = validate_app(source)
-      installed_version = app_version(@configuration.app)
-      if !force && installed_version && installed_version >= source_version
-        log "keeping Raycast #{installed_version} in #{@configuration.app}"
-        return
-      end
-
-      destination = @configuration.app
-      destination.dirname.mkpath
-      transaction = Pathname(
-        Dir.mktmpdir(
-          ".#{destination.basename}.install-",
-          destination.dirname.to_s,
-        ),
-      )
-      staging = transaction/"staging.app"
-      backup = transaction/"backup.app"
-      system "/usr/bin/ditto", source.to_s, staging.to_s, exception: true
-      validate_app(staging)
-      system(
-        "/usr/bin/killall",
-        APP_NAME,
-        out: File::NULL,
-        err: File::NULL,
-      )
-
-      File.rename(destination, backup) if path_exists?(destination)
-      begin
-        File.rename(staging, destination)
-      rescue StandardError
-        File.rename(backup, destination) if path_exists?(backup) && !path_exists?(destination)
-        raise
-      end
-      log "installed Raycast #{source_version} in #{destination}"
-    ensure
-      if defined?(backup) && path_exists?(backup) && !path_exists?(@configuration.app)
-        File.rename(backup, @configuration.app)
-      end
-      remove_path(transaction) if defined?(transaction)
-    end
-
-    def validate_app(app)
-      require_directory(app)
-      plist = require_file(app/"Contents/Info.plist")
-      executable = require_file(app/"Contents/MacOS/#{APP_NAME}")
-      raise Error, "Raycast executable is not executable: #{executable}" unless executable.executable?
-
-      bundle_id = plist_value(plist, "CFBundleIdentifier")
-      raise Error, "unexpected Raycast bundle identifier: #{bundle_id.inspect}" unless bundle_id == EXPECTED_BUNDLE_ID
-
-      app_version(app) || raise(Error, "Raycast app is missing its version")
-    end
-
-    def app_version(app)
-      plist = Pathname(app)/"Contents/Info.plist"
-      return unless plist.file?
-
-      parse_version(plist_value(plist, "CFBundleShortVersionString"))
-    end
-
-    def plist_value(plist, key)
-      stdout, stderr, status = Open3.capture3(
-        "/usr/bin/plutil",
-        "-extract",
-        key,
-        "raw",
-        "-o",
-        "-",
-        plist.to_s,
-      )
-      return stdout.strip if status.success?
-
-      details = stderr.strip
-      details = "plutil failed with exit #{status.exitstatus}" if details.empty?
-      raise Error, details
-    end
-
     def parse_version(value)
       Gem::Version.new(value.to_s)
     rescue ArgumentError => e
       raise Error, "invalid Raycast version #{value.inspect}: #{e.message}"
-    end
-
-    def parse_dmg_checksum(value)
-      return if value.nil?
-
-      checksum = value.to_s
-      raise Error, "Raycast release API returned an unexpected checksum" unless checksum.match?(DMG_CHECKSUM_PATTERN)
-
-      checksum.downcase
-    end
-
-    def verify_dmg_checksum(image, checksum)
-      return unless checksum
-
-      actual = Digest::MD5.file(image).hexdigest
-      return if actual.casecmp?(checksum)
-
-      raise Error, "downloaded Raycast DMG checksum mismatch"
     end
 
     def node_directory
@@ -683,16 +447,6 @@ module Raycast
       path
     end
 
-    def path_exists?(path)
-      path.exist? || path.symlink?
-    end
-
-    def remove_path(path)
-      return unless path && path_exists?(path)
-
-      FileUtils.rm_rf(path)
-    end
-
     def log(message)
       warn "#{PROGRAM_NAME}: #{message}"
     end
@@ -712,22 +466,6 @@ module Raycast
     def run(arguments)
       command = arguments.shift
       case command
-      when "install"
-        force = false
-        parser = OptionParser.new do |options|
-          options.banner = "Usage: #{PROGRAM_NAME} install [--force]"
-          options.on("--force", "Replace the app even when it is current") do
-            force = true
-          end
-          options.on("-h", "--help", "Show this help") do
-            @output.puts options
-            return 0
-          end
-        end
-        parser.parse!(arguments)
-        reject_arguments(arguments)
-
-        @manager.with_lock { @manager.install_latest(force:) }
       when "configure"
         if_present = false
         parser = OptionParser.new do |options|
@@ -746,25 +484,6 @@ module Raycast
         @manager.with_lock do
           @manager.configure(if_present:)
         end
-      when "refresh"
-        force = false
-        parser = OptionParser.new do |options|
-          options.banner = "Usage: #{PROGRAM_NAME} refresh [--force]"
-          options.on("--force", "Replace the app even when it is current") do
-            force = true
-          end
-          options.on("-h", "--help", "Show this help") do
-            @output.puts options
-            return 0
-          end
-        end
-        parser.parse!(arguments)
-        reject_arguments(arguments)
-
-        @manager.with_lock { @manager.refresh(force:) }
-      when "version"
-        reject_arguments(arguments)
-        @output.puts(@manager.installed_version || "not installed")
       when "help", "--help", "-h", nil
         reject_arguments(arguments)
         @output.puts help
@@ -781,10 +500,7 @@ module Raycast
         Usage: #{PROGRAM_NAME} <command> [options]
 
         Commands:
-          install [--force]      Download and install the latest Raycast release
           configure             Apply the local profile, aliases, and AI-disable policy
-          refresh [--force]      Install latest, then apply local configuration
-          version               Print the installed Raycast version
       TEXT
     end
 

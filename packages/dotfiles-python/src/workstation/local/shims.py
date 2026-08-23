@@ -9,14 +9,11 @@ from workstation.lib.commands import exec_process, which
 from workstation.lib.files import is_executable
 
 
-def _real_codex(home: Path, wrapper: Path) -> Path:
+def _real_codex(wrapper: Path) -> Path:
     candidates = (
         os.environ.get("CODEX_REAL_BIN"),
-        home / ".bun/bin/codex",
-        home / ".cache/.bun/bin/codex",
-        home / ".npm/bin/codex",
-        home / ".bun/install/global/node_modules/.bin/codex",
         Path("/opt/homebrew/bin/codex"),
+        Path("/home/linuxbrew/.linuxbrew/bin/codex"),
         Path("/usr/local/bin/codex"),
         Path("/usr/bin/codex"),
     )
@@ -32,7 +29,7 @@ def _real_codex(home: Path, wrapper: Path) -> Path:
 def codex_entrypoint() -> None:
     home = Path.home()
     wrapper = Path(sys.argv[0]).resolve()
-    real = _real_codex(home, wrapper)
+    real = _real_codex(wrapper)
     arguments = list(sys.argv[1:])
     if os.environ.get("TERMINAL_THEME_RUN_ACTIVE"):
         exec_process(real, arguments)

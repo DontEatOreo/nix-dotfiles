@@ -7,13 +7,10 @@ applications_helium_config: >-
     )
     | community.general.from_toml
   }}
-applications_helium_linux_current: >-
+applications_helium_linux_app_dir: >-
   {{
     applications_helium_config.browser.linux.app_dir
     | replace('${home}', dotfiles_home_dir)
     | replace('${config_home}', dotfiles_config_home)
     | replace('${data_home}', dotfiles_data_home)
   }}
-# renovate: datasource=git-refs depName=https://github.com/4evy/browser currentValue=HEAD
-applications_helium_browser_go_package: >-
-  github.com/4evy/browser/cmd/browser@b4f39de39c1d2cf516e78cc2a52803777f6fb02c

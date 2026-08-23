@@ -6,7 +6,6 @@ require "open3"
 require "pathname"
 require "rbconfig"
 require "tmpdir"
-require "webmock/minitest"
 
 REPOSITORY_ROOT = Pathname(__dir__).parent.freeze
 
@@ -102,91 +101,22 @@ class RubyToolsTest < Minitest::Test
     end
   end
 
-  def test_raycast_latest_release_uses_release_api
-    request = stub_request(:get, "https://example.com/releases/latest").with(
-      query:   {
-        "architecture" => "arm64",
-        "platform"     => "macos",
-        "version"      => "0.0.0.0",
-      },
-      headers: {
-        "Accept"     => "application/json",
-        "User-Agent" => Raycast::USER_AGENT,
-      },
-    ).to_return(
-      status:  200,
-      headers: { "Content-Type" => "application/json" },
-      body:    JSON.generate(
-        "version"      => "2.0.3.0",
-        "download_url" =>
-                          "https://x-r2.raycast-releases.com/" \
-                          "Raycast_2.0.3.0_bbbb_arm64.dmg",
-      ),
-    )
-    configuration = Raycast::Configuration.new(
-      environment: { "RAYCAST_RELEASE_API" => "https://example.com/releases/latest" },
-    )
+  def test_raycast_configuration_can_skip_an_absent_profile
+    Dir.mktmpdir("raycast-manager-test-") do |directory|
+      root = Pathname(directory)
+      app = root/"Raycast.app"
+      app.mkpath
+      data_addon = root/"data.darwin-arm64.node"
+      data_addon.write("fixture")
+      configuration = Raycast::Configuration.new(
+        environment: {
+          "RAYCAST_APP"          => app.to_s,
+          "RAYCAST_DATA_ADDON"   => data_addon.to_s,
+          "RAYCAST_PROFILE_FILE" => (root/"missing-profile.json").to_s,
+        },
+      )
 
-    release = Raycast::Manager.new(configuration:).latest_release
-
-    assert_equal Gem::Version.new("2.0.3.0"), release.version
-    assert_equal "/Raycast_2.0.3.0_bbbb_arm64.dmg", release.uri.path
-    assert_nil release.checksum
-    assert_requested request
-  end
-
-  def test_raycast_latest_release_reads_optional_dmg_checksum
-    stub_request(:get, "https://example.com/releases/latest").with(
-      query: {
-        "architecture" => "arm64",
-        "platform"     => "macos",
-        "version"      => "0.0.0.0",
-      },
-    ).to_return(
-      status:  200,
-      headers: { "Content-Type" => "application/json" },
-      body:    JSON.generate(
-        "version"      => "2.0.3.0",
-        "download_url" =>
-                          "https://x-r2.raycast-releases.com/" \
-                          "Raycast_2.0.3.0_bbbb_arm64.dmg",
-        "checksum"     => "DE2E95CB97F221D894ED8810A69102CD",
-      ),
-    )
-    configuration = Raycast::Configuration.new(
-      environment: { "RAYCAST_RELEASE_API" => "https://example.com/releases/latest" },
-    )
-
-    release = Raycast::Manager.new(configuration:).latest_release
-
-    assert_equal "de2e95cb97f221d894ed8810a69102cd", release.checksum
-  end
-
-  def test_raycast_latest_release_rejects_unexpected_checksum
-    stub_request(:get, "https://example.com/releases/latest").with(
-      query: {
-        "architecture" => "arm64",
-        "platform"     => "macos",
-        "version"      => "0.0.0.0",
-      },
-    ).to_return(
-      status:  200,
-      headers: { "Content-Type" => "application/json" },
-      body:    JSON.generate(
-        "version"      => "2.0.3.0",
-        "download_url" =>
-                          "https://x-r2.raycast-releases.com/" \
-                          "Raycast_2.0.3.0_bbbb_arm64.dmg",
-        "checksum"     => "not-an-md5",
-      ),
-    )
-    configuration = Raycast::Configuration.new(
-      environment: { "RAYCAST_RELEASE_API" => "https://example.com/releases/latest" },
-    )
-
-    error = assert_raises(Raycast::Error) do
-      Raycast::Manager.new(configuration:).latest_release
+      refute Raycast::Manager.new(configuration:).configure(if_present: true)
     end
-    assert_match(/unexpected checksum/, error.message)
   end
 end

@@ -2,61 +2,27 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "fileutils"
 require "pathname"
 
 brew = "/opt/homebrew/bin/brew"
-formula = "4evy/dotfiles/raycast"
-manager = "/opt/homebrew/bin/raycast-manager"
+brew_ruby = "/opt/homebrew/opt/ruby/bin/ruby"
 repository = Pathname(ENV.fetch("CHEZMOI_WORKING_TREE"))
-tap = Pathname("/opt/homebrew/Library/Taps/4evy/homebrew-dotfiles")
-brew_environment = {
-  "HOMEBREW_NO_AUTO_UPDATE" => "1",
-  "HOMEBREW_NO_ASK" => "1",
-}
+manager = repository/"libexec/raycast-manager.rb"
 
 unless File.executable?(brew)
   warn "raycast: warning: Homebrew not installed; skipping"
   exit 0
 end
 
-{
-  repository/"Formula/raycast.rb" => tap/"Formula/raycast.rb",
-  repository/"libexec/raycast-manager.rb" => tap/"libexec/raycast-manager.rb",
-}.each do |source, destination|
-  unless source.file?
-    warn "raycast: error: missing local tap source #{source}"
-    exit 1
-  end
-
-  destination.dirname.mkpath
-  FileUtils.cp(source, destination)
-end
-
-formula_installed = system(
-  brew_environment,
-  brew,
-  "list",
-  "--versions",
-  formula,
-  out: File::NULL,
-  err: File::NULL,
-)
-brew_action = formula_installed ? "reinstall" : "install"
-unless system(
-  brew_environment,
-  brew,
-  brew_action,
-  formula,
-)
-  warn "raycast: error: could not #{brew_action} #{formula}"
+unless File.executable?(brew_ruby)
+  warn "raycast: error: Homebrew Ruby is not installed"
   exit 1
 end
 
-unless File.executable?(manager)
-  warn "raycast: error: formula did not install #{manager}"
+unless manager.file?
+  warn "raycast: error: missing profile manager #{manager}"
   exit 1
 end
 
-exec manager, "refresh"
+exec brew_ruby, manager.to_s, "configure", "--if-present"
 {{- end -}}
