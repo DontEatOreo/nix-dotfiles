@@ -26,7 +26,7 @@ on:
       - bluebuild/files/system/**
       - dotfiles/dot_config/autostart/1password.desktop
       - dotfiles/dot_config/fontconfig/conf.d/**
-      - dotfiles/dot_config/kanata/kanata.kbd
+      - packages/kanata/kanata.kbd
       - dotfiles/dot_local/bin/executable_*
       - dotfiles/dot_quiltrc
       - packages/dotfiles-python/assets/**

@@ -4,7 +4,10 @@ on:
   pull_request:
     paths: &homebrew-paths
       - .github/workflows/homebrew.yaml
+      - Brewfile
       - Formula/**
+      - npins/sources.json
+      - packages/kanata-with-cmd/**
   push:
     branches:
       - master
@@ -39,3 +42,6 @@ jobs:
 
       - name: Check Formula Style
         run: brew style Formula/*.rb
+
+      - name: Parse Brewfile
+        run: brew bundle list --file Brewfile --all >/dev/null

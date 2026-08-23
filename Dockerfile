@@ -92,20 +92,10 @@ RUN --mount=type=cache,id=dotfiles-zig-global-${TARGETPLATFORM},sharing=shared,t
     export ZIG_GLOBAL_CACHE_DIR=/tmp/dotfiles-zig-cache; \
     zig build --release=small --prefix "${HOME}/.local"
 
-FROM tool-build-base AS upstream-tool-build
-
-COPY --chown=${TEST_UID}:${TEST_GID} ansible/roles/tools/defaults/ ansible/roles/tools/defaults/
-COPY --chown=${TEST_UID}:${TEST_GID} ansible/roles/tools/tasks/upstream.yml ansible/roles/tools/tasks/upstream.yml
-
-RUN set -eu; \
-    export ANSIBLE_BECOME_ASK_PASS=false; \
-    ansible-playbook containers/fedora-smoke-test.yml --tags upstream
-
 FROM tool-build-base AS dotfiles-test
 
 COPY --from=python-tool-build --chown=${TEST_UID}:${TEST_GID} ${TEST_HOME}/.local/ ${TEST_HOME}/.local/
 COPY --from=zig-tool-build --chown=${TEST_UID}:${TEST_GID} ${TEST_HOME}/.local/ ${TEST_HOME}/.local/
-COPY --from=upstream-tool-build --chown=${TEST_UID}:${TEST_GID} ${TEST_HOME}/.local/ ${TEST_HOME}/.local/
 
 # Full-repository validation comes after tool assembly, so lint-only changes do
 # not invalidate downloads or compiled artifacts.

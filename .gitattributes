@@ -85,7 +85,7 @@ dotfiles/.chezmoiremove linguist-language=Ignore-List linguist-detectable
 *.theme linguist-language=INI linguist-detectable
 # Linguist does not have a Kanata language entry; Kanata config uses
 # s-expression syntax, so Scheme is the closest supported highlighter.
-dotfiles/dot_config/kanata/*.kbd linguist-language=Scheme
+**/*.kbd linguist-language=Scheme
 **/*.patch -whitespace linguist-detectable
 
 # Hidden GitHub/VS Code configuration and test fixtures are repo-owned source,
@@ -102,7 +102,6 @@ ansible/tests/fixtures/** -linguist-vendored
 .tool-versions linguist-language=Text linguist-detectable
 containers/*.txt linguist-language=Text linguist-detectable
 dotfiles/.chezmoiversion linguist-language=Text linguist-detectable
-dotfiles/dot_config/Code/User/vscode-extensions.txt linguist-language=Text linguist-detectable
 dotfiles/dot_config/fastfetch/*.txt linguist-language=Text linguist-detectable
 dotfiles/dot_local/bin/symlink_* linguist-language=Text linguist-detectable
 dotfiles/private_dot_ssh/allowed_signers linguist-language=Text linguist-detectable

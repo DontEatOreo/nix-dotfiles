@@ -19,6 +19,9 @@ on:
       - overlays/default.nix
       - packages/bluebuild-v2/**
       - packages/ghostty-patched/**
+      - packages/hyper-window-tiling/**
+      - packages/kanata/**
+      - packages/kanata-with-cmd/**
   push:
     branches: [master]
     paths: *spectrum-paths

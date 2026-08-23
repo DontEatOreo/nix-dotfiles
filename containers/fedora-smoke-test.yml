@@ -29,16 +29,6 @@
       tags:
         - python
 
-    - name: Install upstream script tools
-      ansible.builtin.include_role:
-        name: tools
-        tasks_from: upstream
-        apply:
-          tags:
-            - upstream
-      tags:
-        - upstream
-
     - name: Verify every installed smoke-test tool
       ansible.builtin.include_role:
         name: tools

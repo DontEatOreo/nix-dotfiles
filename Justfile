@@ -321,8 +321,12 @@ _spectrum-validate: (doctor 'spectrum')
     grep -Fq -- '--mount=type=cache,sharing=locked,dst=/var/cache/libdnf5,id=dnf-cache-spectrum-' "$generated"
     grep -Fq 'bluebuild/recipes/spectrum/sources/astral.json /src/sources.json' "$generated"
     grep -Fq 'bluebuild/recipes/spectrum/sources/ghostty.json /src/sources.json' "$generated"
+    grep -Fq 'bluebuild/recipes/spectrum/sources/kanata.json /src/sources.json' "$generated"
+    grep -Fq 'packages/hyper-window-tiling/package.json /src/package.json' "$generated"
     grep -Fq -- '--mount=type=cache,id=spectrum-ghostty-zig-global-v1,sharing=locked,target=/build/zig-cache' "$generated"
     grep -Fq -- '--mount=type=cache,id=spectrum-ghostty-zig-local-v1,sharing=locked,target=/build/source/.zig-cache' "$generated"
+    grep -Fq -- '--mount=type=cache,id=spectrum-hyper-window-tiling-bun-v1,sharing=locked,target=/root/.bun/install/cache' "$generated"
+    grep -Fq -- '--mount=type=cache,id=spectrum-kanata-target-v1,sharing=locked,target=/build/kanata-source/target' "$generated"
     ! grep -Fq 'npins/sources.json /src/' "$generated"
     locked=$(< bluebuild/recipes/spectrum.lock)
     resolved=$(skopeo inspect "docker://${locked%@*}" | jq -r .Digest)
@@ -373,6 +377,7 @@ spectrum-stage: (_linux-only recipe_name())
 spectrum-inspect target=local_ref: (doctor 'build')
     {{ quote(podman) }} run --rm {{ quote(target) }} bootc container lint --fatal-warnings
     {{ quote(podman) }} run --rm --entrypoint ghostty {{ quote(target) }} +version
+    {{ quote(podman) }} run --rm --entrypoint kanata {{ quote(target) }} --version
     {{ quote(podman) }} run --rm --entrypoint bluebuild {{ quote(target) }} --version
     {{ quote(podman) }} run --rm --entrypoint bluebuild {{ quote(target) }} recipe --help >/dev/null
 
@@ -494,7 +499,6 @@ nix: (doctor 'nix') _ensure-nix
 apply: (doctor 'apply')
     chezmoi init \
       --apply \
-      --error-on-conflict \
       --refresh-externals=auto \
       --source {{ quote(repo_dir) }}
 
@@ -537,7 +541,7 @@ _userland:
 
 [private]
 _host:
-    ansible-playbook ansible/site.yml --tags host
+    ansible/bootstrap.sh --tags host
 
 # Format the repository through the flake's treefmt wrapper.
 [group('dev')]
@@ -938,7 +942,7 @@ _check-python: python-complexity python-dead-code python-dependencies python-typ
 # Update every non-frozen npins source.
 [group('dev')]
 source-update:
-    nix shell nixpkgs#npins --command npins update
+    nix shell nixpkgs#npins --command bash .github/renovate/update-npins-lock.sh
     bash bluebuild/recipes/spectrum/sync-sources.sh
 
 # Verify that npins metadata and fetch URLs describe the same sources.
@@ -1036,6 +1040,7 @@ bun-nix-update:
 _check-ruby:
     bundle exec rubocop
     while IFS= read -r -d '' file; do
+      [[ -f $file && ! -L $file ]] || continue
       ruby -c "$file" >/dev/null
     done < <(git ls-files -z --cached --others --exclude-standard -- '*.rb' Brewfile Gemfile)
     bundle exec ruby -Itest test/ruby_tools_test.rb

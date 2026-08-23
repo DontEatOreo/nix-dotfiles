@@ -27,7 +27,7 @@ for command in ansible-lint ansible-playbook terminal-theme-run yamllint; do
 	"${command}" --version >/dev/null
 done
 
-for command in phone-mirror yt-dlp-script; do
+for command in phone-mirror; do
 	command -v "${command}" >/dev/null 2>&1 || fail "command is missing: ${command}"
 done
 
