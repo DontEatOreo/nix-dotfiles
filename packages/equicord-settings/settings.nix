@@ -123,7 +123,7 @@ let
         questButtonLeftClickAction = "open-quests";
         questButtonMiddleClickAction = "plugin-settings";
         questButtonRightClickAction = "context-menu";
-        ignoredQuestIDs.questIDs = [ ];
+        ignoredQuestIds.questIDs = [ ];
         questButtonIncludedTypes = {
           "1" = true;
           "2" = true;
@@ -182,7 +182,7 @@ let
         questCompletedAlertVolume = 100;
         completeVideoQuestsQuicker = true;
         autoCompleteQuestsSimultaneously = true;
-        resumeQuestIDs = { };
+        resumeQuestIds = { };
       };
       readAllNotificationsButton.enable = true;
       relationshipNotifier.enable = true;
