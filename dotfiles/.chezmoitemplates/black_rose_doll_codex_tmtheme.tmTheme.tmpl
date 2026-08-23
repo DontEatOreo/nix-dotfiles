@@ -5,6 +5,12 @@
 {{- $derived := index $brd "_derived" -}}
 {{- $diffAddedBg := index $derived (printf "%sDiffAddedBg" $variant) -}}
 {{- $diffRemovedBg := index $derived (printf "%sDiffRemovedBg" $variant) -}}
+{{- with index . "diffAddedBg" -}}
+{{- $diffAddedBg = . -}}
+{{- end -}}
+{{- with index . "diffRemovedBg" -}}
+{{- $diffRemovedBg = . -}}
+{{- end -}}
 {{- $themeName := "Black Rose Doll Dark" -}}
 {{- $semanticClass := "theme.dark.black-rose-doll-dark" -}}
 {{- if eq $variant "light" -}}
