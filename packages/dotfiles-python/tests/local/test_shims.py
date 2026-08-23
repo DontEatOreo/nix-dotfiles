@@ -29,6 +29,22 @@ def test_codex_shim_selects_linuxbrew_cask(
     assert shims._real_codex(Path("/wrapper/codex")) == executable
 
 
+def test_codex_shim_selects_next_path_executable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wrapper = Path("/wrapper/codex")
+    executable = Path("/bun/bin/codex")
+    monkeypatch.delenv("CODEX_REAL_BIN", raising=False)
+    monkeypatch.setattr(os, "get_exec_path", lambda: ["/wrapper", "/bun/bin"])
+    monkeypatch.setattr(
+        shims,
+        "is_executable",
+        lambda candidate: Path(candidate) in {wrapper, executable},
+    )
+
+    assert shims._real_codex(wrapper) == executable
+
+
 def test_codex_shim_does_not_rewrap_an_active_themed_invocation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

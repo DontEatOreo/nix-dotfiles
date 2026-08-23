@@ -16,12 +16,14 @@ def _real_codex(wrapper: Path) -> Path:
         Path("/home/linuxbrew/.linuxbrew/bin/codex"),
         Path("/usr/local/bin/codex"),
         Path("/usr/bin/codex"),
+        *(Path(directory) / "codex" for directory in os.get_exec_path()),
     )
+    wrapper = wrapper.resolve()
     for candidate in candidates:
         if not candidate:
             continue
         path = Path(candidate)
-        if path != wrapper and is_executable(path):
+        if path.resolve() != wrapper and is_executable(path):
             return path
     raise DotfilesError("codex: real Codex binary not found")
 
