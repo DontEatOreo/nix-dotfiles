@@ -133,3 +133,15 @@ npins/** linguist-generated
 packages/hyper-window-tiling/bun.nix linguist-generated
 packages/**/dist/** linguist-generated
 secrets/*.yaml linguist-generated
+
+# Lock GitHub's native language bar to a fixed six-color palette. Everything
+# is excluded by default; only the fixed-size ballast files below contribute.
+# Clear earlier language overrides so every forge applies the exclusion. The
+# one-byte size steps fix the order while all segments round to the same width.
+* !linguist-language !gitlab-language -linguist-detectable
+.github/linguist-palette/01-red.yaml linguist-language=YAML linguist-detectable -linguist-generated -linguist-vendored -linguist-documentation
+.github/linguist-palette/02-orange.zig linguist-language=Zig linguist-detectable -linguist-generated -linguist-vendored -linguist-documentation
+.github/linguist-palette/03-yellow.js linguist-language=JavaScript linguist-detectable -linguist-generated -linguist-vendored -linguist-documentation
+.github/linguist-palette/04-green.sh linguist-language=Shell linguist-detectable -linguist-generated -linguist-vendored -linguist-documentation
+.github/linguist-palette/05-blue.py linguist-language=Python linguist-detectable -linguist-generated -linguist-vendored -linguist-documentation
+.github/linguist-palette/06-violet.nix linguist-language=Nix linguist-detectable -linguist-generated -linguist-vendored -linguist-documentation
