@@ -39,26 +39,6 @@
           | length > 0
       }}
 
-- name: Install Hyper window tiling build dependencies
-  ansible.builtin.command:
-    argv:
-      - bun
-      - install
-      - --frozen-lockfile
-    chdir: "{{ desktop_hyper_window_tiling_package }}"
-  changed_when: false
-  when: desktop_hyper_has_gnome or desktop_hyper_has_kde
-
-- name: Build Hyper window tiling integrations
-  ansible.builtin.command:
-    argv:
-      - bun
-      - run
-      - build
-    chdir: "{{ desktop_hyper_window_tiling_package }}"
-  changed_when: false
-  when: desktop_hyper_has_gnome or desktop_hyper_has_kde
-
 - name: Configure Hyper window tiling for GNOME
   ansible.builtin.import_tasks: window-tiling-gnome.yml
   when: desktop_hyper_has_gnome

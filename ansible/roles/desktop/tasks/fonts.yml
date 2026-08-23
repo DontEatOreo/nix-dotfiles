@@ -13,16 +13,29 @@
   tags:
     - jetbrains-nerd-font
 
-- name: Require the image-provided bitmap-backed Noto Color Emoji alias
+- name: Resolve the image-provided bitmap-backed Noto Color Emoji alias
   ansible.builtin.command:
     argv:
       - fc-match
       - --format=%{file}
       - Noto Color Emoji Bitmap
   changed_when: false
+  check_mode: false
   register: desktop_color_emoji_verify
-  failed_when: >-
-    desktop_color_emoji_verify.stdout != desktop_color_emoji_font_file
+  tags:
+    - color-emoji-font
+    - font-cache
+
+- name: Require the image-provided bitmap-backed Noto Color Emoji alias
+  ansible.builtin.assert:
+    that:
+      - desktop_color_emoji_verify.stdout | trim == desktop_color_emoji_font_file
+    fail_msg: >-
+      The booted image does not provide the expected bitmap emoji font at
+      {{ desktop_color_emoji_font_file }}. Fontconfig resolved the alias to
+      {{ desktop_color_emoji_verify.stdout | trim | default('nothing', true) }}.
+      Update and reboot into the current Spectrum image before applying host
+      configuration.
   tags:
     - color-emoji-font
     - font-cache

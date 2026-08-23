@@ -18,25 +18,3 @@
   when: desktop_flatpak_command.rc == 0
   tags:
     - flatpak-nvidia
-
-- name: Configure user Flatpak remotes
-  community.general.flatpak_remote:
-    name: "{{ item.name }}"
-    flatpakrepo_url: "{{ item.url }}"
-    method: user
-    state: present
-  loop: "{{ desktop_flatpak_remotes }}"
-  loop_control:
-    label: "{{ item.name }}"
-  when: desktop_flatpak_command.rc == 0
-
-- name: Install user Flatpak build prerequisites by remote
-  community.general.flatpak:
-    name: "{{ item.names }}"
-    remote: "{{ item.remote }}"
-    method: user
-    state: present
-  loop: "{{ desktop_flatpak_packages }}"
-  loop_control:
-    label: "{{ item.remote }}"
-  when: desktop_flatpak_command.rc == 0

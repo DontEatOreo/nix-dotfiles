@@ -254,10 +254,9 @@
       lookup('ansible.builtin.env', 'DOTFILES_RUSTDESK_SELINUX')
       | default('1', true) != '0'
 
-- name: Enable and start the native RustDesk service
+- name: Start the image-enabled RustDesk service
   ansible.builtin.systemd_service:
     name: rustdesk.service
-    enabled: true
     state: >-
       {{
         'restarted'

@@ -1,21 +1,4 @@
 ---
-desktop_flatpak_remotes:
-  - name: flathub
-    url: https://dl.flathub.org/repo/flathub.flatpakrepo
-  - name: flathub-beta
-    url: https://flathub.org/beta-repo/flathub-beta.flatpakrepo
-  - name: gnome-nightly
-    url: https://nightly.gnome.org/gnome-nightly.flatpakrepo
-
-desktop_flatpak_packages:
-  - names:
-      - org.flatpak.Builder
-    remote: flathub
-  - names:
-      - org.gnome.Platform//master
-      - org.gnome.Sdk//master
-    remote: gnome-nightly
-
 desktop_vicinae_binding_path: >-
   /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vicinae/
 desktop_vicinae_command: /usr/bin/vicinae

@@ -14,8 +14,22 @@ modules:
     dest: /usr
 
   - type: copy@v1
+    from: hyper-window-tiling
+    src: /out/usr
+    dest: /usr
+
+  - type: copy@v1
+    from: kanata
+    src: /out/usr
+    dest: /usr
+
+  - type: copy@v1
     src: bluebuild/files/system
     dest: /
+
+  - type: copy@v1
+    src: packages/kanata/kanata.kbd
+    dest: /usr/libexec/dotfiles/kanata/kanata.kbd
 
   - type: copy@v1
     src: bluebuild/files/kmscon

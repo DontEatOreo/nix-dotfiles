@@ -1,44 +1,22 @@
 ---
-- name: Check the Homebrew-managed Kanata binary
+- name: Require image-provided Kanata integration
   ansible.builtin.stat:
-    path: "{{ platform_homebrew_prefix }}/bin/kanata"
-  register: keyboard_kanata_homebrew_binary
+    path: "{{ item }}"
+  loop:
+    - /usr/bin/kanata
+    - /usr/libexec/dotfiles/kanata/kanata.kbd
+    - /usr/lib/udev/rules.d/70-dotfiles-uinput.rules
+    - /usr/lib/modules-load.d/uinput.conf
+    - /usr/lib/systemd/system/kanata-main.service
+  register: keyboard_kanata_image_files
 
-- name: Require Homebrew-managed Kanata
+- name: Verify image-provided Kanata integration
   ansible.builtin.assert:
     that:
-      - keyboard_kanata_homebrew_binary.stat.executable | default(false)
+      - keyboard_kanata_image_files.results | map(attribute='stat.exists') | min
     fail_msg: >-
-      Kanata is missing from Homebrew. Apply the Brewfile before configuring
-      the Linux keyboard service.
-
-- name: Create Kanata system directories
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    mode: "0755"
-  become: true
-  loop:
-    - /usr/local/bin
-    - /etc/kanata
-    - /etc/udev/rules.d
-    - /etc/systemd/system
-
-- name: Install Kanata binary
-  ansible.builtin.copy:
-    src: "{{ platform_homebrew_prefix }}/bin/kanata"
-    dest: /usr/local/bin/kanata
-    remote_src: true
-    mode: "0755"
-  become: true
-  register: keyboard_kanata_binary
-
-- name: Ensure Kanata uinput group exists
-  ansible.builtin.group:
-    name: uinput
-    state: present
-    system: true
-  become: true
+      Kanata host integration is missing from the Spectrum image. Build and
+      boot the current image before applying keyboard configuration.
 
 - name: Add host user to Kanata device groups
   ansible.builtin.user:
@@ -49,43 +27,18 @@
     append: true
   become: true
 
-- name: Install Kanata configuration
-  ansible.builtin.copy:
-    src: "{{ dotfiles_repo_root }}/dotfiles/dot_config/kanata/kanata.kbd"
-    dest: /etc/kanata/kanata.kbd
-    mode: "0644"
-  become: true
-  register: keyboard_kanata_config
-
-- name: Install Kanata udev rules
-  ansible.builtin.copy:
-    src: uinput.rules
-    dest: /etc/udev/rules.d/70-dotfiles-uinput.rules
-    mode: "0644"
-  become: true
-  notify: Reload Kanata udev rules
-
-- name: Install Kanata systemd service
-  ansible.builtin.copy:
-    src: kanata.service
-    dest: /etc/systemd/system/kanata-main.service
-    mode: "0644"
-  become: true
-  register: keyboard_kanata_unit
-
-- name: Load and persist the uinput kernel module
+- name: Load the image-configured uinput kernel module now
   community.general.modprobe:
     name: uinput
     state: present
-    persistent: present
   become: true
 
 - name: Validate installed Kanata configuration
   ansible.builtin.command:
     argv:
-      - /usr/local/bin/kanata
+      - /usr/bin/kanata
       - --cfg
-      - /etc/kanata/kanata.kbd
+      - /usr/libexec/dotfiles/kanata/kanata.kbd
       - --check
       - --no-wait
   changed_when: false
@@ -104,17 +57,8 @@
     - not keyboard_keep_input_remapper | bool
     - "'input-remapper.service' in ansible_facts.services"
 
-- name: Enable Kanata system service
+- name: Start the image-enabled Kanata system service
   ansible.builtin.systemd_service:
     name: kanata-main.service
-    enabled: true
-    daemon_reload: true
-    state: >-
-      {{
-        'restarted'
-        if keyboard_kanata_binary is changed
-        or keyboard_kanata_config is changed
-        or keyboard_kanata_unit is changed
-        else 'started'
-      }}
+    state: started
   become: true

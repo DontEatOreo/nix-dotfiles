@@ -1,26 +1,16 @@
 ---
-- name: Create Hyper KWin script directories
-  ansible.builtin.file:
-    path: "{{ desktop_hyper_window_tiling_kwin_dir }}/{{ item }}"
-    state: directory
-    mode: "0755"
-  loop:
-    - ""
-    - contents
-    - contents/code
+- name: Check the image-provided Hyper KWin script
+  ansible.builtin.stat:
+    path: "{{ desktop_hyper_window_tiling_kwin_dir }}/contents/code/main.js"
+  register: desktop_hyper_kwin_script
 
-- name: Install Hyper KWin scripts
-  ansible.builtin.copy:
-    src: "{{ item.src }}"
-    dest: "{{ desktop_hyper_window_tiling_kwin_dir }}/{{ item.dest }}"
-    mode: "0644"
-  loop:
-    - src: "{{ desktop_hyper_window_tiling_package }}/kde/metadata.json"
-      dest: metadata.json
-    - src: >-
-        {{ desktop_hyper_window_tiling_package }}/dist/kde/contents/code/main.js
-      dest: contents/code/main.js
-  register: desktop_hyper_kwin_scripts
+- name: Require the image-provided Hyper KWin script
+  ansible.builtin.assert:
+    that:
+      - desktop_hyper_kwin_script.stat.isreg | default(false)
+    fail_msg: >-
+      Hyper window tiling is missing from the Spectrum image. Build and boot
+      the current image before applying desktop configuration.
 
 - name: Enable Hyper KWin script
   community.general.ini_file:
@@ -55,4 +45,4 @@
   when:
     - not ansible_check_mode
     - desktop_hyper_qdbus.rc == 0
-    - desktop_hyper_kwin_scripts is changed or desktop_hyper_kwin_config is changed
+    - desktop_hyper_kwin_config is changed

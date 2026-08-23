@@ -1,14 +1,4 @@
 ---
-- name: Detect GNOME Shell version
-  ansible.builtin.command:
-    argv:
-      - gnome-shell
-      - --version
-  changed_when: false
-  failed_when: false
-  check_mode: false
-  register: keyboard_gnome_shell_version
-
 - name: Detect GNOME extension command
   ansible.builtin.command:
     argv:
@@ -19,14 +9,6 @@
   check_mode: false
   register: keyboard_gnome_extensions_command
 
-- name: Select GNOME Shell major version
-  ansible.builtin.set_fact:
-    keyboard_gnome_shell_major: >-
-      {{ keyboard_gnome_shell_version.stdout | regex_search('[0-9]+') | default('') }}
-  when:
-    - keyboard_gnome_shell_version.rc == 0
-    - keyboard_gnome_extensions_command.rc == 0
-
 - name: Configure Toshy for a supported GNOME session
   ansible.builtin.import_tasks: gnome-context-supported.yml
-  when: keyboard_gnome_shell_major | default('') | length > 0
+  when: keyboard_gnome_extensions_command.rc == 0

@@ -45,3 +45,8 @@ project \
 	  ghostty_zig_x86_64_linux: (.pins.ghostty_zig_x86_64_linux | {hash, url})
 	}}' \
 	"$projection_directory/ghostty.json"
+project \
+	'{pins: {
+	  kanata_homebrew_archive: (.pins.kanata_homebrew_archive | {hash, url})
+	}}' \
+	"$projection_directory/kanata.json"

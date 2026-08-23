@@ -99,7 +99,38 @@ modules:
         - name: NotoColorEmojiBitmap
           url: https://raw.githubusercontent.com/googlefonts/noto-emoji/main/fonts/NotoColorEmoji.ttf
 
+  # Reconcile the development remotes and runtimes for each user at boot.
+  - type: default-flatpaks@v2
+    source: ghcr.io/blue-build/modules@sha256:c5ed99f07b15c8d575a4fa64a77e5cd5602b00da4c84379f5675db2ae4757061
+    configurations:
+      - scope: user
+        notify: false
+        repo:
+          name: flathub
+          title: Flathub
+          url: https://dl.flathub.org/repo/flathub.flatpakrepo
+        install:
+          - org.flatpak.Builder
+      - scope: user
+        notify: false
+        repo:
+          name: flathub-beta
+          title: Flathub Beta
+          url: https://flathub.org/beta-repo/flathub-beta.flatpakrepo
+      - scope: user
+        notify: false
+        repo:
+          name: gnome-nightly
+          title: GNOME Nightly
+          url: https://nightly.gnome.org/gnome-nightly.flatpakrepo
+        install:
+          - org.gnome.Platform//master
+          - org.gnome.Sdk//master
+
   - type: gnome-extensions@v1
     source: ghcr.io/blue-build/modules@sha256:c5ed99f07b15c8d575a4fa64a77e5cd5602b00da4c84379f5675db2ae4757061
     install:
+      - 4974 # Window Calls Extended
+      - 5060 # Xremap
+      - 5592 # Focused Window D-Bus
       - 8834 # Copyous

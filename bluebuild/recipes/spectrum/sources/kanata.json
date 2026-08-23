@@ -1,0 +1,8 @@
+{
+  "pins": {
+    "kanata_homebrew_archive": {
+      "hash": "sha256-5Ru5io2lLTlMYusSwchcZ+c8rl48k3NH1rBFR9VFuZ8=",
+      "url": "https://github.com/4evy/kanata/archive/a20e0e2f7fd4dfae66db4f5c2130732de0fe28c5.tar.gz"
+    }
+  }
+}

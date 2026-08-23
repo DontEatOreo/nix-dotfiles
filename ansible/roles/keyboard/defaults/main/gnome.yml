@@ -4,16 +4,10 @@ keyboard_keep_input_remapper: >-
     lookup('ansible.builtin.env', 'DOTFILES_KEEP_INPUT_REMAPPER') == '1'
   }}
 
-keyboard_toshy_gnome_extension_origin: https://extensions.gnome.org
-keyboard_toshy_gnome_extension_cache: >-
-  {{ dotfiles_cache_home }}/dotfiles/gnome-extensions
 keyboard_toshy_gnome_extensions:
   - uuid: focused-window-dbus@flexagoon.com
     label: Focused Window D-Bus
-    window_context: true
   - uuid: window-calls-extended@hseliger.eu
     label: Window Calls Extended
-    window_context: true
   - uuid: xremap@k0kubun.com
     label: Xremap
-    window_context: true

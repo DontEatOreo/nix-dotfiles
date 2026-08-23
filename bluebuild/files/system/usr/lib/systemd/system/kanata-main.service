@@ -2,11 +2,12 @@
 Description=Kanata keyboard remapper
 Documentation=https://github.com/jtroo/kanata https://github.com/jtroo/kanata/blob/main/docs/setup-linux.md
 Conflicts=input-remapper.service
+ConditionFileIsExecutable=/usr/bin/kanata
 StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/kanata --cfg /etc/kanata/kanata.kbd --symlink-path /run/kanata-main/main --wait-device-ms 2000 --no-wait
+ExecStart=/usr/bin/kanata --cfg /usr/libexec/dotfiles/kanata/kanata.kbd --symlink-path /run/kanata-main/main --wait-device-ms 2000 --no-wait
 Restart=on-failure
 RestartSec=2
 DynamicUser=yes

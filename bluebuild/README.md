@@ -53,3 +53,17 @@ unrelated source update does not invalidate either builder stage. `just source-u
 refreshes these projections, and `just spectrum-validate` rejects any drift from
 `npins/sources.json`. The Ghostty stage also mounts persistent global and local Zig
 caches, allowing compilation artifacts to survive a source or patch cache miss.
+
+The repository-local Hyper window tiler is also built once in a pinned Bun stage and
+copied into the system GNOME and KWin extension directories. Per-user Ansible work is
+therefore limited to enabling the extension and setting desktop shortcuts.
+
+The pinned Kanata executable, configuration, device policy, and system service are
+built into the image together. Ansible only reconciles the live user's device-group
+membership, disables a conflicting remapper when requested, and starts the service.
+
+Homebrew owns portable userland payloads that do not need to be frozen into the image,
+including Helium, its profile configurer, Equilotl, and the repository-pinned
+`yt-dlp-script`. Chezmoi owns
+their user launchers and post-install reconciliation; Ansible no longer downloads
+those programs itself.
