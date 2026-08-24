@@ -11,7 +11,6 @@ let
     pkgs.unstable.openssl.dev
     pkgs.unstable.zlib.dev
   ];
-  codex = pkgs.eupkgs.codex;
 in
 {
   _class = "nixos";
@@ -177,7 +176,6 @@ in
     };
 
     environment.sessionVariables = {
-      CODEX_REAL_BIN = lib.meta.getExe codex;
       LIBCLANG_PATH = "${pkgs.unstable.llvmPackages.libclang.lib}/lib";
       PKG_CONFIG_PATH = rustPkgConfigPath;
       RUST_SRC_PATH = "${pkgs.unstable.rustPlatform.rustLibSrc}";

@@ -38,13 +38,9 @@ let
 
   mkPackages =
     pkgs:
-    let
-      ghidraMcp = pkgs.ghidra-mcp;
-      ghidraMcpHeadless = pkgs.ghidra-mcp-headless;
-    in
     {
       inherit (pkgs) bun2nix;
-      default = ghidraMcp;
+      default = pkgs.dotfiles-python;
       dotfiles-nix-tools = pkgs.buildEnv {
         name = "dotfiles-nix-tools";
         paths = with pkgs; [
@@ -63,12 +59,6 @@ let
         quickCss = equicordQuickCss;
         settings = equicordSettings.jsonConfig;
       };
-      ghidra-mcp = ghidraMcp;
-      ghidra-mcp-bridge = ghidraMcpHeadless.bridge;
-      ghidra-mcp-headless = ghidraMcpHeadless;
-      ghidra-mcp-httpd = ghidraMcpHeadless.httpd;
-      ghidra-mcp-launcher = ghidraMcpHeadless.launcher;
-      inherit (ghidraMcpHeadless) ghidra;
       inherit (pkgs) kanata-with-cmd terminal-theme-tools;
     }
     // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
@@ -82,23 +72,6 @@ let
         toshy-runtime
         uresourced
         ;
-    };
-
-  mkApps =
-    packages:
-    let
-      appFor = program: description: {
-        type = "app";
-        inherit program;
-        meta = { inherit description; };
-      };
-    in
-    {
-      ghidra-mcp = appFor (lib.getExe packages.ghidra-mcp) "Run the Ghidra MCP service";
-      ghidra-mcp-headless = appFor (lib.getExe' packages.ghidra-mcp-launcher "ghidra-mcp-headless") "Run the headless Ghidra MCP backend";
-      ghidra-mcp-httpd = appFor (lib.getExe' packages.ghidra-mcp-httpd "ghidra-mcp-httpd") "Run the Ghidra MCP HTTP server";
-      ghidra-mcp-bridge = appFor (lib.getExe' packages.ghidra-mcp-bridge "ghidra-mcp-bridge") "Run the Ghidra MCP bridge";
-      default = appFor (lib.getExe packages.ghidra-mcp) "Run the Ghidra MCP service";
     };
 
 in
@@ -175,7 +148,6 @@ in
 
   perSystem =
     {
-      config,
       pkgs,
       system,
       ...
@@ -190,6 +162,5 @@ in
       };
 
       packages = mkPackages pkgs;
-      apps = mkApps config.packages;
     };
 }

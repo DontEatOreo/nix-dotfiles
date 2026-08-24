@@ -1,4 +1,60 @@
 {{- if ne .chezmoi.os "windows" -}}
+{{- range $command := list "bash" "jq" "ruby" "sops" -}}
+{{- if not (lookPath $command) -}}
+{{- fail (printf "encrypted records require %s on PATH" $command) -}}
+{{- end -}}
+{{- end -}}
+{{- $repository := joinPath .chezmoi.sourceDir ".." -}}
+{{- $jjDirectory := stat (joinPath $repository ".jj") -}}
+{{- if $jjDirectory -}}
+{{- if not (lookPath "jj") -}}
+{{- fail "encrypted records require jj on PATH in a Jujutsu workspace" -}}
+{{- end -}}
+{{- else if not (lookPath "git") -}}
+{{- fail "encrypted records require git on PATH in a Git-only workspace" -}}
+{{- end -}}
+{{- $root := . -}}
+{{- $vault := joinPath .chezmoi.sourceDir ".." "secrets" "records.yaml" -}}
+{{- $selector := `["items"]["t0"]` -}}
+{{- $filter := joinPath .chezmoi.sourceDir ".chezmoitemplates" "record-filter.sh" -}}
+{{- $manifestJSON := "" -}}
+{{- $helper := "" -}}
+{{- $recordsHostOS := env "DOTFILES_RECORDS_HOST_OS" -}}
+{{- if eq $recordsHostOS "" -}}
+{{- $recordsHostOS = .chezmoi.os -}}
+{{- end -}}
+{{- if eq $recordsHostOS "darwin" -}}
+{{- $helper = joinPath .chezmoi.sourceDir "dot_local/bin/executable_sops-age-key-1password" -}}
+{{- $manifestJSON = output "env" (printf "SOPS_AGE_KEY_CMD=%s" $helper) "sops" "decrypt" "--output-type" "json" "--extract" $selector $vault -}}
+{{- else -}}
+{{- $manifestJSON = output "sops" "decrypt" "--output-type" "json" "--extract" $selector $vault -}}
+{{- end -}}
+{{- range $index, $record := $manifestJSON | fromJson -}}
+{{- $enabled := eq (len $record.systems) 0 -}}
+{{- range $system := $record.systems -}}
+{{- if eq $system $root.chezmoi.os -}}
+{{- $enabled = true -}}
+{{- end -}}
+{{- end -}}
+{{- if $enabled -}}
+{{- range $destination := $record.paths }}
+[{{ $destination | quote }}]
+type = "file"
+url = {{ printf "file://%s" $vault | quote }}
+private = {{ $record.private }}
+executable = {{ $record.executable }}
+refreshPeriod = "1s"
+{{- if eq $recordsHostOS "darwin" }}
+filter.command = "env"
+filter.args = {{ list (printf "SOPS_AGE_KEY_CMD=%s" $helper) "bash" $filter $selector (printf "%d" $index) (printf "%t" $record.render) $root.chezmoi.sourceDir | toToml }}
+{{- else }}
+filter.command = "bash"
+filter.args = {{ list $filter $selector (printf "%d" $index) (printf "%t" $record.render) $root.chezmoi.sourceDir | toToml }}
+{{- end }}
+{{ end -}}
+{{- end -}}
+{{- end -}}
+
 {{- if eq .chezmoi.os "darwin" }}
 # Use the same bitmap emoji font as Linux so generated assets match exactly.
 [".local/share/fonts/NotoColorEmoji/NotoColorEmoji.ttf"]

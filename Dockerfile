@@ -129,7 +129,6 @@ RUN set -eu; \
       .gitignore_global \
       .ssh/config \
       .ssh/allowed_signers \
-      .codex \
       .cache/starship \
       .config \
       .local/share/applications \

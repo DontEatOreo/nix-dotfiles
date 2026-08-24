@@ -56,20 +56,6 @@
       "hash": "sha256-yynjkW99Z91vgUCs/pqvlK/UpQlCdyLlehYIkBZYTxA=",
       "frozen": true
     },
-    "ghidra_mcp": {
-      "type": "Git",
-      "repository": {
-        "type": "GitHub",
-        "owner": "bethington",
-        "repo": "ghidra-mcp"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "bb6a518d3ae25b35149972441a92b2cc8a781b37",
-      "url": "https://github.com/bethington/ghidra-mcp/archive/bb6a518d3ae25b35149972441a92b2cc8a781b37.tar.gz",
-      "hash": "sha256-CRndlxoDVSnPITYYA6wsn3iQRl/YAWy3MFj8nOO1658=",
-      "frozen": true
-    },
     "ghostty": {
       "type": "Git",
       "repository": {

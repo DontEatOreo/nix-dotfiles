@@ -38,7 +38,6 @@ Library/
 {{ if ne .chezmoi.os "darwin" }}
 Library/
 .config/raycast/
-.local/bin/codex-node-repl-browser-trust
 .local/bin/hide-display-audio
 {{ end }}
 

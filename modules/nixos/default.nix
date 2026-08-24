@@ -21,7 +21,6 @@ in
     ../cross
     ./desktop-packages.nix
     ./gnome.nix
-    ./ghidra-mcp.nix
     ./hardware.nix
     ./kanata.nix
     ./kde.nix

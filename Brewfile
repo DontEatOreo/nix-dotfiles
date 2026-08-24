@@ -14,7 +14,6 @@ brew "go"
 brew "gradle"
 brew "maven"
 brew "node"
-brew "opencode"
 brew "ruby"
 brew "ruby-lsp"
 brew "rustup"
@@ -58,7 +57,7 @@ brew "bash-language-server"
 brew "biome"
 brew "clang-format"
 brew "delve"
-brew "dockerfmt"
+brew "dockerfmt" if OS.linux?
 brew "gh"
 brew "git"
 brew "git-filter-repo"
@@ -66,7 +65,7 @@ brew "git-lfs"
 brew "gitui"
 brew "golangci-lint"
 brew "gopls"
-brew "hadolint"
+brew "hadolint" if OS.linux?
 brew "autoconf"
 brew "automake"
 brew "cmake"
@@ -119,7 +118,6 @@ brew "gdb" if OS.linux?
 # Editors and terminals
 brew "4evy/dotfiles/helix-tip"
 brew "yazi"
-cask "codex"
 
 # File management and archives
 brew "chafa"
@@ -210,11 +208,7 @@ if OS.mac?
   brew "4evy/dotfiles/alt-tab-license"
   cask "appcleaner"
   cask "brave-browser"
-  cask "chatgpt"
   cask "discord"
-  # Ansible installs Docker Desktop separately and excludes it from Bundle so
-  # an ordinary userland refresh never removes its root-owned helper tools.
-  cask "docker-desktop", args: { "no-binaries": true }, no_upgrade: true
   cask "firefox"
   cask "google-chrome"
   brew "4evy/dotfiles/ghostty-patched"
@@ -258,8 +252,8 @@ vscode "kdl-org.kdl"
 vscode "mads-hartmann.bash-ide-vscode"
 vscode "mikestead.dotenv"
 vscode "mkhl.shfmt"
-vscode "ms-azuretools.vscode-containers"
-vscode "ms-azuretools.vscode-docker"
+vscode "ms-azuretools.vscode-containers" if OS.linux?
+vscode "ms-azuretools.vscode-docker" if OS.linux?
 vscode "ms-python.debugpy"
 vscode "ms-python.python"
 vscode "ms-python.vscode-python-envs"

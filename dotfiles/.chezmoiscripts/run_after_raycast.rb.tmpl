@@ -6,8 +6,7 @@ require "pathname"
 
 brew = "/opt/homebrew/bin/brew"
 brew_ruby = "/opt/homebrew/opt/ruby/bin/ruby"
-repository = Pathname(ENV.fetch("CHEZMOI_WORKING_TREE"))
-manager = repository/"libexec/raycast-manager.rb"
+configurer = Pathname(Dir.home)/".local/libexec/private-application-configurer"
 
 unless File.executable?(brew)
   warn "raycast: warning: Homebrew not installed; skipping"
@@ -19,10 +18,10 @@ unless File.executable?(brew_ruby)
   exit 1
 end
 
-unless manager.file?
-  warn "raycast: error: missing profile manager #{manager}"
+unless configurer.file?
+  warn "raycast: error: missing private application configurer #{configurer}"
   exit 1
 end
 
-exec brew_ruby, manager.to_s, "configure", "--if-present"
+exec brew_ruby, configurer.to_s, "configure", "--if-present"
 {{- end -}}

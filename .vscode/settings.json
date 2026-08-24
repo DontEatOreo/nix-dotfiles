@@ -66,6 +66,9 @@
     "**/dot_zshrc.tmpl": "goshell"
   },
   "explorer.excludeGitIgnore": true,
+  "files.exclude": {
+    "**/.decrypted~*": true
+  },
   "C_Cpp.default.cStandard": "c23",
   "C_Cpp.default.includePath": [
     "${workspaceFolder}/packages/terminal-theme-tools/include"
@@ -83,6 +86,7 @@
     "**/.ansible": true,
     "**/.cache": true,
     "**/.complexipy_cache": true,
+    "**/.decrypted~*": true,
     "**/.direnv": true,
     "**/.gradle": true,
     "**/.jj": true,
@@ -107,6 +111,7 @@
     "**/.ansible/**": true,
     "**/.cache/**": true,
     "**/.complexipy_cache/**": true,
+    "**/.decrypted~*": true,
     "**/.direnv/**": true,
     "**/.gradle/**": true,
     "**/.jj/**": true,
@@ -188,12 +193,12 @@
   "zig.path": "zig",
   "zig.version": "0.16.0",
   "ansible.ansible.useFullyQualifiedCollectionNames": true,
-  "ansible.lightspeed.enabled": false,
-  "ansible.lightspeed.suggestions.enabled": false,
-  "ansible.mcpServer.enabled": false,
   "ansible.validation.lint.enabled": true,
   "markdownlint.run": "onSave",
   "redhat.telemetry.enabled": false,
+  "sops.enabled": true,
+  "sops.beta": false,
+  "sops.creationEnabled": false,
   "stylua.disableVersionCheck": true,
   "stylua.searchBinaryInPATH": true,
   "systemd.version": "latest",

@@ -5,6 +5,7 @@ Thumbs.db
 # Editor and IDE state
 *.swp
 *~
+.decrypted~*
 .vs/
 .vscode/
 !/.vscode/

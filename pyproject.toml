@@ -19,7 +19,6 @@ dependencies = [
 ]
 
 [project.scripts]
-codex = "workstation.local.shims:codex_entrypoint"
 desktop-perf-audit = "workstation.local.desktop_audit:desktop_perf_audit_entrypoint"
 discord-equicord = "workstation.apps.discord:entrypoint"
 gnome-black-rose-doll-accent = "workstation.local.gnome:gnome_black_rose_doll_accent_entrypoint"

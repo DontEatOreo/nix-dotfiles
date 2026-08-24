@@ -45,7 +45,14 @@ readonly -a HOMEBREW_PLATFORM_PREFIXES=(
 )
 
 readonly -a HOMEBREW_FORMULAE=(
+	'ruby'
+	'sops'
 	'uv'
+)
+
+readonly -a MACOS_HOMEBREW_CASKS=(
+	'1password'
+	'1password-cli'
 )
 
 readonly -a MACOS_GNU_PATH_SUFFIXES=(
@@ -112,6 +119,8 @@ readonly -a REQUIRED_REPOSITORY_FILES=(
 	"${PRIVATE_SETTINGS_FILE}"
 	"${MACOS_AGE_KEY_HELPER_FILE}"
 	'Justfile'
+	'libexec/records.rb'
+	'secrets/records.yaml'
 )
 
 UV_PYTHON_BIN_DIR="${USER_EXECUTABLE_DIRECTORY}"
@@ -627,6 +636,26 @@ install_homebrew_formulae() {
 	fi
 }
 
+install_macos_homebrew_casks() {
+	local homebrew_executable="$1"
+	local operating_system="$2"
+	local -a brew_args=(
+		'install'
+		'--cask'
+	)
+
+	if [[ "${operating_system}" != 'Darwin' ]]; then
+		return 0
+	fi
+	brew_args+=("${MACOS_HOMEBREW_CASKS[@]}")
+
+	log "Installing Homebrew casks: ${MACOS_HOMEBREW_CASKS[*]}"
+	unset HOMEBREW_NO_INSTALL_UPGRADE
+	if ! HOMEBREW_NO_ASK=1 "${homebrew_executable}" "${brew_args[@]}"; then
+		die 'Homebrew cask installation failed'
+	fi
+}
+
 install_python_runtime() {
 	local uv_executable="$1"
 	local python_executable="$2"
@@ -965,6 +994,10 @@ main() {
 	configure_homebrew_path \
 		"${homebrew_prefix}" "${homebrew_executable}" "${operating_system}"
 	install_homebrew_formulae "${homebrew_executable}"
+	if [[ "${setup_requested}" == 'true' ]]; then
+		install_macos_homebrew_casks \
+			"${homebrew_executable}" "${operating_system}"
+	fi
 	if [[ ! -x "${uv_executable}" ]]; then
 		die "Homebrew did not create uv at ${uv_executable}"
 	fi

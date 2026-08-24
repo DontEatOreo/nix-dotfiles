@@ -9,8 +9,6 @@ require "tmpdir"
 
 REPOSITORY_ROOT = Pathname(__dir__).parent.freeze
 
-require REPOSITORY_ROOT/"libexec/raycast-manager"
-
 class RubyToolsTest < Minitest::Test
   def run_tool(name, *arguments, environment: {})
     Open3.capture3(
@@ -101,22 +99,77 @@ class RubyToolsTest < Minitest::Test
     end
   end
 
-  def test_raycast_configuration_can_skip_an_absent_profile
-    Dir.mktmpdir("raycast-manager-test-") do |directory|
+  def test_records_workspace_round_trips_and_skips_an_unchanged_pack
+    Dir.mktmpdir("records-test-") do |directory|
       root = Pathname(directory)
-      app = root/"Raycast.app"
-      app.mkpath
-      data_addon = root/"data.darwin-arm64.node"
-      data_addon.write("fixture")
-      configuration = Raycast::Configuration.new(
-        environment: {
-          "RAYCAST_APP"          => app.to_s,
-          "RAYCAST_DATA_ADDON"   => data_addon.to_s,
-          "RAYCAST_PROFILE_FILE" => (root/"missing-profile.json").to_s,
-        },
+      repository = root/"repository"
+      secrets = repository/"secrets"
+      secrets.mkpath
+      (repository/".sops.yaml").write("creation_rules: []\n")
+      vault = secrets/"records.yaml"
+      vault.write("fixture: true\n")
+      state_file = root/"state.json"
+      log = root/"sops.log"
+      state_file.write(
+        JSON.generate(
+          "items" => {
+            "t0" => [
+              {
+                "body"       => "target body\n",
+                "executable" => false,
+                "paths"      => [".config/tool/config.txt"],
+                "private"    => true,
+                "render"     => false,
+                "systems"    => [],
+              },
+            ],
+          },
+        ),
       )
+      sops = write_executable(root/"sops", "#!#{RbConfig.ruby}\n" + <<~RUBY)
+        require "json"
 
-      refute Raycast::Manager.new(configuration:).configure(if_present: true)
+        state_file = ENV.fetch("RECORDS_TEST_STATE")
+        state = JSON.parse(File.read(state_file))
+        case ARGV.shift
+        when "decrypt"
+          encoded = state.fetch("items").transform_values { |manifest| JSON.generate(manifest) }
+          puts JSON.generate(encoded)
+        when "set"
+          items = JSON.parse($stdin.read)
+          state["items"] = items.transform_values { |manifest| JSON.parse(manifest) }
+          File.write(state_file, JSON.generate(state))
+          File.write(ARGV.fetch(-2), "encrypted fixture\n")
+          File.open(ENV.fetch("RECORDS_TEST_LOG"), "a") { |file| file.puts("set") }
+        else
+          raise "unexpected sops command"
+        end
+      RUBY
+      environment = {
+        "RECORDS_FILE"       => vault.to_s,
+        "RECORDS_REPOSITORY" => repository.to_s,
+        "RECORDS_SOPS"       => sops.to_s,
+        "RECORDS_TEST_LOG"   => log.to_s,
+        "RECORDS_TEST_STATE" => state_file.to_s,
+      }
+      workspace = root/"workspace"
+
+      _, stderr, status = run_tool("records.rb", "unpack", workspace.to_s, environment:)
+      assert status.success?, stderr
+      assert_equal "target body\n", (workspace/"t0/000/body").read
+      assert_equal 0, workspace.stat.mode & 0o077
+      assert_equal ["t0"], JSON.load_file(workspace/"format.json").fetch("collections")
+
+      (workspace/"t0/000/body").write("changed target body\n")
+      _, stderr, status = run_tool("records.rb", "pack", workspace.to_s, environment:)
+      assert status.success?, stderr
+      state = JSON.parse(state_file.read)
+      assert_equal "changed target body\n", state.dig("items", "t0", 0, "body")
+
+      stdout, stderr, status = run_tool("records.rb", "pack", workspace.to_s, environment:)
+      assert status.success?, stderr
+      assert_includes stdout, "records unchanged"
+      assert_equal 1, log.readlines.length
     end
   end
 end
