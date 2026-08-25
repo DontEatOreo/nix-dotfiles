@@ -26,6 +26,7 @@ modules:
         - blueprint-compiler
         - bootc
         - bubblewrap
+        - ayugram-desktop
         - code
         - curl
         - file
