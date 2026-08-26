@@ -2,6 +2,8 @@
 desktop_vicinae_binding_path: >-
   /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vicinae/
 desktop_vicinae_command: /usr/bin/vicinae
+desktop_vicinae_blocked_applications:
+  - 1Password
 desktop_gnome_workspace_numbers:
   - 1
   - 2

@@ -135,4 +135,5 @@ modules:
       - 4974 # Window Calls Extended
       - 5060 # Xremap
       - 5592 # Focused Window D-Bus
+      - 8594 # Vicinae
       - 8834 # Copyous

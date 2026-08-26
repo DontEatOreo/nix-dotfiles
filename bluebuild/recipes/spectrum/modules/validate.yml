@@ -29,6 +29,7 @@ modules:
         grep -Fq 'Noto Sans Egyptian Hieroglyphs'
       - test -f /usr/share/gnome-shell/extensions/hyper-window-tiling@4evy.local/extension.js
       - test -f /usr/share/gnome-shell/extensions/hyper-window-tiling@4evy.local/schemas/gschemas.compiled
+      - test -f /usr/share/gnome-shell/extensions/vicinae@dagimg-dot/extension.js
       - test -f /usr/share/kwin/scripts/hyper-window-tiling/contents/code/main.js
       - test -f /usr/libexec/dotfiles/kanata/kanata.kbd
       - test -x /usr/bin/kanata

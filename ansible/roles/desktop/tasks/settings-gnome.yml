@@ -116,3 +116,17 @@
   loop_control:
     label: "{{ item.key }}"
   when: desktop_custom_keybindings is not skipped
+
+- name: Configure Vicinae clipboard monitoring
+  community.general.dconf:
+    key: "/org/gnome/shell/extensions/vicinae/{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - key: enable-clipboard-monitoring
+      value: "true"
+    - key: blocked-applications
+      value: "{{ desktop_vicinae_blocked_applications | ansible.builtin.to_json }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: desktop_vicinae_command_file.stat.executable | default(false)
