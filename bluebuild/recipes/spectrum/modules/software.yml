@@ -36,6 +36,7 @@ modules:
         - google-noto-color-emoji-fonts
         - google-noto-emoji-fonts
         - google-noto-sans-cjk-fonts
+        - google-noto-sans-egyptian-hieroglyphs-fonts
         - google-noto-sans-mono-cjk-vf-fonts
         - google-noto-sans-mono-vf-fonts
         - google-noto-sans-symbols-2-fonts

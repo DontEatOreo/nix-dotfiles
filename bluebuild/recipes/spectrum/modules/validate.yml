@@ -24,6 +24,9 @@ modules:
       - test "$(readlink /etc/systemd/system/getty.target.wants/kmsconvt@tty1.service)" = /usr/lib/systemd/system/kmsconvt@.service
       - test -f /usr/lib/systemd/system/brew-setup.service
       - test -f /usr/share/fonts/url-fonts/NotoColorEmojiBitmap/NotoColorEmoji.ttf
+      - >-
+        fc-list ':charset=131A9-131AA' family |
+        grep -Fq 'Noto Sans Egyptian Hieroglyphs'
       - test -f /usr/share/gnome-shell/extensions/hyper-window-tiling@4evy.local/extension.js
       - test -f /usr/share/gnome-shell/extensions/hyper-window-tiling@4evy.local/schemas/gschemas.compiled
       - test -f /usr/share/kwin/scripts/hyper-window-tiling/contents/code/main.js
