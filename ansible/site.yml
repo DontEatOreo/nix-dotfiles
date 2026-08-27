@@ -2,6 +2,7 @@
 - name: Configure the dotfiles workstation
   hosts: localhost
   gather_facts: true
+  force_handlers: true
   module_defaults:
     ansible.builtin.uri:
       timeout: 30
