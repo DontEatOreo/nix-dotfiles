@@ -1,4 +1,5 @@
 ---
+profile: production
 exclude_paths:
   - .ansible/
   - compose.yaml

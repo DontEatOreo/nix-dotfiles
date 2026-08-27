@@ -13,12 +13,12 @@
       the current image before applying desktop configuration.
 
 - name: Enable Hyper KWin script
-  community.general.ini_file:
+  community.general.kdeconfig:
     path: "{{ dotfiles_config_home }}/kwinrc"
-    section: Plugins
-    option: hyper-window-tilingEnabled
-    value: "true"
-    no_extra_spaces: true
+    values:
+      - group: Plugins
+        key: hyper-window-tilingEnabled
+        bool_value: true
     mode: "0600"
   register: desktop_hyper_kwin_config
 

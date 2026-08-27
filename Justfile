@@ -1019,10 +1019,9 @@ _check-zig: (doctor 'zig')
     zig build --release=small
 
 [private]
-_check-ansible: (doctor 'ansible') _deps
+_check-ansible: (doctor 'ansible') _deps (_run-files 'yamllint' ['*.yaml', '*.yml'])
     ansible-playbook --syntax-check ansible/site.yml
     ansible-lint ansible
-    yamllint .
 
 [private]
 _check-github-actions:
