@@ -15,10 +15,9 @@ module ShottrLicense
   OPEN = ENV.fetch("SHOTTR_OPEN", "/usr/bin/open").freeze
   SOPS = ENV.fetch("SHOTTR_SOPS", "sops").freeze
   PREFERENCES_FILE = Pathname(
-    ENV.fetch(
-      "SHOTTR_PREFERENCES_FILE",
-      Pathname(Dir.home)/"Library/Preferences/cc.ffitch.shottr.plist",
-    ),
+    ENV.fetch("SHOTTR_PREFERENCES_FILE") do
+      Pathname(Dir.home)/"Library/Preferences/cc.ffitch.shottr.plist"
+    end,
   ).expand_path.freeze
   STATE_KEYS = {
     "license" => ["kc-license", 34],
