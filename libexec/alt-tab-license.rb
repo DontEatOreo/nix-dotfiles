@@ -75,7 +75,7 @@ module AltTabLicense
     end
     remove_keychain_items
     KEYCHAIN_VALUES.each do |account, value|
-      succeeded = system(
+      system(
         SECURITY,
         "add-generic-password",
         "-A",
@@ -86,8 +86,8 @@ module AltTabLicense
         account,
         "-w",
         value,
+        exception: true,
       )
-      raise Error, "could not add AltTab keychain item: #{account}" unless succeeded
     end
     DEFAULT_VALUES.each do |key, (kind, value)|
       system(
