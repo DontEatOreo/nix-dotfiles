@@ -15,11 +15,22 @@
     - "{{ dotfiles_home_dir }}/Library/Preferences/com.carriez.RustDesk"
     - "{{ dotfiles_home_dir }}/Library/LaunchAgents"
 
-- name: Install RustDesk direct-access settings on macOS
-  ansible.builtin.copy:
-    src: rustdesk/RustDesk2.toml
-    dest: "{{ dotfiles_home_dir }}/Library/Preferences/com.carriez.RustDesk/RustDesk2.toml"
+- name: Configure RustDesk direct access on macOS
+  community.general.ini_file:
+    path: >-
+      {{ dotfiles_home_dir }}/Library/Preferences/com.carriez.RustDesk/RustDesk2.toml
+    section: options
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    no_extra_spaces: false
     mode: "0644"
+  loop:
+    - option: direct-server
+      value: '"Y"'
+    - option: direct-access-port
+      value: '"21118"'
+  loop_control:
+    label: "{{ item.option }}"
 
 - name: Install RustDesk launch agent on macOS
   ansible.builtin.copy:

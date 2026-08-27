@@ -11,7 +11,6 @@
     - apparmor_parser
     - gdbus
     - gst-inspect-1.0
-    - update-desktop-database
   register: system_rustdesk_tools
 
 - name: Detect the active local desktop session
@@ -185,19 +184,6 @@
   become: true
   register: system_rustdesk_service_dropin
 
-- name: Ensure the user application directory exists
-  ansible.builtin.file:
-    path: "{{ dotfiles_data_home }}/applications"
-    state: directory
-    mode: "0755"
-
-- name: Install the RustDesk desktop entry
-  ansible.builtin.copy:
-    src: rustdesk.desktop
-    dest: "{{ dotfiles_data_home }}/applications/rustdesk.desktop"
-    mode: "0644"
-  register: system_rustdesk_desktop
-
 - name: Inspect the existing RustDesk autostart entry
   ansible.builtin.stat:
     path: "{{ dotfiles_config_home }}/autostart/rustdesk.desktop"
@@ -212,16 +198,6 @@
     no_extra_spaces: true
     mode: "0644"
   when: system_rustdesk_autostart.stat.exists | default(false)
-
-- name: Refresh the user desktop database
-  ansible.builtin.command:
-    argv:
-      - update-desktop-database
-      - "{{ dotfiles_data_home }}/applications"
-  changed_when: true
-  when:
-    - system_rustdesk_desktop is changed
-    - system_rustdesk_tools.results[3].rc == 0
 
 - name: Reconcile RustDesk host policy
   dotfiles_selinux_service:
