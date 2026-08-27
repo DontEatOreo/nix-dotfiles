@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "digest"
-
 class AltTabLicense < Formula
   MANAGER_SOURCE = (Pathname(__dir__).parent/"libexec/alt-tab-license.rb").freeze
 
@@ -9,7 +7,7 @@ class AltTabLicense < Formula
   homepage "https://github.com/lwouis/alt-tab-macos"
   url "file://#{MANAGER_SOURCE}"
   version "1"
-  sha256 Digest::SHA256.file(MANAGER_SOURCE).hexdigest
+  sha256 MANAGER_SOURCE.sha256
   license "MIT"
 
   depends_on macos: :tahoe

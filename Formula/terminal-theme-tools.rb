@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "digest"
 require "json"
 
 class TerminalThemeTools < Formula
@@ -13,7 +12,7 @@ class TerminalThemeTools < Formula
   end
 
   SOURCE_ARCHIVE = (Pathname(__dir__).parent/"Sources/terminal-theme-tools-0.3.0.tar").freeze
-  SOURCE_SHA256 = Digest::SHA256.file(SOURCE_ARCHIVE).hexdigest.freeze
+  SOURCE_SHA256 = SOURCE_ARCHIVE.sha256.freeze
 
   desc "Theme-aware launcher for terminal applications"
   homepage "https://github.com/4evy/dotfiles"
