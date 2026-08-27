@@ -377,8 +377,7 @@ spectrum-build: (_linux-only recipe_name())
 # Build and run the complete local pre-publish validation gate.
 [group('spectrum')]
 [linux]
-spectrum-stage: spectrum-build
-    {{ quote(just_executable()) }} --justfile {{ quote(justfile()) }} spectrum-inspect {{ quote(local_ref) }}
+spectrum-stage: spectrum-build && (spectrum-inspect local_ref)
 
 [group('spectrum')]
 [macos]
@@ -473,9 +472,8 @@ determinate-upgrade: (doctor 'nix') _ensure-nix
 
 # Replace incorrect Nix expression hashes, prompting before each edit by default.
 [group('dev')]
-[positional-arguments]
 determinate-fix-hashes *args: (doctor 'nix') _ensure-nix
-    determinate-nixd fix hashes "$@"
+    determinate-nixd fix hashes {{ quote(args) }}
 
 # Install Nix on the live host and ensure Nix profile tools exist.
 [group('setup')]
@@ -559,25 +557,21 @@ _host:
 
 # Format the repository through the flake's treefmt wrapper.
 [group('dev')]
-fmt: (doctor 'fmt') (_format 'write')
+fmt: (doctor 'fmt') (_format [])
 
 # Rerun a recipe when files change.
 [arg('args', help='Recipe and arguments to rerun on file changes')]
 [group('dev')]
-[positional-arguments]
-watch +args='check': (doctor 'watch')
-    watchexec --clear --restart -- {{ quote(just_executable()) }} --justfile {{ quote(justfile()) }} "$@"
+watch +args=['check']: (doctor 'watch')
+    watchexec --clear --restart -- {{ quote(just_executable()) }} --justfile {{ quote(justfile()) }} {{ quote(args) }}
 
 # Run the same treefmt wrapper in CI mode without retaining rewrites.
 [group('dev')]
-check-format: (doctor 'fmt') (_format 'check')
+check-format: (doctor 'fmt') (_format ['--', '--ci'])
 
 [private]
-_format mode:
-    case {{ quote(mode) }} in
-      write) nix fmt ;;
-      check) nix fmt -- --ci ;;
-    esac
+_format *args:
+    nix fmt {{ quote(args) }}
 
 [parallel]
 [private]
@@ -1000,15 +994,13 @@ python-dependencies:
 
 # Run the Python test suite.
 [group('dev')]
-[positional-arguments]
 python-test *args:
-    uv run pytest "$@"
+    uv run pytest {{ quote(args) }}
 
 # Type-check the Python source roots configured in pyproject.toml.
 [group('dev')]
-[positional-arguments]
 python-typecheck *args:
-    uv run ty check "$@"
+    uv run ty check {{ quote(args) }}
 
 # Scan the first-party Python source roots configured in pyproject.toml.
 [group('dev')]
