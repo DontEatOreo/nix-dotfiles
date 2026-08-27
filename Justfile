@@ -7,6 +7,8 @@ set default-list
 set default-script
 set script-interpreter := ['bash', '-euo', 'pipefail']
 
+import 'just/secrets.just'
+
 image_name := env("SPECTRUM_IMAGE_NAME", "spectrum")
 local_ref := "localhost/" + image_name + ":latest_linux_amd64"
 compose := split(env("COMPOSE", "podman-compose"))
@@ -32,7 +34,11 @@ doctor_setup_commands := ['bash', 'curl', 'git', 'sudo']
 doctor_format_commands := ['git', 'nix']
 doctor_ansible_commands := ['ansible-doc', 'ansible-galaxy', 'ansible-lint', 'ansible-playbook', 'yamllint']
 doctor_lint_commands := ['actionlint', 'bundle', 'chezmoi', 'deadnix', 'diffstat', 'jq', 'luacheck', 'nix-instantiate', 'quilt', 'ruby', 'rumdl', 'shellcheck', 'statix', 'taplo', 'uv', 'zig', 'zizmor'] ++ (if host_os == "linux" { ['hadolint'] } else { [] }) ++ doctor_format_commands ++ doctor_ansible_commands
-doctor_all_commands := doctor_lint_commands ++ ['bash', 'curl', 'sudo', 'watchexec']
+[private]
+doctor_sops_commands := ['bash', 'sops'] ++ (if host_os == "macos" { ['op'] } else { [] })
+[private]
+doctor_records_commands := doctor_sops_commands ++ ['jq', 'ruby']
+doctor_all_commands := doctor_lint_commands ++ doctor_sops_commands ++ ['curl', 'sudo', 'watchexec']
 
 export PATH := homebrew_path + PATH_VAR_SEP + nix_bin_dir + PATH_VAR_SEP + nix_profile_bin_dir + PATH_VAR_SEP + nixos_profile_bin_dir + PATH_VAR_SEP + env("PATH", "")
 # Development recipes are reproducible by default; dependency changes must be
@@ -52,7 +58,7 @@ alias up := update
 alias w := watch
 
 # Check commands required for a workflow profile.
-[arg('profile', pattern=['status', 'reboot', 'install', 'build', 'setup', 'apply', 'records', 'shell', 'spectrum', 'fmt', 'lint', 'zig', 'ansible', 'bun', 'smoke', 'nix', 'watch', 'check', 'all'], help='status, reboot, install, build, setup, apply, records, shell, spectrum, fmt, lint, zig, ansible, bun, smoke, nix, watch, check, or all')]
+[arg('profile', pattern=['status', 'reboot', 'install', 'build', 'setup', 'apply', 'records', 'sops', 'shell', 'spectrum', 'fmt', 'lint', 'zig', 'ansible', 'bun', 'smoke', 'nix', 'watch', 'check', 'all'], help='status, reboot, install, build, setup, apply, records, sops, shell, spectrum, fmt, lint, zig, ansible, bun, smoke, nix, watch, check, or all')]
 [group('system')]
 doctor profile="setup":
     profile={{ quote(profile) }}
@@ -69,11 +75,6 @@ doctor profile="setup":
       fi
     }
 
-    records_commands() {
-      commands+=(bash jq ruby sops)
-      [[ $host_os != macos ]] || commands+=(op)
-    }
-
     case "$profile" in
       status) linux_commands bootc sudo ;;
       reboot) linux_commands systemctl ;;
@@ -82,11 +83,13 @@ doctor profile="setup":
       spectrum) commands=(bluebuild check-jsonschema jq "${podman_command[0]}" skopeo) ;;
       setup) commands=({{ quote(doctor_setup_commands) }}) ;;
       apply)
-        commands=(chezmoi)
-        records_commands
+        commands=(chezmoi {{ quote(doctor_records_commands) }})
         ;;
       records)
-        records_commands
+        commands=({{ quote(doctor_records_commands) }})
+        ;;
+      sops)
+        commands=({{ quote(doctor_sops_commands) }})
         ;;
       shell) commands=(shellcheck shfmt) ;;
       fmt) commands=({{ quote(doctor_format_commands) }}) ;;
@@ -521,35 +524,6 @@ dotfiles-diff: (doctor 'apply')
       --refresh-externals=never \
       diff
 
-# Decrypt every private record into a protected workspace outside this repository.
-[group('secrets')]
-records-unpack workspace: (doctor 'records')
-    ruby {{ quote(repo_dir / "libexec/records.rb") }} unpack {{ quote(workspace) }}
-
-# Validate and re-encrypt a protected records workspace in one SOPS update.
-[group('secrets')]
-records-pack workspace: (doctor 'records')
-    ruby {{ quote(repo_dir / "libexec/records.rb") }} pack {{ quote(workspace) }}
-
-# Validate the encrypted vault, or pass a protected workspace to validate it.
-[group('secrets')]
-[positional-arguments]
-records-check *args: (doctor 'records')
-    ruby {{ quote(repo_dir / "libexec/records.rb") }} check "$@"
-
-# Edit all records, a collection, or one collection index in a temporary workspace.
-[group('secrets')]
-[positional-arguments]
-records-edit *args: (doctor 'records')
-    ruby {{ quote(repo_dir / "libexec/records.rb") }} edit "$@"
-
-# Refresh the SOPS master-key metadata for every encrypted vault.
-[group('secrets')]
-sops-updatekeys: (doctor 'records')
-    SOPS_CONFIG={{ quote(repo_dir / ".sops.yaml") }} sops updatekeys --yes \
-      {{ quote(repo_dir / "secrets/records.yaml") }} \
-      {{ quote(repo_dir / "secrets/secrets.yaml") }}
-
 # Apply Helium extensions and settings; quit Helium first so profile writes run.
 [group('setup')]
 helium: (doctor 'setup')
@@ -636,7 +610,7 @@ _check-worktree-paths:
     exit "$broken"
 
 [private]
-_lint-chezmoi-source:
+_lint-chezmoi-source: sops-check
     temporary_dir=$(mktemp -d)
     trap 'rm -rf "$temporary_dir"' EXIT
     chezmoi_executable=$(command -v chezmoi)

@@ -131,11 +131,29 @@ class RubyToolsTest < Minitest::Test
 
         state_file = ENV.fetch("RECORDS_TEST_STATE")
         state = JSON.parse(File.read(state_file))
+        filename_override = nil
+        if ARGV.first == "--filename-override"
+          ARGV.shift
+          filename_override = ARGV.shift
+        end
         case ARGV.shift
         when "decrypt"
+          if ENV["RECORDS_TEST_FAIL_DECRYPT"] == "1"
+            warn "injected decrypt failure"
+            exit 42
+          end
+
           encoded = state.fetch("items").transform_values { |manifest| JSON.generate(manifest) }
           puts JSON.generate(encoded)
         when "set"
+          raise "missing filename override" unless filename_override == ENV.fetch("RECORDS_FILE")
+
+          if ENV["RECORDS_TEST_FAIL_SET"] == "1"
+            File.write(ARGV.fetch(-2), "partial replacement\n")
+            warn "injected set failure"
+            exit 42
+          end
+
           items = JSON.parse($stdin.read)
           state["items"] = items.transform_values { |manifest| JSON.parse(manifest) }
           File.write(state_file, JSON.generate(state))
@@ -154,6 +172,30 @@ class RubyToolsTest < Minitest::Test
       }
       workspace = root/"workspace"
 
+      existing_workspace = root/"existing-workspace"
+      existing_workspace.mkdir(0o700)
+      _, stderr, status = run_tool(
+        "records.rb",
+        "unpack",
+        existing_workspace.to_s,
+        environment: environment.merge("RECORDS_TEST_FAIL_DECRYPT" => "1"),
+      )
+      refute status.success?
+      assert_includes stderr, "injected decrypt failure"
+      assert existing_workspace.directory?
+      assert_empty existing_workspace.children
+
+      failed_workspace = root/"failed-workspace"
+      _, stderr, status = run_tool(
+        "records.rb",
+        "unpack",
+        failed_workspace.to_s,
+        environment: environment.merge("RECORDS_TEST_FAIL_DECRYPT" => "1"),
+      )
+      refute status.success?
+      assert_includes stderr, "injected decrypt failure"
+      refute failed_workspace.exist?
+
       _, stderr, status = run_tool("records.rb", "unpack", workspace.to_s, environment:)
       assert status.success?, stderr
       assert_equal "target body\n", (workspace/"t0/000/body").read
@@ -166,6 +208,21 @@ class RubyToolsTest < Minitest::Test
       state = JSON.parse(state_file.read)
       assert_equal "changed target body\n", state.dig("items", "t0", 0, "body")
 
+      vault_before_failure = vault.binread
+      mode_before_failure = vault.stat.mode
+      (workspace/"t0/000/body").write("failed update\n")
+      _, stderr, status = run_tool(
+        "records.rb",
+        "pack",
+        workspace.to_s,
+        environment: environment.merge("RECORDS_TEST_FAIL_SET" => "1"),
+      )
+      refute status.success?
+      assert_includes stderr, "injected set failure"
+      assert_equal vault_before_failure, vault.binread
+      assert_equal mode_before_failure, vault.stat.mode
+
+      (workspace/"t0/000/body").write("changed target body\n")
       stdout, stderr, status = run_tool("records.rb", "pack", workspace.to_s, environment:)
       assert status.success?, stderr
       assert_includes stdout, "records unchanged"

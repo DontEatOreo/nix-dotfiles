@@ -25,19 +25,27 @@ module Records
   class Vault
     def initialize(environment: ENV)
       @environment = environment
-      @repository = Pathname(environment.fetch("RECORDS_REPOSITORY", Pathname(__dir__).parent)).realpath
-      @vault = Pathname(environment.fetch("RECORDS_FILE", @repository/"secrets/records.yaml")).expand_path
+      repository = environment.fetch("RECORDS_REPOSITORY") { Pathname(__dir__).parent }
+      @repository = Pathname(repository).realpath
+      vault = environment.fetch("RECORDS_FILE") { @repository/"secrets/records.yaml" }
+      @vault = Pathname(vault).expand_path
       @sops = environment.fetch("RECORDS_SOPS", "sops")
     end
 
     def unpack(destination)
-      root = prepare_destination(destination)
+      root, created = prepare_destination(destination)
       collections = decrypt_collections
       write_workspace(root, collections)
       puts "unpacked #{record_count(collections)} records into #{root}"
       root
     rescue StandardError
-      FileUtils.remove_entry_secure(root) if root&.directory?
+      if root&.directory?
+        if created
+          FileUtils.remove_entry_secure(root)
+        elsif !Dir.empty?(root)
+          warn "records: protected workspace retained at #{root}"
+        end
+      end
       raise
     end
 
@@ -73,7 +81,8 @@ module Records
         collections = decrypt_collections
         write_workspace(workspace, collections)
         target = editor_target(workspace, collection, index)
-        editor = Shellwords.shellsplit(@environment.fetch("VISUAL", @environment.fetch("EDITOR", "")))
+        editor_name = @environment.fetch("VISUAL") { @environment.fetch("EDITOR", "") }
+        editor = Shellwords.shellsplit(editor_name)
         raise Error, "VISUAL or EDITOR must name an editor" if editor.empty?
 
         puts "editing protected workspace #{workspace}"
@@ -144,6 +153,8 @@ module Records
         IO.copy_stream(@vault, temporary)
         temporary.close
         run_sops(
+          "--filename-override",
+          @vault.to_s,
           "set",
           "--input-type",
           "yaml",
@@ -179,7 +190,7 @@ module Records
         raise Error, "workspace must be an empty directory: #{path}" unless path.directory? && Dir.empty?(path)
         raise Error, "workspace must not be a symlink: #{path}" if path.symlink?
 
-        return existing_workspace(path)
+        return [existing_workspace(path), false]
       end
 
       raise Error, "workspace parent does not exist: #{path.parent}" unless path.parent.directory?
@@ -187,7 +198,7 @@ module Records
       resolved = path.parent.realpath/path.basename
       ensure_outside_repository(resolved)
       Dir.mkdir(resolved, 0o700)
-      resolved
+      [resolved, true]
     end
 
     def existing_workspace(source)
