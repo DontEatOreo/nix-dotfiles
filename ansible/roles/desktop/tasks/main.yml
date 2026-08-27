@@ -7,26 +7,6 @@
     - fonts
     - host
 
-- name: Configure Flatpak prerequisites
-  ansible.builtin.import_tasks: flatpak.yml
-  when: platform_is_linux
-  tags:
-    - desktop
-    - flatpak
-    - host
-    - sushi-preview
-
-- name: Configure NVIDIA Flatpak runtimes
-  ansible.builtin.import_tasks: flatpak-nvidia.yml
-  when:
-    - platform_is_linux
-    - desktop_flatpak_command.rc == 0
-  tags:
-    - desktop
-    - flatpak
-    - flatpak-nvidia
-    - host
-
 - name: Configure desktop settings
   ansible.builtin.import_tasks: settings.yml
   when: platform_is_linux
@@ -42,14 +22,3 @@
     - desktop
     - host
     - hyper-window-tiling
-
-- name: Configure file previews
-  ansible.builtin.import_tasks: file-preview.yml
-  when:
-    - platform_is_linux
-    - desktop_flatpak_command.rc == 0
-  tags:
-    - desktop
-    - flatpak
-    - host
-    - sushi-preview

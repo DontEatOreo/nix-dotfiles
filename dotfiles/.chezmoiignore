@@ -41,6 +41,10 @@ Library/
 .local/bin/hide-display-audio
 {{ end }}
 
+{{ if ne .chezmoi.os "linux" }}
+.local/share/flatpak/
+{{ end }}
+
 {{ if eq .chezmoi.os "darwin" }}
 .config/Code/
 .config/autostart/
