@@ -186,6 +186,20 @@
   tags:
     - ghostty
 
+- name: Install privileged Homebrew cask
+  community.general.homebrew_cask:
+    name: temurin@21
+    path: "{{ bootstrap_homebrew_prefix }}/bin"
+    state: latest
+    sudo_password: >-
+      {{
+        lookup('ansible.builtin.env', 'ANSIBLE_BECOME_PASS')
+        or lookup('ansible.builtin.env', 'ANSIBLE_BECOME_PASSWORD')
+      }}
+  when: platform_is_macos
+  tags:
+    - temurin
+
 - name: Apply Homebrew bundle
   ansible.builtin.command:
     argv:
