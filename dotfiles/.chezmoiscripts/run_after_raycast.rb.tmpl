@@ -4,16 +4,16 @@
 
 require "pathname"
 
-brew = "/opt/homebrew/bin/brew"
-brew_ruby = "/opt/homebrew/opt/ruby/bin/ruby"
+brew = Pathname("/opt/homebrew/bin/brew")
+brew_ruby = Pathname("/opt/homebrew/opt/ruby/bin/ruby")
 configurer = Pathname(Dir.home)/".local/libexec/private-application-configurer"
 
-unless File.executable?(brew)
+unless brew.executable?
   warn "raycast: warning: Homebrew not installed; skipping"
   exit 0
 end
 
-unless File.executable?(brew_ruby)
+unless brew_ruby.executable?
   warn "raycast: error: Homebrew Ruby is not installed"
   exit 1
 end
@@ -23,5 +23,5 @@ unless configurer.file?
   exit 1
 end
 
-exec brew_ruby, configurer.to_s, "configure", "--if-present"
+exec brew_ruby.to_s, configurer.to_s, "configure", "--if-present"
 {{- end -}}
