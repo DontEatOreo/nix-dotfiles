@@ -236,6 +236,7 @@ end
 vscode "astral-sh.ty"
 vscode "biomejs.biome"
 vscode "bradlc.vscode-tailwindcss"
+vscode "catppuccin.catppuccin-vsc"
 vscode "catppuccin.catppuccin-vsc-icons"
 vscode "charliermarsh.ruff"
 vscode "christian-kohler.path-intellisense"
