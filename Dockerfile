@@ -137,7 +137,7 @@ RUN set -eu; \
     for target in ${chezmoi_targets}; do \
       set -- "$@" "${HOME}/${target}"; \
     done; \
-    chezmoi \
+    DOTFILES_RECORDS_DISABLED=1 chezmoi \
       --source=/workspace/dotfiles/dotfiles \
       --destination="${HOME}" \
       apply \

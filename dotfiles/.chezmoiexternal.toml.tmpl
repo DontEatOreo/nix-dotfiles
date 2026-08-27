@@ -1,4 +1,5 @@
 {{- if ne .chezmoi.os "windows" -}}
+{{- if ne (env "DOTFILES_RECORDS_DISABLED") "1" -}}
 {{- range $command := list "bash" "jq" "ruby" "sops" -}}
 {{- if not (lookPath $command) -}}
 {{- fail (printf "encrypted records require %s on PATH" $command) -}}
@@ -52,6 +53,7 @@ filter.command = "bash"
 filter.args = {{ list $filter $selector (printf "%d" $index) (printf "%t" $record.render) $root.chezmoi.sourceDir | toToml }}
 {{- end }}
 {{ end -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
