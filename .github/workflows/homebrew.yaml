@@ -6,8 +6,9 @@ on:
       - .github/workflows/homebrew.yaml
       - Brewfile
       - Formula/**
+      - LICENSE
       - npins/sources.json
-      - packages/kanata-with-cmd/**
+      - packages/theme-run/**
   push:
     branches:
       - master
@@ -39,6 +40,13 @@ jobs:
 
       - name: Install Homebrew RubyGems
         run: brew install-bundler-gems
+
+      - name: Package theme-run Source
+        run: |
+          mkdir -p Sources
+          tar -cf Sources/theme-run-0.1.0.tar \
+            -C packages/theme-run go.mod go.sum README.md cmd internal \
+            -C ../.. LICENSE
 
       - name: Check Formula Style
         run: brew style Formula/*.rb

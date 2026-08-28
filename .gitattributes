@@ -86,14 +86,12 @@ dotfiles/.chezmoiremove linguist-language=Ignore-List linguist-detectable
 # Linguist does not have a Kanata language entry; Kanata config uses
 # s-expression syntax, so Scheme is the closest supported highlighter.
 **/*.kbd linguist-language=Scheme
-**/*.patch -whitespace linguist-detectable
 
-# Hidden GitHub/VS Code configuration and test fixtures are repo-owned source,
-# but Linguist treats these paths as vendored by default. Generated attributes
+# Hidden GitHub/VS Code configuration is repo-owned source, but Linguist treats
+# these paths as vendored by default. Generated attributes
 # below still take precedence for lockfiles inside these directories.
 .github/** -linguist-vendored
 .vscode/*.json -linguist-vendored linguist-detectable
-ansible/tests/fixtures/** -linguist-vendored
 
 # Plain-text files below are executable repository configuration or managed
 # data rather than documentation, so include them without inventing a DSL.
@@ -107,14 +105,10 @@ dotfiles/dot_local/bin/symlink_* linguist-language=Text linguist-detectable
 dotfiles/private_dot_ssh/allowed_signers linguist-language=Text linguist-detectable
 dotfiles/private_dot_ssh/known_hosts.d/* linguist-language=Text linguist-detectable
 dotfiles/dot_zprofile linguist-language=Shell
-packages/*/patches/series linguist-language=Text linguist-detectable
 
 # Linguist vendors TypeScript declaration files globally. These declarations
 # describe local extension runtimes and should count with the package sources.
 packages/hyper-window-tiling/src/**/*.d.ts -linguist-vendored
-
-# Exclude the bundled tomlc17 dependency from repository language statistics.
-packages/terminal-theme-tools/vendor/tomlc17/tomlc17.[ch] linguist-vendored
 
 # These files are checked in generated/runtime artifacts built from package
 # sources, host discovery, encryption tools, dependency resolvers, or schemas.

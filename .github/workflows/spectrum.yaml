@@ -18,10 +18,10 @@ on:
       - npins/sources.json
       - overlays/default.nix
       - packages/bluebuild-v2/**
-      - packages/ghostty-patched/**
+      - packages/ghostty-patched/build.sh
       - packages/hyper-window-tiling/**
       - packages/kanata/**
-      - packages/kanata-with-cmd/**
+      - packages/kanata-with-cmd/build-linux.sh
   push:
     branches: [master]
     paths: *spectrum-paths

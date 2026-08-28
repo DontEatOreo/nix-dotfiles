@@ -18,7 +18,6 @@ on:
       # Inputs to the flake, NixOS configuration, and package checks that are
       # not already covered by the formatter/linter extensions below.
       - .dockerignore
-      - Dockerfile
       - Justfile
       - '**/flake.lock'
       - '**/Containerfile'
@@ -28,12 +27,10 @@ on:
       - dotfiles/dot_config/fontconfig/conf.d/**
       - packages/kanata/kanata.kbd
       - dotfiles/dot_local/bin/executable_*
-      - dotfiles/dot_quiltrc
       - packages/dotfiles-python/assets/**
       - packages/hyper-window-tiling/bun.lock
       - packages/hyper-window-tiling/gnome/schemas/**
-      - packages/*/patches/**
-      - packages/terminal-theme-tools/**
+      - packages/theme-run/**
 
       # `nix flake check` includes treefmt and pre-commit checks, so changes to
       # any file type checked by those tools are genuine inputs to this job.
@@ -121,9 +118,6 @@ jobs:
           .#checks.x86_64-linux.pre-commit
           .#checks.x86_64-linux.treefmt
 
-      - name: Check Quilt Queues
-        run: nix develop --command just quilt-check
-
       - name: Detect Native Check Inputs
         id: native-inputs
         env:
@@ -151,8 +145,7 @@ jobs:
           - dotfiles-python
           - equicord-settings
           - hyper-window-tiling
-          - nixos-module
-          - terminal-theme-tools
+          - theme-run
           - toshy-runtime
     steps:
       - name: Checkout Repository

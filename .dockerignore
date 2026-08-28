@@ -1,19 +1,15 @@
-# Start from an empty build context and add back only the paths used by the
-# smoke-test Dockerfile and Spectrum image builds.
+# Start from an empty build context and add back only Spectrum image inputs.
 *
 
 !.ansible-lint
 !.yamllint
 !ansible.cfg
+!LICENSE
 !pyproject.toml
 !uv.lock
 
-!containers/
-!containers/**
-
 !ansible/
 !ansible/**
-ansible/tests/
 
 !bluebuild/
 !bluebuild/**
@@ -37,7 +33,7 @@ packages/dotfiles-python/*
 !packages/dotfiles-python/src/
 !packages/dotfiles-python/src/**
 !packages/ghostty-patched/
-!packages/ghostty-patched/**
+!packages/ghostty-patched/build.sh
 !packages/hyper-window-tiling/
 packages/hyper-window-tiling/*
 !packages/hyper-window-tiling/package.json
@@ -54,23 +50,15 @@ packages/hyper-window-tiling/*
 !packages/kanata-with-cmd/
 packages/kanata-with-cmd/*
 !packages/kanata-with-cmd/build-linux.sh
-!packages/kanata-with-cmd/patches/
-!packages/kanata-with-cmd/patches/**
-!packages/terminal-theme-tools/
-packages/terminal-theme-tools/*
-!packages/terminal-theme-tools/build.zig
-!packages/terminal-theme-tools/build.zig.zon
-!packages/terminal-theme-tools/build_support.zig
-!packages/terminal-theme-tools/config/
-!packages/terminal-theme-tools/config/**
-!packages/terminal-theme-tools/include/
-!packages/terminal-theme-tools/include/**
-!packages/terminal-theme-tools/src/
-!packages/terminal-theme-tools/src/**
-!packages/terminal-theme-tools/tests/
-!packages/terminal-theme-tools/tests/**
-!packages/terminal-theme-tools/vendor/
-!packages/terminal-theme-tools/vendor/**
+!packages/theme-run/
+packages/theme-run/*
+!packages/theme-run/go.mod
+!packages/theme-run/go.sum
+!packages/theme-run/package.nix
+!packages/theme-run/cmd/
+!packages/theme-run/cmd/**
+!packages/theme-run/internal/
+!packages/theme-run/internal/**
 
 # Never send local generated state if it appears under an included path.
 **/.DS_Store

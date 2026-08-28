@@ -9,8 +9,6 @@ ignore: |
   build*/
   dist/
   node_modules/
-  packages/terminal-theme-tools/build*/
-  packages/terminal-theme-tools/zig-pkg/
   result
   secrets/
   zig-pkg/
