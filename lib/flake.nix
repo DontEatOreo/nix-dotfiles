@@ -59,13 +59,12 @@ let
         quickCss = equicordQuickCss;
         settings = equicordSettings.jsonConfig;
       };
-      inherit (pkgs) kanata-with-cmd terminal-theme-tools;
+      inherit (pkgs) theme-run;
     }
     // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
       inherit (pkgs)
         bluebuild-v2
         check-jsonschema
-        ghostty-patched
         hyper-window-tiling-gnome
         hyper-window-tiling-kde
         kmscon
@@ -110,6 +109,7 @@ in
               inputs.browser.nixosModules.default
               inputs.determinate.nixosModules.default
               inputs.nixcord.nixosModules.nixcord
+              inputs.patches.nixosModules.default
               inputs.vicinae.nixosModules.default
             ];
 

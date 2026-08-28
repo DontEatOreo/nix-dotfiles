@@ -45,11 +45,6 @@
           ++ [ self'.packages.bun2nix ];
       };
 
-      zigShell = pkgs.mkShell {
-        packages = [ pkgs.zig_0_16 ];
-        inputsFrom = [ self'.packages.terminal-theme-tools ];
-      };
-
       operationsShell = pkgs.mkShell {
         packages =
           with pkgs;
@@ -79,51 +74,10 @@
           );
       };
 
-      mkStandaloneNixosModule =
-        testModule:
-        inputs.nixpkgs.lib.nixosSystem {
-          system = null;
-          modules = [
-            self.nixosModules.default
-            {
-              boot.isContainer = true;
-              nixpkgs.hostPlatform = system;
-              local.kde.enable = true;
-              system.stateVersion = "26.05";
-            }
-            testModule
-          ];
-        };
-
-      standaloneNixosModule = mkStandaloneNixosModule {
-        local.user.name = "module-test";
-        users = {
-          groups.module-test = { };
-          users.module-test = {
-            group = "module-test";
-            isNormalUser = true;
-          };
-        };
-      };
-
-      missingUserMessage = "local.user.name must identify an account declared in users.users.";
-      missingUserNixosModule = mkStandaloneNixosModule {
-        local.user.name = "missing-user";
-      };
-      missingUserAssertionPresent = lib.any (
-        assertion: !assertion.assertion && assertion.message == missingUserMessage
-      ) missingUserNixosModule.config.assertions;
-
-      standaloneNixosModuleCheck =
-        assert missingUserAssertionPresent;
-        builtins.deepSeq standaloneNixosModule.config.system.build.toplevel.drvPath (
-          pkgs.runCommandLocal "nixos-module-evaluation" { } "touch $out"
-        );
-
     in
     {
       checks = {
-        inherit (self'.packages) dotfiles-python equicord-settings terminal-theme-tools;
+        inherit (self'.packages) dotfiles-python equicord-settings theme-run;
       }
       // lib.optionalAttrs isLinux {
         hyper-window-tiling = self'.packages.hyper-window-tiling-gnome;
@@ -131,20 +85,17 @@
       }
       // lib.optionalAttrs (system == "x86_64-linux") {
         nixos = self.nixosConfigurations.nixos.config.system.build.toplevel;
-        nixos-module = standaloneNixosModuleCheck;
       };
 
       devShells = {
         python = pythonShell;
         javascript = javascriptShell;
-        zig = zigShell;
         operations = operationsShell;
         default = pkgs.mkShell {
           inputsFrom = [
             config.pre-commit.devShell
             pythonShell
             javascriptShell
-            zigShell
             operationsShell
           ];
           packages = [
@@ -153,7 +104,6 @@
           ++ (with pkgs; [
             git
             just
-            quilt
           ]);
           inherit (config.pre-commit) shellHook;
         };
@@ -175,7 +125,6 @@
           excludes = [
             "hosts/linux/hardware-configuration.nix"
             "packages/hyper-window-tiling/bun.nix"
-            "packages/terminal-theme-tools/zig-pkg/.*"
           ];
         };
         statix.enable = true;
@@ -194,10 +143,7 @@
           ];
         };
         ruff.enable = true;
-        rumdl = {
-          enable = true;
-          excludes = [ "packages/terminal-theme-tools/vendor/tomlc17/PROVENANCE.md" ];
-        };
+        rumdl.enable = true;
         shellcheck.enable = true;
         treefmt.enable = true;
         yamllint.enable = true;
@@ -226,6 +172,10 @@
             validate.enable = false;
           };
           clang-format.enable = true;
+          gofmt = {
+            enable = true;
+            package = pkgs.go_1_27;
+          };
           just.enable = true;
           nixfmt.enable = true;
           ruff-format.enable = true;
@@ -240,7 +190,6 @@
         };
 
         settings = {
-          excludes = [ "packages/terminal-theme-tools/vendor/**" ];
           formatter = {
             shfmt = {
               includes = lib.mkAfter [
@@ -250,6 +199,7 @@
               excludes = [
                 "dotfiles/dot_local/bin/executable_ghostty-dreamy-swirl.ts"
                 "dotfiles/dot_local/bin/executable_helix-rumdl-lsp"
+                "dotfiles/dot_local/bin/executable_vscode-just-lsp"
                 "bluebuild/files/system/usr/bin/open"
               ];
               options = lib.mkAfter [ "-ci" ];

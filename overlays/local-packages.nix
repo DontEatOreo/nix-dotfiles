@@ -4,10 +4,8 @@ let
   packageFiles = {
     bluebuild-v2 = ../packages/bluebuild-v2/package.nix;
     dotfiles-python = ../packages/dotfiles-python/package.nix;
-    ghostty-patched = ../packages/ghostty-patched/package.nix;
     hyper-window-tiling = ../packages/hyper-window-tiling/package.nix;
-    kanata-with-cmd = ../packages/kanata-with-cmd/package.nix;
-    terminal-theme-tools = ../packages/terminal-theme-tools/package.nix;
+    theme-run = ../packages/theme-run/package.nix;
     toshy-runtime = ../packages/toshy-runtime/package.nix;
     uresourced = ../packages/uresourced/package.nix;
   };
@@ -15,11 +13,6 @@ let
   packageArgs = {
     dotfiles-python = {
       inherit (final.unstable) python314Packages;
-    };
-    ghostty-patched = {
-      ghostty = final.unstable.ghostty.override {
-        zig_0_15 = final.unstable.zig;
-      };
     };
   };
 

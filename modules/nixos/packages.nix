@@ -1,5 +1,6 @@
 {
   dotfilesPackages,
+  inputs,
   lib,
   pkgs,
   ...
@@ -17,6 +18,11 @@ in
 
   config = {
     programs = {
+      _4evy = {
+        enable = true;
+        packages = [ inputs.patches.packages.${pkgs.stdenv.hostPlatform.system}.ghostty ];
+      };
+
       nh = {
         enable = true;
         package = pkgs.unstable.nh;
@@ -34,7 +40,7 @@ in
         just
         yamllint
         ;
-      inherit (dotfilesPackages) dotfiles-python terminal-theme-tools;
+      inherit (dotfilesPackages) dotfiles-python theme-run;
 
       # Host/session spine and editor dependencies.
       inherit (pkgs.unstable)
@@ -163,7 +169,6 @@ in
         ;
 
       # Hardware and platform tools.
-      inherit (dotfilesPackages) ghostty-patched;
       inherit (pkgs.unstable)
         chezmoi
         pciutils
