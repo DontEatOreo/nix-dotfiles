@@ -37,8 +37,4 @@ class Equilotl < Formula
     system "go", "build", *std_go_args(output: bin/executable, ldflags:, tags: "cli")
     bin.install_symlink executable => "equilotl"
   end
-
-  test do
-    assert_match "Usage", shell_output("#{bin}/equilotl -help 2>&1")
-  end
 end

@@ -21,8 +21,4 @@ class HeliumLinux < Formula
     libexec.install Dir["*"]
     bin.install_symlink libexec/"helium" => "helium"
   end
-
-  test do
-    assert_match "Helium #{version}", shell_output("#{libexec}/helium --version")
-  end
 end

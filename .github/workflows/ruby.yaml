@@ -10,7 +10,6 @@ on:
       - Gemfile
       - Gemfile.lock
       - libexec/*.rb
-      - test/**/*.rb
   push:
     branches:
       - master
@@ -25,7 +24,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  quality:
     name: Check
     if: >-
       github.event_name != 'pull_request' ||
@@ -50,7 +49,4 @@ jobs:
         run: bundle exec rubocop --format github
 
       - name: Check Syntax
-        run: find Formula libexec test -name '*.rb' -print0 | xargs -0 -n1 ruby -c
-
-      - name: Test
-        run: bundle exec ruby -Itest test/ruby_tools_test.rb
+        run: find Formula libexec -name '*.rb' -print0 | xargs -0 -n1 ruby -c

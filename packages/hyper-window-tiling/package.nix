@@ -23,7 +23,7 @@ let
       (packageRoot + /gnome/schemas)
       (packageRoot + /kde/metadata.json)
       (packageRoot + /package.json)
-      (lib.fileset.difference (packageRoot + /src) (packageRoot + /src/shared/lib.test.ts))
+      (packageRoot + /src)
       (packageRoot + /tsconfig.json)
     ];
   };

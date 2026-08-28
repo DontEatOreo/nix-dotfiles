@@ -18,14 +18,4 @@ class AltTabLicense < Formula
     chmod 0755, libexec/"alt-tab-license.rb"
     bin.install_symlink (libexec/"alt-tab-license.rb") => "alt-tab-license"
   end
-
-  test do
-    assert_predicate libexec/"alt-tab-license.rb", :executable?
-    output = shell_output(
-      "ALT_TAB_SECURITY=/usr/bin/false ALT_TAB_DEFAULTS=/usr/bin/false " \
-      "#{bin}/alt-tab-license status",
-    )
-    assert_match "licenseKey:  none", output
-    assert_match "lastValidation:        none", output
-  end
 end

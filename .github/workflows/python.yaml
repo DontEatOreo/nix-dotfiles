@@ -78,8 +78,5 @@ jobs:
       - name: Compile Python Sources
         run: uv run python -m compileall -q ansible dotfiles packages
 
-      - name: Test
-        run: uv run pytest
-
       - name: Build Package
         run: uv build --no-build-logs

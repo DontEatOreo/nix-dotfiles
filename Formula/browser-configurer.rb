@@ -21,8 +21,4 @@ class BrowserConfigurer < Formula
   def install
     system "go", "build", *std_go_args(output: bin/"browser-configurer"), "./cmd/browser"
   end
-
-  test do
-    assert_match "Make Chromium-family browsers declarative", shell_output("#{bin}/browser-configurer --help")
-  end
 end

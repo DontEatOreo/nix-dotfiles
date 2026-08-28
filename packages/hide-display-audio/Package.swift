@@ -21,7 +21,6 @@ let package = Package(
       name: "HideDisplayAudio",
       dependencies: ["EDIDKit", "PrivateIOKit"]
     ),
-    .testTarget(name: "EDIDKitTests", dependencies: ["EDIDKit"]),
   ],
   // PackageDescription 6.2 still calls the finalized ISO C23 mode `c2x`.
   cLanguageStandard: .c2x

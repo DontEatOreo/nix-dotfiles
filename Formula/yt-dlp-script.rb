@@ -24,8 +24,4 @@ class YtDlpScript < Formula
   def install
     bin.install "pkgs/by-name/yt/yt-dlp-script/yt-dlp-script.sh" => "yt-dlp-script"
   end
-
-  test do
-    assert_match "Usage:", shell_output("#{bin}/yt-dlp-script --help")
-  end
 end

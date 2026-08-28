@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.fallow.tools/schemas/config.json",
-  "ignorePatterns": ["dist/**", "extension.js", "node_modules/**", "src/**/*.test.ts"],
+  "ignorePatterns": ["dist/**", "extension.js", "node_modules/**"],
   "duplicates": {
     "ignore": ["dist/**", "extension.js"]
   },

@@ -19,7 +19,6 @@ Thumbs.db
 .cache/
 .gradle/
 .complexipy_cache/
-.pytest_cache/
 .ruff_cache/
 .rumdl_cache/
 .docker-cache/
@@ -58,12 +57,5 @@ local.properties
 *.egg-info/
 result
 tmp/
-
-# Test and coverage outputs
-.coverage
-.coverage.*
-coverage.xml
-htmlcov/
-lcov.info
 
 /.bluebuild-scripts_*

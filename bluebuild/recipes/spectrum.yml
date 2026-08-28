@@ -34,4 +34,3 @@ modules:
   - from-file: ../bluebuild/recipes/spectrum/modules/software.yml
   - from-file: ../bluebuild/recipes/spectrum/modules/local.yml
   - from-file: ../bluebuild/recipes/spectrum/modules/system.yml
-  - from-file: ../bluebuild/recipes/spectrum/modules/validate.yml

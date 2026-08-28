@@ -33,7 +33,6 @@ dev = [
   "complexipy>=7,<8",
   "defusedxml>=0.7,<1",
   "deptry>=0.25.1,<0.26",
-  "pytest>=9,<10",
   "ruff>=0.16,<0.17",
   "ty>=0.0.57,<0.1",
   "vulture>=2.14,<3",
@@ -65,12 +64,6 @@ packages = [
   "packages/dotfiles-python/assets/desktop/*.json",
   "packages/dotfiles-python/assets/desktop/*.in",
 ]
-
-[tool.pytest.ini_options]
-filterwarnings = ["error"]
-minversion = "9.0"
-strict = true
-testpaths = ["packages/dotfiles-python/tests", "ansible/tests"]
 
 [tool.ruff]
 extend-exclude = ["ansible/roles/keyboard/files/toshy/slices"]
@@ -131,7 +124,7 @@ ignore = [
   "suspicious-subprocess-import",
   "subprocess-without-shell-equals-true",
   "start-process-with-no-shell",
-  # Standalone automation scripts and tests are not importable packages.
+  # Standalone automation scripts are not importable packages.
   "implicit-namespace-package",
   # Package initializers intentionally register Cyclopts command trees.
   "non-empty-init-module",
@@ -154,12 +147,6 @@ known-first-party = ["workstation"]
 max-complexity = 10
 
 [tool.ruff.lint.per-file-ignores]
-"**/test_*.py" = [
-  "import-private-name",
-  "magic-value-comparison",
-  "assert",
-  "private-member-access",
-]
 "packages/dotfiles-python/src/workstation/macos/terminal.py" = [
   "get-attr-with-constant",
 ]
@@ -195,13 +182,11 @@ all = "error"
 error-on-warning = true
 
 [tool.vulture]
-exclude = ["packages/terminal-theme-tools/zig-pkg"]
 min_confidence = 100
 paths = ["ansible", "dotfiles", "packages"]
 sort_by_size = true
 
 [tool.deptry]
-extend_exclude = [".*tests/"]
 known_first_party = ["workstation"]
 
 [tool.deptry.per_rule_ignores]

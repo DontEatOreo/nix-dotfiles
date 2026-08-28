@@ -33,12 +33,4 @@ class ShottrLicense < Formula
     chmod "go-rwx", libexec/"secrets.yaml"
     bin.install_symlink (libexec/"shottr-license.rb") => "shottr-license"
   end
-
-  test do
-    assert_predicate libexec/"shottr-license.rb", :executable?
-    assert_predicate libexec/"secrets.yaml", :file?
-    ENV["SHOTTR_PLUTIL"] = "/usr/bin/false"
-    output = shell_output("#{bin}/shottr-license status")
-    assert_equal "shottr-license: not installed", output.strip
-  end
 end

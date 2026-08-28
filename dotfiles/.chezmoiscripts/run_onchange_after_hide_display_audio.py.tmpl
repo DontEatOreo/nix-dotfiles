@@ -1,7 +1,7 @@
 {{- if eq .chezmoi.os "darwin" -}}
 {{- $repo := .chezmoi.workingTree -}}
 #!/usr/bin/env python3.14
-# Source fingerprint: {{ output "git" "-C" $repo "hash-object" (joinPath $repo "packages/hide-display-audio/Package.swift") (joinPath $repo "packages/hide-display-audio/Sources/EDIDKit/EDID.swift") (joinPath $repo "packages/hide-display-audio/Sources/HideDisplayAudio/main.swift") (joinPath $repo "packages/hide-display-audio/Sources/PrivateIOKit/PrivateIOKit.c") (joinPath $repo "packages/hide-display-audio/Sources/PrivateIOKit/include/PrivateIOKit.h") (joinPath $repo "packages/hide-display-audio/Tests/EDIDKitTests/EDIDTests.swift") | sha256sum }}
+# Source fingerprint: {{ output "git" "-C" $repo "hash-object" (joinPath $repo "packages/hide-display-audio/Package.swift") (joinPath $repo "packages/hide-display-audio/Sources/EDIDKit/EDID.swift") (joinPath $repo "packages/hide-display-audio/Sources/HideDisplayAudio/main.swift") (joinPath $repo "packages/hide-display-audio/Sources/PrivateIOKit/PrivateIOKit.c") (joinPath $repo "packages/hide-display-audio/Sources/PrivateIOKit/include/PrivateIOKit.h") | sha256sum }}
 from __future__ import annotations
 
 import os
