@@ -8,8 +8,8 @@ modules:
     dest: /src/sources.json
 
   - type: copy@v1
-    src: packages/kanata-with-cmd/patches
-    dest: /src/packages/kanata-with-cmd/patches
+    src: bluebuild/recipes/spectrum/sources/patches.json
+    dest: /src/patches.json
 
   - type: copy@v1
     src: packages/kanata-with-cmd/build-linux.sh
@@ -23,6 +23,7 @@ modules:
         - cargo
         - gcc
         - git
+        - jq
         - python3
         - rust
 
@@ -35,6 +36,7 @@ modules:
           --mount=type=cache,id=spectrum-kanata-target-v1,sharing=locked,target=/build/kanata-source/target \
           SOURCE_LOCK=/src/sources.json \
           SOURCE_PIN=kanata_homebrew_archive \
-          PATCHES=/src/packages/kanata-with-cmd/patches \
+          PATCHES_LOCK=/src/patches.json \
+          PATCH_STACK=kanata \
           PREFIX=/out/usr \
           bash /src/build-kanata.sh

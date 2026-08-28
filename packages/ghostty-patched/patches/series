@@ -1,5 +1,0 @@
-0001-os-quote-literal-shell-command-arguments.patch
-0002-datastruct-support-replacing-split-tree-leaves.patch
-0003-apprt-honor-per-surface-command-wait-behavior.patch
-0004-apprt-edit-scrollback-in-a-terminal-surface.patch
-0005-build-make-package-manifest-sandbox-opt-in.patch

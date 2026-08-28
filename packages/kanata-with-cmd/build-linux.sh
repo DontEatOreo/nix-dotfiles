@@ -5,7 +5,8 @@ set -euo pipefail
 
 source_lock=${SOURCE_LOCK:?SOURCE_LOCK must point to the projected source lock}
 source_pin=${SOURCE_PIN:-kanata_homebrew_archive}
-patches=${PATCHES:?PATCHES must point to the ordered patch directory}
+patches_lock=${PATCHES_LOCK:?PATCHES_LOCK must point to the shared repository lock}
+patch_stack=${PATCH_STACK:-kanata}
 prefix=${PREFIX:-/out/usr}
 source_directory=${SOURCE_DIRECTORY:-/build/kanata-source}
 
@@ -35,6 +36,15 @@ PYTHON
 
 install -d -m 0755 "$source_directory"
 tar -xf "$archive" --strip-components=1 -C "$source_directory"
+
+patches_repository=$(jq -er '.repository' "$patches_lock")
+patches_revision=$(jq -er '.revision' "$patches_lock")
+git init -q /build/patches
+git -C /build/patches remote add origin "$patches_repository"
+git -C /build/patches fetch --depth=1 origin "$patches_revision"
+git -C /build/patches checkout --detach --quiet FETCH_HEAD
+patches="/build/patches/stacks/$patch_stack/patches"
+test -s "$patches/series"
 
 while IFS= read -r patch_name || [[ -n $patch_name ]]; do
 	[[ -n $patch_name ]] || continue

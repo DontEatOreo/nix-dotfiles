@@ -65,16 +65,16 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "b97b17f06b1ffd694f80edd3df5dd2134a0bcb9e",
-      "url": "https://github.com/ghostty-org/ghostty/archive/b97b17f06b1ffd694f80edd3df5dd2134a0bcb9e.tar.gz",
-      "hash": "sha256-w9WabnJ/v/TX4ZJgRKLmOqpcHVOVxb2WJlhVg6WbxM4=",
+      "revision": "5834a0e3df621802e9578e4562d88b0c2ad4ada8",
+      "url": "https://github.com/ghostty-org/ghostty/archive/5834a0e3df621802e9578e4562d88b0c2ad4ada8.tar.gz",
+      "hash": "sha256-28tDNkJ0sLzogMuCrILCLNakIG/bTqyKgBw7Axziv+M=",
       "frozen": true
     },
     "ghostty_archive": {
       "type": "Url",
-      "url": "https://github.com/ghostty-org/ghostty/archive/b97b17f06b1ffd694f80edd3df5dd2134a0bcb9e.tar.gz",
+      "url": "https://github.com/ghostty-org/ghostty/archive/5834a0e3df621802e9578e4562d88b0c2ad4ada8.tar.gz",
       "unpack": false,
-      "hash": "sha256-LMBfvN6tKssFL1Bsz3Cu1DJSLe7kw2NcRY/xj7SWB5g=",
+      "hash": "sha256-opQod7R8nXE0argO5m9taZ+AqDON+pzZqepCNZfJUyc=",
       "frozen": true
     },
     "ghostty_zig_aarch64_linux": {
@@ -138,21 +138,21 @@
       "type": "Git",
       "repository": {
         "type": "GitHub",
-        "owner": "4evy",
+        "owner": "jj-vcs",
         "repo": "jj"
       },
-      "branch": "evy/git-ref-fetch-upstream",
+      "branch": "main",
       "submodules": false,
-      "revision": "beb39b2fa9abb31fe9341077be49bbef22595def",
-      "url": "https://github.com/4evy/jj/archive/beb39b2fa9abb31fe9341077be49bbef22595def.tar.gz",
-      "hash": "sha256-9RXRcfgJtKl0ipIp4VfsH0weNloxebSo5yrzlbgKQRA=",
+      "revision": "25c431b5433e907dca67d74271010239fc1207c5",
+      "url": "https://github.com/jj-vcs/jj/archive/25c431b5433e907dca67d74271010239fc1207c5.tar.gz",
+      "hash": "sha256-rHhmfkTRg4Kx+yu50XgMRZpzXGgtyBQh39GQeHIoE7o=",
       "frozen": true
     },
     "jj_archive": {
       "type": "Url",
-      "url": "https://github.com/4evy/jj/archive/beb39b2fa9abb31fe9341077be49bbef22595def.tar.gz",
+      "url": "https://github.com/jj-vcs/jj/archive/25c431b5433e907dca67d74271010239fc1207c5.tar.gz",
       "unpack": false,
-      "hash": "sha256-hry6Khi05A5glQiwnPfgdN5GalkUIPuyisVy1G3NjZQ=",
+      "hash": "sha256-XOclFBkWf/WJDtGy4LSqOsDHKcDOHqxnanI+6eC8z9k=",
       "frozen": true
     },
     "kanata": {
@@ -234,34 +234,6 @@
       "version": "3.2",
       "url": "https://files.pythonhosted.org/packages/04/d1/1adbf06a38dc339e41a1666f6c7135924594c20fd46e060fb263248c564d/astral-3.2.tar.gz",
       "hash": "sha256-m3w7QS6eadFyz7JL4Oat3MnxvQGijbi+vmbXXMxTPYg="
-    },
-    "terminal_theme_tools_ghostty": {
-      "type": "Git",
-      "repository": {
-        "type": "GitHub",
-        "owner": "ghostty-org",
-        "repo": "ghostty"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "f64f4aca2c29b554d111b36c3d946a9bddd159ff",
-      "url": "https://github.com/ghostty-org/ghostty/archive/f64f4aca2c29b554d111b36c3d946a9bddd159ff.tar.gz",
-      "hash": "sha256-tzt9C99wsV0lriI6LtLDYMhnNbWNwIzmcWfRJStGhMs=",
-      "frozen": true
-    },
-    "terminal_theme_tools_ghostty_archive": {
-      "type": "Url",
-      "url": "https://github.com/ghostty-org/ghostty/archive/f64f4aca2c29b554d111b36c3d946a9bddd159ff.tar.gz",
-      "unpack": false,
-      "hash": "sha256-wzbH1sBQwFyUGzSjCKj3W11hu4sM/qHYpSEuXO+9K/k=",
-      "frozen": true
-    },
-    "terminal_theme_tools_uucode": {
-      "type": "Url",
-      "url": "https://deps.files.ghostty.org/uucode-2826a37a4562284fdacd8fa029d49509cc9bffcd.tar.gz",
-      "unpack": false,
-      "hash": "sha256-fnb8f6seescoxSs1u7PluMY5hBq/x/4aS8sTBQWUvJ4=",
-      "frozen": true
     },
     "toshy": {
       "type": "GitRelease",

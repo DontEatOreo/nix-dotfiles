@@ -29,6 +29,11 @@
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable-small";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    patches = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:4evy/patches";
+    };
+
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix";
   };

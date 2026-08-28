@@ -5,6 +5,7 @@ set -euo pipefail
 
 repository_root=$(git rev-parse --show-toplevel)
 source_lock="$repository_root/npins/sources.json"
+flake_lock="$repository_root/flake.lock"
 projection_directory="$repository_root/bluebuild/recipes/spectrum/sources"
 mode=${1:-write}
 
@@ -14,11 +15,12 @@ if [[ $mode != write && $mode != --check ]]; then
 fi
 
 project() {
-	local filter=$1
-	local destination=$2
+	local input=$1
+	local filter=$2
+	local destination=$3
 
 	if [[ $mode == --check ]]; then
-		if ! cmp <(jq --sort-keys "$filter" "$source_lock") "$destination"; then
+		if ! cmp <(jq --sort-keys "$filter" "$input") "$destination"; then
 			printf '%s is stale; run just source-update\n' \
 				"${destination#"$repository_root/"}" >&2
 			return 1
@@ -28,7 +30,7 @@ project() {
 
 	local temporary
 	temporary=$(mktemp "${destination}.XXXXXX")
-	if ! jq --sort-keys "$filter" "$source_lock" >"$temporary"; then
+	if ! jq --sort-keys "$filter" "$input" >"$temporary"; then
 		rm -f "$temporary"
 		return 1
 	fi
@@ -36,9 +38,11 @@ project() {
 }
 
 project \
+	"$source_lock" \
 	'{pins: {python_astral: (.pins.python_astral | {hash, url, version})}}' \
 	"$projection_directory/astral.json"
 project \
+	"$source_lock" \
 	'{pins: {
 	  ghostty: (.pins.ghostty | {revision}),
 	  ghostty_archive: (.pins.ghostty_archive | {hash, url}),
@@ -46,7 +50,18 @@ project \
 	}}' \
 	"$projection_directory/ghostty.json"
 project \
+	"$source_lock" \
 	'{pins: {
 	  kanata_homebrew_archive: (.pins.kanata_homebrew_archive | {hash, url})
 	}}' \
 	"$projection_directory/kanata.json"
+project \
+	"$flake_lock" \
+	'{
+    repository: (
+      "https://github.com/" + .nodes.patches.locked.owner + "/" +
+      .nodes.patches.locked.repo + ".git"
+    ),
+    revision: .nodes.patches.locked.rev
+  }' \
+	"$projection_directory/patches.json"

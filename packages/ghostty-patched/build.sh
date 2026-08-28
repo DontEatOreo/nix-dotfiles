@@ -7,7 +7,8 @@ set -euo pipefail
 : "${SOURCE_PIN:?}"
 : "${REVISION_PIN:?}"
 : "${ZIG_PIN:?}"
-: "${PATCHES:?}"
+: "${PATCHES_LOCK:?}"
+: "${PATCH_STACK:?}"
 : "${PREFIX:?}"
 : "${VERSION_PREFIX:?}"
 : "${ARTIFACT:?}"
@@ -19,6 +20,8 @@ source_hash=$(jq -er --arg pin "$SOURCE_PIN" '.pins[$pin].hash' "$SOURCE_LOCK")
 zig_url=$(jq -er --arg pin "$ZIG_PIN" '.pins[$pin].url' "$SOURCE_LOCK")
 zig_hash=$(jq -er --arg pin "$ZIG_PIN" '.pins[$pin].hash' "$SOURCE_LOCK")
 revision=$(jq -er --arg pin "$REVISION_PIN" '.pins[$pin].revision' "$SOURCE_LOCK")
+patches_repository=$(jq -er '.repository' "$PATCHES_LOCK")
+patches_revision=$(jq -er '.revision' "$PATCHES_LOCK")
 
 verify_sri() {
 	local path=$1
@@ -41,9 +44,16 @@ verify_sri /build/zig.tar.xz "$zig_hash"
 tar -xzf /build/ghostty.tar.gz --strip-components=1 -C /build/source
 tar -xJf /build/zig.tar.xz --strip-components=1 -C /build/zig
 
+git init -q /build/patches
+git -C /build/patches remote add origin "$patches_repository"
+git -C /build/patches fetch --depth=1 origin "$patches_revision"
+git -C /build/patches checkout --detach --quiet FETCH_HEAD
+patches="/build/patches/stacks/$PATCH_STACK/patches"
+test -s "$patches/series"
+
 while IFS= read -r patch_name; do
-	git -C /build/source apply "$PATCHES/$patch_name"
-done <"$PATCHES/series"
+	git -C /build/source apply "$patches/$patch_name"
+done <"$patches/series"
 
 version="$VERSION_PREFIX.${revision:0:7}"
 (
