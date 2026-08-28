@@ -38,9 +38,29 @@ for immutable host state, Homebrew for programs, chezmoi for home files, and
 Ansible only for machine-local reconciliation that cannot be expressed by
 those layers
 
+Normal setup runs install missing Brewfile entries without upgrading the
+existing userland. `just update` opts into Homebrew Bundle upgrades explicitly
+
 Ansible modules are the default for that remaining state. A custom module is
 justified only when no maintained module or composition of modules can model
-the outcome, and the exception must support check mode and have focused tests
+the outcome, and the exception must support check mode
+
+## Maintained collection capabilities
+
+The playbook uses maintained collection plugins for the mutable state they
+model directly:
+
+- `community.general` owns dconf and KDE settings, macOS defaults and launchd
+  services, Homebrew casks and services, INI edits, kernel module loading, and
+  1Password lookups.
+- `community.sops.load_vars` reads encrypted application settings without
+  materializing plaintext files.
+- `ansible.posix.synchronize` performs the file-tree reconciliations that need
+  rsync semantics.
+
+There is no Ansible package-install layer for Linux. Spectrum packages,
+Flatpaks, fonts, extensions, and enabled system services belong to BlueBuild;
+portable programs and editor extensions belong to the Brewfile.
 
 ## Intentional custom modules
 

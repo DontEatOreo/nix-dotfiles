@@ -31,32 +31,32 @@ is pinned to the same upstream commit as the `bluebuild-cli` entry in
 Spectrum available inside the installed OS. `just spectrum-validate` rejects
 the recipe if those pins drift apart.
 
-Use `just spectrum-stage` to build the local image and run the bootc, Ghostty,
-and embedded BlueBuild checks against it. The lower-level
-`just spectrum-build` and `just spectrum-inspect` commands remain available
-when only one phase is needed.
+Use `just spectrum-build` to build the local image.
 
 BlueBuild supplies locked package-manager cache mounts to every module. Local
 Podman builds reuse those mounts and unchanged image layers. Published CI
 builds additionally set `BB_CACHE_LAYERS=true`, which imports and exports the
 registry cache at `ghcr.io/4evy/spectrum:latest-cache`. Pull-request builds
 stay read-only while importing that registry cache and using a branch-aware
-GitHub Actions layer cache, so they reuse work without pushing test images.
+GitHub Actions layer cache, so they reuse work without pushing temporary
+images.
 
 The top-level recipe is intentionally only an assembly manifest. Expensive
 build stages live under `recipes/spectrum/stages`, while main-image modules
 are ordered under `recipes/spectrum/modules` from remote-heavy software
-installation to local files, system policy, and final assertions. This
-ordering means edits to local configuration do not invalidate package, font,
-extension, or Linuxbrew layers.
+installation to local files and system policy. This ordering means edits to
+local configuration do not invalidate package, font, extension, or Linuxbrew
+layers.
 
-Astral and Ghostty consume minimal source-lock projections under
+Astral, Ghostty, and Kanata consume minimal source-lock projections under
 `recipes/spectrum/sources` instead of the repository-wide npins lock.
-Consequently, an unrelated source update does not invalidate either builder
-stage. `just source-update` refreshes these projections, and
-`just spectrum-validate` rejects any drift from `npins/sources.json`. The
-Ghostty stage also mounts persistent global and local Zig caches, allowing
-compilation artifacts to survive a source or patch cache miss.
+Consequently, an unrelated source update doesn't invalidate those builder
+stages. `just source-update` refreshes these projections, and
+`just spectrum-validate` rejects any drift from `npins/sources.json` or
+`flake.lock`. Ghostty and Kanata fetch their patch queues from the shared
+repository revision pinned by the flake. The Ghostty stage also mounts
+persistent global and local Zig caches, allowing compilation artifacts to
+survive a source or patch cache miss.
 
 The repository-local Hyper window tiler is also built once in a pinned Bun
 stage and copied into the system GNOME and KWin extension directories.
@@ -66,7 +66,9 @@ setting desktop shortcuts.
 The pinned Kanata executable, configuration, device policy, and system service
 are built into the image together. Ansible only reconciles the live user's
 device-group membership, disables a conflicting remapper when requested, and
-starts the service.
+starts the service. Spectrum also owns and globally enables the static Toshy
+user units that connect Toshy to Kanata; Ansible retains the pinned upstream
+installer and live service reconciliation.
 
 The stable Sushi Flatpak is installed by the image's per-user Flatpak service.
 Flatpak owns its matching graphics-driver extensions, while chezmoi owns the
