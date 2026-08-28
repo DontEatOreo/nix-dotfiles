@@ -30,6 +30,7 @@ modules:
         - fedora-atomic-desktop-appstream-cache-refresh.service
     user:
       enabled:
+        - toshy-kanata-device.path
         - vicinae.service
 
   - type: script@v1

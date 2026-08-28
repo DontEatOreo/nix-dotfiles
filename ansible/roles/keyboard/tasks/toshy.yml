@@ -300,31 +300,6 @@
     - not ansible_check_mode
     - keyboard_toshy_config_after_install.stat.exists | default(false)
 
-- name: Install Toshy Kanata user units
-  ansible.builtin.copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    mode: "0644"
-  loop:
-    - src: toshy-kanata.conf
-      dest: >-
-        {{ dotfiles_config_home }}/systemd/user/toshy-config.service.d/10-dotfiles.conf
-    - src: >-
-        toshy-kanata-device.path
-      dest: "{{ dotfiles_config_home }}/systemd/user/toshy-kanata-device.path"
-    - src: >-
-        toshy-kanata-device.service
-      dest: "{{ dotfiles_config_home }}/systemd/user/toshy-kanata-device.service"
-  notify: Restart Toshy services
-
-- name: Enable Toshy Kanata device watcher
-  ansible.builtin.systemd_service:
-    name: toshy-kanata-device.path
-    enabled: true
-    state: started
-    scope: user
-    daemon_reload: true
-
 - name: Refresh Toshy for the current Kanata device
   ansible.builtin.systemd_service:
     name: toshy-kanata-device.service
