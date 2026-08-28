@@ -34,8 +34,7 @@
     "swiftlang.swift-vscode",
     "tamasfe.even-better-toml",
     "timonwong.shellcheck",
-    "xembly.gomplate",
-    "ziglang.vscode-zig"
+    "xembly.gomplate"
   ],
   "unwantedRecommendations": ["llvm-vs-code-extensions.vscode-clangd"]
 }

@@ -21,7 +21,7 @@
         "color": "terminal.ansiGreen"
       },
       "group": {
-        "kind": "test",
+        "kind": "build",
         "isDefault": true
       },
       "problemMatcher": []
@@ -37,7 +37,7 @@
         "id": "checklist",
         "color": "terminal.ansiCyan"
       },
-      "group": "test",
+      "group": "build",
       "problemMatcher": []
     },
     {
@@ -47,7 +47,7 @@
       "command": "just",
       "args": ["check-format"],
       "inAgents": true,
-      "group": "test",
+      "group": "build",
       "problemMatcher": []
     },
     {
@@ -96,44 +96,13 @@
       }
     },
     {
-      "label": "containers: smoke test",
-      "detail": "Build and run the Fedora smoke-test container.",
-      "type": "process",
-      "command": "just",
-      "args": ["smoke"],
-      "icon": {
-        "id": "package",
-        "color": "terminal.ansiBlue"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "python: test",
-      "detail": "Run the configured pytest suite through the uv environment.",
-      "type": "process",
-      "command": "just",
-      "args": ["python-test"],
-      "inAgents": true,
-      "group": "test",
-      "problemMatcher": "$python"
-    },
-    {
-      "label": "python: test current file",
-      "detail": "Run pytest for the active Python file through the uv environment.",
-      "type": "process",
-      "command": "just",
-      "args": ["python-test", "${relativeFile}"],
-      "group": "test",
-      "problemMatcher": "$python"
-    },
-    {
       "label": "bun: check",
       "detail": "Run Biome and every Bun workspace type check.",
       "type": "process",
       "command": "bun",
       "args": ["run", "check"],
       "inAgents": true,
-      "group": "test",
+      "group": "build",
       "problemMatcher": "$tsc"
     },
     {
@@ -141,29 +110,10 @@
       "detail": "Run the repository RuboCop configuration.",
       "type": "process",
       "command": "bundle",
-      "args": ["exec", "rubocop", "libexec", "test"],
+      "args": ["exec", "rubocop", "libexec"],
       "inAgents": true,
-      "group": "test",
+      "group": "build",
       "problemMatcher": []
-    },
-    {
-      "label": "ruby: test",
-      "detail": "Run the Ruby tool test suite.",
-      "type": "process",
-      "command": "ruby",
-      "args": ["-Itest", "test/ruby_tools_test.rb"],
-      "inAgents": true,
-      "group": "test",
-      "problemMatcher": []
-    },
-    {
-      "label": "zig: test",
-      "detail": "Run the Zig unit and C interface tests.",
-      "type": "process",
-      "command": "zig",
-      "args": ["build", "test"],
-      "group": "test",
-      "problemMatcher": "$gcc"
     },
     {
       "label": "nix: flake check (no build)",
@@ -172,7 +122,7 @@
       "command": "nix",
       "args": ["flake", "check", "--keep-going", "--no-build"],
       "inAgents": true,
-      "group": "test",
+      "group": "build",
       "problemMatcher": []
     },
     {
@@ -226,7 +176,7 @@
       "command": "just",
       "args": ["spectrum-validate"],
       "inAgents": true,
-      "group": "test",
+      "group": "build",
       "problemMatcher": []
     },
     {
@@ -261,10 +211,8 @@
         "spectrum",
         "fmt",
         "lint",
-        "zig",
         "ansible",
         "bun",
-        "smoke",
         "nix",
         "watch",
         "check"
@@ -282,12 +230,10 @@
         "check-jsonschema",
         "dotfiles-python",
         "equicord-settings",
-        "ghostty-patched",
         "hyper-window-tiling-gnome",
         "hyper-window-tiling-kde",
-        "kanata-with-cmd",
         "kmscon",
-        "terminal-theme-tools",
+        "theme-run",
         "uresourced"
       ]
     }

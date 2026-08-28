@@ -70,17 +70,11 @@
     "**/.decrypted~*": true
   },
   "C_Cpp.default.cStandard": "c23",
-  "C_Cpp.default.includePath": [
-    "${workspaceFolder}/packages/terminal-theme-tools/include"
-  ],
   // cpptools still misparses C23 constexpr declarations. Rely on clang-tidy
   // diagnostics until its C23 parser support catches up:
   // https://github.com/microsoft/vscode-cpptools/issues?q=is%3Aissue%20C23%20constexpr
   "C_Cpp.errorSquiggles": "disabled",
   "C_Cpp.codeAnalysis.clangTidy.enabled": true,
-  "C_Cpp.codeAnalysis.exclude": {
-    "**/vendor/tomlc17/tomlc17.{c,h}": true
-  },
   "C_Cpp.formatting": "clangFormat",
   "search.exclude": {
     "**/.ansible": true,
@@ -90,20 +84,17 @@
     "**/.direnv": true,
     "**/.gradle": true,
     "**/.jj": true,
-    "**/.pytest_cache": true,
     "**/.ruby-lsp": true,
     "**/.ruff_cache": true,
     "**/.rumdl_cache": true,
     "**/.swiftpm": true,
     "**/.venv": true,
-    "**/.zig-cache": true,
     "**/__pycache__": true,
     "**/build": true,
     "**/build-*/**": true,
     "**/builddir/**": true,
     "**/dist": true,
     "**/node_modules": true,
-    "**/zig-out/**": true,
     "result": true,
     "secrets": true
   },
@@ -115,20 +106,17 @@
     "**/.direnv/**": true,
     "**/.gradle/**": true,
     "**/.jj/**": true,
-    "**/.pytest_cache/**": true,
     "**/.ruby-lsp/**": true,
     "**/.ruff_cache/**": true,
     "**/.rumdl_cache/**": true,
     "**/.swiftpm/**": true,
     "**/.venv/**": true,
-    "**/.zig-cache/**": true,
     "**/__pycache__/**": true,
     "**/build/**": true,
     "**/build-*/**": true,
     "**/builddir/**": true,
     "**/dist/**": true,
     "**/node_modules/**": true,
-    "**/zig-out/**": true,
     "result/**": true,
     "secrets/**": true
   },
@@ -176,8 +164,6 @@
   "js/ts.updateImportsOnFileMove.enabled": "always",
   "python.languageServer": "None",
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
-  "python.testing.pytestEnabled": true,
-  "python.testing.unittestEnabled": false,
   "python.useEnvironmentsExtension": true,
   "python-envs.workspaceSearchPaths": [".venv"],
   "ty.diagnosticMode": "workspace",
@@ -190,8 +176,7 @@
   "nix.serverPath": "nixd",
   "nix.formatterPath": "nixfmt",
   "rubyLsp.formatter": "rubocop",
-  "zig.path": "zig",
-  "zig.version": "0.16.0",
+  "vscode-just.lspPath": "vscode-just-lsp",
   "ansible.ansible.useFullyQualifiedCollectionNames": true,
   "ansible.validation.lint.enabled": true,
   "markdownlint.run": "onSave",
@@ -214,10 +199,6 @@
     "editor.defaultFormatter": "Shopify.ruby-lsp",
     "editor.formatOnSave": true,
     "editor.formatOnType": true
-  },
-  "[zig]": {
-    "editor.defaultFormatter": "ziglang.vscode-zig",
-    "editor.formatOnSave": true
   },
   "[shellscript]": {
     "editor.defaultFormatter": "mkhl.shfmt"
@@ -314,5 +295,8 @@
   "[markdown]": {
     "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
     "editor.formatOnSave": true
+  },
+  "[just]": {
+    "editor.defaultFormatter": "nefrob.vscode-just-syntax"
   }
 }
