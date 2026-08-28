@@ -3,6 +3,7 @@
 cask_args appdir: "/Applications" if OS.mac?
 
 tap "4evy/dotfiles", trusted: true
+tap "4evy/patches", "https://github.com/4evy/patches", trusted: true
 
 # Bootstrap shell and provisioning tools
 brew "bash"
@@ -174,7 +175,7 @@ brew "fastfetch"
 brew "fzf"
 brew "ghidra"
 brew "4evy/dotfiles/equilotl"
-brew "4evy/dotfiles/terminal-theme-tools"
+brew "4evy/dotfiles/theme-run"
 
 # Linux's image owns Kanata's executable, configuration, and host integration.
 # macOS keeps its Brew-provided binary and signed launch daemon in Ansible.

@@ -10,7 +10,7 @@
     - jj
     - kanata
     - shottr
-    - terminal-theme-tools
+    - theme-run
 
 - name: Synchronize repository-owned local Homebrew tap content
   ansible.posix.synchronize:
@@ -31,15 +31,8 @@
       - "--include=/Formula/***"
       - "--include=/npins/"
       - "--include=/npins/sources.json"
-      - "--include=/packages/"
-      - "--include=/packages/jj-patched/"
-      - "--include=/packages/jj-patched/patches/***"
-      - "--include=/packages/kanata-with-cmd/"
-      - "--include=/packages/kanata-with-cmd/patches/***"
     bootstrap_homebrew_tap_rsync_macos:
       - "--include=/libexec/***"
-      - "--include=/packages/ghostty-patched/"
-      - "--include=/packages/ghostty-patched/patches/***"
       - "--include=/secrets/"
       - "--include=/secrets/secrets.yaml"
   tags: *bootstrap_homebrew_tap_tags
@@ -53,47 +46,35 @@
   tags:
     - shottr
 
-- name: Build terminal theme tools source archive for the local tap
+- name: Ensure local Homebrew source directory exists
+  ansible.builtin.file:
+    path: "{{ bootstrap_homebrew_local_tap_dir }}/Sources"
+    state: directory
+    mode: "0755"
   tags:
-    - terminal-theme-tools
-  block:
-    - name: Ensure local Homebrew source archive cache exists
-      ansible.builtin.file:
-        path: "{{ dotfiles_cache_dir }}/homebrew-sources"
-        state: directory
-        mode: "0755"
+    - theme-run
 
-    - name: Create deterministic terminal theme tools source archive
-      ansible.builtin.command:
-        argv:
-          - /usr/bin/tar
-          - -cf
-          - "{{ dotfiles_cache_dir }}/homebrew-sources/terminal-theme-tools-0.3.0.tar"
-          - -C
-          - "{{ dotfiles_repo_root }}/packages/terminal-theme-tools"
-          - build.zig
-          - build.zig.zon
-          - build_support.zig
-          - README.md
-          - config
-          - include
-          - src
-          - tests
-          - vendor
-          - -C
-          - "{{ dotfiles_repo_root }}"
-          - LICENSE
-      environment:
-        COPYFILE_DISABLE: "1"
-      changed_when: false
-
-    - name: Synchronize generated local Homebrew source archives
-      ansible.posix.synchronize:
-        src: "{{ dotfiles_cache_dir }}/homebrew-sources/"
-        dest: "{{ bootstrap_homebrew_local_tap_dir }}/Sources/"
-        archive: true
-        checksum: true
-        delete: true
+- name: Package the current theme-run source for Homebrew
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/tar
+      - -cf
+      - "{{ bootstrap_homebrew_local_tap_dir }}/Sources/theme-run-0.1.0.tar"
+      - -C
+      - "{{ dotfiles_repo_root }}/packages/theme-run"
+      - go.mod
+      - go.sum
+      - README.md
+      - cmd
+      - internal
+      - -C
+      - "{{ dotfiles_repo_root }}"
+      - LICENSE
+  environment:
+    COPYFILE_DISABLE: "1"
+  changed_when: false
+  tags:
+    - theme-run
 
 - name: Clear Discord cask ASAR locks before Homebrew changes
   ansible.builtin.command:
@@ -186,11 +167,11 @@
   tags:
     - ghostty
 
-- name: Install privileged Homebrew cask
+- name: Ensure privileged Homebrew cask is installed
   community.general.homebrew_cask:
     name: temurin@21
     path: "{{ bootstrap_homebrew_prefix }}/bin"
-    state: latest
+    state: present
     sudo_password: >-
       {{
         lookup('ansible.builtin.env', 'ANSIBLE_BECOME_PASS')
@@ -206,6 +187,12 @@
       - "{{ bootstrap_homebrew_prefix }}/bin/brew"
       - bundle
       - install
+      - >-
+        {{
+          '--upgrade'
+          if lookup('ansible.builtin.env', 'DOTFILES_HOMEBREW_UPGRADE') == '1'
+          else '--no-upgrade'
+        }}
       - --jobs
       - "1"
       - --force-cleanup
@@ -221,7 +208,67 @@
     bootstrap_homebrew_bundle_install.stdout is search('(^|\n)(==> )?(Installing|Upgrading|Uninstalling|Uninstalled|Untapping|Removing) ')
     or bootstrap_homebrew_bundle_install.stderr is search('(^|\n)(==> )?(Installing|Upgrading|Uninstalling|Uninstalled|Untapping|Removing) ')
 
-- name: Reconcile the installed terminal theme tools source
-  ansible.builtin.import_tasks: homebrew-terminal-theme-tools.yml
+- name: Read the packaged theme-run source checksum
+  ansible.builtin.stat:
+    path: "{{ bootstrap_homebrew_local_tap_dir }}/Sources/theme-run-0.1.0.tar"
+    checksum_algorithm: sha256
+  register: bootstrap_homebrew_theme_run_source
   tags:
-    - terminal-theme-tools
+    - theme-run
+
+- name: Inspect the installed theme-run source checksum
+  ansible.builtin.stat:
+    path: >-
+      {{ bootstrap_homebrew_prefix }}/opt/theme-run/share/theme-run/source.sha256
+  register: bootstrap_homebrew_theme_run_installed_checksum_file
+  tags:
+    - theme-run
+
+- name: Inspect the installed theme-run prefix
+  ansible.builtin.stat:
+    path: "{{ bootstrap_homebrew_prefix }}/opt/theme-run"
+  register: bootstrap_homebrew_theme_run_installed_prefix
+  tags:
+    - theme-run
+
+- name: Read the installed theme-run source checksum
+  ansible.builtin.slurp:
+    path: >-
+      {{ bootstrap_homebrew_prefix }}/opt/theme-run/share/theme-run/source.sha256
+  register: bootstrap_homebrew_theme_run_installed_source
+  when: >-
+    bootstrap_homebrew_theme_run_installed_checksum_file.stat.exists
+    | default(false)
+  tags:
+    - theme-run
+
+- name: Reinstall theme-run when its local source changes
+  when:
+    - bootstrap_homebrew_theme_run_installed_prefix.stat.exists
+      | default(false)
+    - >-
+      not (
+        bootstrap_homebrew_theme_run_installed_checksum_file.stat.exists
+        | default(false)
+      )
+      or (
+          bootstrap_homebrew_theme_run_installed_source.content
+          | default('')
+          | b64decode
+          | trim
+        ) != bootstrap_homebrew_theme_run_source.stat.checksum
+  tags:
+    - theme-run
+  block:
+    - name: Remove theme-run built from the previous local source
+      community.general.homebrew:
+        name: 4evy/dotfiles/theme-run
+        path: "{{ bootstrap_homebrew_prefix }}/bin"
+        state: absent
+
+    - name: Install theme-run from the current local source
+      community.general.homebrew:
+        name: 4evy/dotfiles/theme-run
+        force_formula: true
+        path: "{{ bootstrap_homebrew_prefix }}/bin"
+        state: present
