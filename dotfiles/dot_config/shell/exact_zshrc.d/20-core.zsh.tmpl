@@ -11,7 +11,7 @@ _dotfiles_wrap_command() {
 _dotfiles_wrap_themed_command() {
   emulate -L zsh
   local -r command_name=$1
-  eval "$command_name() { command terminal-theme-run ${(q)command_name} \"\$@\"; }"
+  eval "$command_name() { command theme-run ${(q)command_name} \"\$@\"; }"
 }
 
 # A3 / dotfiles repository

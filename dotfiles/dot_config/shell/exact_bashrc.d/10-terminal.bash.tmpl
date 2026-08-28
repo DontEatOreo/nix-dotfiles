@@ -13,8 +13,8 @@ fi
 # wrappers inherit this value; standalone launcher calls can still use Kitty or
 # OSC detection when no theme environment is available.
 if [[ -z "${TERMINAL_THEME:-}" ]] &&
-	command -v terminal-theme-run >/dev/null 2>&1; then
-	_dotfiles_terminal_theme="$(terminal-theme-run --print-theme-no-terminal 2>/dev/null)" || _dotfiles_terminal_theme=
+	command -v theme-run >/dev/null 2>&1; then
+	_dotfiles_terminal_theme="$(theme-run --print-theme-no-terminal 2>/dev/null)" || _dotfiles_terminal_theme=
 	case "$_dotfiles_terminal_theme" in
 		dark | light) export TERMINAL_THEME="$_dotfiles_terminal_theme" ;;
 	esac
@@ -28,7 +28,7 @@ case "${TERMINAL_THEME:-}" in
 	dark | light)
 		export LC_TERMINAL_THEME="$TERMINAL_THEME"
 		# Starship runs several times per prompt. Select its managed profile once
-		# instead of putting terminal-theme-run in that hot path.
+		# instead of putting theme-run in that hot path.
 		export STARSHIP_CONFIG="$HOME/.config/starship-black-rose-doll-${TERMINAL_THEME}.toml"
 		;;
 esac

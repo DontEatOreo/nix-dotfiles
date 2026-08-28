@@ -1,6 +1,6 @@
 ---
 tools_homebrew_commands:
-  - terminal-theme-run
+  - theme-run
 
 tools_python_tools:
   - phone-mirror

@@ -4,7 +4,7 @@
 # both tools share one preexec/precmd framework instead of competing PS0 hooks.
 _atuin_bin="$(_dotfiles_command_path atuin 2>/dev/null || true)"
 if [[ -t 0 && -t 1 && -n "$_atuin_bin" && -r "$HOME/.cache/atuin/init.bash" ]]; then
-	if _dotfiles_command_path terminal-theme-run >/dev/null; then
+	if _dotfiles_command_path theme-run >/dev/null; then
 		_dotfiles_wrap_themed_command atuin
 	else
 		_dotfiles_wrap_command atuin "$_atuin_bin"
@@ -43,7 +43,7 @@ fi
 unset _starship_bin
 _fzf_bin="$(_dotfiles_command_path fzf 2>/dev/null || true)"
 if [[ -n "$_fzf_bin" ]]; then
-	if _dotfiles_command_path terminal-theme-run >/dev/null; then
+	if _dotfiles_command_path theme-run >/dev/null; then
 		_dotfiles_wrap_themed_command fzf
 	else
 		_dotfiles_wrap_command fzf "$_fzf_bin"

@@ -41,7 +41,7 @@ _dotfiles_wrap_themed_command() {
 	local quoted_name
 
 	printf -v quoted_name '%q' "$command_name"
-	eval "$command_name() { command terminal-theme-run $quoted_name \"\$@\"; }"
+	eval "$command_name() { command theme-run $quoted_name \"\$@\"; }"
 }
 
 _dotfiles_command_path() {
