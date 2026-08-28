@@ -1,11 +1,13 @@
 {{- if ne .chezmoi.os "windows" -}}
 {{- if ne (env "DOTFILES_RECORDS_DISABLED") "1" -}}
+{{- $repository := joinPath .chezmoi.sourceDir ".." -}}
+{{- $recordsUnpacked := stat (joinPath $repository ".records-unpacked") -}}
+{{- if not $recordsUnpacked -}}
 {{- range $command := list "bash" "jq" "ruby" "sops" -}}
 {{- if not (lookPath $command) -}}
 {{- fail (printf "encrypted records require %s on PATH" $command) -}}
 {{- end -}}
 {{- end -}}
-{{- $repository := joinPath .chezmoi.sourceDir ".." -}}
 {{- $jjDirectory := stat (joinPath $repository ".jj") -}}
 {{- if $jjDirectory -}}
 {{- if not (lookPath "jj") -}}
@@ -53,6 +55,7 @@ filter.command = "bash"
 filter.args = {{ list $filter $selector (printf "%d" $index) (printf "%t" $record.render) $root.chezmoi.sourceDir | toToml }}
 {{- end }}
 {{ end -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

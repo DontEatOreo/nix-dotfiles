@@ -23,5 +23,6 @@
     "dot_config/raycast/**/*.cts",
     "dot_config/raycast/**/*.json",
     "dot_config/raycast/**/*.mts"
-  ]
+  ],
+  "exclude": ["**/private_*"]
 }
