@@ -101,10 +101,13 @@ jobs:
             exit 1
           fi
 
-      - name: Materialize Flake Partitions
+      - name: Materialize Flake Evaluation Inputs
         run: |
           nix store add-path nix/dev
           nix store add-path nix/nixos
+          nix eval --raw \
+            .#nixosConfigurations.nixos.config.system.build.toplevel.drvPath \
+            >/dev/null
 
       - name: Check Flake
         run: >-
