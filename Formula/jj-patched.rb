@@ -13,9 +13,7 @@ class JjPatched < Formula
   manifest = JSON.load_file(patches_tap.path/"stacks/jj/stack.json")
   stack_revision = manifest.fetch("source").fetch("revision")
   result_tree = manifest.fetch("result").fetch("tree").fetch("oid")
-  if stack_revision != jj.fetch("revision")
-    raise "The jj source pin does not match the 4evy/patches stack"
-  end
+  raise "The jj source pin does not match the 4evy/patches stack" if stack_revision != jj.fetch("revision")
 
   digest = archive.fetch("hash").delete_prefix("sha256-").unpack1("m0").unpack1("H*")
 

@@ -13,9 +13,7 @@ class KanataWithCmd < Formula
 
   manifest = JSON.load_file(patches_tap.path/"stacks/kanata/stack.json")
   stack_revision = manifest.fetch("source").fetch("revision")
-  if stack_revision != homebrew.fetch("revision")
-    raise "The Kanata source pin does not match the 4evy/patches stack"
-  end
+  raise "The Kanata source pin does not match the 4evy/patches stack" if stack_revision != homebrew.fetch("revision")
 
   digest = archive.fetch("hash").delete_prefix("sha256-").unpack1("m0").unpack1("H*")
 
