@@ -1,6 +1,7 @@
 import ipaddress
 import os
 import re
+import socket
 import sys
 import time
 from collections.abc import Sequence
@@ -8,6 +9,7 @@ from pathlib import Path
 from subprocess import CompletedProcess
 from typing import Annotated
 
+import psutil
 from cyclopts import App, Parameter, validators
 from cyclopts.config import Env
 from pydantic import ValidationError
@@ -37,6 +39,7 @@ _GUI_ENVIRONMENT_KEYS = frozenset({
 })
 _WIRELESS_DEBUGGING_PORTS = (30000, 49999)
 _OPEN_TCP_PORT = re.compile(r"(?<!\d)(\d{1,5})/open/tcp")
+_PHONE_LAN_INTERFACE_PREFIXES = ("eth", "wlan")
 
 
 def _run_command(
@@ -128,6 +131,37 @@ def _parse_devices(output: str) -> dict[str, str]:
         if len(fields) >= 2:
             devices[fields[0]] = fields[1]
     return devices
+
+
+def _local_ipv4_networks() -> tuple[ipaddress.IPv4Network, ...]:
+    networks: list[ipaddress.IPv4Network] = []
+    for addresses in psutil.net_if_addrs().values():
+        for address in addresses:
+            if address.family != socket.AF_INET or address.netmask is None:
+                continue
+            interface = ipaddress.IPv4Interface(f"{address.address}/{address.netmask}")
+            if interface.ip.is_loopback or interface.ip.is_link_local:
+                continue
+            networks.append(interface.network)
+    return tuple(dict.fromkeys(networks))
+
+
+def _phone_lan_addresses(output: str) -> tuple[ipaddress.IPv4Address, ...]:
+    addresses: list[ipaddress.IPv4Address] = []
+    for line in output.splitlines():
+        fields = line.split()
+        if len(fields) < 4:
+            continue
+        interface = fields[1].rstrip(":")
+        if not interface.startswith(_PHONE_LAN_INTERFACE_PREFIXES):
+            continue
+        try:
+            inet = fields.index("inet")
+            address = ipaddress.IPv4Address(fields[inet + 1].partition("/")[0])
+        except ValueError, IndexError:
+            continue
+        addresses.append(address)
+    return tuple(dict.fromkeys(addresses))
 
 
 def _open_ports_from_nmap(output: str) -> tuple[int, ...]:
@@ -262,6 +296,35 @@ class PhoneMirror:
             "over USB, then retry"
         )
 
+    def _prefer_lan(self, serial: str) -> str:
+        result = self._adb(
+            "-s",
+            serial,
+            "shell",
+            "ip",
+            "-o",
+            "-4",
+            "addr",
+            "show",
+            "up",
+            "scope",
+            "global",
+        )
+        if result.returncode != 0:
+            return serial
+
+        networks = _local_ipv4_networks()
+        for address in _phone_lan_addresses(result.stdout):
+            if not any(address in network for network in networks):
+                continue
+            if connected := self._connect(str(address), self.config.port):
+                error_console.print(
+                    f"phone-mirror: using local network address {address}",
+                    highlight=False,
+                )
+                return connected
+        return serial
+
     def _target_ip(self) -> str:
         if self.config.ip is not None:
             return str(self.config.ip)
@@ -300,7 +363,7 @@ class PhoneMirror:
             if separator and key in _GUI_ENVIRONMENT_KEYS:
                 self.environment.setdefault(key, value)
 
-    def _scrcpy_arguments(self, host: str) -> tuple[str, ...]:
+    def _scrcpy_arguments(self, serial: str) -> tuple[str, ...]:
         result = self.run_command(("scrcpy", "--help"), timeout=5)
         active_option = (
             "--keep-active"
@@ -308,8 +371,12 @@ class PhoneMirror:
             else "--stay-awake"
         )
         arguments = [
-            f"--tcpip={_endpoint(host, self.config.port)}",
+            f"--serial={serial}",
             active_option,
+            "--video-codec=h265",
+            "--video-bit-rate=2M",
+            "--max-size=1280",
+            "--max-fps=30",
         ]
         if sys.platform.startswith("linux") and self.config.render_driver:
             arguments.extend(("--render-driver", self.config.render_driver))
@@ -330,6 +397,7 @@ class PhoneMirror:
         if self.config.connect_only:
             error_console.print(f"phone-mirror: connected to {serial}", highlight=False)
             return
+        serial = self._prefer_lan(serial)
 
         require_commands("scrcpy")
         self._hydrate_gui_environment()
@@ -347,7 +415,7 @@ class PhoneMirror:
             raise DotfilesError("required command is not available: scrcpy")
         exec_process(
             os.fspath(executable),
-            self._scrcpy_arguments(host),
+            self._scrcpy_arguments(serial),
             self.environment,
             argument_zero="scrcpy",
         )
