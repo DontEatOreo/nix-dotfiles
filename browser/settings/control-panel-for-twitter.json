@@ -23,7 +23,7 @@
         "followButtonStyle": "themed",
         "fullWidthContent": false,
         "fullWidthMedia": true,
-        "hideAccountSwitcher": true,
+        "hideAccountSwitcher": false,
         "hideAdsNav": true,
         "hideBookmarkButton": false,
         "hideBookmarkMetrics": true,
