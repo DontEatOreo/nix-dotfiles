@@ -1,9 +1,10 @@
 # ░█▀▀░█░█░█▀█░▀█▀░█▀█░█░█
 # ░▀▀█░░█░░█░█░░█░░█▀█░▄▀▄
 # ░▀▀▀░░▀░░▀░▀░░▀░░▀░▀░▀░▀
-# zsh syntax highlighting / Black Rose Doll
-# Use terminal palette colors rather than fixed RGB values so Ghostty's automatic
-# light/dark theme switch also updates an already-running shell.
+# zsh syntax highlighting / T3 Chat
+# ANSI bright black carries T3 Chat's muted foreground, so automatic light/dark
+# theme changes also update muted shell text in an already-running shell.
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main)
 typeset -gA ZSH_HIGHLIGHT_STYLES
 ZSH_HIGHLIGHT_STYLES[comment]='fg=8'

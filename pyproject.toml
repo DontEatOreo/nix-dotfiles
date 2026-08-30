@@ -21,11 +21,11 @@ dependencies = [
 [project.scripts]
 desktop-perf-audit = "workstation.local.desktop_audit:desktop_perf_audit_entrypoint"
 discord-equicord = "workstation.apps.discord:entrypoint"
-gnome-black-rose-doll-accent = "workstation.local.gnome:gnome_black_rose_doll_accent_entrypoint"
+gnome-t3-chat-accent = "workstation.local.gnome:gnome_t3_chat_accent_entrypoint"
 jj-get = "workstation.local.jj:jj_get_entrypoint"
-macos-black-rose-doll-appearance = "workstation.macos.appearance:apply_appearance"
+macos-t3-chat-appearance = "workstation.macos.appearance:apply_appearance"
 phone-mirror = "workstation.local.phone_mirror:entrypoint"
-terminal-black-rose-doll = "workstation.macos.terminal:terminal_profile"
+terminal-t3-chat = "workstation.macos.terminal:terminal_profile"
 
 [dependency-groups]
 dev = [

@@ -36,5 +36,5 @@ modules:
     dest: /usr/libexec/dotfiles/kmscon
 
   - type: copy@v1
-    src: dotfiles/.chezmoidata/black_rose_doll.json
-    dest: /usr/share/dotfiles/black_rose_doll_palette.json
+    src: dotfiles/.chezmoidata/t3_chat.json
+    dest: /usr/share/dotfiles/t3_chat_palette.json

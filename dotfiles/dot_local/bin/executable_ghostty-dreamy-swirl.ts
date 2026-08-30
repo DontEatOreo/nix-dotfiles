@@ -13,21 +13,20 @@ const RENDER_SCALE = CANVAS.width / DESIGN_CANVAS.width;
 const DEFAULT_SEED = "25b38848";
 const OUTPUT =
   process.argv[2] ??
-  join(homedir(), ".config/ghostty/backgrounds/black-rose-doll-emoji-corner.png");
+  join(homedir(), ".config/ghostty/backgrounds/t3-chat-emoji-corner.png");
 const SEED = process.env.GHOSTTY_SWIRL_SEED ?? DEFAULT_SEED;
 
 type Family =
-  | "bubble"
+  | "flag"
   | "flamingo"
   | "flower"
   | "heart"
-  | "lotus"
   | "nails"
-  | "purse"
+  | "rainbow"
   | "ribbon"
   | "sparkle"
-  | "tulip"
-  | "wing";
+  | "symbol"
+  | "unicorn";
 
 type Role = Readonly<{
   angle: number;
@@ -85,18 +84,18 @@ function copies<const T extends Role>(count: number, role: T): T[] {
 }
 
 const roles = [
-  ...copies(5, { emoji: "🌹", family: "flower", size: 23, angle: 18 }),
-  ...copies(4, { emoji: "🎀", family: "ribbon", size: 29, angle: 24 }),
-  ...copies(4, { emoji: "🖤", family: "heart", size: 25, angle: 15 }),
-  ...copies(3, { emoji: "🥀", family: "heart", size: 23, angle: 14 }),
-  ...copies(3, { emoji: "🕯️", family: "bubble", size: 19, angle: 18 }),
-  ...copies(3, { emoji: "✨", family: "sparkle", size: 16, angle: 10 }),
-  ...copies(2, { emoji: "🥀", family: "lotus", size: 28, angle: 12 }),
-  ...copies(2, { emoji: "🥀", family: "tulip", size: 22, angle: 16 }),
-  ...copies(2, { emoji: "🪽", family: "wing", size: 24, angle: 26 }),
-  { emoji: "🦇", family: "flamingo", size: 28, angle: 10 },
-  { emoji: "👛", family: "purse", size: 25, angle: 14 },
+  ...copies(4, { emoji: "🏳️‍🌈", family: "flag", size: 27, angle: 14 }),
+  ...copies(4, { emoji: "🏳️‍⚧️", family: "flag", size: 27, angle: 14 }),
+  ...copies(3, { emoji: "🌈", family: "rainbow", size: 25, angle: 14 }),
+  ...copies(3, { emoji: "⚧️", family: "symbol", size: 24, angle: 12 }),
+  ...copies(4, { emoji: "🩷", family: "heart", size: 25, angle: 15 }),
+  ...copies(3, { emoji: "💖", family: "heart", size: 24, angle: 15 }),
+  ...copies(3, { emoji: "🌸", family: "flower", size: 24, angle: 18 }),
+  ...copies(2, { emoji: "🎀", family: "ribbon", size: 28, angle: 24 }),
+  ...copies(2, { emoji: "🦩", family: "flamingo", size: 28, angle: 10 }),
+  { emoji: "🦄", family: "unicorn", size: 27, angle: 12 },
   { emoji: "💅🏻", family: "nails", size: 24, angle: 12 },
+  { emoji: "✨", family: "sparkle", size: 17, angle: 10 },
 ] satisfies readonly Role[];
 
 function shuffled<const T>(values: readonly T[]): T[] {
@@ -190,10 +189,11 @@ const points: Point[] = [
 ];
 
 const proxyMultipliers = {
-  bubble: 1.35,
+  flag: 1.45,
   flamingo: 1.2,
   ribbon: 1.2,
-  wing: 1.2,
+  rainbow: 1.2,
+  unicorn: 1.2,
 } satisfies Partial<Record<Family, number>>;
 
 function proxyRadius(point: Point): number {
@@ -280,7 +280,7 @@ try {
   runMagick([
     "-size",
     `${CANVAS.width}x${CANVAS.height}`,
-    "xc:rgba(0,0,0,0)",
+    "xc:none",
     "-colorspace",
     "sRGB",
     `PNG32:${canvas}`,

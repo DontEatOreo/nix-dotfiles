@@ -38,8 +38,8 @@ ANSI_ROLE_MAP = {
     "light-magenta": "pink",
     "light-cyan": "teal",
     "white": "subtext1",
-    "foreground": "text",
-    "background": "base",
+    "foreground": "terminalForeground",
+    "background": "terminalBackground",
 }
 
 LIGHT_ROLE_OVERRIDES = {
@@ -127,7 +127,7 @@ def render_config(
         role_map.update(LIGHT_ROLE_OVERRIDES)
     lines = [
         "# Managed by dotfiles.",
-        f"# Theme: black-rose-doll-{choice.name}",
+        f"# Theme: t3-chat-{choice.name}",
         f"# Theme source: {choice.source}",
         "term=kmscon",
         "font-engine=freetype",
@@ -170,7 +170,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     with args.palette_json.open(encoding="utf-8") as handle:
-        palette = json.load(handle)["black_rose_doll"]
+        palette = json.load(handle)["t3_chat"]
     output_path = args.output_config
     write_if_changed(output_path, render_config(palette))
     return 0

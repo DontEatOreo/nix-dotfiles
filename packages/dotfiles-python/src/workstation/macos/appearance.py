@@ -1,4 +1,4 @@
-"""Black Rose Doll integration with macOS appearance preferences."""
+"""T3 Chat integration with macOS appearance preferences."""
 
 import sys
 import warnings
@@ -17,10 +17,10 @@ SKYLIGHT = "/System/Library/PrivateFrameworks/SkyLight.framework"
 
 def _accent() -> str:
     data = TypeAdapter(dict[str, dict[str, dict[str, str]]]).validate_json(
-        asset_path("desktop", "black_rose_doll_palette.json").read_text()
+        asset_path("desktop", "t3_chat_palette.json").read_text()
     )
-    palette = data["black_rose_doll"]
-    return palette["light"]["pink"]
+    palette = data["t3_chat"]
+    return palette["light"]["accent"]
 
 
 def _components(color: str) -> tuple[float, float, float]:

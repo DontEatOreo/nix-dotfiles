@@ -18,13 +18,12 @@ let
   equicordParseRules = builtins.fromJSON (
     builtins.readFile "${inputs.nixcord}/modules/plugins/parse-rules.json"
   );
-  blackRoseDollPalette =
-    (builtins.fromJSON (builtins.readFile ../dotfiles/.chezmoidata/black_rose_doll.json))
-    .black_rose_doll;
+  t3ChatPalette =
+    (builtins.fromJSON (builtins.readFile ../dotfiles/.chezmoidata/t3_chat.json)).t3_chat;
   equicordExceptionsCss = builtins.readFile ../packages/equicord-settings/quick-css.css;
   equicordQuickCss = import ../packages/equicord-settings/theme.nix {
     inherit lib;
-    palette = blackRoseDollPalette;
+    palette = t3ChatPalette;
     exceptions = equicordExceptionsCss;
   };
   equicordSettings =

@@ -29,6 +29,11 @@ case "${TERMINAL_THEME:-}" in
 		export LC_TERMINAL_THEME="$TERMINAL_THEME"
 		# Starship runs several times per prompt. Select its managed profile once
 		# instead of putting theme-run in that hot path.
-		export STARSHIP_CONFIG="$HOME/.config/starship-black-rose-doll-${TERMINAL_THEME}.toml"
+		if [[ "${TERM_PROGRAM:-}" == "Apple_Terminal" ]]; then
+			export STARSHIP_CONFIG="$HOME/.config/starship-t3-chat-terminal-${TERMINAL_THEME}.toml"
+			printf '\e]50;SetProfile=T3 Chat %s\a' "${TERMINAL_THEME^}"
+		else
+			export STARSHIP_CONFIG="$HOME/.config/starship-t3-chat-${TERMINAL_THEME}.toml"
+		fi
 		;;
 esac

@@ -14,7 +14,7 @@ on:
       - ansible/roles/system/templates/macos/tailscale-ssh-helper.py.in
       - browser/helium.toml
       - browser/settings/**
-      - dotfiles/.chezmoidata/black_rose_doll.json
+      - dotfiles/.chezmoidata/t3_chat.json
       - packages/dotfiles-python/assets/**
   push:
     branches:

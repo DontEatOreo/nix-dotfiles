@@ -1,0 +1,11 @@
+[Unit]
+Description=Apply T3 Chat GNOME accent colors
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/gnome-t3-chat-accent --watch
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

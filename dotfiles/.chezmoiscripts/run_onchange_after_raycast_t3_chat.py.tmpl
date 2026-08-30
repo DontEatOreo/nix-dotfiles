@@ -1,0 +1,199 @@
+{{- if eq .chezmoi.os "darwin" -}}
+{{- $repo := .chezmoi.workingTree -}}
+{{- $light := .t3_chat.light -}}
+{{- $dark := .t3_chat.dark -}}
+#!/usr/bin/env python3.14
+# palette hash: {{ output "cat" (joinPath $repo "dotfiles/.chezmoidata/t3_chat.json") | sha256sum }}
+# Raycast fingerprint: {{ template "executable_fingerprint" "/Applications/Raycast.app/Contents/MacOS/Raycast" }}
+from __future__ import annotations
+
+import json
+import shutil
+import subprocess
+import time
+from pathlib import Path
+
+RAYCAST_APP = Path("/Applications/Raycast.app")
+DATABASE_CLI = Path.home() / ".config/raycast/raycast-db.mts"
+THEME_FIELDS = (
+    "name",
+    "appearance",
+    "background",
+    "backgroundSecondary",
+    "foreground",
+    "accent",
+    "selection",
+    "loader",
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "blue",
+    "purple",
+    "magenta",
+)
+THEMES = (
+    {
+        "name": "T3 Chat Light",
+        "appearance": "light",
+        "background": "{{ index $light "base" }}",
+        "backgroundSecondary": "{{ index $light "surface" }}",
+        "foreground": "{{ index $light "text" }}",
+        "accent": "{{ index $light "love" }}",
+        "selection": "{{ index $light "rose" }}",
+        "loader": "{{ index $light "iris" }}",
+        "red": "{{ index $light "red" }}",
+        "orange": "{{ index $light "peach" }}",
+        "yellow": "{{ index $light "yellow" }}",
+        "green": "{{ index $light "green" }}",
+        "blue": "{{ index $light "blue" }}",
+        "purple": "{{ index $light "mauve" }}",
+        "magenta": "{{ index $light "pink" }}",
+    },
+    {
+        "name": "T3 Chat Dark",
+        "appearance": "dark",
+        "background": "{{ index $dark "base" }}",
+        "backgroundSecondary": "{{ index $dark "surface" }}",
+        "foreground": "{{ index $dark "text" }}",
+        "accent": "{{ index $dark "love" }}",
+        "selection": "{{ index $dark "rose" }}",
+        "loader": "{{ index $dark "iris" }}",
+        "red": "{{ index $dark "red" }}",
+        "orange": "{{ index $dark "peach" }}",
+        "yellow": "{{ index $dark "yellow" }}",
+        "green": "{{ index $dark "green" }}",
+        "blue": "{{ index $dark "blue" }}",
+        "purple": "{{ index $dark "mauve" }}",
+        "magenta": "{{ index $dark "pink" }}",
+    },
+)
+
+
+def call_database(node: str, method: str, arguments: object = None) -> object:
+    completed = subprocess.run(
+        (
+            node,
+            str(DATABASE_CLI),
+            "call",
+            method,
+            json.dumps(arguments or [], separators=(",", ":")),
+        ),
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        message = completed.stderr.strip() or "Raycast database call failed"
+        raise RuntimeError(f"{method}: {message}")
+    try:
+        payload: object = json.loads(completed.stdout)
+    except json.JSONDecodeError as error:
+        raise RuntimeError(f"{method}: invalid database response") from error
+    if not isinstance(payload, dict):
+        raise TypeError(f"{method}: invalid database response")
+    return payload.get("result")
+
+
+def require_theme_id(value: object, context: str) -> str:
+    if not isinstance(value, dict) or not isinstance(value.get("id"), str):
+        raise TypeError(f"{context}: Raycast did not return a theme ID")
+    return value["id"]
+
+
+def apply_themes(node: str) -> bool:
+    installed = call_database(node, "settings.allThemes")
+    if not isinstance(installed, list):
+        raise TypeError("settings.allThemes: invalid database response")
+
+    changed = False
+    active_ids: dict[str, str] = {}
+    for desired in THEMES:
+        current = next(
+            (
+                theme
+                for theme in installed
+                if isinstance(theme, dict)
+                and theme.get("name") == desired["name"]
+                and theme.get("appearance") == desired["appearance"]
+            ),
+            None,
+        )
+        if current is None:
+            created = call_database(node, "settings.addTheme", [desired])
+            theme_id = require_theme_id(created, f"create {desired['name']}")
+            changed = True
+        else:
+            theme_id = require_theme_id(current, f"inspect {desired['name']}")
+            if any(current.get(field) != desired[field] for field in THEME_FIELDS):
+                updated = call_database(
+                    node,
+                    "settings.updateTheme",
+                    [theme_id, desired],
+                )
+                require_theme_id(updated, f"update {desired['name']}")
+                changed = True
+        active_ids[desired["appearance"]] = theme_id
+
+    general = call_database(node, "settings.getGeneralSettings")
+    if not isinstance(general, dict):
+        raise TypeError("settings.getGeneralSettings: invalid database response")
+    for appearance, setting_type, setting_key in (
+        ("dark", "ThemeDarkId", "themeDarkId"),
+        ("light", "ThemeLightId", "themeLightId"),
+    ):
+        theme_id = active_ids[appearance]
+        if general.get(setting_key) == theme_id:
+            continue
+        call_database(
+            node,
+            "settings.updateGeneralSetting",
+            [{"type": setting_type, "value": theme_id}],
+        )
+        changed = True
+
+    return changed
+
+
+def restart_raycast() -> None:
+    subprocess.run(
+        ("/usr/bin/killall", "Raycast"),
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    error = "unknown launch error"
+    for _ in range(10):
+        completed = subprocess.run(
+            ("/usr/bin/open", "-g", str(RAYCAST_APP)),
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if completed.returncode == 0:
+            return
+        error = completed.stderr.strip() or error
+        time.sleep(0.5)
+    raise RuntimeError(f"Raycast restart failed: {error}")
+
+
+def main() -> None:
+    if not RAYCAST_APP.is_dir():
+        print("Raycast T3 Chat theme install skipped: Raycast is not installed")
+        return
+    node = shutil.which("node")
+    if node is None or not DATABASE_CLI.is_file():
+        print("Raycast T3 Chat theme install skipped: database bridge not found")
+        return
+
+    if not apply_themes(node):
+        print("Raycast T3 Chat themes already current")
+        return
+
+    restart_raycast()
+    print("Raycast T3 Chat light and dark themes installed")
+
+
+if __name__ == "__main__":
+    main()
+{{ end -}}

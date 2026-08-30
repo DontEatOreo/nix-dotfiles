@@ -1,0 +1,19 @@
+{{- if eq .chezmoi.os "darwin" -}}
+{{- $repo := .chezmoi.workingTree -}}
+#!/usr/bin/env python3.14
+# command fingerprint: {{ template "executable_fingerprint" (joinPath .chezmoi.homeDir ".local/bin/terminal-t3-chat") }}
+# helper source hash: {{ output "cat" (joinPath $repo "packages/dotfiles-python/src/workstation/macos/terminal.py") | sha256sum }}
+from __future__ import annotations
+
+import os
+import shutil
+from pathlib import Path
+
+command = Path(os.environ["CHEZMOI_HOME_DIR"]) / ".local/bin/terminal-t3-chat"
+if not command.is_file():
+    command = Path(shutil.which("terminal-t3-chat") or command)
+if not command.is_file() or not os.access(command, os.X_OK):
+    print("Terminal theme install skipped: terminal-t3-chat not found")
+    raise SystemExit(0)
+os.execv(command, (os.fspath(command),))
+{{ end -}}

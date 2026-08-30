@@ -1,5 +1,5 @@
 /*
- * Semantic overrides and narrowly scoped exceptions for Black Rose Doll.
+ * Semantic overrides and narrowly scoped exceptions for T3 Chat.
  * The generated native color ramps live in theme.nix; keep this
  * file free of Discord component selectors unless a semantic token cannot
  * express the fix.
@@ -9,211 +9,249 @@
   .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
   .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
 ) {
-  --brand-experiment: var(--brd-brand);
-  --brand-experiment-500: var(--brd-brand);
-  --control-brand-foreground: var(--brd-brand);
-  --control-brand-foreground-new: var(--brd-brand);
-  --control-secondary-background-default: color-mix(
-    in srgb,
-    var(--brd-overlay1) 12%,
-    transparent
-  );
-  --control-secondary-background-hover: color-mix(
-    in srgb,
-    var(--brd-overlay1) 16%,
-    transparent
-  );
-  --control-secondary-background-active: color-mix(
-    in srgb,
-    var(--brd-overlay1) 24%,
-    transparent
-  );
-  --control-secondary-border-default: var(--border-muted);
-  --control-secondary-border-hover: var(--border-muted);
-  --control-secondary-border-active: var(--border-muted);
-  --text-brand: var(--brd-brand);
-  --text-link: var(--brd-pine);
-  --text-link-low-saturation: var(--brd-pine);
-  --mention-foreground: var(--brd-brand);
+  --brand-experiment: var(--t3-chat-brand);
+  --brand-experiment-500: var(--t3-chat-brand);
+  --control-brand-foreground: var(--t3-chat-brand);
+  --control-brand-foreground-new: var(--t3-chat-brand);
 
-  --header-primary: var(--brd-text);
-  --header-secondary: var(--brd-subtext0);
-  --text-normal: var(--brd-text);
-  --text-default: var(--brd-text);
-  --text-muted: var(--brd-muted);
-  --text-subtle: var(--brd-subtext0);
-  --interactive-normal: var(--brd-subtext0);
-  --interactive-hover: var(--brd-text);
-  --interactive-active: var(--brd-text);
-  --interactive-muted: var(--brd-overlay1);
-  --channels-default: var(--brd-muted);
-  --channel-icon: var(--brd-muted);
-  --icon-muted: var(--brd-muted);
-  --channel-text-area-placeholder: color-mix(in srgb, var(--brd-text) 50%, transparent);
+  /* Text and icons follow T3 Chat's named foreground roles. */
+  --text-brand: var(--t3-chat-brand);
+  --text-link: var(--t3-chat-infoForeground);
+  --text-link-low-saturation: var(--t3-chat-infoForeground);
+  --text-feedback-critical: var(--t3-chat-critical-foreground);
+  --text-feedback-info: var(--t3-chat-infoForeground);
+  --text-feedback-positive: var(--t3-chat-positive-foreground);
+  --text-feedback-warning: var(--t3-chat-warningForeground);
+  --mention-foreground: var(--t3-chat-brand);
 
-  --background-accent: var(--brd-surface1);
-  --background-mod-muted: color-mix(in srgb, var(--brd-surface2) 5%, transparent);
-  --background-mod-normal: color-mix(in srgb, var(--brd-surface2) 15%, transparent);
-  --background-mod-subtle: color-mix(in srgb, var(--brd-surface2) 25%, transparent);
-  --background-mod-strong: color-mix(in srgb, var(--brd-surface2) 45%, transparent);
-  --interactive-background-hover: color-mix(
-    in srgb,
-    var(--brd-overlay2) 15%,
-    transparent
-  );
-  --interactive-background-selected: color-mix(
-    in srgb,
-    var(--brd-overlay0) 20%,
-    transparent
-  );
-  --interactive-background-active: color-mix(in srgb, var(--brd-text) 17%, transparent);
+  --header-primary: var(--t3-chat-text);
+  --header-secondary: var(--t3-chat-secondaryLabel);
+  --text-normal: var(--t3-chat-text);
+  --text-default: var(--t3-chat-text);
+  --text-muted: var(--t3-chat-textMuted);
+  --text-subtle: var(--t3-chat-secondaryLabel);
+  --interactive-normal: var(--t3-chat-iconMuted);
+  --interactive-hover: var(--t3-chat-text);
+  --interactive-active: var(--t3-chat-text);
+  --interactive-muted: var(--t3-chat-placeholder);
+  --interactive-text-default: var(--t3-chat-iconMuted);
+  --interactive-text-hover: var(--t3-chat-text);
+  --interactive-text-active: var(--t3-chat-text);
+  --interactive-icon-default: var(--t3-chat-iconMuted);
+  --interactive-icon-hover: var(--t3-chat-text);
+  --interactive-icon-active: var(--t3-chat-text);
+  --channels-default: var(--t3-chat-sidebarMutedForeground);
+  --channel-icon: var(--t3-chat-iconMuted);
+  --icon-default: var(--t3-chat-text);
+  --icon-muted: var(--t3-chat-iconMuted);
+  --icon-subtle: var(--t3-chat-secondaryLabel);
+  --icon-strong: var(--t3-chat-text);
+  --icon-feedback-critical: var(--t3-chat-critical);
+  --icon-feedback-info: var(--t3-chat-info);
+  --icon-feedback-positive: var(--t3-chat-positive);
+  --icon-feedback-warning: var(--t3-chat-warning);
+  --channel-text-area-placeholder: var(--t3-chat-placeholder);
+  --input-icon-default: var(--t3-chat-iconMuted);
+  --input-placeholder-text-default: var(--t3-chat-placeholder);
+  --input-text-default: var(--t3-chat-text);
+  --input-text-error-default: var(--t3-chat-critical-foreground);
 
-  /* Preserve Discord's border contrast ladder using the theme palette. */
-  --border-muted: color-mix(in srgb, var(--brd-overlay1) 20%, transparent);
-  --border-subtle: color-mix(in srgb, var(--brd-overlay1) 28%, transparent);
-  --border-normal: color-mix(in srgb, var(--brd-overlay1) 40%, transparent);
-  --border-strong: color-mix(in srgb, var(--brd-overlay1) 52%, transparent);
-  --border-focus: var(--brd-brand);
-  --border-feedback-positive: var(--brd-positive);
-  --border-feedback-warning: var(--brd-warning);
-  --border-feedback-critical: var(--brd-critical);
-  --border-feedback-info: var(--brd-info);
+  /* T3 Chat uses its message-action roles for solid controls. */
+  --control-primary-background-default: var(--t3-chat-messageAction);
+  --control-primary-background-hover: var(--t3-chat-messageActionHover);
+  --control-primary-background-active: var(--t3-chat-messageActionHover);
+  --control-primary-icon-default: var(--t3-chat-messageActionForeground);
+  --control-primary-icon-hover: var(--t3-chat-messageActionForeground);
+  --control-primary-icon-active: var(--t3-chat-messageActionForeground);
+  --control-primary-text-default: var(--t3-chat-messageActionForeground);
+  --control-primary-text-hover: var(--t3-chat-messageActionForeground);
+  --control-primary-text-active: var(--t3-chat-messageActionForeground);
+  --control-expressive-background-default: var(--t3-chat-messageAction);
+  --control-expressive-background-hover: var(--t3-chat-messageActionHover);
+  --control-expressive-background-active: var(--t3-chat-messageActionHover);
+  --control-expressive-icon-default: var(--t3-chat-messageActionForeground);
+  --control-expressive-icon-hover: var(--t3-chat-messageActionForeground);
+  --control-expressive-icon-active: var(--t3-chat-messageActionForeground);
+  --control-expressive-text-default: var(--t3-chat-messageActionForeground);
+  --control-expressive-text-hover: var(--t3-chat-messageActionForeground);
+  --control-expressive-text-active: var(--t3-chat-messageActionForeground);
+
+  --control-secondary-background-default: var(--t3-chat-toolbarControl);
+  --control-secondary-background-hover: var(--t3-chat-toolbarControlHover);
+  --control-secondary-background-active: var(--t3-chat-secondary);
+  --control-secondary-border-default: var(--t3-chat-border);
+  --control-secondary-border-hover: var(--t3-chat-input);
+  --control-secondary-border-active: var(--t3-chat-input);
+  --control-secondary-icon-default: var(--t3-chat-toolbarControlForeground);
+  --control-secondary-icon-hover: var(--t3-chat-toolbarControlForeground);
+  --control-secondary-icon-active: var(--t3-chat-toolbarControlForeground);
+  --control-secondary-text-default: var(--t3-chat-toolbarControlForeground);
+  --control-secondary-text-hover: var(--t3-chat-toolbarControlForeground);
+  --control-secondary-text-active: var(--t3-chat-toolbarControlForeground);
+
+  --control-critical-primary-background-default: var(--t3-chat-error);
+  --control-critical-primary-background-hover: var(--t3-chat-error);
+  --control-critical-primary-background-active: var(--t3-chat-error);
+  --control-critical-primary-icon-default: var(--t3-chat-errorForeground);
+  --control-critical-primary-icon-hover: var(--t3-chat-errorForeground);
+  --control-critical-primary-icon-active: var(--t3-chat-errorForeground);
+  --control-critical-primary-text-default: var(--t3-chat-errorForeground);
+  --control-critical-primary-text-hover: var(--t3-chat-errorForeground);
+  --control-critical-primary-text-active: var(--t3-chat-errorForeground);
+
+  --control-connected-background-default: var(--t3-chat-success);
+  --control-connected-background-hover: var(--t3-chat-success);
+  --control-connected-background-active: var(--t3-chat-success);
+  --control-connected-icon-default: var(--t3-chat-accentForeground);
+  --control-connected-icon-hover: var(--t3-chat-accentForeground);
+  --control-connected-icon-active: var(--t3-chat-accentForeground);
+  --control-connected-text-default: var(--t3-chat-accentForeground);
+  --control-connected-text-hover: var(--t3-chat-accentForeground);
+  --control-connected-text-active: var(--t3-chat-accentForeground);
+
+  --checkbox-background-selected-default: var(--t3-chat-messageAction);
+  --checkbox-background-selected-hover: var(--t3-chat-messageActionHover);
+  --checkbox-icon-active: var(--t3-chat-messageActionForeground);
+  --radio-background-selected-default: var(--t3-chat-messageAction);
+  --radio-background-selected-hover: var(--t3-chat-messageActionHover);
+  --radio-foreground-active: var(--t3-chat-messageAction);
+  --radio-thumb-background-active: var(--t3-chat-messageActionForeground);
+  --switch-background-selected-default: var(--t3-chat-messageAction);
+  --switch-background-selected-hover: var(--t3-chat-messageActionHover);
+  --switch-thumb-background-selected-default: var(--t3-chat-messageActionForeground);
+
+  --background-accent: var(--t3-chat-accentSurface);
+  --background-code: var(--t3-chat-codeBackground);
+  --text-code: var(--t3-chat-codeForeground);
+  --background-mod-muted: color-mix(in srgb, var(--t3-chat-text) 4%, transparent);
+  --background-mod-normal: color-mix(in srgb, var(--t3-chat-text) 8%, transparent);
+  --background-mod-subtle: color-mix(in srgb, var(--t3-chat-text) 6%, transparent);
+  --background-mod-strong: color-mix(in srgb, var(--t3-chat-text) 12%, transparent);
+  --interactive-background-default: transparent;
+  --interactive-background-hover: var(--t3-chat-sidebarRowHover);
+  --interactive-background-selected: var(--t3-chat-sidebarRowSelected);
+  --interactive-background-active: var(--t3-chat-sidebarRowActive);
+
+  /* Preserve Discord's contrast ladder around T3 Chat's border roles. */
+  --border-muted: color-mix(in srgb, var(--t3-chat-border) 55%, transparent);
+  --border-subtle: color-mix(in srgb, var(--t3-chat-border) 75%, transparent);
+  --border-normal: var(--t3-chat-border);
+  --border-strong: var(--t3-chat-input);
+  --border-focus: var(--t3-chat-focus);
+  --border-feedback-positive: var(--t3-chat-positive);
+  --border-feedback-warning: var(--t3-chat-warning);
+  --border-feedback-critical: var(--t3-chat-critical);
+  --border-feedback-info: var(--t3-chat-info);
   --app-frame-border: var(--border-normal);
   --input-border-default: var(--border-normal);
   --input-border-hover: var(--border-normal);
   --input-border-active: var(--border-focus);
   --input-border-error-default: var(--border-feedback-critical);
   --input-border-readonly: var(--border-muted);
-  --border-voice-muted: color-mix(in srgb, var(--brd-critical) 12%, transparent);
+  --border-voice-muted: var(--t3-chat-errorSurface);
 
   --background-feedback-positive: color-mix(
     in srgb,
-    var(--brd-positive) 15%,
+    var(--t3-chat-positive) 15%,
     transparent
   );
-  --background-feedback-warning: color-mix(
-    in srgb,
-    var(--brd-warning) 15%,
-    transparent
-  );
-  --background-feedback-critical: color-mix(
-    in srgb,
-    var(--brd-critical) 15%,
-    transparent
-  );
-  --background-feedback-info: color-mix(in srgb, var(--brd-info) 15%, transparent);
-  --status-positive: var(--brd-positive);
-  --status-warning: var(--brd-warning);
-  --status-danger: var(--brd-critical);
-  --status-positive-background: var(--brd-positive);
-  --status-warning-background: var(--brd-warning);
-  --status-danger-background: var(--brd-critical);
-  --info-positive-foreground: var(--brd-positive);
-  --info-warning-foreground: var(--brd-warning);
-  --info-danger-foreground: var(--brd-critical);
-  --info-help-foreground: var(--brd-info);
+  --background-feedback-warning: var(--t3-chat-warningSurface);
+  --background-feedback-critical: var(--t3-chat-errorSurface);
+  --background-feedback-info: color-mix(in srgb, var(--t3-chat-info) 15%, transparent);
+  --background-voice-muted: var(--t3-chat-errorSurface);
+  --text-status-offline: var(--t3-chat-placeholder);
+  --icon-status-offline: var(--t3-chat-placeholder);
+  --status-online: var(--t3-chat-positive);
+  --status-speaking: var(--t3-chat-positive);
+  --status-positive: var(--t3-chat-positive);
+  --status-warning: var(--t3-chat-warning);
+  --status-danger: var(--t3-chat-critical);
+  --status-positive-background: var(--t3-chat-positive);
+  --status-warning-background: var(--t3-chat-warning);
+  --status-danger-background: var(--t3-chat-critical);
+  --status-positive-text: var(--t3-chat-accentForeground);
+  --status-warning-text: var(--t3-chat-accentForeground);
+  --info-positive-foreground: var(--t3-chat-positive-foreground);
+  --info-warning-foreground: var(--t3-chat-warningForeground);
+  --info-danger-foreground: var(--t3-chat-critical-foreground);
+  --info-help-foreground: var(--t3-chat-infoForeground);
 
-  --message-reacted-background-default: color-mix(
-    in srgb,
-    var(--brd-brand) 30%,
-    transparent
-  );
-  --mention-background: color-mix(in srgb, var(--brd-brand) 30%, transparent);
-  --message-mentioned-background-default: color-mix(
-    in srgb,
-    var(--brd-warning) 10%,
-    transparent
-  );
-  --message-mentioned-background-hover: color-mix(
-    in srgb,
-    var(--brd-warning) 8%,
-    transparent
-  );
-  --message-highlight-background-default: color-mix(
-    in srgb,
-    var(--brd-brand) 8%,
-    transparent
-  );
-  --message-highlight-background-hover: color-mix(
-    in srgb,
-    var(--brd-brand) 6%,
-    transparent
-  );
-  --message-automod-background-default: color-mix(
-    in srgb,
-    var(--brd-critical) 10%,
-    transparent
-  );
-  --message-automod-background-hover: color-mix(
-    in srgb,
-    var(--brd-critical) 15%,
-    transparent
-  );
+  --message-reacted-background-default: var(--t3-chat-accentSurface);
+  --mention-background: color-mix(in srgb, var(--t3-chat-brand) 30%, transparent);
+  --message-mentioned-background-default: var(--t3-chat-warningSurface);
+  --message-mentioned-background-hover: var(--t3-chat-warningSurface);
+  --message-highlight-background-default: var(--t3-chat-updateSurface);
+  --message-highlight-background-hover: var(--t3-chat-updateSurface);
+  --message-automod-background-default: var(--t3-chat-errorSurface);
+  --message-automod-background-hover: var(--t3-chat-errorSurface);
 
   /* Native rules build these from HSL channel-only foundations. */
   --content-inventory-media-seekbar-container: color-mix(
     in srgb,
-    var(--brd-overlay2) 30%,
+    var(--t3-chat-overlay2) 30%,
     transparent
   );
   --creator-revenue-info-box-background: color-mix(
     in srgb,
-    var(--brd-teal) 15%,
+    var(--t3-chat-teal) 15%,
     transparent
   );
-  --polls-victor-fill: var(--brd-positive);
-  --polls-voted-fill: var(--brd-brand);
+  --polls-victor-fill: var(--t3-chat-positive);
+  --polls-voted-fill: var(--t3-chat-brand);
 
   /* Profile widgets use a separate overlay palette from the base ramps. */
-  --user-profile-overlay-background: var(--background-base-low);
-  --user-profile-overlay-background-hover: var(--background-mod-subtle);
-  --user-profile-background-hover: var(--background-mod-subtle);
-  --user-profile-toolbar-background: var(--background-base-low);
-  --user-profile-activity-toolbar-background: var(--background-base-low);
-  --user-profile-border: color-mix(in srgb, var(--brd-overlay1) 28%, transparent);
-  --user-profile-toolbar-border: color-mix(
-    in srgb,
-    var(--brd-overlay1) 20%,
-    transparent
-  );
+  --user-profile-overlay-background: var(--t3-chat-surfaceRaised);
+  --user-profile-overlay-background-hover: var(--t3-chat-accentSurface);
+  --user-profile-background-hover: var(--t3-chat-accentSurface);
+  --user-profile-toolbar-background: var(--t3-chat-surfaceRaised);
+  --user-profile-activity-toolbar-background: var(--t3-chat-surfaceRaised);
+  --user-profile-border: var(--t3-chat-border);
+  --user-profile-toolbar-border: var(--t3-chat-border);
 
   --profile-gradient-role-pill-background: color-mix(
     in srgb,
-    var(--brd-overlay1) 50%,
+    var(--t3-chat-overlay1) 50%,
     transparent
   );
-  --profile-gradient-role-pill-border: var(--brd-overlay1);
+  --profile-gradient-role-pill-border: var(--t3-chat-overlay1);
   --quest-home-tab-gradient-blurple-inner: color-mix(
     in srgb,
-    var(--brd-brand) 30%,
+    var(--t3-chat-brand) 30%,
     transparent
   );
   --quest-home-tab-gradient-blurple-outer: color-mix(
     in srgb,
-    var(--brd-brand) 10%,
+    var(--t3-chat-brand) 10%,
     transparent
   );
-  --expressive-gradient-tenure-badge-gold-end: var(--brd-yellow);
-  --expressive-gradient-tenure-badge-opal-start: var(--brd-teal);
-  --expressive-gradient-tenure-badge-opal-end: var(--brd-blue);
-  --expressive-gradient-tenure-badge-platinum-start: var(--brd-foam);
-  --expressive-gradient-tenure-badge-platinum-end: var(--brd-sky);
-  --expressive-gradient-tenure-badge-ruby-start: var(--brd-red);
-  --expressive-gradient-tenure-badge-ruby-end: var(--brd-love);
-  --expressive-gradient-tenure-badge-silver-start: var(--brd-overlay0);
-  --expressive-gradient-tenure-badge-silver-end: var(--brd-overlay2);
+  --expressive-gradient-tenure-badge-gold-end: var(--t3-chat-yellow);
+  --expressive-gradient-tenure-badge-opal-start: var(--t3-chat-teal);
+  --expressive-gradient-tenure-badge-opal-end: var(--t3-chat-blue);
+  --expressive-gradient-tenure-badge-platinum-start: var(--t3-chat-foam);
+  --expressive-gradient-tenure-badge-platinum-end: var(--t3-chat-sky);
+  --expressive-gradient-tenure-badge-ruby-start: var(--t3-chat-red);
+  --expressive-gradient-tenure-badge-ruby-end: var(--t3-chat-love);
+  --expressive-gradient-tenure-badge-silver-start: var(--t3-chat-overlay0);
+  --expressive-gradient-tenure-badge-silver-end: var(--t3-chat-overlay2);
 
-  --scrollbar-thin-thumb: var(--brd-overlay0);
+  --scrollbar-thin-thumb: var(--t3-chat-terminalScrollbar);
   --scrollbar-thin-track: transparent;
-  --scrollbar-auto-thumb: var(--brd-overlay0);
-  --scrollbar-auto-track: var(--brd-mantle);
-  --scrollbar-auto-scrollbar-color-thumb: var(--brd-overlay0);
-  --scrollbar-auto-scrollbar-color-track: var(--brd-mantle);
-  --opacity-blurple-8: color-mix(in srgb, var(--brd-brand) 8%, transparent);
-  --opacity-blurple-16: color-mix(in srgb, var(--brd-brand) 16%, transparent);
-  --opacity-blurple-24: color-mix(in srgb, var(--brd-brand) 24%, transparent);
-  --opacity-blurple-32: color-mix(in srgb, var(--brd-brand) 32%, transparent);
-  --opacity-blurple-60: color-mix(in srgb, var(--brd-brand) 60%, transparent);
+  --scrollbar-auto-thumb: var(--t3-chat-terminalScrollbar);
+  --scrollbar-auto-track: transparent;
+  --scrollbar-auto-scrollbar-color-thumb: var(--t3-chat-terminalScrollbar);
+  --scrollbar-auto-scrollbar-color-track: transparent;
+  --opacity-blurple-8: color-mix(in srgb, var(--t3-chat-brand) 8%, transparent);
+  --opacity-blurple-16: color-mix(in srgb, var(--t3-chat-brand) 16%, transparent);
+  --opacity-blurple-24: color-mix(in srgb, var(--t3-chat-brand) 24%, transparent);
+  --opacity-blurple-32: color-mix(in srgb, var(--t3-chat-brand) 32%, transparent);
+  --opacity-blurple-60: color-mix(in srgb, var(--t3-chat-brand) 60%, transparent);
+}
+
+/* MemberCount binds its labels directly to Discord's legacy color ramps. */
+.visual-refresh .vc-membercount-widget {
+  --color-online: var(--t3-chat-positive-foreground);
+  --color-total: var(--t3-chat-placeholder);
+  --color-voice: var(--t3-chat-placeholder);
 }
 
 /* Lazy profile-theme chunks redeclare these tokens on their theme root. */
@@ -224,112 +262,66 @@
   .user-profile-popout,
   .user-profile-sidebar.user-profile-sidebar-redesign
 ) {
-  --user-profile-overlay-background: var(--brd-base);
-  --user-profile-overlay-background-hover: color-mix(
-    in srgb,
-    var(--brd-surface2) 25%,
-    transparent
-  );
-  --user-profile-background-hover: color-mix(
-    in srgb,
-    var(--brd-surface2) 25%,
-    transparent
-  );
-  --user-profile-note-background-focus: var(--brd-mantle);
-  --user-profile-toolbar-background: var(--brd-base);
-  --user-profile-activity-toolbar-background: var(--brd-base);
-  --user-profile-border: color-mix(in srgb, var(--brd-overlay1) 28%, transparent);
-  --user-profile-toolbar-border: color-mix(
-    in srgb,
-    var(--brd-overlay1) 20%,
-    transparent
-  );
+  --user-profile-overlay-background: var(--t3-chat-surfaceRaised);
+  --user-profile-overlay-background-hover: var(--t3-chat-accentSurface);
+  --user-profile-background-hover: var(--t3-chat-accentSurface);
+  --user-profile-note-background-focus: var(--t3-chat-accentSurface);
+  --user-profile-toolbar-background: var(--t3-chat-surfaceRaised);
+  --user-profile-activity-toolbar-background: var(--t3-chat-surfaceRaised);
+  --user-profile-border: var(--t3-chat-border);
+  --user-profile-toolbar-border: var(--t3-chat-border);
 
-  --border-muted: color-mix(in srgb, var(--brd-overlay1) 20%, transparent);
-  --border-subtle: color-mix(in srgb, var(--brd-overlay1) 28%, transparent);
-  --border-normal: color-mix(in srgb, var(--brd-overlay1) 40%, transparent);
-  --border-strong: color-mix(in srgb, var(--brd-overlay1) 52%, transparent);
-  --border-focus: var(--brd-brand);
-  --border-feedback-critical: var(--brd-critical);
+  --border-muted: color-mix(in srgb, var(--t3-chat-border) 55%, transparent);
+  --border-subtle: color-mix(in srgb, var(--t3-chat-border) 75%, transparent);
+  --border-normal: var(--t3-chat-border);
+  --border-strong: var(--t3-chat-input);
+  --border-focus: var(--t3-chat-focus);
+  --border-feedback-critical: var(--t3-chat-critical);
   --app-frame-border: var(--border-normal);
   --input-border-default: var(--border-normal);
   --input-border-hover: var(--border-normal);
-  --input-border-active: var(--brd-brand);
-  --input-border-error-default: var(--brd-critical);
+  --input-border-active: var(--t3-chat-focus);
+  --input-border-error-default: var(--t3-chat-critical);
   --input-border-readonly: var(--border-muted);
 
-  --control-secondary-background-default: color-mix(
-    in srgb,
-    var(--brd-overlay1) 12%,
-    transparent
-  );
-  --control-secondary-background-hover: color-mix(
-    in srgb,
-    var(--brd-overlay1) 16%,
-    transparent
-  );
-  --control-secondary-background-active: color-mix(
-    in srgb,
-    var(--brd-overlay1) 24%,
-    transparent
-  );
-  --control-secondary-border-default: var(--border-muted);
-  --control-secondary-border-hover: var(--border-muted);
-  --control-secondary-border-active: var(--border-muted);
+  --control-secondary-background-default: var(--t3-chat-toolbarControl);
+  --control-secondary-background-hover: var(--t3-chat-toolbarControlHover);
+  --control-secondary-background-active: var(--t3-chat-secondary);
+  --control-secondary-border-default: var(--t3-chat-border);
+  --control-secondary-border-hover: var(--t3-chat-input);
+  --control-secondary-border-active: var(--t3-chat-input);
 
   --profile-gradient-role-pill-background: color-mix(
     in srgb,
-    var(--brd-overlay1) 50%,
+    var(--t3-chat-overlay1) 50%,
     transparent
   );
-  --profile-gradient-role-pill-border: var(--brd-overlay1);
-}
-
-:is(.visual-refresh.theme-light, .visual-refresh .theme-light) {
-  --app-frame-background: var(--brd-crust);
-  --background-primary: var(--brd-base);
-  --background-secondary: var(--brd-mantle);
-  --background-secondary-alt: var(--brd-highlightLow);
-  --background-tertiary: var(--brd-crust);
-  --background-floating: var(--brd-surface);
-  --background-mobile-primary: var(--brd-base);
-  --background-mobile-secondary: var(--brd-mantle);
-  --background-base-low: var(--brd-base);
-  --background-base-lower: var(--brd-mantle);
-  --background-base-lowest: var(--brd-crust);
-  --background-surface-high: var(--brd-highlightLow);
-  --background-surface-higher: var(--brd-highlightMed);
-  --background-surface-highest: var(--brd-highlightHigh);
-  --background-gradient-highest: var(--brd-base);
-  --channeltextarea-background: var(--brd-overlay);
-  --chat-input-container-background: var(--brd-overlay);
-  --brd-composer: var(--brd-overlay);
-  --brd-composer-border: var(--brd-highlightHigh);
+  --profile-gradient-role-pill-border: var(--t3-chat-overlay1);
 }
 
 :is(
-  .visual-refresh:is(.theme-dark, .theme-darker, .theme-midnight),
-  .visual-refresh :is(.theme-dark, .theme-darker, .theme-midnight)
+  .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
+  .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
 ) {
-  --app-frame-background: var(--brd-crust);
-  --background-primary: var(--brd-base);
-  --background-secondary: var(--brd-mantle);
-  --background-secondary-alt: var(--brd-surface);
-  --background-tertiary: var(--brd-crust);
-  --background-floating: var(--brd-surface0);
-  --background-mobile-primary: var(--brd-base);
-  --background-mobile-secondary: var(--brd-mantle);
-  --background-base-low: var(--brd-base);
-  --background-base-lower: var(--brd-mantle);
-  --background-base-lowest: var(--brd-crust);
-  --background-surface-high: var(--brd-surface0);
-  --background-surface-higher: var(--brd-surface1);
-  --background-surface-highest: var(--brd-surface2);
-  --background-gradient-highest: var(--brd-base);
-  --channeltextarea-background: var(--brd-surface0);
-  --chat-input-container-background: var(--brd-surface0);
-  --brd-composer: var(--brd-surface0);
-  --brd-composer-border: var(--brd-surface2);
+  --app-frame-background: var(--t3-chat-chrome);
+  --background-primary: var(--t3-chat-canvas);
+  --background-secondary: var(--t3-chat-sidebar);
+  --background-secondary-alt: var(--t3-chat-sidebarControlSurface);
+  --background-tertiary: var(--t3-chat-chrome);
+  --background-floating: var(--t3-chat-surfaceOverlay);
+  --background-mobile-primary: var(--t3-chat-canvas);
+  --background-mobile-secondary: var(--t3-chat-sidebar);
+  --background-base-low: var(--t3-chat-surface);
+  --background-base-lower: var(--t3-chat-canvas);
+  --background-base-lowest: var(--t3-chat-sidebar);
+  --background-surface-high: var(--t3-chat-surfaceRaised);
+  --background-surface-higher: var(--t3-chat-surfaceRaised);
+  --background-surface-highest: var(--t3-chat-surfaceRaised);
+  --background-gradient-highest: var(--t3-chat-canvas);
+  --channeltextarea-background: var(--t3-chat-surfaceRaised);
+  --chat-input-container-background: var(--t3-chat-surfaceRaised);
+  --t3-chat-composer: var(--t3-chat-surfaceRaised);
+  --t3-chat-composer-border: var(--t3-chat-input);
 }
 
 /* Native composer layers do not consistently consume their semantic token. */
@@ -339,8 +331,8 @@
   )
   div[class*="channelTextArea_"]
   div[class*="themedBackground_"] {
-  background: var(--brd-composer) !important;
-  border-color: var(--brd-composer-border) !important;
+  background: var(--t3-chat-composer) !important;
+  border-color: var(--t3-chat-composer-border) !important;
 }
 
 /* Mana switches write Discord's brand color into an inline style. */
@@ -369,7 +361,7 @@
   .visual-refresh:is(.theme-light, .theme-dark, .theme-darker, .theme-midnight),
   .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
 ) [class*="greenGlow_"] {
-  background: color-mix(in srgb, var(--brd-positive) 10%, transparent);
+  background: color-mix(in srgb, var(--t3-chat-positive) 10%, transparent);
 }
 
 :is(
@@ -377,7 +369,7 @@
     .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
   )
   [class*="greenGlow_"]:hover {
-  background: color-mix(in srgb, var(--brd-positive) 20%, transparent);
+  background: color-mix(in srgb, var(--t3-chat-positive) 20%, transparent);
 }
 
 :is(
@@ -385,7 +377,7 @@
     .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
   )
   [class*="redGlow_"] {
-  background: color-mix(in srgb, var(--brd-critical) 10%, transparent);
+  background: color-mix(in srgb, var(--t3-chat-critical) 10%, transparent);
 }
 
 :is(
@@ -393,7 +385,7 @@
     .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
   )
   [class*="redGlow_"]:hover {
-  background: color-mix(in srgb, var(--brd-critical) 20%, transparent) !important;
+  background: color-mix(in srgb, var(--t3-chat-critical) 20%, transparent) !important;
 }
 
 /* Media and forum-card fades contain literal native neutral colors. */
@@ -403,8 +395,8 @@
 ) div[class^="overlay_"][class*="darkThemeGradient_"] {
   background: linear-gradient(
     0deg,
-    var(--brd-base) 0,
-    color-mix(in srgb, var(--brd-surface0) 50%, transparent) 50%,
+    var(--t3-chat-base) 0,
+    color-mix(in srgb, var(--t3-chat-surface0) 50%, transparent) 50%,
     transparent
   );
 }
@@ -416,9 +408,9 @@
   div[class^="textContentFooter_"] {
   background: linear-gradient(
     0deg,
-    var(--brd-base),
-    color-mix(in srgb, var(--brd-surface0) 97%, transparent) 36px,
-    color-mix(in srgb, var(--brd-surface1) 40%, transparent)
+    var(--t3-chat-surface),
+    color-mix(in srgb, var(--t3-chat-surface) 97%, transparent) 36px,
+    color-mix(in srgb, var(--t3-chat-surfaceRaised) 40%, transparent)
   ) !important;
 }
 
@@ -428,7 +420,7 @@
   )
   div[class^="textContentFooter_"]
   [class*="tagPill_"] {
-  background-color: color-mix(in srgb, var(--brd-surface1) 90%, transparent);
+  background-color: var(--t3-chat-accentSurface);
 }
 
 :is(
@@ -436,5 +428,5 @@
     .visual-refresh :is(.theme-light, .theme-dark, .theme-darker, .theme-midnight)
   )
   ::selection {
-  background: color-mix(in srgb, var(--brd-brand) 42%, transparent);
+  background: color-mix(in srgb, var(--t3-chat-brand) 42%, transparent);
 }

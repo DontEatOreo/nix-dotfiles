@@ -1,7 +1,7 @@
 [theme]
-dark = "black_rose_doll_dark"
-light = "black_rose_doll_light"
-fallback = "black_rose_doll_dark"
+dark = "t3_chat_dark"
+light = "t3_chat_light"
+fallback = "t3_chat_dark"
 
 [editor]
 auto-format = true

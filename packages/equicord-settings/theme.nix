@@ -61,7 +61,7 @@ let
       (anchor 29 palette.light.highlightHigh)
       (anchor 34 palette.light.overlay0)
       (anchor 41 palette.light.overlay1)
-      (anchor 47 palette.light.muted)
+      (anchor 47 palette.light.placeholder)
       (anchor 58 palette.light.subtext0)
       (anchor 66 palette.light.subtext1)
       (anchor 72 palette.light.text)
@@ -72,7 +72,7 @@ let
       (anchor 4 palette.dark.text)
       (anchor 10 palette.dark.subtext1)
       (anchor 16 palette.dark.subtle)
-      (anchor 23 palette.dark.muted)
+      (anchor 23 palette.dark.placeholder)
       (anchor 27 palette.dark.overlay1)
       (anchor 40 palette.dark.highlightMed)
       (anchor 47 palette.dark.overlay0)
@@ -83,7 +83,7 @@ let
       (anchor 69 palette.dark.mantle)
       (anchor 73 palette.dark.base)
       (anchor 78 palette.dark.crust)
-      (anchor 100 "#000000")
+      (anchor 100 palette.dark.surfaceOverlay)
     ];
   };
 
@@ -129,7 +129,7 @@ let
   scaleGroupDeclarations =
     steps: scales: concatMapAttrsStringSep "\n" (name: scaleDeclarations name steps) scales;
   paletteDeclarations =
-    colors: concatMapAttrsStringSep "\n" (role: color: "  --brd-${role}: ${color};") colors;
+    colors: concatMapAttrsStringSep "\n" (role: color: "  --t3-chat-${role}: ${color};") colors;
 
   accentAnchors = variant: role: [
     (anchor 1 (if variant == "light" then palette.light.surface else palette.dark.text))
@@ -152,7 +152,7 @@ let
     "blue-new" = accentAnchors variant "blue";
     "green-new" = accentAnchors variant "green";
     neutral = neutralAnchors.${variant};
-    blurple = accentAnchors variant "rose";
+    blurple = accentAnchors variant "accent";
     "orange-new" = accentAnchors variant "peach";
     pink = accentAnchors variant "pink";
     "red-new" = accentAnchors variant "red";
@@ -161,7 +161,7 @@ let
   };
   legacyScales = variant: {
     primary = legacyNeutralAnchors variant;
-    brand = legacyAccentAnchors variant "rose" 500;
+    brand = legacyAccentAnchors variant "accent" 500;
     red = legacyAccentAnchors variant "red" 400;
     green = legacyAccentAnchors variant "green" 400;
     yellow = legacyAccentAnchors variant "yellow" 400;
@@ -170,11 +170,11 @@ let
 
   variantDeclarations = variant: ''
     ${paletteDeclarations palette.${variant}}
-    --brd-brand: var(--brd-rose);
-    --brd-positive: var(--brd-green);
-    --brd-warning: var(--brd-yellow);
-    --brd-critical: var(--brd-red);
-    --brd-info: var(--brd-sky);
+    --t3-chat-brand: var(--t3-chat-accent);
+    --t3-chat-positive: var(--t3-chat-success);
+    --t3-chat-positive-foreground: var(--t3-chat-successForeground);
+    --t3-chat-critical: var(--t3-chat-error);
+    --t3-chat-critical-foreground: var(--t3-chat-errorForeground);
 
     /* Discord's modern neutral, branded, and status foundations. */
     ${scaleGroupDeclarations modernSteps (modernScales variant)}
@@ -185,9 +185,9 @@ let
 in
 ''
   /*
-   * Black Rose Doll for Discord
+   * T3 Chat for Discord
    *
-   * Generated from black_rose_doll_palette.json. Discord's native theme
+   * Generated from T3 Chat's application roles. Discord's native theme
    * classes map semantic tokens onto these foundations, so new components
    * inherit the palette without component-class patches.
    */
