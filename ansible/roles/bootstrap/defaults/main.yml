@@ -9,3 +9,5 @@ bootstrap_homebrew_repository: >-
   }}
 bootstrap_homebrew_local_tap_dir: >-
   {{ bootstrap_homebrew_repository }}/Library/Taps/4evy/homebrew-dotfiles
+bootstrap_homebrew_private_bundle_file: >-
+  {{ dotfiles_config_home }}/homebrew/Brewfile.private

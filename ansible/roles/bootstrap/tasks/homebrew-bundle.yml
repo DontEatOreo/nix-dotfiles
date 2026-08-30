@@ -198,9 +198,18 @@
       - "1"
       - --force-cleanup
       - --file
-      - "{{ dotfiles_repo_root }}/Brewfile"
+      - "-"
   args:
     chdir: "{{ dotfiles_repo_root }}"
+    stdin: |-
+      {{ lookup('ansible.builtin.file', dotfiles_repo_root ~ '/Brewfile') }}
+      {{
+        lookup(
+          'ansible.builtin.file',
+          bootstrap_homebrew_private_bundle_file,
+          errors='ignore'
+        )
+      }}
   environment:
     HOMEBREW_NO_ASK: "1"
     PATH: "{{ bootstrap_homebrew_path }}"
