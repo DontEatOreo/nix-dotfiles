@@ -51,7 +51,7 @@ let
       ignoreActivities = {
         enable = true;
         ignoreCompeting = true;
-        ignoreListening = true;
+        ignoreListening = false;
         ignorePlaying = true;
         ignoreWatching = true;
       };
