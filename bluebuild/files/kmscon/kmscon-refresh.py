@@ -3,15 +3,15 @@
 import argparse
 import hashlib
 import json
-import os
-import pathlib
 import subprocess
-import tempfile
+from pathlib import Path
+
+from kmscon_files import write_if_changed
 
 LOGINCTL = "/usr/bin/loginctl"
 SYSTEMCTL = "/usr/bin/systemctl"
 KMSCON_TTYS = tuple(f"tty{number}" for number in range(1, 7))
-DEFAULT_STATE = pathlib.Path("/run/kmscon-theme-refresh.json")
+DEFAULT_STATE = Path("/run/kmscon-theme-refresh.json")
 
 
 def command_output(argv: tuple[str, ...]) -> str:
@@ -51,11 +51,11 @@ def logged_in_ttys() -> set[str]:
     return {tty for session_id in session_ids() if (tty := session_tty(session_id))}
 
 
-def config_digest(config: pathlib.Path) -> str:
+def config_digest(config: Path) -> str:
     return hashlib.sha256(config.read_bytes()).hexdigest()
 
 
-def load_pending(state_path: pathlib.Path, digest: str) -> set[str]:
+def load_pending(state_path: Path, digest: str) -> set[str]:
     try:
         state = json.loads(state_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
@@ -70,27 +70,16 @@ def load_pending(state_path: pathlib.Path, digest: str) -> set[str]:
     return {tty for tty in pending if tty in KMSCON_TTYS}
 
 
-def write_state(state_path: pathlib.Path, digest: str, pending: set[str]) -> None:
-    state_path.parent.mkdir(parents=True, exist_ok=True)
+def write_state(state_path: Path, digest: str, pending: set[str]) -> None:
     content = json.dumps(
         {"config_sha256": digest, "pending_ttys": sorted(pending)},
         indent=2,
         sort_keys=True,
     )
-    with tempfile.NamedTemporaryFile(
-        "w",
-        encoding="utf-8",
-        dir=state_path.parent,
-        delete_on_close=False,
-    ) as handle:
-        handle.write(f"{content}\n")
-        handle.flush()
-        os.fchmod(handle.fileno(), 0o644)
-        handle.close()
-        pathlib.Path(handle.name).replace(state_path)
+    write_if_changed(state_path, f"{content}\n")
 
 
-def refresh(config: pathlib.Path, state_path: pathlib.Path) -> int:
+def refresh(config: Path, state_path: Path) -> int:
     digest = config_digest(config)
     pending = load_pending(state_path, digest)
     if not pending:
@@ -113,9 +102,9 @@ def refresh(config: pathlib.Path, state_path: pathlib.Path) -> int:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("config", type=pathlib.Path)
-    parser.add_argument("--state", type=pathlib.Path, default=DEFAULT_STATE)
+    parser = argparse.ArgumentParser(suggest_on_error=True)
+    parser.add_argument("config", type=Path)
+    parser.add_argument("--state", type=Path, default=DEFAULT_STATE)
     return parser.parse_args()
 
 

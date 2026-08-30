@@ -5,13 +5,14 @@ import datetime as dt
 import json
 import math
 import os
-import pathlib
 import re
 import sys
-import tempfile
 from dataclasses import dataclass
+from pathlib import Path
 
-ASTRAL_VENDOR_PATH = pathlib.Path("/usr/lib/dotfiles/python")
+from kmscon_files import write_if_changed
+
+ASTRAL_VENDOR_PATH = Path("/usr/lib/dotfiles/python")
 sys.path.insert(0, str(ASTRAL_VENDOR_PATH))
 
 from astral import Observer  # ruff: ignore[module-import-not-at-top-of-file]
@@ -143,27 +144,10 @@ def render_config(
     return "\n".join(lines) + "\n"
 
 
-def write_if_changed(path: pathlib.Path, text: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists() and path.read_text(encoding="utf-8") == text:
-        return
-    with tempfile.NamedTemporaryFile(
-        "w",
-        encoding="utf-8",
-        dir=path.parent,
-        delete_on_close=False,
-    ) as handle:
-        handle.write(text)
-        handle.flush()
-        os.fchmod(handle.fileno(), 0o644)
-        handle.close()
-        pathlib.Path(handle.name).replace(path)
-
-
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("palette_json", type=pathlib.Path)
-    parser.add_argument("output_config", type=pathlib.Path)
+    parser = argparse.ArgumentParser(suggest_on_error=True)
+    parser.add_argument("palette_json", type=Path)
+    parser.add_argument("output_config", type=Path)
     return parser.parse_args()
 
 
