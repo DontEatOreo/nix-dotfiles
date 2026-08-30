@@ -54,10 +54,13 @@ _lint-templates:
 
     tmp_destination=$(mktemp -d)
     trap 'rm -rf "$tmp_destination"' EXIT
-    chezmoi apply \
+    chezmoi \
+      --persistent-state "$tmp_destination/chezmoi.boltdb" \
+      apply \
       --dry-run \
       --source {{ quote(repo_dir) }} \
       --destination "$tmp_destination" \
+      --exclude encrypted \
       --force \
       --no-tty \
       --refresh-externals=never >/dev/null
@@ -67,7 +70,10 @@ _lint-templates:
       "${zsh_template_files[@]}"; do
       rendered_file="$tmp_destination/rendered-templates/${file%.tmpl}"
       mkdir -p "${rendered_file%/*}"
-      chezmoi --source {{ quote(repo_dir) }} execute-template < "$file" > "$rendered_file"
+      chezmoi \
+        --persistent-state "$tmp_destination/chezmoi.boltdb" \
+        --source {{ quote(repo_dir) }} \
+        execute-template < "$file" > "$rendered_file"
     done
     script_platform_overrides=(
       '{"chezmoi":{"os":"darwin","arch":"arm64","osRelease":{}}}'
@@ -89,7 +95,9 @@ _lint-templates:
         "${xml_template_files[@]}"; do
         rendered_file="$tmp_destination/rendered-script-templates/$platform_index/${file%.tmpl}"
         mkdir -p "${rendered_file%/*}"
-        chezmoi --source {{ quote(repo_dir) }} \
+        chezmoi \
+          --persistent-state "$tmp_destination/chezmoi.boltdb" \
+          --source {{ quote(repo_dir) }} \
           --override-data "$platform_override" \
           execute-template < "$file" > "$rendered_file"
         [[ -s $rendered_file ]] || continue
@@ -189,7 +197,9 @@ _lint-shell-templates-portable:
       for file in "${shell_template_files[@]}"; do
         rendered_file="$tmp_destination/$platform_index/${file%.tmpl}"
         mkdir -p "${rendered_file%/*}"
-        chezmoi --source {{ quote(repo_dir) }} \
+        chezmoi \
+          --persistent-state "$tmp_destination/chezmoi.boltdb" \
+          --source {{ quote(repo_dir) }} \
           --override-data "$platform_override" \
           execute-template < "$file" > "$rendered_file"
         case "$file" in

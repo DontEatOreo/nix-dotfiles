@@ -88,7 +88,7 @@ _lint-chezmoi-source: sops-check
         managed --path-style=source-relative >> "$managed_source_paths"
       chezmoi_for_platform managed >> "$managed_target_paths"
       if ! chezmoi_for_platform \
-        apply --force --exclude scripts,externals \
+        apply --force --exclude encrypted,scripts,externals \
         >/dev/null 2> "$render_stderr"; then
         cat "$render_stderr" >&2
         invalid=1
