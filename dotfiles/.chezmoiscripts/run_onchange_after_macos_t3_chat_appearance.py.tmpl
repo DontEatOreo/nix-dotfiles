@@ -1,17 +1,15 @@
 {{- if eq .chezmoi.os "darwin" -}}
 #!/usr/bin/env python3.14
+# ruff: file-ignore[unsorted-imports]
 # command fingerprint: {{ template "executable_fingerprint" (joinPath .chezmoi.homeDir ".local/bin/macos-t3-chat-appearance") }}
 # palette fingerprint: {{ .t3_chat | toJson | sha256sum }}
 from __future__ import annotations
 
-import os
-import shutil
 import subprocess
-from pathlib import Path
 
-command = Path(os.environ["CHEZMOI_HOME_DIR"]) / ".local/bin/macos-t3-chat-appearance"
-if not command.is_file():
-    command = Path(shutil.which("macos-t3-chat-appearance") or command)
-if command.is_file() and os.access(command, os.X_OK):
+{{ include ".chezmoitemplates/python-commands.py" }}
+
+preferred = Path(os.environ["CHEZMOI_HOME_DIR"]) / ".local/bin/macos-t3-chat-appearance"
+if command := find_executable("macos-t3-chat-appearance", preferred):
     subprocess.run((command,), check=True)
 {{ end -}}

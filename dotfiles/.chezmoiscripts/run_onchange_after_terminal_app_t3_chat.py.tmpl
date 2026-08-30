@@ -5,14 +5,11 @@
 # helper source hash: {{ output "cat" (joinPath $repo "packages/dotfiles-python/src/workstation/macos/terminal.py") | sha256sum }}
 from __future__ import annotations
 
-import os
-import shutil
-from pathlib import Path
+{{ include ".chezmoitemplates/python-commands.py" }}
 
-command = Path(os.environ["CHEZMOI_HOME_DIR"]) / ".local/bin/terminal-t3-chat"
-if not command.is_file():
-    command = Path(shutil.which("terminal-t3-chat") or command)
-if not command.is_file() or not os.access(command, os.X_OK):
+preferred = Path(os.environ["CHEZMOI_HOME_DIR"]) / ".local/bin/terminal-t3-chat"
+command = find_executable("terminal-t3-chat", preferred)
+if command is None:
     print("Terminal theme install skipped: terminal-t3-chat not found")
     raise SystemExit(0)
 os.execv(command, (os.fspath(command),))
