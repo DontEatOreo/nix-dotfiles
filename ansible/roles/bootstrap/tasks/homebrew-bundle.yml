@@ -1,3 +1,4 @@
+---
 - name: Ensure local dotfiles Homebrew tap root exists
   ansible.builtin.file:
     path: "{{ bootstrap_homebrew_local_tap_dir }}"
@@ -244,8 +245,7 @@
 
 - name: Reinstall theme-run when its local source changes
   when:
-    - bootstrap_homebrew_theme_run_installed_prefix.stat.exists
-      | default(false)
+    - bootstrap_homebrew_theme_run_installed_prefix.stat.exists | default(false)
     - >-
       not (
         bootstrap_homebrew_theme_run_installed_checksum_file.stat.exists

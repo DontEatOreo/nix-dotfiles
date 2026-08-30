@@ -24,8 +24,8 @@ unset _dotfiles_bash_completion_base
 # Load Homebrew's supported Bash completion framework before Oh My Bash adds
 # its Git and SSH definitions. Do not reload it if a system profile already did
 # so (as on NixOS).
-if [[ -z "${BASH_COMPLETION_VERSINFO[*]-}" && \
-	-n "${HOMEBREW_PREFIX:-}" && \
+if [[ -z "${BASH_COMPLETION_VERSINFO[*]-}" &&
+	-n "${HOMEBREW_PREFIX:-}" &&
 	-r "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh" ]]; then
 	# shellcheck source=/dev/null
 	source "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh"

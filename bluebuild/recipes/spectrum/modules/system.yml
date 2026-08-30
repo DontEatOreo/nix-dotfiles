@@ -64,7 +64,7 @@ modules:
             systemctl disable "$unit"
           fi
         done
-      - |
+      - |-
         for directory in /run/rpm-ostree/lock /run/rpm-ostree /run/dnf; do
           if test -d "$directory"; then
             rmdir "$directory"

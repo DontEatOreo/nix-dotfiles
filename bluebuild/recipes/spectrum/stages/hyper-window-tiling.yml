@@ -29,7 +29,7 @@ modules:
 
   - type: containerfile
     snippets:
-      - |
+      - |-
         RUN \
           --mount=type=cache,id=spectrum-hyper-window-tiling-bun-v1,sharing=locked,target=/root/.bun/install/cache \
           cd /src && \

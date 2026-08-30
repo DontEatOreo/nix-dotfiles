@@ -64,7 +64,7 @@ def is_temporary_uri(uri: object) -> bool:
 def track_client_request(body: bytes) -> None:
     try:
         message = json.loads(body)
-    except (json.JSONDecodeError, UnicodeDecodeError):
+    except json.JSONDecodeError, UnicodeDecodeError:
         return
 
     if message.get("method") != "textDocument/diagnostic":
@@ -84,7 +84,7 @@ def track_client_request(body: bytes) -> None:
 def filter_server_message(body: bytes) -> bytes:
     try:
         message = json.loads(body)
-    except (json.JSONDecodeError, UnicodeDecodeError):
+    except json.JSONDecodeError, UnicodeDecodeError:
         return body
 
     if message.get("method") == "textDocument/publishDiagnostics":

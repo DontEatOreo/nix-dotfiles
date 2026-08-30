@@ -67,11 +67,11 @@ _dotfiles_ansible_playbook() {
 
 _dotfiles_repo_path="${DOTFILES_REPO:-}"
 if [[ -z "$_dotfiles_repo_path" ]]; then
-{{- if eq .chezmoi.os "darwin" }}
+	{{- if eq .chezmoi.os "darwin" }}
 	_dotfiles_repo_candidates=("$HOME/Developer/dotfiles" "$HOME/dotfiles")
-{{- else }}
+	{{- else }}
 	_dotfiles_repo_candidates=("$HOME/dotfiles")
-{{- end }}
+	{{- end }}
 	for _dotfiles_repo_candidate in "${_dotfiles_repo_candidates[@]}"; do
 		[[ -f "$_dotfiles_repo_candidate/Justfile" ]] || continue
 		[[ -d "$_dotfiles_repo_candidate/ansible" ]] || continue

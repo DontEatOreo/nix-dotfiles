@@ -49,14 +49,15 @@ def write_message(stream: object, body: bytes) -> None:
 def track_client_request(body: bytes) -> None:
     try:
         message = json.loads(body)
-    except (json.JSONDecodeError, UnicodeDecodeError):
+    except json.JSONDecodeError, UnicodeDecodeError:
         return
 
     method = message.get("method")
     request_id = message.get("id")
-    if method not in {"textDocument/diagnostic", "workspace/diagnostic"} or not isinstance(
-        request_id, (int, str)
-    ):
+    if method not in {
+        "textDocument/diagnostic",
+        "workspace/diagnostic",
+    } or not isinstance(request_id, (int, str)):
         return
 
     with REQUESTS_LOCK:
@@ -66,7 +67,7 @@ def track_client_request(body: bytes) -> None:
 def filter_server_message(body: bytes) -> bytes:
     try:
         message = json.loads(body)
-    except (json.JSONDecodeError, UnicodeDecodeError):
+    except json.JSONDecodeError, UnicodeDecodeError:
         return body
 
     if message.get("method") == "textDocument/publishDiagnostics":

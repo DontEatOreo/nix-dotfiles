@@ -1,3 +1,4 @@
+---
 name: Prepare Spectrum Build
 description: Provision build tools, verify the locked base, and generate the Containerfile.
 
@@ -62,7 +63,7 @@ runs:
         BLUEBUILD: ${{ steps.tools.outputs.bluebuild }}
         CHECK_JSONSCHEMA: ${{ steps.tools.outputs.validator }}
       shell: bash
-      run: |
+      run: |-
         set -euo pipefail
         "$CHECK_JSONSCHEMA" \
           --base-uri https://schema.blue-build.org/ \

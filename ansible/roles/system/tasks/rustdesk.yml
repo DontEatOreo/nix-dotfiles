@@ -64,8 +64,7 @@
   notify: Reload RustDesk AppArmor profile
   when:
     - system_rustdesk_apparmor_enabled
-    - system_rustdesk_apparmor.content | default('') | b64decode | upper
-      is match('^Y')
+    - system_rustdesk_apparmor.content | default('') | b64decode | upper is match('^Y')
     - system_rustdesk_tools.results[0].rc == 0
 
 - name: Apply pending host handlers before RustDesk service reconciliation

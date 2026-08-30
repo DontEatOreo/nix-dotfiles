@@ -29,7 +29,7 @@ modules:
 
   - type: containerfile
     snippets:
-      - |
+      - |-
         RUN \
           --mount=type=cache,id=spectrum-kanata-cargo-registry-v1,sharing=locked,target=/root/.cargo/registry \
           --mount=type=cache,id=spectrum-kanata-cargo-git-v1,sharing=locked,target=/root/.cargo/git \

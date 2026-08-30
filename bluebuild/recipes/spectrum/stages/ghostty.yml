@@ -51,7 +51,7 @@ modules:
   # source or patch update can reuse unchanged Zig compilation artifacts.
   - type: containerfile
     snippets:
-      - |
+      - |-
         RUN \
           --mount=type=cache,id=spectrum-ghostty-zig-global-v1,sharing=locked,target=/build/zig-cache \
           --mount=type=cache,id=spectrum-ghostty-zig-local-v1,sharing=locked,target=/build/source/.zig-cache \

@@ -1,3 +1,4 @@
+---
 name: Build Spectrum Image
 description: Build Spectrum, validate pull-request images, and resolve published digests.
 
@@ -77,7 +78,7 @@ runs:
       env:
         IMAGE_REF: "ghcr.io/${{ github.repository_owner }}/spectrum"
       shell: bash
-      run: |
+      run: |-
         set -euo pipefail
         image_ref=${IMAGE_REF,,}
         digest=$(skopeo inspect "docker://$image_ref:latest" | jq -r .Digest)
