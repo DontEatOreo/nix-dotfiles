@@ -19,10 +19,10 @@ MARKER_RE = re.compile(
 
 
 def read_slices(slice_dir: Path) -> dict[str, str]:
-    slices = {}
-    for path in sorted(slice_dir.glob("*.py")):
-        slices[path.stem] = path.read_text(encoding="utf-8").strip() + "\n"
-
+    slices = {
+        path.stem: path.read_text(encoding="utf-8").strip() + "\n"
+        for path in sorted(slice_dir.glob("*.py"))
+    }
     if not slices:
         raise SystemExit(f"No Toshy slice files found in {slice_dir}")
 
@@ -81,7 +81,7 @@ def merge_slices(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(suggest_on_error=True)
     parser.add_argument("config", type=Path, help="Base Toshy config to read")
     parser.add_argument(
         "slice_dir", type=Path, help="Directory of <slice-name>.py files"

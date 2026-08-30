@@ -21,6 +21,12 @@ SUDO_SHIM_DIR = os.environ.get("TOSHY_SUDO_SHIM_DIR")
 SUDO_NAMES = {"sudo", "sudo-rs"}
 SUDO_K_RE = re.compile(r"(^|[;&|]\s*)(?:/usr/bin/)?sudo(?:-rs)?\s+-k(?=\s*(?:[;&|]|$))")
 SUDO_CMD_RE = re.compile(r"(^|[;&|]\s*)((?:/usr/bin/)?sudo(?:-rs)?)\s+")
+PROMPT_RESPONSES = (
+    ("have you updated your system recently", "y"),
+    ("run admin commands", "y"),
+    ("folder is not in path", "y"),
+    ("install a kwin script", "n"),
+)
 
 
 def resolve_sudo() -> str:
@@ -114,20 +120,19 @@ def automated_run(
 
 def answer_for(prompt: str) -> str:
     secret_match = re.search(
-        r"secret code ['\"]([^'\"]+)['\"]", prompt, re.IGNORECASE
-    ) or re.search(r"enter the secret code ['\"]([^'\"]+)['\"]", prompt, re.IGNORECASE)
+        r"(?:enter the )?secret code ['\"]([^'\"]+)['\"]",
+        prompt,
+        re.IGNORECASE,
+    )
     if secret_match:
         return secret_match.group(1)
 
     lowered = prompt.casefold()
-    if "have you updated your system recently" in lowered:
-        return "y"
-    if "run admin commands" in lowered:
-        return "y"
-    if "folder is not in path" in lowered:
-        return "y"
-    if "install a kwin script" in lowered:
-        return "n"
+    if response := next(
+        (response for phrase, response in PROMPT_RESPONSES if phrase in lowered),
+        None,
+    ):
+        return response
     if "barebones" in lowered and 'enter "yes" to proceed' in lowered:
         return "YES"
     if 'enter "yes" to proceed' in lowered:
