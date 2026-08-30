@@ -6,7 +6,7 @@ _run executable +arguments:
 [private]
 _run-files executable patterns arguments=[]:
     printf '==> %s\n' {{ quote(join_list([executable, arguments])) }}
-    : {{ assert(patterns, '_run-files requires at least one file pattern') }}
+    : {{ quote(assert(patterns, '_run-files requires at least one file pattern')) }}
     files=()
     while IFS= read -r -d '' file; do
       [[ -f $file && ! -L $file ]] && files+=("$file")
