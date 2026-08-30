@@ -2,9 +2,9 @@
 name: Spectrum Image
 
 on:
-  pull_request:
+  push:
     branches: [master]
-    paths: &spectrum-paths
+    paths:
       - .dockerignore
       - .github/actions/setup-nix/**
       - .github/actions/spectrum-build/**
@@ -23,9 +23,6 @@ on:
       - packages/hyper-window-tiling/**
       - packages/kanata/**
       - packages/kanata-with-cmd/build-linux.sh
-  push:
-    branches: [master]
-    paths: *spectrum-paths
   workflow_dispatch:
 
 concurrency:
@@ -35,38 +32,9 @@ concurrency:
 permissions: {}
 
 jobs:
-  validate:
-    name: Validate Pull Request
-    # Immutable GitHub bot IDs: Renovate, GitHub Actions, Dependabot.
-    if: >-
-      (github.event_name != 'pull_request' ||
-      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association) ||
-      (github.event.pull_request.user.type == 'Bot' &&
-      contains(fromJSON('[29139614, 41898282, 49699333]'), github.event.pull_request.user.id))) &&
-      (github.event_name == 'pull_request' ||
-      github.ref != format('refs/heads/{0}', github.event.repository.default_branch))
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      - name: Prepare Build
-        id: prepare
-        uses: ./.github/actions/spectrum-prepare
-
-      - name: Build and Validate
-        uses: ./.github/actions/spectrum-build
-        with:
-          bluebuild: ${{ steps.prepare.outputs.bluebuild }}
-
   publish:
     name: Build and Publish
-    if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
