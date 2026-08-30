@@ -337,7 +337,7 @@ def set_multiplatform(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, suggest_on_error=True)
     parser.add_argument(
         "--vendor-id", type=lambda value: int(value, 0), default=LOGITECH_VENDOR_ID
     )
