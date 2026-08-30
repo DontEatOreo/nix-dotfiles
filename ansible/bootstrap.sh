@@ -17,6 +17,8 @@ readonly PRIVATE_SETTINGS_FILE='secrets/secrets.yaml'
 readonly MACOS_AGE_KEY_HELPER_FILE='dotfiles/dot_local/bin/executable_sops-age-key-1password'
 readonly MINIMUM_MACOS_MAJOR='26'
 readonly PYTHON_VERSION='3.14'
+readonly DOWNLOAD_ATTEMPTS='3'
+readonly SUDO_PASSWORD_ATTEMPTS='3'
 readonly PYTHON_COMMAND="python${PYTHON_VERSION}"
 readonly USER_EXECUTABLE_DIRECTORY="${HOME}/.local/bin"
 # Update the revision and checksum together from Homebrew/install's install.sh.
@@ -308,7 +310,7 @@ capture_ansible_become_password() {
 	fi
 
 	current_user="$(id -un)" || die 'could not determine the current user'
-	for attempt in 1 2 3; do
+	for ((attempt = 1; attempt <= SUDO_PASSWORD_ATTEMPTS; attempt++)); do
 		printf '[sudo] password for %s: ' "${current_user}" >&2
 		if ! IFS= read -r -s inferred_ansible_become_pass; then
 			printf '\n' >&2
@@ -322,7 +324,7 @@ capture_ansible_become_password() {
 		fi
 
 		inferred_ansible_become_pass=''
-		if ((attempt < 3)); then
+		if ((attempt < SUDO_PASSWORD_ATTEMPTS)); then
 			printf 'Sorry, try again.\n' >&2
 		fi
 	done
@@ -405,10 +407,10 @@ download_file() {
 	local destination="$2"
 
 	if command_exists curl; then
-		curl -fsSL --retry 3 --retry-delay 1 \
+		curl -fsSL --retry "${DOWNLOAD_ATTEMPTS}" --retry-delay 1 \
 			-o "${destination}" "${url}"
 	elif command_exists wget; then
-		wget --quiet --tries=3 --timeout=30 \
+		wget --quiet --tries="${DOWNLOAD_ATTEMPTS}" --timeout=30 \
 			--output-document="${destination}" "${url}"
 	else
 		die "neither curl nor wget is available to download ${url}"
