@@ -2,8 +2,15 @@
 {{- range $tool := list "atuin" "chezmoi" "delta" "deno" "fzf" "gh" "jj" "op" "rustup" "starship" }}
 # {{ $tool }} fingerprint: {{ template "executable_fingerprint" (lookPath $tool) }}
 {{- end }}
+{{- $extraCompletionsPath := joinPath .chezmoi.homeDir ".config/shell/completion-commands.json" }}
+{{- if stat $extraCompletionsPath }}
+{{- range $completion := include $extraCompletionsPath | fromJson }}
+# extra completion fingerprint: {{ template "executable_fingerprint" (lookPath (index $completion 0)) }}
+{{- end }}
+{{- end }}
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -27,16 +34,18 @@ def write_if_changed(path: Path, content: str) -> None:
     if path.is_file() and path.read_text(encoding="utf-8") == content:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
-    descriptor, temporary_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
-    temporary = Path(temporary_name)
-    try:
-        with os.fdopen(descriptor, "w", encoding="utf-8") as target:
-            target.write(content)
-        temporary.chmod(0o644)
-        temporary.replace(path)
-    except BaseException:
-        temporary.unlink(missing_ok=True)
-        raise
+    with tempfile.NamedTemporaryFile(
+        "w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        delete_on_close=False,
+    ) as temporary:
+        temporary.write(content)
+        temporary.flush()
+        os.fchmod(temporary.fileno(), 0o644)
+        temporary.close()
+        Path(temporary.name).replace(path)
 
 
 def remove_owned(path: Path) -> None:
@@ -44,7 +53,7 @@ def remove_owned(path: Path) -> None:
         path.unlink()
 
 
-def capture(command: tuple[str, ...], target: Path) -> None:
+def capture(command: tuple[str, ...], target: Path, shell: str) -> None:
     executable = shutil.which(command[0])
     if executable is None:
         remove_owned(target)
@@ -53,6 +62,7 @@ def capture(command: tuple[str, ...], target: Path) -> None:
         (executable, *command[1:]),
         check=False,
         capture_output=True,
+        env={**os.environ, "SHELL": f"/bin/{shell}"},
         text=True,
     )
     if result.returncode != 0:
@@ -87,6 +97,12 @@ def fzf_zsh(target: Path) -> None:
 home = Path(os.environ["CHEZMOI_HOME_DIR"])
 cache = Path(os.environ.get("XDG_CACHE_HOME", home / ".cache"))
 data = Path(os.environ.get("XDG_DATA_HOME", home / ".local/share"))
+extra_commands_path = home / ".config/shell/completion-commands.json"
+extra_commands = (
+    tuple((name, tuple(command)) for name, command in json.loads(extra_commands_path.read_text()).items())
+    if extra_commands_path.is_file()
+    else ()
+)
 for shell in ("zsh", "bash"):
     completion_dir = (
         cache / "zsh/completions"
@@ -97,7 +113,7 @@ for shell in ("zsh", "bash"):
     if shell == "zsh":
         fzf_zsh(cache / "fzf/init.zsh")
     else:
-        capture(("fzf", "--bash"), cache / "fzf/init.bash")
+        capture(("fzf", "--bash"), cache / "fzf/init.bash", shell)
     atuin_target = completion_dir / ("_atuin" if shell == "zsh" else "atuin.bash")
     if (atuin := shutil.which("atuin")) is None:
         remove_owned(atuin_target)
@@ -118,8 +134,9 @@ for shell in ("zsh", "bash"):
         elif result.returncode != 0:
             print(f"failed to generate shell completions for atuin ({shell})")
     prefix = "_" if shell == "zsh" else ""
-    for name, command in COMPLETION_COMMANDS:
+    for name, command in (*COMPLETION_COMMANDS, *extra_commands):
         capture(
             tuple(part.format(shell=shell) for part in command),
             completion_dir / f"{prefix}{name}",
+            shell,
         )

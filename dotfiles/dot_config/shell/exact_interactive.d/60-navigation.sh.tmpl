@@ -27,8 +27,7 @@ pip() {
 }
 
 pip3() {
-	[[ -z "$VIRTUAL_ENV" && ! -d ".venv" ]] && uv venv -q
-	uv pip "$@"
+	pip "$@"
 }
 
 # C4 / fzf palette

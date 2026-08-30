@@ -2,25 +2,20 @@
 # B3 / Brewfile
 # Always use the repository Brewfile and report missing prerequisites clearly.
 
-_dotfiles_brewfile_path() {
-	printf '%s\n' "$_dotfiles_repo_path/Brewfile"
-}
+_dotfiles_brewfile="$_dotfiles_repo_path/Brewfile"
 
 _dotfiles_brew_bundle() {
-	local brewfile
-
 	if ! command -v brew >/dev/null 2>&1; then
 		printf '%s\n' "brew is not installed" >&2
 		return 127
 	fi
 
-	brewfile="$(_dotfiles_brewfile_path)"
-	if [[ ! -f "$brewfile" ]]; then
-		printf '%s\n' "Brewfile not found: $brewfile" >&2
+	if [[ ! -f "$_dotfiles_brewfile" ]]; then
+		printf '%s\n' "Brewfile not found: $_dotfiles_brewfile" >&2
 		return 1
 	fi
 
-	command brew bundle --file "$brewfile" "$@"
+	command brew bundle --file "$_dotfiles_brewfile" "$@"
 }
 
 brewfile() {
@@ -39,19 +34,27 @@ brewup() {
 # update applies userland state, rebuild provisions the host, and check runs
 # syntax and lint validation.
 
-{{- if eq .chezmoi.os "darwin" }}
+_dotfiles_ansible_tags() (
+	cd "$_dotfiles_repo_path" || exit
+	_dotfiles_ansible_playbook ansible/site.yml --tags "$@"
+)
+
 update() {
-	(
-		cd "$_dotfiles_repo_path" &&
-			_dotfiles_ansible_playbook ansible/site.yml --tags userland "$@"
-	) || return
+	_dotfiles_ansible_tags userland "$@" || return
 	chezmoi apply --refresh-externals=auto || return
-	(
-		cd "$_dotfiles_repo_path" &&
-			_dotfiles_ansible_playbook ansible/site.yml --tags host "$@"
-	)
+	_dotfiles_ansible_tags host "$@"
 }
 
+check() (
+	cd "$_dotfiles_repo_path" || exit
+	_dotfiles_brew_bundle check --verbose &&
+		{{- if ne .chezmoi.os "darwin" }}
+		just check &&
+		{{- end }}
+		_dotfiles_ansible_playbook --syntax-check ansible/site.yml
+)
+
+{{- if eq .chezmoi.os "darwin" }}
 rebuild() {
 	(
 		cd "$_dotfiles_repo_path" &&
@@ -59,30 +62,10 @@ rebuild() {
 	)
 }
 
-check() {
-	(
-		cd "$_dotfiles_repo_path" &&
-			_dotfiles_brew_bundle check --verbose &&
-			_dotfiles_ansible_playbook --syntax-check ansible/site.yml
-	)
-}
-
 micfix() {
 	sudo killall coreaudiod "$@"
 }
 {{- else }}
-update() {
-	(
-		cd "$_dotfiles_repo_path" &&
-			_dotfiles_ansible_playbook ansible/site.yml --tags userland
-	) || return
-	chezmoi apply --refresh-externals=auto || return
-	(
-		cd "$_dotfiles_repo_path" &&
-			_dotfiles_ansible_playbook ansible/site.yml --tags host
-	)
-}
-
 {{- if eq (get .chezmoi.osRelease "id") "nixos" }}
 rebuild() {
 	(
@@ -99,15 +82,6 @@ rebuild() {
 	)
 }
 {{- end }}
-
-check() {
-	(
-		cd "$_dotfiles_repo_path" &&
-			_dotfiles_brew_bundle check --verbose &&
-			just check &&
-			_dotfiles_ansible_playbook --syntax-check ansible/site.yml
-	)
-}
 
 micfix() {
 	systemctl --user restart pipewire pipewire-pulse wireplumber "$@"
