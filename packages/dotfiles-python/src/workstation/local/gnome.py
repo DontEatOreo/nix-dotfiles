@@ -1,23 +1,21 @@
 """GNOME desktop commands."""
 
 import subprocess
+from string import Template
 from typing import Annotated
 
 from cyclopts import App, Group, Parameter, validators
 from platformdirs import user_config_path as user_config_home
-from pydantic import TypeAdapter
 
 from workstation.lib.commands import output, run, which
 from workstation.lib.files import write_if_changed
 from workstation.lib.paths import asset_path
+from workstation.lib.theme import palettes
 from workstation.local.gsettings import available as gsettings_available
 
 
 def _accent_colors() -> tuple[tuple[str, str], tuple[str, str]]:
-    data = TypeAdapter(dict[str, dict[str, dict[str, str]]]).validate_json(
-        asset_path("desktop", "t3_chat_palette.json").read_text()
-    )
-    palette = data["t3_chat"]
+    palette = palettes()
     light = palette["light"]
     dark = palette["dark"]
     return (
@@ -28,11 +26,9 @@ def _accent_colors() -> tuple[tuple[str, str], tuple[str, str]]:
 
 def _gtk_accent_css(accent: str, accent_fg: str, *, gtk_version: int) -> str:
     source = asset_path("desktop", f"gtk-{gtk_version}-accent.css.in")
-    return (
-        source
-        .read_text(encoding="utf-8")
-        .replace("@accent@", accent)
-        .replace("@accent_fg@", accent_fg)
+    return Template(source.read_text(encoding="utf-8")).substitute(
+        accent=accent,
+        accent_fg=accent_fg,
     )
 
 

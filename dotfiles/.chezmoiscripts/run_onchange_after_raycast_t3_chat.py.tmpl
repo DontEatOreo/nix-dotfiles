@@ -15,58 +15,33 @@ from pathlib import Path
 
 RAYCAST_APP = Path("/Applications/Raycast.app")
 DATABASE_CLI = Path.home() / ".config/raycast/raycast-db.mts"
-THEME_FIELDS = (
-    "name",
-    "appearance",
-    "background",
-    "backgroundSecondary",
-    "foreground",
-    "accent",
-    "selection",
-    "loader",
-    "red",
-    "orange",
-    "yellow",
-    "green",
-    "blue",
-    "purple",
-    "magenta",
+THEME_ROLE_FIELDS = (
+    ("background", "base"),
+    ("backgroundSecondary", "surface"),
+    ("foreground", "text"),
+    ("accent", "love"),
+    ("selection", "rose"),
+    ("loader", "iris"),
+    ("red", "red"),
+    ("orange", "peach"),
+    ("yellow", "yellow"),
+    ("green", "green"),
+    ("blue", "blue"),
+    ("purple", "mauve"),
+    ("magenta", "pink"),
 )
-THEMES = (
+THEME_FIELDS = ("name", "appearance", *(field for field, _role in THEME_ROLE_FIELDS))
+PALETTES = json.loads(r"""{{ .t3_chat | toJson }}""")
+THEMES = tuple(
     {
-        "name": "T3 Chat Light",
-        "appearance": "light",
-        "background": "{{ index $light "base" }}",
-        "backgroundSecondary": "{{ index $light "surface" }}",
-        "foreground": "{{ index $light "text" }}",
-        "accent": "{{ index $light "love" }}",
-        "selection": "{{ index $light "rose" }}",
-        "loader": "{{ index $light "iris" }}",
-        "red": "{{ index $light "red" }}",
-        "orange": "{{ index $light "peach" }}",
-        "yellow": "{{ index $light "yellow" }}",
-        "green": "{{ index $light "green" }}",
-        "blue": "{{ index $light "blue" }}",
-        "purple": "{{ index $light "mauve" }}",
-        "magenta": "{{ index $light "pink" }}",
-    },
-    {
-        "name": "T3 Chat Dark",
-        "appearance": "dark",
-        "background": "{{ index $dark "base" }}",
-        "backgroundSecondary": "{{ index $dark "surface" }}",
-        "foreground": "{{ index $dark "text" }}",
-        "accent": "{{ index $dark "love" }}",
-        "selection": "{{ index $dark "rose" }}",
-        "loader": "{{ index $dark "iris" }}",
-        "red": "{{ index $dark "red" }}",
-        "orange": "{{ index $dark "peach" }}",
-        "yellow": "{{ index $dark "yellow" }}",
-        "green": "{{ index $dark "green" }}",
-        "blue": "{{ index $dark "blue" }}",
-        "purple": "{{ index $dark "mauve" }}",
-        "magenta": "{{ index $dark "pink" }}",
-    },
+        "name": f"T3 Chat {appearance.title()}",
+        "appearance": appearance,
+        **{
+            field: PALETTES[appearance][role]
+            for field, role in THEME_ROLE_FIELDS
+        },
+    }
+    for appearance in ("light", "dark")
 )
 
 

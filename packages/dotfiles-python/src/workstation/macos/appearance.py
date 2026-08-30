@@ -5,31 +5,31 @@ import warnings
 from importlib import import_module
 from typing import Any, cast
 
-from pydantic import TypeAdapter
-
 from workstation.lib.commands import run
-from workstation.lib.paths import asset_path
+from workstation.lib.theme import palettes, rgb_components
 
 APPLE_PINK_ACCENT = 6
 OTHER_ICON_TINT = 10
 SKYLIGHT = "/System/Library/PrivateFrameworks/SkyLight.framework"
+PREFERENCE_WRITES = (
+    ("-g", "AppleAccentColor", "-int", str(APPLE_PINK_ACCENT)),
+    ("-g", "AppleHighlightColor", "-string", "{highlight} Other"),
+    (
+        "com.apple.systempreferences",
+        "AppleOtherHighlightColor",
+        "-string",
+        "{highlight}",
+    ),
+)
 
 
 def _accent() -> str:
-    data = TypeAdapter(dict[str, dict[str, dict[str, str]]]).validate_json(
-        asset_path("desktop", "t3_chat_palette.json").read_text()
-    )
-    palette = data["t3_chat"]
-    return palette["light"]["accent"]
-
-
-def _components(color: str) -> tuple[float, float, float]:
-    red, green, blue = bytes.fromhex(color.removeprefix("#"))
-    return red / 255, green / 255, blue / 255
+    return palettes()["light"]["accent"]
 
 
 def _preference_color(color: str, *, alpha: bool = False) -> str:
-    channels = (*_components(color), 1.0) if alpha else _components(color)
+    components = rgb_components(color)
+    channels = (*components, 1.0) if alpha else components
     return " ".join(f"{channel:.6f}" for channel in channels)
 
 
@@ -39,7 +39,7 @@ def _apply_icon_tint(color: str) -> None:
     objc.loadBundle("SkyLight", globals(), bundle_path=SKYLIGHT)
     configuration_class = objc.lookUpClass("SLSIconAppearanceConfiguration")
     configuration = configuration_class.fetchCurrentIconAppearanceConfiguration()
-    red, green, blue = _components(color)
+    red, green, blue = rgb_components(color)
     tint = appkit.NSColor.colorWithSRGBRed_green_blue_alpha_(
         red,
         green,
@@ -70,29 +70,11 @@ def apply_appearance() -> None:
         return
     accent = _accent()
     highlight = _preference_color(accent)
-    run((
-        "defaults",
-        "write",
-        "-g",
-        "AppleAccentColor",
-        "-int",
-        str(APPLE_PINK_ACCENT),
-    ))
-    run((
-        "defaults",
-        "write",
-        "-g",
-        "AppleHighlightColor",
-        "-string",
-        f"{highlight} Other",
-    ))
-    run((
-        "defaults",
-        "write",
-        "com.apple.systempreferences",
-        "AppleOtherHighlightColor",
-        "-string",
-        highlight,
-    ))
+    for write in PREFERENCE_WRITES:
+        run((
+            "defaults",
+            "write",
+            *(value.format(highlight=highlight) for value in write),
+        ))
     _apply_icon_tint(accent)
     _notify_color_change()
