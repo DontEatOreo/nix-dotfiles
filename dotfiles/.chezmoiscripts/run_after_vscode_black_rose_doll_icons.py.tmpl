@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.14
-"""Build a light/dark Black Rose Doll theme from Catppuccin's icon shapes."""
+"""Build and reinstall the Black Rose Doll theme after each dotfiles apply."""
 # Catppuccin source={{- if lookPath `code` -}}{{- $source := output `code` `--locate-extension` `catppuccin.catppuccin-vsc-icons` | trim -}}{{ $source }}{{ if $source }}@{{ (stat (joinPath $source `dist/mocha/theme.json`)).modTime }}{{ end }}{{- end }}
 
 import hashlib
