@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import sys
+from filecmp import cmp
 from pathlib import Path
 
 home = Path(os.environ["CHEZMOI_HOME_DIR"])
@@ -49,7 +50,6 @@ settings.mkdir(parents=True, exist_ok=True)
 for name in ("settings.json", "quickCss.css"):
     source = package / name
     destination = settings / name
-    content = source.read_bytes()
-    if not destination.is_file() or destination.read_bytes() != content:
-        destination.write_bytes(content)
+    if not destination.is_file() or not cmp(source, destination, shallow=False):
+        source.copy(destination)
     destination.chmod(0o644)

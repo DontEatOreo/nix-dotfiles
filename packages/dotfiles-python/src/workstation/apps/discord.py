@@ -43,6 +43,10 @@ DISCORD_FLAGS = (
     "--disable-gpu-process-crash-limit",
     "--enable-gpu-rasterization",
 )
+EQUILOTL_ASSETS = {
+    "darwin": "EquilotlCli-darwin-arm64",
+    "linux": "EquilotlCli-linux",
+}
 
 
 def _flags_from_file(path: Path) -> list[str]:
@@ -113,16 +117,22 @@ def _patch_current(discord_dir: Path, equilotl: Path) -> None:
         _patch_location(max(locations, key=_version_key), equilotl)
 
 
-def _macos_equilotl(package_bin: Path) -> Path | None:
+def _equilotl(
+    package_bin: Path,
+    platform: str,
+    *,
+    require_installed: bool,
+) -> Path | None:
+    asset = EQUILOTL_ASSETS[platform]
     configured = os.environ.get("DISCORD_EQUICORD_EQUILOTL")
     path_command = shutil.which("equilotl")
     candidates = (
         Path(configured) if configured else None,
         Path(path_command) if path_command else None,
-        user_bin_home() / "EquilotlCli-darwin-arm64",
-        package_bin / "EquilotlCli-darwin-arm64",
+        user_bin_home() / asset,
+        package_bin / asset,
     )
-    return next(
+    installed = next(
         (
             candidate
             for candidate in candidates
@@ -130,24 +140,8 @@ def _macos_equilotl(package_bin: Path) -> Path | None:
         ),
         None,
     )
-
-
-def _linux_equilotl(package_bin: Path) -> Path:
-    configured = os.environ.get("DISCORD_EQUICORD_EQUILOTL")
-    path_command = shutil.which("equilotl")
-    candidates = (
-        Path(configured) if configured else None,
-        Path(path_command) if path_command else None,
-        user_bin_home() / "EquilotlCli-linux",
-        package_bin / "EquilotlCli-linux",
-    )
-    return next(
-        (
-            candidate
-            for candidate in candidates
-            if candidate is not None and is_executable(candidate)
-        ),
-        package_bin / "EquilotlCli-linux",
+    return (
+        installed if require_installed or installed is not None else package_bin / asset
     )
 
 
@@ -178,7 +172,7 @@ def _repair_macos(package_bin: Path) -> None:
     resources = app / "Contents/Resources"
     if not (resources / "app.asar").is_file():
         return
-    equilotl = _macos_equilotl(package_bin)
+    equilotl = _equilotl(package_bin, "darwin", require_installed=True)
     if equilotl is None:
         return
 
@@ -211,7 +205,9 @@ def main(
     discord_dir = config_home / "discord"
     discord_host = discord_dir / "Discord"
     package_bin = Path(sys.argv[0]).resolve().parent
-    equilotl = _linux_equilotl(package_bin)
+    equilotl = _equilotl(package_bin, "linux", require_installed=False)
+    if equilotl is None:
+        raise DotfilesError("discord-equicord: Equilotl asset could not be resolved")
     if repair_only:
         if sys.platform == "darwin":
             _repair_macos(package_bin)
