@@ -25,7 +25,7 @@ doctor profile="all":
       printf 'Skipping Linux-only dependency check for workflow %q on %s.\n' "$profile" "$host_os"
       exit
     fi
-    if [[ $profile =~ ^(build|spectrum|all)$ ]]; then
+    if [[ $host_os == linux && $profile =~ ^(build|spectrum|all)$ ]]; then
       commands+=("${podman_command[0]}")
     fi
 
