@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import IO, Literal
 
 from workstation.errors import DotfilesError
-from workstation.lib.files import is_executable
 
 type ProcessStream = int | IO[str] | None
 
@@ -60,9 +59,6 @@ def exec_process(
 
 
 def which(name: str, *, path: str | None = None) -> Path | None:
-    if "/" in name:
-        candidate = Path(name)
-        return candidate if is_executable(candidate) else None
     executable = shutil.which(name, path=path)
     return Path(executable) if executable is not None else None
 

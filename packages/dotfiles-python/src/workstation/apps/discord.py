@@ -1,6 +1,5 @@
 import os
 import shlex
-import shutil
 import sys
 from pathlib import Path
 from typing import Annotated
@@ -14,7 +13,7 @@ from platformdirs import (
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, ValidationError
 
 from workstation.errors import DotfilesError
-from workstation.lib.commands import run
+from workstation.lib.commands import run, which
 from workstation.lib.files import ensure_directory, is_executable, write_if_changed
 
 
@@ -125,10 +124,10 @@ def _equilotl(
 ) -> Path | None:
     asset = EQUILOTL_ASSETS[platform]
     configured = os.environ.get("DISCORD_EQUICORD_EQUILOTL")
-    path_command = shutil.which("equilotl")
+    path_command = which("equilotl")
     candidates = (
         Path(configured) if configured else None,
-        Path(path_command) if path_command else None,
+        path_command,
         user_bin_home() / asset,
         package_bin / asset,
     )
