@@ -6,8 +6,30 @@ email = "git@evy.pink"
 color = "auto"
 paginate = "auto"
 merge-editor = "vscode"
-diff-formatter = ":git"
+diff-formatter = "git-plaintext-records"
 default-command = "log"
+
+[merge-tools.git-plaintext-records]
+program = "jj-diff"
+diff-args = [
+  "patch",
+  "$left",
+  "$right",
+  "{{ joinPath .chezmoi.sourceDir ".." }}",
+  "$width",
+]
+diff-expected-exit-codes = [0, 1]
+
+[merge-tools.git-plaintext-records-stat]
+program = "jj-diff"
+diff-args = [
+  "stat",
+  "$left",
+  "$right",
+  "{{ joinPath .chezmoi.sourceDir ".." }}",
+  "$width",
+]
+diff-expected-exit-codes = [0, 1]
 
 [git]
 # Sign unsigned outgoing commits authored by me. The local jj patch preserves
@@ -39,6 +61,7 @@ allowed-signers = "{{ .chezmoi.homeDir }}/.ssh/allowed_signers"
 
 [aliases]
 d = ["describe"]
+ds = ["diff", "--tool", "git-plaintext-records-stat"]
 p = ["git", "push"]
 e = ["edit"]
 n = ["new"]

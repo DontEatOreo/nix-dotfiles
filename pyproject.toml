@@ -22,6 +22,7 @@ dependencies = [
 desktop-perf-audit = "workstation.local.desktop_audit:desktop_perf_audit_entrypoint"
 discord-equicord = "workstation.apps.discord:entrypoint"
 gnome-t3-chat-accent = "workstation.local.gnome:gnome_t3_chat_accent_entrypoint"
+jj-diff = "workstation.local.jj:jj_diff_entrypoint"
 jj-get = "workstation.local.jj:jj_get_entrypoint"
 macos-t3-chat-appearance = "workstation.macos.appearance:apply_appearance"
 phone-mirror = "workstation.local.phone_mirror:entrypoint"
