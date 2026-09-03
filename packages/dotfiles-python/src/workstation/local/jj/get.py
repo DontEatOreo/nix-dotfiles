@@ -15,6 +15,10 @@ from .repository import (
 )
 from .settings import settings as _settings
 
+_GITHUB_PR_URL = re.compile(
+    r"https://github\.com/([^/]+)/([^/]+)/pull/(\d+)(?:[/?#].*)?"
+)
+
 
 class _GitHubOwner(BaseModel):
     login: str = Field(min_length=1)
@@ -189,9 +193,7 @@ def _validate_arguments(arguments: ArgumentCollection) -> None:
         cast("str", remote_argument.value) if remote_argument.tokens else None
     )
     base = cast("str", base_argument.value) if base_argument.tokens else None
-    is_pr_url = re.fullmatch(
-        r"https://github\.com/([^/]+)/([^/]+)/pull/(\d+)(?:[/?#].*)?", target
-    )
+    is_pr_url = _GITHUB_PR_URL.fullmatch(target)
     if target.isdigit() and base is not None:
         raise ValueError("PR numbers accept at most OWNER/REPO")
     if is_pr_url and (remote_or_repo is not None or base is not None):
@@ -221,9 +223,7 @@ def jj_get(
 
     """
     is_pr_number = target.isdigit()
-    is_pr_url = re.fullmatch(
-        r"https://github\.com/([^/]+)/([^/]+)/pull/(\d+)(?:[/?#].*)?", target
-    )
+    is_pr_url = _GITHUB_PR_URL.fullmatch(target)
     if not _git("rev-parse", "--git-dir", check=False):
         raise DotfilesError("jj-get: this requires a colocated Git repository")
     if is_pr_number:
