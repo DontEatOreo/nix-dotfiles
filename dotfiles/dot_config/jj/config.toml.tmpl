@@ -32,9 +32,10 @@ diff-args = [
 diff-expected-exit-codes = [0, 1]
 
 [git]
-# Sign unsigned outgoing commits authored by me. The local jj patch preserves
-# explicitly redated author and committer timestamps while adding signatures.
-sign-on-push = "~signed() & mine()"
+# Sign unsigned outgoing commits authored or committed by me. The local jj
+# patch preserves explicitly redated author and committer timestamps while
+# adding signatures.
+sign-on-push = '''~signed() & (mine() | committer(exact-i:"git@evy.pink"))'''
 # Preserve the custom branch's shallow-fetch behavior: one requested commit
 # plus its parent, so the requested commit retains a real diff base.
 fetch-depth = 2
