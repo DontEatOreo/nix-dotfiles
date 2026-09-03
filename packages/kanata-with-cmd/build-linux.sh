@@ -29,7 +29,8 @@ algorithm, encoded_digest = pin["hash"].split("-", maxsplit=1)
 if algorithm != "sha256":
     raise ValueError(f"unsupported Kanata archive hash: {algorithm}")
 expected_digest = base64.b64decode(encoded_digest, validate=True)
-actual_digest = hashlib.sha256(Path(archive).read_bytes()).digest()
+with Path(archive).open("rb") as source:
+    actual_digest = hashlib.file_digest(source, "sha256").digest()
 if actual_digest != expected_digest:
     raise ValueError("Kanata source archive checksum mismatch")
 PYTHON

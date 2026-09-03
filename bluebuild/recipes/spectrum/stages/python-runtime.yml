@@ -39,9 +39,9 @@ modules:
             algorithm, expected_digest = pin["hash"].split("-", maxsplit=1)
             if algorithm != "sha256":
                 raise ValueError(f"unsupported Astral hash algorithm: {algorithm}")
-            actual_digest = base64.b64encode(
-                hashlib.sha256(archive.read_bytes()).digest()
-            ).decode()
+            with archive.open("rb") as source:
+                digest = hashlib.file_digest(source, "sha256").digest()
+            actual_digest = base64.b64encode(digest).decode()
             if actual_digest != expected_digest:
                 raise ValueError("Astral source archive checksum mismatch")
 

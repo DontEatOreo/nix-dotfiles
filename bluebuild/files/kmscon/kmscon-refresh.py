@@ -52,7 +52,8 @@ def logged_in_ttys() -> set[str]:
 
 
 def config_digest(config: Path) -> str:
-    return hashlib.sha256(config.read_bytes()).hexdigest()
+    with config.open("rb") as source:
+        return hashlib.file_digest(source, "sha256").hexdigest()
 
 
 def load_pending(state_path: Path, digest: str) -> set[str]:
