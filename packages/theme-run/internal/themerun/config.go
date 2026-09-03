@@ -118,9 +118,13 @@ type Platform struct {
 type Priorities[K comparable] []K
 
 func (priorities Priorities[K]) Lookup[V any, M ~map[K]V](values M) (V, bool) {
-	return priorities.LookupFunc(values, func(left, right K) bool {
-		return left == right
-	})
+	for _, key := range priorities {
+		if value, ok := values[key]; ok {
+			return value, true
+		}
+	}
+	var zero V
+	return zero, false
 }
 
 func (priorities Priorities[K]) LookupFunc[V any, M ~map[K]V](values M, equal func(K, K) bool) (V, bool) {
