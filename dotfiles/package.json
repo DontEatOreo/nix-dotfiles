@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "check": "bun run typecheck",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "bun x --no-install tsc -p tsconfig.json"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
