@@ -296,6 +296,18 @@
   tags:
     - kanata
 
+- name: Install the macOS Kanata launcher
+  ansible.builtin.template:
+    src: macos/launch-kanata.j2
+    dest: "{{ system_macos_kanata.launcher }}"
+    owner: root
+    group: wheel
+    mode: "0755"
+  become: true
+  register: system_kanata_launcher
+  tags:
+    - kanata
+
 - name: Configure Logitech keyboard for Kanata
   ansible.builtin.command:
     argv:
@@ -336,6 +348,7 @@
         'restarted'
         if system_kanata_application is changed
         or system_kanata_config is changed
+        or system_kanata_launcher is changed
         or system_kanata_plist is changed
         else 'started'
       }}
