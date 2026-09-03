@@ -18,7 +18,7 @@ spec:
   tool-versions:
     # Keep this aligned with the bluebuild-cli npins revision. Unlike tagged
     # release installers, commit installers include the recipe-v2 feature.
-    bluebuild: 84f8726bcb44a0d0e79f5768e311ed7184ad8b3f
+    bluebuild: b01c4d22d9c5e12cfe9e09087d21e6050642ad56
 
 stages:
   # BlueBuild currently resolves imports from the repository-level recipes/
