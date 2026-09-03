@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"iter"
 	"maps"
 	"os"
@@ -253,7 +254,7 @@ func (v *vault) decryptCollections(files ...string) (collectionSet, error) {
 	}
 
 	var items map[string]jsontext.Value
-	if err := decodeJSON(output, &items); err != nil {
+	if err := json.Unmarshal(output, &items); err != nil {
 		return nil, fmt.Errorf("encrypted manifest is not valid JSON (%v)", err)
 	}
 
@@ -274,7 +275,7 @@ func (v *vault) decryptCollections(files ...string) (collectionSet, error) {
 			return nil, fmt.Errorf("%s manifest must be an array", collection)
 		}
 		var rawRecords []jsontext.Value
-		if err := decodeJSON([]byte(manifest), &rawRecords); err != nil {
+		if err := json.Unmarshal([]byte(manifest), &rawRecords); err != nil {
 			return nil, fmt.Errorf("encrypted manifest is not valid JSON (%v)", err)
 		}
 
@@ -371,19 +372,7 @@ func validateRecord(item record, label string) error {
 }
 
 func validRelativePath(value string) bool {
-	if value == "" || strings.ContainsRune(value, 0) || filepath.IsAbs(value) {
-		return false
-	}
-	cleaned := filepath.Clean(value)
-	if cleaned != value {
-		return false
-	}
-	for component := range strings.SplitSeq(filepath.ToSlash(value), "/") {
-		if component == "." || component == ".." {
-			return false
-		}
-	}
-	return true
+	return value != "." && !strings.ContainsRune(value, 0) && fs.ValidPath(value)
 }
 
 func (v *vault) packCollections(value collectionSet) error {

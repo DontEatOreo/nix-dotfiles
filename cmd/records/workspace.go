@@ -5,7 +5,6 @@ import (
 	json "encoding/json/v2"
 	"errors"
 	"fmt"
-	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -14,8 +13,6 @@ import (
 
 	set "github.com/hashicorp/go-set/v3"
 )
-
-var workspaceFormatFields = set.From([]string{"collections", "version"})
 
 type workspaceFormat struct {
 	Collections []string `json:"collections"`
@@ -265,18 +262,24 @@ func readWorkspace(root string) (collectionSet, error) {
 	if err := assertEntries(root, slices.Concat([]string{"format.json"}, collectionNames)); err != nil {
 		return nil, err
 	}
-	format, err := parseJSONObject(filepath.Join(root, "format.json"), "workspace format")
+	formatPath := filepath.Join(root, "format.json")
+	regular, err := isRegular(formatPath)
 	if err != nil {
 		return nil, err
 	}
-	if !workspaceFormatFields.EqualSliceSet(slices.Collect(maps.Keys(format))) {
-		return nil, errors.New("unsupported workspace format")
+	if !regular {
+		return nil, errors.New("missing workspace format")
 	}
-	var version int
-	var names []string
-	if json.Unmarshal(format["version"], &version) != nil ||
-		json.Unmarshal(format["collections"], &names) != nil ||
-		version != formatVersion || !collectionNameSet.EqualSliceSet(names) {
+	content, err := os.ReadFile(formatPath)
+	if err != nil {
+		return nil, err
+	}
+	var format workspaceFormat
+	if err := json.Unmarshal(content, &format, json.RejectUnknownMembers(true)); err != nil {
+		return nil, fmt.Errorf("workspace format is not valid JSON (%v)", err)
+	}
+	if format.Version != formatVersion ||
+		!collectionNameSet.EqualSliceSet(format.Collections) {
 		return nil, errors.New("unsupported workspace format")
 	}
 

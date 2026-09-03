@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json/jsontext"
 	json "encoding/json/v2"
 	"errors"
 	"fmt"
@@ -29,7 +28,6 @@ var (
 		"# BEGIN dotfiles decrypted records",
 		"# END dotfiles decrypted records",
 	)
-	markerFields          = set.From([]string{"version"})
 	literalSourcePrefixes = []string{
 		"after_",
 		"before_",
@@ -86,6 +84,10 @@ type sourceFile struct {
 	path string
 	body string
 	mode os.FileMode
+}
+
+type markerFormat struct {
+	Version int `json:"version"`
 }
 
 func (v *vault) unpackSource() (returnErr error) {
@@ -1005,7 +1007,7 @@ func ignoreOverlayContent(value collectionSet) string {
 }
 
 func (v *vault) writeMarker() error {
-	content, err := marshalJSON(map[string]int{"version": layoutVersion})
+	content, err := marshalJSON(markerFormat{Version: layoutVersion})
 	if err != nil {
 		return err
 	}
@@ -1042,15 +1044,11 @@ func (v *vault) requireUnpackedMarker() error {
 	if err != nil {
 		return err
 	}
-	var marker map[string]jsontext.Value
-	if err := json.Unmarshal(content, &marker); err != nil {
+	var marker markerFormat
+	if err := json.Unmarshal(content, &marker, json.RejectUnknownMembers(true)); err != nil {
 		return fmt.Errorf("records marker is not valid JSON (%v)", err)
 	}
-	if !markerFields.EqualSliceSet(slices.Collect(maps.Keys(marker))) {
-		return errors.New("unsupported records marker")
-	}
-	var version int
-	if err := json.Unmarshal(marker["version"], &version); err != nil || version != layoutVersion {
+	if marker.Version != layoutVersion {
 		return errors.New("unsupported records marker")
 	}
 	return nil

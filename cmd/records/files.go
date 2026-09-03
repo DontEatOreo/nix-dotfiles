@@ -14,10 +14,6 @@ import (
 	"github.com/google/renameio/v2"
 )
 
-func decodeJSON(content []byte, destination any) error {
-	return json.Unmarshal(content, destination)
-}
-
 func parseJSONObject(path, label string) (map[string]jsontext.Value, error) {
 	regular, err := isRegular(path)
 	if err != nil {
@@ -31,7 +27,7 @@ func parseJSONObject(path, label string) (map[string]jsontext.Value, error) {
 		return nil, err
 	}
 	var result map[string]jsontext.Value
-	if err := decodeJSON(content, &result); err != nil {
+	if err := json.Unmarshal(content, &result); err != nil {
 		return nil, fmt.Errorf("%s is not valid JSON (%v)", label, err)
 	}
 	if result == nil {
@@ -97,10 +93,7 @@ func pathMatches(path string, matches func(os.FileInfo) bool) (bool, error) {
 
 func isWithin(root, candidate string) bool {
 	relative, err := filepath.Rel(root, candidate)
-	if err != nil {
-		return false
-	}
-	return relative == "." || (relative != ".." && !strings.HasPrefix(relative, ".."+string(filepath.Separator)))
+	return err == nil && filepath.IsLocal(relative)
 }
 
 func relativePath(root, candidate string) (string, error) {
