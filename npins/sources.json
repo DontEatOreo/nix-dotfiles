@@ -9,9 +9,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "84f8726bcb44a0d0e79f5768e311ed7184ad8b3f",
-      "url": "https://github.com/blue-build/cli/archive/84f8726bcb44a0d0e79f5768e311ed7184ad8b3f.tar.gz",
-      "hash": "sha256-P2CG22ptBggTUnrDCSV9ST1ydXiId4DrMB55zEHPYXI="
+      "revision": "b01c4d22d9c5e12cfe9e09087d21e6050642ad56",
+      "url": "https://github.com/blue-build/cli/archive/b01c4d22d9c5e12cfe9e09087d21e6050642ad56.tar.gz",
+      "hash": "sha256-QymzvTGKq/ZUBpipiun3gayBE3orXh5RZqfXd5oJrDs="
     },
     "browser": {
       "type": "Git",
@@ -102,16 +102,16 @@
       "version_upper_bound": null,
       "release_prefix": null,
       "submodules": false,
-      "version": "0.15.6.1",
-      "revision": "fa8c2be6fe144257052c04ad0baef1dcba54382b",
-      "url": "https://api.github.com/repos/imputnet/helium-linux/tarball/refs/tags/0.15.6.1",
-      "hash": "sha256-XTVT/hzng6FG72s6xOt1dAPhCIbg6rKyYFj4i5ZGS8w="
+      "version": "0.16.4.1",
+      "revision": "67668c4bde15e9447123a682a6d302b00add9dfa",
+      "url": "https://api.github.com/repos/imputnet/helium-linux/tarball/refs/tags/0.16.4.1",
+      "hash": "sha256-0/IlUCq1ysgb66QOK5b2PN+D5YOhnPk/FiRWR4dQ/jc="
     },
     "helium_linux_binary": {
       "type": "Url",
-      "url": "https://github.com/imputnet/helium-linux/releases/download/0.15.6.1/helium-0.15.6.1-x86_64_linux.tar.xz",
+      "url": "https://github.com/imputnet/helium-linux/releases/download/0.16.4.1/helium-0.16.4.1-x86_64_linux.tar.xz",
       "unpack": false,
-      "hash": "sha256-TVzi5ZWyvFsh6ovoBhU5DW0k3wlQ5/gUDD4+ykAQPTY=",
+      "hash": "sha256-aD7bp0q49q4KxycqPCf575RWkGKeFSU3CIexeBXO3L4=",
       "frozen": true
     },
     "helix": {
@@ -143,16 +143,16 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "25c431b5433e907dca67d74271010239fc1207c5",
-      "url": "https://github.com/jj-vcs/jj/archive/25c431b5433e907dca67d74271010239fc1207c5.tar.gz",
-      "hash": "sha256-rHhmfkTRg4Kx+yu50XgMRZpzXGgtyBQh39GQeHIoE7o=",
+      "revision": "ba3d2e78ef636371d9512feee8fcdf00c3cd729e",
+      "url": "https://github.com/jj-vcs/jj/archive/ba3d2e78ef636371d9512feee8fcdf00c3cd729e.tar.gz",
+      "hash": "sha256-mt2YeDeLvZ+yaiKDpFOaNxnQ37Bi4CQHpyyxNGmJpQE=",
       "frozen": true
     },
     "jj_archive": {
       "type": "Url",
-      "url": "https://github.com/jj-vcs/jj/archive/25c431b5433e907dca67d74271010239fc1207c5.tar.gz",
+      "url": "https://github.com/jj-vcs/jj/archive/ba3d2e78ef636371d9512feee8fcdf00c3cd729e.tar.gz",
       "unpack": false,
-      "hash": "sha256-XOclFBkWf/WJDtGy4LSqOsDHKcDOHqxnanI+6eC8z9k=",
+      "hash": "sha256-0NOyxtMMa1vH4ywcydZJefJAGABwgMvChui+JekUBNs=",
       "frozen": true
     },
     "kanata": {
@@ -164,9 +164,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "565d5070e9e61992af5b4e844d512a9ce2f2d8c1",
-      "url": "https://github.com/jtroo/kanata/archive/565d5070e9e61992af5b4e844d512a9ce2f2d8c1.tar.gz",
-      "hash": "sha256-O3cKyJ352/miOr2sTnO7ZmKz4dJKYSH6iQZo9ELDIms="
+      "revision": "f1ea695c551b23726a0644720ddcac89f01e88a2",
+      "url": "https://github.com/jtroo/kanata/archive/f1ea695c551b23726a0644720ddcac89f01e88a2.tar.gz",
+      "hash": "sha256-WuNBHZ9i9urCxBVDVEF1NfeGt4q3tmGmmJuyK60tK0o="
     },
     "kanata_homebrew": {
       "type": "Git",
@@ -276,15 +276,15 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "cc231ba5e27ca60d95c15249b680c144205276b4",
-      "url": "https://github.com/euvlok/pkgs/archive/cc231ba5e27ca60d95c15249b680c144205276b4.tar.gz",
-      "hash": "sha256-+f8KFemSjUJ2uHnBcoKLQ2NF0w88QAUWcJJC0GeQAWw="
+      "revision": "93c7fe4594022c009e9cac4d02543c879607c597",
+      "url": "https://github.com/euvlok/pkgs/archive/93c7fe4594022c009e9cac4d02543c879607c597.tar.gz",
+      "hash": "sha256-1IHLOTPHfTkQIq1vfuv63VEDNidRCistWjG6y0lmhuU="
     },
     "yt_dlp_script_archive": {
       "type": "Url",
-      "url": "https://github.com/euvlok/pkgs/archive/cc231ba5e27ca60d95c15249b680c144205276b4.tar.gz",
+      "url": "https://github.com/euvlok/pkgs/archive/93c7fe4594022c009e9cac4d02543c879607c597.tar.gz",
       "unpack": false,
-      "hash": "sha256-g7S5JhHePALsbM5iXTzJJyt8ETAiV9zcZgoOGOXpecQ=",
+      "hash": "sha256-QSgemLq+5u0moxVS7UA4ZzSl6GoASjtXq0nggw/uK4I=",
       "frozen": true
     }
   },
