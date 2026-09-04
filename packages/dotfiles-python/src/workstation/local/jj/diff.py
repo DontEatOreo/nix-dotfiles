@@ -97,7 +97,7 @@ def _materialize_records(
             "--justfile",
             repository / _JUSTFILE_PATH,
             "records-unpack",
-            vault,
+            vault.absolute(),
         ),
         env={
             "RECORDS_FILE": os.fspath(encrypted_vault.absolute()),
