@@ -46,6 +46,8 @@ window-theme = ghostty
 {{- end }}
 
 {{- if eq .chezmoi.os "darwin" }}
+# Ghostty 1.4 stopped copying selections by default on macOS.
+copy-on-select = clipboard
 macos-option-as-alt = true
 font-thicken = true
 {{- end }}

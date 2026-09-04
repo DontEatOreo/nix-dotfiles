@@ -1,11 +1,11 @@
 {
   "pins": {
     "ghostty": {
-      "revision": "5834a0e3df621802e9578e4562d88b0c2ad4ada8"
+      "revision": "c81f0b26871c7fbbe2fc35549fdad1f64ed29094"
     },
     "ghostty_archive": {
-      "hash": "sha256-opQod7R8nXE0argO5m9taZ+AqDON+pzZqepCNZfJUyc=",
-      "url": "https://github.com/ghostty-org/ghostty/archive/5834a0e3df621802e9578e4562d88b0c2ad4ada8.tar.gz"
+      "hash": "sha256-xzPZDfvXh/Uby1soHGcAxk1qqSrwuHZBBUC7FUFGtbY=",
+      "url": "https://github.com/ghostty-org/ghostty/archive/c81f0b26871c7fbbe2fc35549fdad1f64ed29094.tar.gz"
     },
     "ghostty_zig_x86_64_linux": {
       "hash": "sha256-cOSWZKdDdLSLUebz/fv0N/Y5XUJQkFBYi9SavlK6PQA=",

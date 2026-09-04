@@ -188,11 +188,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788432600,
-        "narHash": "sha256-1ughKQ3Zo1OTx+3OjW4SlTOmnoebbObBLbW6xZFzbkY=",
+        "lastModified": 1788526800,
+        "narHash": "sha256-dcricQDcaS6S2m6Ne904wkndFtRQTRh6icYNdvJ625o=",
         "owner": "4evy",
         "repo": "patches",
-        "rev": "1fda9b444610d67c02fe3981e2f5fad852a5fb5d",
+        "rev": "dc7a3e41799e4365b608dccd2ea4866fb2fd6ac4",
         "type": "github"
       },
       "original": {
