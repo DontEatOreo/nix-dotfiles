@@ -1,0 +1,183 @@
+[[interpreter]]
+name = "ecmascript"
+shebang_commands = ["/usr/bin/env"]
+shebang_arguments = ["node"]
+programs = [
+  "node",
+  "bun",
+  "/usr/bin/node",
+  "/bin/node",
+  "/run/current-system/sw/bin/node",
+  "~/.cache/.bun/bin/bun",
+  "~/.bun/bin/bun",
+]
+
+[[integration]]
+name = "codex"
+strategy = "arguments"
+dark_theme = "t3-chat-dark"
+light_theme = "t3-chat-light"
+arguments = ["-c", 'tui.theme="{theme}"', "-c", "{context}"]
+context_table = "projects"
+context_field = "trust_level"
+context_value = "trusted"
+context_path_flags = ["-C", "--cd"]
+context_path_prefixes = ["-C", "--cd="]
+context_argument_separator = "--"
+context_directory_commands = [
+  [
+    "git",
+    "-C",
+    "{directory}",
+    "rev-parse",
+    "--show-toplevel",
+  ],
+]
+
+[[integration]]
+name = "btop"
+strategy = "config"
+dark_theme = "t3_chat_dark"
+light_theme = "t3_chat_light"
+default_config = ".config/btop/btop.conf"
+assignment = "color_theme"
+config_flags = ["--config", "-c"]
+config_output_flag = "--config"
+temporary_prefix = "theme-run-btop-XXXXXX"
+temporary_location = "cache"
+cache_subdirectory = "theme-run/btop"
+quote = '"'
+
+[[integration]]
+name = "atuin"
+strategy = "environment"
+dark_theme = "t3-chat-dark"
+light_theme = "t3-chat-light"
+env = { ATUIN_CONFIG_DIR = "{home}/.config/atuin-{theme}", ATUIN_THEME_DIR = "{home}/.config/atuin/themes" }
+
+[[integration]]
+name = "bat"
+strategy = "environment"
+dark_theme = "T3 Chat Dark"
+light_theme = "T3 Chat Light"
+env = { BAT_THEME = "{theme}" }
+
+[[integration]]
+name = "delta"
+strategy = "environment"
+dark_theme = "t3-chat-dark"
+light_theme = "t3-chat-light"
+env = { DELTA_FEATURES = "{theme}" }
+
+[[integration]]
+name = "eza"
+strategy = "environment"
+dark_theme = "t3-chat-dark"
+light_theme = "t3-chat-light"
+env = { EZA_CONFIG_DIR = "{home}/.config/eza-{theme}" }
+
+[[integration]]
+name = "fzf"
+strategy = "environment"
+dark_theme = "t3-chat-dark"
+light_theme = "t3-chat-light"
+env = { FZF_DEFAULT_OPTS_FILE = "{home}/.config/fzf/{theme}.opts" }
+
+[[integration]]
+name = "gitui"
+strategy = "arguments"
+dark_theme = "t3-chat-dark"
+light_theme = "t3-chat-light"
+arguments = ["--theme", "{theme}.ron"]
+
+[[integration]]
+name = "glamour"
+strategy = "environment"
+dark_theme = "t3-chat-dark"
+light_theme = "t3-chat-light"
+env = { GLAMOUR_STYLE = "{home}/.config/glamour/styles/{theme}.json" }
+
+[[integration]]
+name = "starship"
+strategy = "environment"
+dark_theme = "t3-chat-dark"
+light_theme = "t3-chat-light"
+env = { STARSHIP_CONFIG = "{home}/.config/starship-{theme}.toml" }
+
+[[runner]]
+name = "codex"
+programs = [
+  "$THEME_RUN_CODEX_BIN",
+  "~/.bun/bin/codex",
+  "~/.cache/.bun/bin/codex",
+  "~/.npm/bin/codex",
+  "codex",
+]
+default_args = ["--dangerously-bypass-approvals-and-sandbox"]
+skip_env = ["THEME_RUN_CODEX_WRAPPER"]
+env_unset = ["NO_COLOR"]
+env = { COLORTERM = "truecolor" }
+integration = "codex"
+interpreter = "ecmascript"
+
+[[runner]]
+name = "btop"
+programs = ["btop"]
+env_unset = ["NO_COLOR"]
+env = { COLORTERM = "truecolor" }
+integration = "btop"
+
+[[runner]]
+name = "atuin"
+programs = ["atuin"]
+integration = "atuin"
+
+[[runner]]
+name = "bat"
+programs = ["bat"]
+integration = "bat"
+
+[[runner]]
+name = "delta"
+programs = ["delta"]
+env_unset = ["NO_COLOR"]
+integration = "delta"
+
+[[runner]]
+name = "eza"
+programs = ["eza"]
+env_unset = ["NO_COLOR"]
+integration = "eza"
+
+[[runner]]
+name = "fzf"
+programs = ["fzf"]
+env_unset = ["NO_COLOR"]
+integration = "fzf"
+
+[[runner]]
+name = "gh"
+programs = ["gh"]
+integration = "glamour"
+
+[[runner]]
+name = "gitui"
+programs = ["gitui"]
+env_unset = ["NO_COLOR"]
+integration = "gitui"
+
+[[runner]]
+name = "glow"
+programs = ["glow"]
+integration = "glamour"
+
+[[runner]]
+name = "starship"
+programs = ["starship"]
+env_unset = ["NO_COLOR"]
+integration = "starship"
+
+[[runner]]
+name = "helix"
+aliases = ["hx"]
+programs = ["hx", "helix"]

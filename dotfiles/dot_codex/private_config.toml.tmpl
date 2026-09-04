@@ -1,0 +1,315 @@
+{{- $t3 := .t3_chat -}}
+{{- $light := index $t3 "light" -}}
+{{- $dark := index $t3 "dark" -}}
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
+approval_policy = "never"
+default_permissions = "unrestricted"
+web_search = "live"
+
+{{- if eq .chezmoi.os "darwin" }}
+{{- $notifyClient := joinPath .chezmoi.homeDir ".codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient" }}
+{{- if stat $notifyClient }}
+notify = [
+  "{{ $notifyClient }}",
+  "turn-ended",
+]
+{{- end }}
+{{- end }}
+
+# Keep a custom root-write profile so ChatGPT does not classify the default as
+# its built-in Full access mode. Use `codex --profile safe` or `review` when a
+# task should run with narrower permissions.
+[permissions.unrestricted]
+description = "Unrestricted access without the desktop Full access warning"
+
+[permissions.unrestricted.filesystem]
+":root" = "write"
+
+[permissions.unrestricted.network]
+enabled = true
+allow_local_binding = true
+dangerously_allow_all_unix_sockets = true
+
+[tui]
+notification_condition = "always"
+show_tooltips = false
+theme = "t3-chat-dark"
+terminal_resize_reflow_max_rows = 0
+status_line = [
+  "model-with-reasoning",
+  "project-name",
+  "context-remaining",
+  "five-hour-limit",
+  "weekly-limit",
+]
+status_line_use_colors = true
+
+[tui.keymap.global]
+{{- if eq .chezmoi.os "darwin" }}
+open_transcript = "ctrl-t"
+{{- end }}
+open_external_editor = "ctrl-x"
+
+{{- $onePasswordMcp := "" }}
+{{- if eq .chezmoi.os "darwin" }}
+{{- $onePasswordMcp = "/Applications/1Password.app/Contents/MacOS/1password-mcp" }}
+{{- else if lookPath "1password-mcp" }}
+{{- $onePasswordMcp = lookPath "1password-mcp" }}
+{{- end }}
+{{- if and $onePasswordMcp (stat $onePasswordMcp) }}
+[mcp_servers.1password]
+command = "{{ $onePasswordMcp }}"
+enabled = true
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+default_tools_approval_mode = "approve"
+{{- end }}
+
+[mcp_servers.ghidra]
+url = "http://127.0.0.1:8090/mcp"
+enabled = false
+startup_timeout_sec = 60
+tool_timeout_sec = 1800
+default_tools_approval_mode = "approve"
+enabled_tools = [
+  "list_instances",
+  "connect_instance",
+  "check_tools",
+  "list_tool_groups",
+  "load_tool_group",
+  "unload_tool_group",
+  "search_tools",
+  "import_file",
+  "get_current_program_info",
+  "list_open_programs",
+  "list_project_files",
+  "list_projects",
+  "get_project_info",
+  "create_project",
+  "close_project",
+  "open_project",
+  "load_program",
+  "load_program_from_project",
+  "open_program",
+  "close_program",
+  "switch_program",
+  "save_program",
+  "save_all_programs",
+  "analysis_status",
+  "run_analysis",
+  "reanalyze",
+  "get_address_spaces",
+  "list_functions",
+  "list_functions_enhanced",
+  "search_functions",
+  "search_functions_enhanced",
+  "get_function_by_address",
+  "get_function_signature",
+  "get_function_variables",
+  "get_function_callers",
+  "get_function_callees",
+  "get_function_call_graph",
+  "get_function_xrefs",
+  "get_xrefs_to",
+  "get_xrefs_from",
+  "get_bulk_xrefs",
+  "decompile_function",
+  "force_decompile",
+  "disassemble_function",
+  "disassemble_bytes",
+  "get_function_pcode",
+  "analyze_dataflow",
+  "analyze_data_region",
+  "analyze_function_completeness",
+  "analyze_for_documentation",
+  "batch_decompile",
+  "detect_array_bounds",
+  "list_strings",
+  "search_strings",
+  "list_imports",
+  "list_exports",
+  "get_entry_points",
+  "list_segments",
+  "list_data_items",
+  "list_data_items_by_xrefs",
+  "list_globals",
+  "search_byte_patterns",
+  "search_instructions",
+  "read_memory",
+  "inspect_memory_content",
+  "list_data_types",
+  "search_data_types",
+  "get_type_size",
+  "get_struct_layout",
+  "create_struct",
+  "add_struct_field",
+  "modify_struct_field",
+  "remove_struct_field",
+  "validate_data_type_exists",
+  "validate_function_prototype",
+  "batch_set_variable_types",
+  "set_variables",
+  "set_global",
+  "audit_global",
+  "audit_globals_in_function",
+  "rename_function_by_address",
+  "rename_variables",
+  "rename_or_label",
+  "batch_rename_function_components",
+  "set_plate_comment",
+  "set_disassembly_comment",
+  "set_decompiler_comment",
+  "list_bookmarks",
+  "set_bookmark",
+  "delete_bookmark",
+  "get_plate_comment",
+  "batch_set_comments",
+  "set_function_prototype",
+  "set_local_variable_type",
+  "apply_data_type",
+  "analyze_function_complete",
+  "analyze_call_graph",
+  "emulate_function",
+]
+
+{{- if lookPath "lldb-mcp-launcher" }}
+[mcp_servers.lldb]
+command = "lldb-mcp-launcher"
+enabled = false
+startup_timeout_sec = 30
+tool_timeout_sec = 1800
+default_tools_approval_mode = "approve"
+enabled_tools = [
+  "command",
+  "debugger_list",
+]
+{{- end }}
+
+{{- $chatGPTResources := "" }}
+{{- if eq .chezmoi.os "darwin" }}
+{{- $chatGPTResources = "/Applications/ChatGPT.app/Contents/Resources" }}
+{{- else if and (eq .chezmoi.os "linux") (lookPath "chatgpt") }}
+{{- $chatGPTExecutable := output "readlink" "-f" (lookPath "chatgpt") | trim }}
+{{- $chatGPTResources = joinPath (dir (dir $chatGPTExecutable)) "lib/chatgpt/resources" }}
+{{- end }}
+{{- $nodeRepl := joinPath $chatGPTResources "cua_node/bin/node_repl" }}
+{{- if and $chatGPTResources (stat $nodeRepl) }}
+{{- $codexHome := joinPath .chezmoi.homeDir ".codex" }}
+{{- $nodeModules := joinPath $chatGPTResources "cua_node/lib/node_modules" }}
+{{- $browserService := joinPath $chatGPTResources "plugins/openai-bundled/plugins/browser/scripts/browser-service.mjs" }}
+
+# Keep ChatGPT's app-hosted automation available to standalone CLI sessions.
+# ChatGPT may refresh these values with config/batchWrite after an app update.
+[mcp_servers.node_repl]
+args = []
+{{- if eq .chezmoi.os "darwin" }}
+command = "{{ joinPath .chezmoi.homeDir ".local/bin/codex-node-repl-browser-trust" }}"
+{{- else }}
+command = "{{ $nodeRepl }}"
+{{- end }}
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = "{{ $nodeModules }}"
+NODE_REPL_NODE_PATH = "{{ joinPath $chatGPTResources "cua_node/bin/node" }}"
+NODE_REPL_TRUSTED_CODE_PATHS = "{{ $codexHome }}:{{ $nodeModules }}"
+CODEX_HOME = "{{ $codexHome }}"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+BROWSER_USE_TINYSKY_ENABLED = "0"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+{{- if eq .chezmoi.os "darwin" }}
+NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE = "Control desktop apps on macOS through Computer Use."
+{{- end }}
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+{{- if eq .chezmoi.os "darwin" }}
+NODE_REPL_TRUSTED_SERVICES = '{"browser":"{{ $browserService }}","sky":"@oai/sky/service"}'
+SKY_CUA_SERVICE_PATH = "{{ joinPath $codexHome "computer-use/Codex Computer Use.app" }}"
+{{- else }}
+NODE_REPL_TRUSTED_SERVICES = '{"browser":"{{ $browserService }}"}'
+{{- end }}
+CODEX_CLI_PATH = "{{ joinPath $chatGPTResources "codex" }}"
+
+# Expose ChatGPT's compatibility variants through an unreserved marketplace
+# name so standalone Codex sessions can load the bundled plugins.
+[marketplaces.dotfiles-chatgpt-bundled]
+source_type = "local"
+source = "{{ joinPath $codexHome ".tmp/compatibility-marketplaces/dotfiles-chatgpt-bundled" }}"
+
+[plugins."codex-app-tools@dotfiles-chatgpt-bundled"]
+enabled = true
+
+[plugins."sites@dotfiles-chatgpt-bundled"]
+enabled = true
+
+[plugins."browser@dotfiles-chatgpt-bundled"]
+enabled = true
+
+[plugins."chrome@dotfiles-chatgpt-bundled"]
+enabled = true
+
+[plugins."computer-use@dotfiles-chatgpt-bundled"]
+enabled = true
+
+[plugins."deep-research@dotfiles-chatgpt-bundled"]
+enabled = true
+
+[plugins."user-writing@dotfiles-chatgpt-bundled"]
+enabled = true
+
+[plugins."visualize@dotfiles-chatgpt-bundled"]
+enabled = true
+{{- end }}
+
+[apps._default]
+enabled = true
+destructive_enabled = true
+open_world_enabled = true
+default_tools_approval_mode = "approve"
+
+[notice]
+hide_full_access_warning = true
+hide_world_writable_warning = true
+
+# ChatGPT derives ~/.codex/computer-use/config.json from these desktop theme
+# values and the active locale; leave that generated file app-owned.
+[desktop]
+appearanceLightCodeThemeId = "t3-chat-light"
+appearanceDarkCodeThemeId = "t3-chat-dark"
+followUpQueueMode = "queue"
+
+[desktop.appearanceLightChromeTheme]
+accent = "{{ index $light "pink" }}"
+accentSource = "custom"
+contrast = 45
+ink = "{{ index $light "text" }}"
+opaqueWindows = false
+surface = "{{ index $light "base" }}"
+
+[desktop.appearanceLightChromeTheme.fonts]
+
+[desktop.appearanceLightChromeTheme.semanticColors]
+diffAdded = "{{ index $light "green" }}"
+diffAddedBg = "{{ template "theme_color_mix" (dict "background" (index $light "terminalBackground") "foreground" (index $light "success") "weight" 15) }}"
+diffRemoved = "{{ index $light "red" }}"
+diffRemovedBg = "{{ index $light "errorSurface" }}"
+skill = "{{ index $light "mauve" }}"
+
+[desktop.appearanceDarkChromeTheme]
+accent = "{{ index $dark "pink" }}"
+accentSource = "custom"
+contrast = 60
+ink = "{{ index $dark "text" }}"
+opaqueWindows = false
+surface = "{{ index $dark "base" }}"
+
+[desktop.appearanceDarkChromeTheme.fonts]
+
+[desktop.appearanceDarkChromeTheme.semanticColors]
+diffAdded = "{{ index $dark "green" }}"
+diffAddedBg = "{{ template "theme_color_mix" (dict "background" (index $dark "terminalBackground") "foreground" (index $dark "success") "weight" 15) }}"
+diffRemoved = "{{ index $dark "red" }}"
+diffRemovedBg = "{{ index $dark "errorSurface" }}"
+skill = "{{ index $dark "mauve" }}"

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# shellcheck shell=bash
+set -euo pipefail
+
+if command -v bun >/dev/null 2>&1; then
+	bun_global_dir="$(dirname "$(bun pm bin --global)")/install/global"
+	readonly bun_global_dir
+	declare -a bun_packages=()
+
+	queue_bun_package() {
+		local package=$1
+		local requested=$2
+		local installed=
+		local available
+
+		if [[ -f $bun_global_dir/node_modules/$package/package.json ]]; then
+			installed=$(jq -r '.version // empty' \
+				"$bun_global_dir/node_modules/$package/package.json")
+		fi
+		available=$(bun pm view "$requested" version)
+		if [[ $installed != "$available" ]]; then
+			bun_packages+=("$requested")
+		fi
+	}
+
+	queue_bun_package opencode-ai opencode-ai
+	queue_bun_package @openai/codex @openai/codex@alpha
+	if ((${#bun_packages[@]})); then
+		bun add --global "${bun_packages[@]}"
+	fi
+fi
+
+readonly home_dir={{ .chezmoi.homeDir | quote }}
+readonly local_bin_dir="$home_dir/.local/bin"
+readonly zsh_completion_dir="$home_dir/.cache/zsh/completions"
+readonly bash_completion_dir="$home_dir/.local/share/bash-completion/completions"
+mkdir -p "$local_bin_dir" "$zsh_completion_dir" "$bash_completion_dir"
+
+if [[ $(uname -s) == Linux ]] && command -v nix >/dev/null 2>&1; then
+	readonly chatgpt_package_dir="$home_dir/.local/share/nix/chatgpt"
+	if [[ -f $chatgpt_package_dir/flake.nix ]]; then
+		if nix profile list --json | jq -e '.elements.chatgpt' >/dev/null; then
+			nix profile upgrade chatgpt
+		else
+			nix profile install "path:$chatgpt_package_dir#chatgpt"
+		fi
+	fi
+fi

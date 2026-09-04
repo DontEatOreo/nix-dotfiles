@@ -1,0 +1,107 @@
+{
+  "backupVersion": 1,
+  "fallbackCommandIds": ["c:r:ai::-::openQuickAi"],
+  "modelUserDefaultKeys": [
+    "AIChatWindowLastUsedModel",
+    "AIChatWindowSelectedModel",
+    "SelectedAIModel"
+  ],
+  "frecencyPrefixes": [
+    "c:r:ai:",
+    "c:r:dictation:",
+    "c:r:translator:",
+    "c:r:screen-awareness:"
+  ],
+  "mergeableBackupCollections": [
+    "internalExtensions",
+    "models",
+    "userDefaults",
+    "macOSDefaults"
+  ],
+  "internalExtensions": [
+    {
+      "id": "e:r:ai",
+      "syncedMeta": {
+        "aiChatAskQuestionsEnabled": false,
+        "aiMemoryEnabled": false,
+        "aiToolConfirmationAllowList": []
+      },
+      "localMeta": {
+        "aiByokApiKeys": [],
+        "aiChatInvalidCompletionRecoveryEnabled": false,
+        "skillDirectories": []
+      },
+      "enabledFallbackCommandIds": []
+    },
+    {
+      "id": "e:r:dictation",
+      "syncedMeta": {
+        "appContext": false,
+        "autoDetectStyle": false
+      }
+    },
+    {
+      "id": "e:r:translator"
+    },
+    {
+      "id": "e:r:mcp"
+    },
+    {
+      "id": "e:r:screen-awareness"
+    },
+    {
+      "id": "e:r:file-search",
+      "enabled": "preserve",
+      "localMeta": {
+        "semanticIndexingPaths": [],
+        "semanticIndexingUseFileSearchScope": false
+      }
+    }
+  ],
+  "statusFields": [
+    { "key": "enabled", "path": ["enabled"] },
+    {
+      "key": "enabledFallbackCommandIds",
+      "path": ["enabledFallbackCommandIds"],
+      "defaultValue": []
+    },
+    {
+      "key": "aiChatAskQuestionsEnabled",
+      "path": ["syncedMeta", "aiChatAskQuestionsEnabled"]
+    },
+    { "key": "aiMemoryEnabled", "path": ["syncedMeta", "aiMemoryEnabled"] },
+    {
+      "key": "aiChatInvalidCompletionRecoveryEnabled",
+      "path": ["localMeta", "aiChatInvalidCompletionRecoveryEnabled"]
+    },
+    { "key": "skillDirectories", "path": ["localMeta", "skillDirectories"] },
+    { "key": "aiByokApiKeys", "path": ["localMeta", "aiByokApiKeys"] },
+    { "key": "semanticIndexingPaths", "path": ["localMeta", "semanticIndexingPaths"] },
+    {
+      "key": "semanticIndexingUseFileSearchScope",
+      "path": ["localMeta", "semanticIndexingUseFileSearchScope"]
+    }
+  ],
+  "macOSDefaults": [
+    { "key": "raycast_HasOpenedAIChat", "restoreType": "bool" },
+    { "key": "NSWindow Frame ai-chat-window", "restoreType": "string" }
+  ],
+  "aiDataQueries": [
+    { "key": "chatCount", "methodPath": ["ai", "chatGetAllIds"] },
+    {
+      "key": "quickAiChatCount",
+      "methodPath": ["ai", "chatGetAllInvalidationSnapshots"],
+      "filter": { "path": ["source"], "equals": "quick_ai" }
+    },
+    { "key": "commandCount", "methodPath": ["ai", "commandGetAll"] },
+    { "key": "modeCount", "methodPath": ["ai", "modeGetAll"] },
+    { "key": "transcriptionCount", "methodPath": ["ai", "transcriptionGetAll"] },
+    {
+      "key": "transcriptionStyleCount",
+      "methodPath": ["ai", "transcriptionStyleGetAll"]
+    },
+    { "key": "mcpServerCount", "methodPath": ["settings", "allMcpServers"] },
+    { "key": "orgSkillCount", "methodPath": ["orgPacks", "listOrgSkills"] },
+    { "key": "orgAgentCount", "methodPath": ["orgPacks", "listOrgAiAgents"] }
+  ]
+}

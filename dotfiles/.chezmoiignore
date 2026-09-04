@@ -27,6 +27,7 @@ node_modules/**
 .oh-my-zsh/
 .fzf-tab-completion/
 .local/bin/
+.local/libexec/external-cli-installer
 .local/share/applications/
 .config/atuin/
 .config/autostart/
@@ -41,12 +42,18 @@ Library/
 
 {{ if ne .chezmoi.os "darwin" }}
 Library/
+.config/homebrew/Brewfile.private
 .config/raycast/
+.local/bin/codex-node-repl-browser-trust
 .local/bin/hide-display-audio
+.local/libexec/private-application-configurer
 {{ end }}
 
 {{ if ne .chezmoi.os "linux" }}
+.config/Code/User/settings.json
+.local/bin/update-chatgpt-nix
 .local/share/flatpak/
+.local/share/nix/chatgpt/
 {{ end }}
 
 {{ if eq .chezmoi.os "darwin" }}
