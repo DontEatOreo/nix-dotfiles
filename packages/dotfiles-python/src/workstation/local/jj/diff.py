@@ -14,6 +14,7 @@ from workstation.errors import DotfilesError, UsageError
 from workstation.lib.commands import run
 
 _RECORDS_PATH = Path("secrets/records.yaml")
+_JUSTFILE_PATH = Path("Justfile")
 _STATUS_LINE = re.compile(r"^ ([AMD]) (.*?)( \|.*)$")
 _STATUS_STYLES = {
     "A": "\033[32m",
@@ -50,8 +51,8 @@ def _parse_arguments(arguments: Sequence[str]) -> tuple[str, Path, Path, Path, i
     repository = Path(repository_value)
     if not left.is_dir() or not right.is_dir():
         raise UsageError("snapshot paths must name directories")
-    if not (repository / "justfile").is_file():
-        raise UsageError("dotfiles repository must contain a justfile")
+    if not (repository / _JUSTFILE_PATH).is_file():
+        raise UsageError("dotfiles repository must contain a Justfile")
     if not width_value.isdigit() or int(width_value) < 1:
         raise UsageError(f"invalid output width: {width_value}")
     return output_format, left, right, repository, int(width_value)
@@ -94,7 +95,7 @@ def _materialize_records(
         (
             "just",
             "--justfile",
-            repository / "justfile",
+            repository / _JUSTFILE_PATH,
             "records-unpack",
             vault,
         ),
