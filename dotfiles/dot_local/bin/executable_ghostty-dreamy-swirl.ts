@@ -16,17 +16,7 @@ const OUTPUT =
   join(homedir(), ".config/ghostty/backgrounds/t3-chat-emoji-corner.png");
 const SEED = process.env.GHOSTTY_SWIRL_SEED ?? DEFAULT_SEED;
 
-type Family =
-  | "flag"
-  | "flamingo"
-  | "flower"
-  | "heart"
-  | "nails"
-  | "rainbow"
-  | "ribbon"
-  | "sparkle"
-  | "symbol"
-  | "unicorn";
+type Family = "flag" | "heart" | "rainbow" | "sparkle";
 
 type Role = Readonly<{
   angle: number;
@@ -87,15 +77,12 @@ const roles = [
   ...copies(4, { emoji: "🏳️‍🌈", family: "flag", size: 27, angle: 14 }),
   ...copies(4, { emoji: "🏳️‍⚧️", family: "flag", size: 27, angle: 14 }),
   ...copies(3, { emoji: "🌈", family: "rainbow", size: 25, angle: 14 }),
-  ...copies(3, { emoji: "⚧️", family: "symbol", size: 24, angle: 12 }),
   ...copies(4, { emoji: "🩷", family: "heart", size: 25, angle: 15 }),
-  ...copies(3, { emoji: "💖", family: "heart", size: 24, angle: 15 }),
-  ...copies(3, { emoji: "🌸", family: "flower", size: 24, angle: 18 }),
-  ...copies(2, { emoji: "🎀", family: "ribbon", size: 28, angle: 24 }),
-  ...copies(2, { emoji: "🦩", family: "flamingo", size: 28, angle: 10 }),
-  { emoji: "🦄", family: "unicorn", size: 27, angle: 12 },
-  { emoji: "💅🏻", family: "nails", size: 24, angle: 12 },
-  { emoji: "✨", family: "sparkle", size: 17, angle: 10 },
+  ...copies(4, { emoji: "💜", family: "heart", size: 25, angle: 15 }),
+  ...copies(4, { emoji: "💙", family: "heart", size: 25, angle: 15 }),
+  ...copies(3, { emoji: "🩵", family: "heart", size: 25, angle: 15 }),
+  ...copies(2, { emoji: "🤍", family: "heart", size: 25, angle: 15 }),
+  ...copies(3, { emoji: "✨", family: "sparkle", size: 17, angle: 10 }),
 ] satisfies readonly Role[];
 
 function shuffled<const T>(values: readonly T[]): T[] {
@@ -190,10 +177,7 @@ const points: Point[] = [
 
 const proxyMultipliers = {
   flag: 1.45,
-  flamingo: 1.2,
-  ribbon: 1.2,
   rainbow: 1.2,
-  unicorn: 1.2,
 } satisfies Partial<Record<Family, number>>;
 
 function proxyRadius(point: Point): number {

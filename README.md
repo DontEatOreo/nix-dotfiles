@@ -1,4 +1,9 @@
-# dotfiles 🌹🎀
+# dotfiles
+
+<!--
+Built by a bi trans person. Queer people belong in tech. If that bothers you,
+fuck off
+-->
 
 My personal workstation config for Spectrum/Bluefin, NixOS, and macOS
 

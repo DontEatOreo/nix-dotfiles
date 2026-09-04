@@ -4,14 +4,9 @@
     "type": "file",
     "source": "~/.config/fastfetch/emblem.txt",
     "color": {
-      "1": "#D60270",
-      "2": "#9B4F96",
-      "3": "#315FC3",
-      "4": "#5BCEFA",
-      "5": "#F5A9B8",
-      "6": "#F7F7F7",
-      "7": "#FCF434",
-      "8": "#555555"
+      "1": "#5BCEFA",
+      "2": "#F5A9B8",
+      "3": "#F7F7F7"
     },
     "padding": {
       "top": 1,
@@ -22,8 +17,8 @@
     "separator": "  ›  ",
     "color": {
       "keys": "#F5A9B8",
-      "title": "#D60270",
-      "separator": "#9B4F96"
+      "title": "#5BCEFA",
+      "separator": "#F7F7F7"
     },
     "key": {
       "width": 0
@@ -35,7 +30,7 @@
       },
       "color": {
         "elapsed": "#5BCEFA",
-        "total": "#9B4F96"
+        "total": "#F5A9B8"
       },
       "width": 10
     },
@@ -47,12 +42,12 @@
     "break",
     {
       "type": "title",
-      "format": "{#38;2;214;2;112}{user-name}{#}@{#38;2;91;206;250}{host-name}{#}  {#38;2;252;244;52}✦{#}"
+      "format": "{#38;2;91;206;250}{user-name}{#}@{#38;2;245;169;184}{host-name}{#}  {#38;2;247;247;247}✦{#}"
     },
     "break",
     {
       "type": "custom",
-      "format": "{#38;2;214;2;112}━━━━{#}{#38;2;155;79;150}━━━━{#}{#38;2;49;95;195}━━━━{#}{#38;2;91;206;250}━━━━{#}{#38;2;245;169;184}━━━━{#}{#38;2;252;244;52}━━━━{#}"
+      "format": "{#38;2;91;206;250}━━━━━{#}{#38;2;245;169;184}━━━━━{#}{#38;2;247;247;247}━━━━━{#}{#38;2;245;169;184}━━━━━{#}{#38;2;91;206;250}━━━━━{#}"
     },
     {
       "type": "os",
@@ -61,38 +56,38 @@
       {{- else }}
       "key": "󰣛  os      ",
       {{- end }}
-      "keyColor": "#D60270",
+      "keyColor": "#5BCEFA",
       "format": "{name}{?version-id} {version-id}{?}{?variant} · {variant}{?}"
     },
     {
       "type": "host",
       "key": "󰌢  host    ",
-      "keyColor": "#9B4F96",
+      "keyColor": "#F5A9B8",
       "format": "{vendor} {family}"
     },
     {
       "type": "kernel",
       "key": "  kernel  ",
-      "keyColor": "#315FC3",
+      "keyColor": "#F7F7F7",
       "format": "{release}"
     },
     {
       "type": "uptime",
       "key": "󰅐  uptime  ",
-      "keyColor": "#5BCEFA",
+      "keyColor": "#F5A9B8",
       "format": "{?days}{days}d {?}{hours}h {minutes}m"
     },
     {
       "type": "packages",
       "key": "󰏖  packages",
-      "keyColor": "#F5A9B8",
+      "keyColor": "#5BCEFA",
       "format": "{all}{?rpm} · rpm {rpm}{?}{?brew-all} · brew {brew-all}{?}{?nix-all} · nix {nix-all}{?}{?flatpak-all} · flatpak {flatpak-all}{?}"
     },
     {{- if eq .chezmoi.os "darwin" }}
     {
       "type": "shell",
       "key": "  shell   ",
-      "keyColor": "#F7F7F7",
+      "keyColor": "#F5A9B8",
       "format": "{pretty-name}{?version} {version}{?}"
     },
     {{- else }}
@@ -106,13 +101,13 @@
     {
       "type": "terminal",
       "key": "  terminal",
-      "keyColor": "#FCF434",
+      "keyColor": "#F7F7F7",
       "format": "{pretty-name}{?version} {version}{?}"
     },
     {
       "type": "cpu",
       "key": "󰍛  cpu     ",
-      "keyColor": "#9B4F96",
+      "keyColor": "#F5A9B8",
       "format": "{name} · {cores-logical} threads"
     },
     {
@@ -130,14 +125,14 @@
     {
       "type": "disk",
       "key": "󰋊  disk    ",
-      "keyColor": "#315FC3",
+      "keyColor": "#5BCEFA",
       "folders": "/",
       "format": "{size-used} / {size-total} ({size-percentage}) · {filesystem}"
     },
     {
       "type": "battery",
       "key": "󰁹  battery ",
-      "keyColor": "#FCF434",
+      "keyColor": "#F7F7F7",
       "format": "{capacity-bar}  {capacity} [{status}]"
     },
     "break"
