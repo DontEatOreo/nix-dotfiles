@@ -55,6 +55,13 @@
   tags:
     - theme-run
 
+- name: Ensure Homebrew temporary directory exists
+  ansible.builtin.file:
+    path: "{{ bootstrap_homebrew_temp_dir }}"
+    state: directory
+    mode: "0755"
+  tags: *bootstrap_homebrew_tap_tags
+
 - name: Package the current theme-run source for Homebrew
   ansible.builtin.command:
     argv:
@@ -212,6 +219,7 @@
       }}
   environment:
     HOMEBREW_NO_ASK: "1"
+    HOMEBREW_TEMP: "{{ bootstrap_homebrew_temp_dir }}"
     PATH: "{{ bootstrap_homebrew_path }}"
   register: bootstrap_homebrew_bundle_install
   changed_when: >-
@@ -252,11 +260,13 @@
   tags:
     - theme-run
 
-- name: Reinstall theme-run when its local source changes
+- name: Install theme-run or refresh it when its local source changes
+  environment:
+    HOMEBREW_TEMP: "{{ bootstrap_homebrew_temp_dir }}"
   when:
-    - bootstrap_homebrew_theme_run_installed_prefix.stat.exists | default(false)
     - >-
-      not (
+      not (bootstrap_homebrew_theme_run_installed_prefix.stat.exists | default(false))
+      or not (
         bootstrap_homebrew_theme_run_installed_checksum_file.stat.exists
         | default(false)
       )
