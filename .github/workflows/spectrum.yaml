@@ -51,17 +51,17 @@ jobs:
 
       - name: Prepare Build
         id: prepare
-        uses: ./.github/actions/spectrum-prepare # zizmor: ignore[self-repository]
+        uses: ./.github/actions/spectrum-prepare
 
       - name: Build and Publish
         id: image
-        uses: ./.github/actions/spectrum-build # zizmor: ignore[self-repository]
+        uses: ./.github/actions/spectrum-build
         with:
           bluebuild: ${{ steps.prepare.outputs.bluebuild }}
           publish: "true"
 
       - name: Sign and Attest
-        uses: ./.github/actions/spectrum-publish # zizmor: ignore[self-repository]
+        uses: ./.github/actions/spectrum-publish
         with:
           image-ref: ${{ steps.image.outputs.image-ref }}
           image-digest: ${{ steps.image.outputs.image-digest }}

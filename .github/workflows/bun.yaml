@@ -61,7 +61,7 @@ jobs:
           persist-credentials: false
 
       - name: Set Up Bun
-        uses: ./.github/actions/setup-bun # zizmor: ignore[self-repository]
+        uses: ./.github/actions/setup-bun
         with:
           cache-dependency-path: |
             bun.lock
