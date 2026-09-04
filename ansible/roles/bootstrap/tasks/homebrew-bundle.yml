@@ -201,8 +201,6 @@
           if lookup('ansible.builtin.env', 'DOTFILES_HOMEBREW_UPGRADE') == '1'
           else '--no-upgrade'
         }}
-      - --jobs
-      - "1"
       - --force-cleanup
       - --file
       - "-"
@@ -222,8 +220,12 @@
     HOMEBREW_TEMP: "{{ bootstrap_homebrew_temp_dir }}"
     PATH: "{{ bootstrap_homebrew_path }}"
   register: bootstrap_homebrew_bundle_install
+  retries: 2
+  delay: 2
+  until: bootstrap_homebrew_bundle_install.rc == 0
   changed_when: >-
-    bootstrap_homebrew_bundle_install.stdout is search('(^|\n)(==> )?(Installing|Upgrading|Uninstalling|Uninstalled|Untapping|Removing) ')
+    bootstrap_homebrew_bundle_install.attempts | default(1) > 1
+    or bootstrap_homebrew_bundle_install.stdout is search('(^|\n)(==> )?(Installing|Upgrading|Uninstalling|Uninstalled|Untapping|Removing) ')
     or bootstrap_homebrew_bundle_install.stderr is search('(^|\n)(==> )?(Installing|Upgrading|Uninstalling|Uninstalled|Untapping|Removing) ')
 
 - name: Read the packaged theme-run source checksum
