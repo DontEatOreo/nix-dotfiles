@@ -88,7 +88,7 @@ jobs:
           persist-credentials: false
 
       - name: Set Up Nix
-        uses: ./.github/actions/setup-nix
+        uses: $/.github/actions/setup-nix
 
       - name: Check Generated Bun Dependencies
         run: |
@@ -158,7 +158,7 @@ jobs:
           persist-credentials: false
 
       - name: Set Up Nix
-        uses: ./.github/actions/setup-nix
+        uses: $/.github/actions/setup-nix
 
       # Independent runners prevent one expensive package from consuming the
       # entire workflow timeout and preserve successful caches for other checks.
