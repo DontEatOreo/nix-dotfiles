@@ -15,3 +15,5 @@
       - "--help"
   changed_when: false
   loop: "{{ tools_python_tools | default([]) }}"
+  tags:
+    - repo-tools

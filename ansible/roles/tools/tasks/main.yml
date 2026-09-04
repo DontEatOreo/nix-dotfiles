@@ -8,7 +8,6 @@
 - name: Verify repo-local commands
   ansible.builtin.import_tasks: verify.yml
   tags:
-    - repo-tools
     - verify
 
 - name: Install Nix tools
