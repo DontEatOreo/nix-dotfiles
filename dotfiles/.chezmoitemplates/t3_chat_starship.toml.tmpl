@@ -5,13 +5,15 @@
 {{- $p := index $t3 $variant -}}
 add_newline = true
 command_timeout = 5000
+continuation_prompt = "[∙](subtle) "
 format = "$directory$line_break$sudo$character$command_timeout"
 palette = "t3_chat_{{ $variant }}"
 right_format = "$cmd_duration$time"
 
 [character]
-error_symbol = "[💔 ❯](bold love){{ if $terminal }} {{ end }}"
-success_symbol = "[💖 ❯](bold rose){{ if $terminal }} {{ end }}"
+error_symbol = "[💔 ❯ ](bold love)"
+format = "$symbol"
+success_symbol = "[🦋 ❯ ](bold sky)"
 
 [cmd_duration]
 format = "[took $duration]($style) "
@@ -20,8 +22,10 @@ style = "subtle"
 
 [directory]
 fish_style_pwd_dir_length = 1
-format = "[💜 $path]($style) "
-style = "bold mauve"
+format = "[🌈 $path]($style)[$read_only]($read_only_style) "
+read_only = " 󰌾"
+read_only_style = "bold love"
+style = "bold pink"
 truncate_to_repo = false
 truncation_symbol = "../"
 
@@ -58,8 +62,9 @@ yellow = "{{ index $p "yellow" }}"
 
 [sudo]
 disabled = false
+format = "[$symbol]($style) "
 style = "bold love"
-symbol = "🌈  "
+symbol = "🔓 root"
 
 [time]
 disabled = false
