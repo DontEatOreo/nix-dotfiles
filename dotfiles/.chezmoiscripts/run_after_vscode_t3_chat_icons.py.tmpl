@@ -134,6 +134,10 @@ def main() -> None:
         return
 
     upstream = Path(located)
+    # Catppuccin only recompiles its generated color themes on first activation
+    # or a live settings change. Chezmoi can update the palette while Code is
+    # closed, so invalidate its activation sentinel for the next launch.
+    (upstream / "themes/.flag").unlink(missing_ok=True)
     with TemporaryDirectory(
         prefix=f".{CUSTOM_EXTENSION_ID}-",
         dir=upstream.parent,
