@@ -30,7 +30,9 @@ if command -v bun >/dev/null 2>&1; then
 	fi
 fi
 
-readonly home_dir={{ .chezmoi.homeDir | quote }}
+# Chezmoi renders this assignment before execution.
+# shellcheck disable=SC1083,SC2034
+readonly home_dir={{ quote .chezmoi.homeDir }}
 readonly local_bin_dir="$home_dir/.local/bin"
 readonly zsh_completion_dir="$home_dir/.cache/zsh/completions"
 readonly bash_completion_dir="$home_dir/.local/share/bash-completion/completions"
