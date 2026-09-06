@@ -55,8 +55,5 @@ watch +args=['check']: (doctor 'watch')
 
 # Run the same treefmt wrapper in CI mode without retaining rewrites.
 [group('check')]
-check-format: (doctor 'fmt') (_format ['--', '--ci'])
-
-[private]
-_format *args:
-    nix fmt {{ quote(args) }}
+check-format: (doctor 'fmt')
+    nix fmt -- --ci

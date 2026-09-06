@@ -48,12 +48,10 @@ alias up := update
 alias validate := spectrum-validate
 alias w := watch
 
-help_target(recipe) := if recipe == 'a' { 'apply' } else if recipe == 'build' { 'spectrum-build' } else if recipe == 'c' || recipe == 'ck' { 'check' } else if recipe == 'cf' { 'check-format' } else if recipe == 'diff' { 'dotfiles-diff' } else if recipe == 'f' { 'fmt' } else if recipe == 'h' { 'help' } else if recipe == 'l' { 'lint' } else if recipe == 'nx' { 'nix' } else if recipe == 'r' { 'reboot' } else if recipe == 's' { 'setup' } else if recipe == 'typecheck' { 'python-typecheck' } else if recipe == 'up' { 'update' } else if recipe == 'validate' { 'spectrum-validate' } else if recipe == 'w' { 'watch' } else { recipe }
-
 # List recipes or show detailed usage for one recipe.
 [arg('recipe', help='Recipe to explain; omit to list all recipes')]
 [group('system')]
 help recipe='':
     {{ quote(just_executable()) }} \
       --justfile {{ quote(justfile()) }} \
-      {{ quote(if recipe != '' { ['--usage', help_target(recipe)] } else { ['--list', '--list-submodules'] }) }}
+      {{ quote(if recipe != '' { ['--usage', recipe] } else { ['--list', '--list-submodules'] }) }}
