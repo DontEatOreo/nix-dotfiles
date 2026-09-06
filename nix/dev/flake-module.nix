@@ -418,16 +418,7 @@
           enable = true;
           files = "(Dockerfile|Containerfile)$";
         };
-        luacheck = {
-          enable = true;
-          args = [
-            "--globals"
-            "Command"
-            "cx"
-            "ya"
-            "--"
-          ];
-        };
+        luacheck.enable = true;
         ruff.enable = true;
         rumdl.enable = true;
         shellcheck.enable = true;
@@ -570,6 +561,8 @@
               ];
               options = lib.mkAfter [ "-ci" ];
             };
+
+            stylua.includes = lib.mkAfter [ ".luacheckrc" ];
 
             swift-format = {
               command = lib.getExe pkgs.swift-format;

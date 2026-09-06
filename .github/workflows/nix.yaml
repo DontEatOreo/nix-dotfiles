@@ -9,6 +9,7 @@ on:
       - .github/workflows/nix.yaml
       - .ansible-lint
       - .clang-format
+      - .luacheckrc
       - .gitignore
       - .markdownlint.json
       - .shellcheckrc
