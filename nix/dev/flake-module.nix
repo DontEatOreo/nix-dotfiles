@@ -250,8 +250,7 @@
                 output_name=''${output_name%.tmpl}
                 formatter=(
                   ${lib.getExe pkgs.yamlfmt}
-                  -formatter
-                  "eof_newline=true,include_document_start=true,retain_line_breaks_single=true,scan_folded_as_literal=true,trim_trailing_whitespace=true"
+                  -conf ${../../.yamlfmt}
                 )
                 ;;
               *.json.tmpl | *.jsonc.tmpl | *.css.in | *.css.tmpl | *.scss.tmpl)
@@ -462,21 +461,7 @@
           stylua.enable = true;
           taplo.enable = true;
           xmllint.enable = true;
-          yamlfmt = {
-            enable = true;
-            excludes = [
-              "dotfiles/dot_config/solaar/rules.yaml"
-              "secrets/*.yaml"
-            ];
-            settings.formatter = {
-              type = "basic";
-              eof_newline = true;
-              include_document_start = true;
-              retain_line_breaks_single = true;
-              scan_folded_as_literal = true;
-              trim_trailing_whitespace = true;
-            };
-          };
+          yamlfmt.enable = true;
         };
 
         settings = {
@@ -558,6 +543,7 @@
             };
 
             stylua.includes = lib.mkAfter [ ".luacheckrc" ];
+            yamlfmt.includes = lib.mkAfter [ ".yamlfmt" ];
 
             swift-format = {
               command = lib.getExe pkgs.swift-format;

@@ -15,6 +15,7 @@ on:
       - .markdownlint.json
       - .shellcheckrc
       - .yamllint
+      - .yamlfmt
       - biome.jsonc
       - pyproject.toml
 
