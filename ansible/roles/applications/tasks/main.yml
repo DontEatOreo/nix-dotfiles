@@ -19,14 +19,6 @@
     - applications
     - helium
 
-- name: Apply managed application licenses on macOS
-  ansible.builtin.import_tasks: licenses.yml
-  when: platform_is_macos
-  tags:
-    - applications
-    - macos
-    - shottr
-
 - name: Configure RustDesk on macOS
   ansible.builtin.import_tasks: rustdesk.yml
   when: platform_is_macos

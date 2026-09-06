@@ -223,7 +223,6 @@ if OS.mac?
   cask "raycast", args: { force: true }
   cask "rustdesk"
   cask "shottr"
-  brew "4evy/dotfiles/shottr-license"
   cask "stats"
   cask "telegram"
   cask "visual-studio-code"

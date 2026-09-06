@@ -9,7 +9,6 @@
     - helix
     - jj
     - kanata
-    - shottr
     - theme-run
 
 - name: Synchronize repository-owned local Homebrew tap content
@@ -33,18 +32,7 @@
       - "--include=/npins/sources.json"
     bootstrap_homebrew_tap_rsync_macos:
       - "--include=/libexec/***"
-      - "--include=/secrets/"
-      - "--include=/secrets/secrets.yaml"
   tags: *bootstrap_homebrew_tap_tags
-
-- name: Restrict encrypted local Homebrew tap data
-  ansible.builtin.file:
-    path: "{{ bootstrap_homebrew_local_tap_dir }}/secrets/secrets.yaml"
-    state: file
-    mode: "0600"
-  when: platform_is_macos
-  tags:
-    - shottr
 
 - name: Ensure local Homebrew source directory exists
   ansible.builtin.file:
