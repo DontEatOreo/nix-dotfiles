@@ -206,7 +206,6 @@ if OS.mac?
   cask "1password"
   cask "1password-cli"
   cask "alt-tab"
-  brew "4evy/dotfiles/alt-tab-license"
   cask "appcleaner"
   cask "brave-browser"
   cask "discord"

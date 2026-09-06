@@ -24,7 +24,6 @@
   when: platform_is_macos
   tags:
     - applications
-    - alt-tab
     - macos
     - shottr
 
