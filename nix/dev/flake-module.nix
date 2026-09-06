@@ -221,13 +221,10 @@
 
             case "$relative_file" in
               dotfiles/dot_bash*.tmpl | *.bash.tmpl | *.sh.tmpl)
-                output_name=''${output_name%.tmpl}
-                formatter=(
-                  ${lib.getExe pkgs.shfmt}
-                  -w
-                  -i 0
-                  -ci
-                )
+                if ! ${lib.getExe pkgs.shfmt} -w "$file" >/dev/null 2>&1; then
+                  printf 'Skipped unparseable template: %s\n' "$file" >&2
+                fi
+                continue
                 ;;
               *.py.tmpl)
                 output_name=''${output_name%.tmpl}
@@ -460,8 +457,7 @@
           rumdl-format.enable = true;
           shfmt = {
             enable = true;
-            indent_size = 0;
-            simplify = false;
+            useEditorConfig = true;
           };
           stylua.enable = true;
           taplo.enable = true;
@@ -559,7 +555,6 @@
                 "dotfiles/dot_local/bin/executable_vscode-just-lsp"
                 "bluebuild/files/system/usr/bin/open"
               ];
-              options = lib.mkAfter [ "-ci" ];
             };
 
             stylua.includes = lib.mkAfter [ ".luacheckrc" ];
