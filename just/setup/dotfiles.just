@@ -32,8 +32,7 @@ update: _userland apply _host
 [private]
 _deps:
     ansible-galaxy collection install {{ if !path_exists('.ansible/collections/ansible_collections/community/general/MANIFEST.json') || !path_exists('.ansible/collections/ansible_collections/community/sops/MANIFEST.json') { '--force' } }} \
-      --requirements-file ansible/requirements.yml \
-      --collections-path .ansible/collections
+      --requirements-file ansible/requirements.yml
 
 [private]
 _userland:
