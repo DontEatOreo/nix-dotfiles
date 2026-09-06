@@ -12,6 +12,7 @@ on:
       - .github/actions/spectrum-publish/**
       - .github/workflows/spectrum.yaml
       - bluebuild/**
+      - recipes
       - flake.lock
       - flake.nix
       - lib/flake.nix

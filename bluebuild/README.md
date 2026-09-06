@@ -31,7 +31,10 @@ is pinned to the same upstream commit as the `bluebuild-cli` entry in
 Spectrum available inside the installed OS. `just spectrum-validate` rejects
 the recipe if those pins drift apart.
 
-Use `just spectrum-build` to build the local image.
+Use `just spectrum-build` to build the local image. The repository-root
+`recipes` symlink points here to `bluebuild/recipes`, so BlueBuild resolves
+`from-file` imports through its native recipe directory. The build context
+stays at the repository root so stages can copy shared packages and dotfiles.
 
 BlueBuild supplies locked package-manager cache mounts to every module. Local
 Podman builds reuse those mounts and unchanged image layers. Published CI

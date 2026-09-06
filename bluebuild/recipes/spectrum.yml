@@ -21,16 +21,14 @@ spec:
     bluebuild: b01c4d22d9c5e12cfe9e09087d21e6050642ad56
 
 stages:
-  # BlueBuild currently resolves imports from the repository-level recipes/
-  # directory, not from the directory containing this recipe.
-  - from-file: ../bluebuild/recipes/spectrum/stages/python-runtime.yml
-  - from-file: ../bluebuild/recipes/spectrum/stages/ghostty.yml
-  - from-file: ../bluebuild/recipes/spectrum/stages/hyper-window-tiling.yml
-  - from-file: ../bluebuild/recipes/spectrum/stages/kanata.yml
+  - from-file: spectrum/stages/python-runtime.yml
+  - from-file: spectrum/stages/ghostty.yml
+  - from-file: spectrum/stages/hyper-window-tiling.yml
+  - from-file: spectrum/stages/kanata.yml
 
 modules:
   # Put immutable, remote-heavy work first. Local source and configuration
   # changes then invalidate only the cheap assembly/finalization tail.
-  - from-file: ../bluebuild/recipes/spectrum/modules/software.yml
-  - from-file: ../bluebuild/recipes/spectrum/modules/local.yml
-  - from-file: ../bluebuild/recipes/spectrum/modules/system.yml
+  - from-file: spectrum/modules/software.yml
+  - from-file: spectrum/modules/local.yml
+  - from-file: spectrum/modules/system.yml
