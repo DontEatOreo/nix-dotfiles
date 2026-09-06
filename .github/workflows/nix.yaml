@@ -20,6 +20,8 @@ on:
       # not already covered by the formatter/linter extensions below.
       - .dockerignore
       - Justfile
+      - go.work
+      - go.work.sum
       - '**/flake.lock'
       - '**/Containerfile'
       - ansible/roles/system/templates/macos/tailscale-ssh-helper.py.in

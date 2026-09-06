@@ -498,6 +498,7 @@
             "*.patch"
             "package-lock.json"
             "go.sum"
+            "go.work.sum"
             ".gitattributes"
             ".gitignore"
             ".gitmodules"
@@ -514,10 +515,15 @@
                   temporary_directory=$(mktemp -d)
                   trap 'rm -rf "$temporary_directory"' EXIT
                   for file in "$@"; do
-                    cp "$file" "$temporary_directory/go.mod"
-                    ${lib.getExe pkgs.go_1_27} mod edit -fmt "$temporary_directory/go.mod"
-                    if ! cmp -s "$file" "$temporary_directory/go.mod"; then
-                      cp "$temporary_directory/go.mod" "$file"
+                    # Go rewrites even unchanged files; treefmt uses mtimes to
+                    # detect changes. -print leaves the source untouched.
+                    case "$file" in
+                      *go.work) kind=work ;;
+                      *) kind=mod ;;
+                    esac
+                    ${lib.getExe pkgs.go_1_27} "$kind" edit -fmt -print "$file" > "$temporary_directory/formatted"
+                    if ! cmp -s "$file" "$temporary_directory/formatted"; then
+                      cp "$temporary_directory/formatted" "$file"
                     fi
                   done
                 '';
@@ -525,6 +531,7 @@
               includes = [
                 "go.mod"
                 "*/go.mod"
+                "go.work"
               ];
             };
 

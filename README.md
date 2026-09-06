@@ -123,6 +123,9 @@ access when needed
 
 Run `just help <command>` with either a command or alias for argument details.
 
+`go.work` connects the records command and `theme-run`, so I can check both
+modules from here with `go vet ./... ./packages/theme-run/...`.
+
 For direct Nix work, drop down a level:
 
 ``` bash

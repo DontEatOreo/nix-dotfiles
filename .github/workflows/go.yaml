@@ -8,6 +8,8 @@ on:
       - cmd/**/*.go
       - go.mod
       - go.sum
+      - go.work
+      - go.work.sum
       - packages/theme-run/**
   push:
     branches:
