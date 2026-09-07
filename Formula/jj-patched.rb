@@ -23,6 +23,7 @@ class JjPatched < Formula
   version "0.44.0-head-#{result_tree[0, 8]}"
   sha256 digest
   license "Apache-2.0"
+  revision 1
   depends_on "rust" => :build
 
   conflicts_with "jj", because: "both install a jj binary"
@@ -32,6 +33,9 @@ class JjPatched < Formula
     patches = (patch_dir/"series").readlines(chomp: true).map { |name| patch_dir/name }
     odie "jj patch series is empty: #{patch_dir}" if patches.empty?
 
+    # Homebrew's temporary directory can be inside its own Git checkout.
+    # Give the source its own root so git apply cannot silently skip patches.
+    system "git", "init", "--quiet"
     system "git", "apply", *patches
     system "cargo", "install", "--bin", "jj", *std_cargo_args(path: "cli")
 
