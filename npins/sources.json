@@ -143,16 +143,16 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "ba3d2e78ef636371d9512feee8fcdf00c3cd729e",
-      "url": "https://github.com/jj-vcs/jj/archive/ba3d2e78ef636371d9512feee8fcdf00c3cd729e.tar.gz",
-      "hash": "sha256-mt2YeDeLvZ+yaiKDpFOaNxnQ37Bi4CQHpyyxNGmJpQE=",
+      "revision": "1d41436bfe6f9410b573f8ef39169c5253bbccdf",
+      "url": "https://github.com/jj-vcs/jj/archive/1d41436bfe6f9410b573f8ef39169c5253bbccdf.tar.gz",
+      "hash": "sha256-SwwGwuj8DVaXco/PTF1cpTkKOeiEGgjNnS4XGl1rZMQ=",
       "frozen": true
     },
     "jj_archive": {
       "type": "Url",
-      "url": "https://github.com/jj-vcs/jj/archive/ba3d2e78ef636371d9512feee8fcdf00c3cd729e.tar.gz",
+      "url": "https://github.com/jj-vcs/jj/archive/1d41436bfe6f9410b573f8ef39169c5253bbccdf.tar.gz",
       "unpack": false,
-      "hash": "sha256-0NOyxtMMa1vH4ywcydZJefJAGABwgMvChui+JekUBNs=",
+      "hash": "sha256-0ZQ0sNfDMDZgg5qEuE3vnOrB+/h3UTMFPcSl577+KFc=",
       "frozen": true
     },
     "kanata": {
